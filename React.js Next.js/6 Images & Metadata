@@ -1,0 +1,33 @@
+# Componente `Image`
+Para trabajar con imágenes en Next.js simplemente las ubicamos dentro de la carpeta `public` y suponiendo que a un archivo  `logo.png` lo colocamos en la raíz, podremos insertarlo usando `<img src="/logo.svg"/>`
+
+Next.js 10 incluye el componente `Image` que podemos importar de `next/image` que es una extensión del elemento html `img` pero que debemos pasarle además `width` y `height`: `<Image src="/logo.svg"/ width={128} heigth={77}>`.
+
+Una ventaja en términos de optimización del uso de este componente es que *images are lazy loaded*, lo cual significa que si la imagen está fuera del viewport no la cargará hasta tener que mostrarla.
+
+# Metadata
+Es posible incluir el título de una página y también agregar metadata utilizando el componente `Head` que importamos de `next/head` y Next.js se encargará de insertarlo en el `head` del documento y podemos poner dentro los elementos que pondríamos el head de un archivo html por ejemplo `title`, `meta`, `script`
+
+La [documentación](https://nextjs.org/docs/api-reference/next/head) indica que el contenido de `head` es limpiado al desmontar el componente, por lo que cada página debe definir lo que necesita en el `head` sin asumir acerca de lo que han agregado otras páginas.
+
+```jsx
+import Head from 'next/head'
+import Link from 'next/link'
+
+export default function Home() {
+  return (
+    <>
+      <Head>
+        <title>Ninja List | Home</title>
+        <meta name="keywords" content="ninjas"/>
+      </Head>
+      <div>
+        <h1>Homepage</h1>
+        <p>Lorem ipsum dolor sit amet </p>
+      </div>
+    </>
+  )
+}
+```
+
+> Si tenemos un componente Layout que incorporamos en todas nuestras páginas podríamos pasarle una prop `title` de modo tal que sea el título de esa página en cuestión.
