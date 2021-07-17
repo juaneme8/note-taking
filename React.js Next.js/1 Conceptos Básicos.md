@@ -1,5 +1,3 @@
-:blue_heart: Falta revisar bastante
-
 # Next.js
 
 > Basado en el curso de Platzi de Next.js, es posible clonar un [repositorio](https://www.github.com/jonalvarezz/platzi-nextjs/tree/main) del autor con los pasos iniciales utilizando TypeScript.
