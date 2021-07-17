@@ -1,11 +1,11 @@
 # Routing
 
-El concepto de routing involucra lo relacionado con páginas y navegación. A diferencia de lo que ocurre cuando trabajamos con create-react-app por ejemplo en Next.js tenemos una solución para no tener que preocuparnos por eso.  Cada página en Next.js está representada por un componente React.
+El concepto de routing involucra lo relacionado con páginas y navegación. A diferencia de lo que ocurre cuando trabajamos con **create-react-app** por ejemplo en Next.js tenemos una solución para no tener que preocuparnos por eso.  Cada página en Next.js está representada por un archivo dentro de la carpeta `pages` por lo que se conoce como routing basado ene l filesystem.
 
 Existen dos formas de hacer routing que se conocen como **rutas estáticas**  y  **rutas dinámicas** 
 
 ## Rutas Estáticas
-Next.js va a hacer un **routing basado en el filesystem** es decir que si dentro de `pages` creamos una **página básica** llamada `about.js` y en ella un componente funcional, si vamos a `/about` la veremos. 
+Gracias a este **routing basado en el filesystem** si dentro de `pages` creamos una **página básica** llamada `about.js` y en ella un componente funcional, si vamos a `/about` la veremos. 
 
 > Escribir los nombres de los archivos en minúscula, ya que las rutas son *case sensitive* (esto antes no era así fue incorporado en Next.js 10) por lo que si ponemos en la barra de direcciones otra capitalización obtendremos un 404.
 
@@ -38,9 +38,9 @@ const ProductItem = () => {
 export default ProductItem;
 ```
 
-> Si queremos tener una ruta dinámica con mas de un nivel del estilo `/car/Juan` o `/avion/Ocho` debemos crear dentro de pages una carpeta `[vehicle]` t dentro de ella un archivo `[person].js` y luego en `const router = useRouter();` tendremos `router.query.vehicle` y `router.query.person`. 
+> Si queremos tener una ruta dinámica con mas de un nivel del estilo `/car/Juan` o `/avion/Ocho` debemos crear dentro de pages una carpeta `[vehicle]` y dentro de ella un archivo `[person].js` y luego en `const router = useRouter();` tendremos `router.query.vehicle` y `router.query.person`. 
 
-> Si queremos trabajar con query parameters es decir que tenemos `/car/Juan?age=2021` recibiremos también `router.query1.age`, mientras que si tenemos  `/car/Juan?age=2021&age=2022` recibiremos un array `age` con esos dos valores.
+> Si queremos trabajar con query parameters es decir que tenemos `/car/Juan?age=2021` recibiremos también `router.query.age`, mientras que si tenemos  `/car/Juan?age=2021&age=2022` recibiremos un array `age` con esos dos valores.
 
 > Si queremos simplificar la notación y en lugar de tener `router.query.productId` usar `productId` podemos utilizar *nested object destructuring* 
 
@@ -87,7 +87,7 @@ En nuestro caso todo lo ha generado con el algoritmo de forma estática (segunda
 Corremos el servidor node para **producción** con `yarn start` si vamos a Network en las DevTools veremos que Next.js nos hace el **code splitting** y cada página tiene su chunk específico `2d57ec00e72a16...` además también veremos otros paquetes que son reutilizados por todas las páginas como `webpack-c2126667a5f965...` o `framework.c6faa22799416a6...`. Con esto notamos que que Next.js ya ha realizado optimizaciones de manera automática.
 En modo de **desarrollo** también veremos este proceso ya que cada página tiene su propio *javascript bundle* que obtenemos cuando la navegamos por primera vez. 
 
-Otra optimización que hace Next.js es el **prerendering**  o **SSR** *(server side rendering)* lo cual podemos verificar (luego de ejecutar `yarn build` y `yarn start`). Si abrimos la dirección home `localhost:3000` y hacemos click derecho en "Ver código fuente" (o bien en Response en Network) veremos que el contenido principal de la página (el texto Hola Mundo) ya viene incluido en el html de la respuesta. Esto significa que no hay *client side rendering* y todo lo que estamos viendo ya viene del servidor. **Esto es muy importante en términos de SEO** (search engine optmization) como ya todo viene prerenderizado es mucho más amigable para los motores de búsqueda y también a la hora de compartir la página en redes sociales ya que la información estará disponible.
+Otra optimización que hace Next.js es el **prerendering**  o **SSR** *(server side rendering)* lo cual podemos verificar (luego de ejecutar `yarn build` y `yarn start`). Si abrimos la dirección home `localhost:3000` y hacemos click derecho en "Ver código fuente" (o bien en Response en Network) veremos que el contenido principal de la página ya viene incluido en el HTML de la respuesta. Esto significa que no hay *client side rendering* y todo lo que estamos viendo ya viene del servidor. **Esto es muy importante en términos de SEO** (search engine optmization) como ya todo viene prerenderizado es mucho más amigable para los motores de búsqueda y también a la hora de compartir la página en redes sociales ya que la información estará disponible.
 
 
 
@@ -126,12 +126,12 @@ export default Navbar;
 
 > En versiones antiguas de Next.js además de `href` era necesario poner `as`
 
-Vemos entonces la diferencia que existe entre el routing con el servidor y el routing del lado del cliente en el cual logramos un comportamiento deque se conoce como SPA *(single page application)*.
+Vemos entonces la diferencia que existe entre el routing con el servidor y el routing del lado del cliente en el cual logramos un comportamiento que se conoce como SPA *(single page application)*.
 
 Con el agregado del componente `Link` se produce otra optimización que se conoce como **prefetching automático de recursos**, para ver esto `yarn build` y `yarn start`. Estando en la página `/` veremos que se cargan de manera anticipada recursos de `about` logrando de esta manera una navegación mucho más rápida hacia esa página. 
 
 ## Custom Page Extensions
-Cuando trabajamos con unit tests necesitaremos crear archivos similares a `index.spec.js` y no queremos que Next.js haga una ruta a partir de ellos : http://localhost:3000/index.spec
+Cuando trabajamos con unit tests necesitaremos crear archivos similares a `index.spec.js` y no queremos que Next.js haga una ruta a partir de ellos como por ejemplo http://localhost:3000/index.spec
 
 Es posible configurar las extensiones que serán analizadas en el directorio `pages` a la hora de resolver páginas. Para eso en `next.config.js` agregamos `pageExtensions`
 
@@ -144,10 +144,4 @@ module.exports = {
 Como indica la [documentación](https://nextjs.org/docs/api-reference/next.config.js/custom-page-extensions) tener presente que esto afecta a `_document.js`, `_app.js` y a los archivos dentro de `pages/api/`.
 
 
-Por lo tanto si en cambio colocamos como `pageExtensions: ['page.js']` los archivos deberán tener ese nombre `about.page.js`  y lo mismo en `api` 
-
-```js
-module.exports = {
-  pageExtensions: ['page.js'],
-}
-```
+Por lo tanto si en cambio colocamos como `pageExtensions: ['page.js']` los archivos deberían ser renombrados a `_document.page.tsx`, `_app.page.tsx`, `about.page.js`, etc  y lo mismo en `api` 
