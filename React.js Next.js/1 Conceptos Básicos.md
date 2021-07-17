@@ -292,17 +292,8 @@ Como es de esperar en `Tabs` recibimos este contenido via la prop `children` que
 
 
 
-# Estilos en Next.js
-
-Next.js tiene soporte para **CSS Modules** que nos permite tener los mismos nombres de clases en múltiples componentes sin que se pisen. De esta manera puedo tener selectores menos específicos o utilizar nombres de clases comunes como `.container` más de una vez asignándole estilos distintos. Si a estos elementos los visualizamos en las devtools veríamos que al nombre de la clase le agrega un **hash** de modo que sea único. 
-
-> Si queremos darle formato a un componente  `Navbar` creamos en `styles` un archivo `Navbar.module.css`.
->
-> Si queremos reutilizar un estilo en más de un componente podemos utilizar la hoja de estilos `global.css`.
-
-
-
 # Routing
+
 El routing es la navegación entre páginas y en Next.js tenemos una solución para no tener que preocuparnos por eso. 
 
 Existen dos formas de hacer routing que se conocen como **rutas estáticas**  y  **rutas dinámicas** 
