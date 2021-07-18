@@ -12,7 +12,8 @@ Se trata de un ecommerce con TypeScript, Next.js, ChakraUI y Google Sheets como 
 * **Server Side Rendering (SSR)** significa que una instancia de nuestra aplicación va a correr en un servidor que es un entorno seguro (podemos conectarnos a nuestra db con las credenciales  sin que sean visibles para el usuario). Además uando entramos a una página y el servidor se encarga de procesar toda la información esta se ve mucho más rápido en pantalla que si fuera el cliente quién debe comunicarse con un backend, este le da los datos y el los debe bajar y recién ahi los muestra en pantalla.
 
 * **Incremental static generation:** posibilita generar los sitios estáticos que pueden ser regenerados luego de un tiempo.
-* 
+
+  
 # Google Sheets
 Obtendremos la información de google sheets en formato `.csv`, luego tendremos que parsearla a `JSON`. Esa operación puede ser costosa en términos de procesamiento de datos, pero como esto corre en el servidor no debemos prestar demasiada atención al dispositivo con el cual el usuario visita la página cosa que sí sucedería si usáramos create-react-app.
 

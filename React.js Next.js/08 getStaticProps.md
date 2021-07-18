@@ -1,7 +1,7 @@
-# Fetching Data
-Como fake API es posible utilizar https://jsonplaceholder.typicode.com/
+# `getStaticProps`
+En aplicaciones React donde utilizamos por ejemplo **create-react-app** hacemos el fetch de datos de una API en el  `useEffect` hook es decir que e request lo estamos haciendo en el navegador. Sin embargo al utilizar **Next.js** como los componentes ya están pre-renderizados cuando llegan al navegador por lo que idealmente vamos queremos obtener los datos antes para que ya estén en el template. Es posible hacer esto con una función especial provista por Next.js llamada `getStaticProps` que se ejecuta antes de que se renderice el componente, obtiene los datos mediante el `fetch` y luego se los pasa via `props` al componente que luego será renderizado.
 
-En aplaciones normales de React hacemos el fetch en el `useEffect` hook por lo que este request lo estamos haciendo en el navegador. Sin embargo al utilizar Next.js como los componentes ya están pre renderizados cuando llegan al navegador por lo que idealmente queremos obtener los datos antes para que ya estén en el template. Es posible hacer esto con una función especial provista por Next.js llamada `getStaticProps` que se ejecuta antes de que se renderice el componente, obtiene los datos mediante el `fetch` y luego se los pasa via `props` al componente que luego será renderizado.
+> Como fake API es posible utilizar https://jsonplaceholder.typicode.com/
 
 ```jsx
 import styles from '../../styles/Jobs.module.css'
@@ -36,3 +36,4 @@ export default Ninjas;
 ```
 
 Esta función se ejecuta *at build-time* por lo que no debemos escribir código que esperamos que se ejecute en el navegador.
+

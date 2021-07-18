@@ -1,7 +1,7 @@
 # API
-Es posible crear una API con Next.js para eso cualquier archivo ubicado dentro de `pages/api` será mapeado a `/api/*` y tratado como un endpoint de lProyecto con TypeScript
-Antes de incorporar nuestra API en lugal autor del como una `page`
+Es posible crear una API con Next.js para eso cualquier archivo ubicado dentro de `pages/api` será mapeado a `/api/*` y tratado como un endpoint de la API.
 Por ejemplo si en `pages/api` tenemos el siguiente archivo `hello.js`:
+
 ```js
 export default (req, res) => {
   res.statusCode = 200
@@ -10,8 +10,15 @@ export default (req, res) => {
 ```
 Luego al ingresaurso decidió incorporar TypeScript y para obtener la `http://localhost:3000/api/hello` obtendremos el json deseado.
 
-# Proyecto con TypeScript
-En el curso de Platzipuesta a punto inicial es posible clonar el [su repositorio](https://github.com/jonalvarezz/platzi-nextjs/tree/main) con los pasos iniciales y que incluye el uso de TypeScript. Para ello debemos comenz y luego trabajar basándonos en la etiqueta `2-inicio-api`
+
+
+# Simular Fetch a API externa con data Mockeada
+
+> :thinking: El curso de Platzi se abandonó en el **video 10**, evaluar si conviene conservar esto o eliminarlo.
+
+Es posible clonar el [repositorio](https://github.com/jonalvarezz/platzi-nextjs/tree/main) con los pasos iniciales y que incluye el uso de TypeScript. 
+
+Queremos basarnos en la etiqueta `2-inicio-api`
 
 ```bash
 mkdir md-nextjs-ts
@@ -23,10 +30,15 @@ git checkout -b juaneme8-api 2-inicio-api
 yarn install
 ```
 
-con `git clone https://github.com/jonalvarezz/platzi-nextjs.git .` indicamos que queremos clonar en la carpeta actual y que no cree una nueva llamada `platzi-nextjs`
-con `git fetch --tags` obtenemos todos los tags (segun lo comprobado no es necesario hacerlo, quizás sea útil para situaciones en las cuales ya teníamos el proyecto y en el repo remoto hay un tag que no tenemos localmente, pero para una situación donde clonamos ya obtenemos todos).
-con `git tag` los listamos
-con `git checkout -b juaneme8-api 2-inicio-api` creamos un nuevo branch llamado `juaneme8-api` desde la etiqueta `2-inicio-api`
+* con `git clone https://github.com/jonalvarezz/platzi-nextjs.git .` indicamos que queremos clonar en la carpeta actual y que no cree una nueva llamada `platzi-nextjs`
+
+* con `git fetch --tags` obtenemos todos los tags (según lo comprobado no es necesario hacerlo, quizás sea útil para situaciones en las cuales ya teníamos el proyecto y en el repo remoto hay un tag que no tenemos localmente, pero para una situación donde clonamos ya obtenemos todos).
+
+* con `git tag` los listamos
+
+* con `git checkout -b juaneme8-api 2-inicio-api` creamos un nuevo branch llamado `juaneme8-api` desde la etiqueta `2-inicio-api`
+
+  
 
 Para evitar la aparición de warnings vamos actualizar las dependencias:  
 `yarn add next@latest` 
@@ -104,7 +116,7 @@ export default Database
 La idea es que cuando entremos a. `/` consumamos una API para renderizar todos los elementos llamando a `api/avo/`
 Por lo que dentro de `pages` tendremos que crear una carpeta `api` y otra llamada `avo`, finalmente dentro de esta última un archivo `index.tx`.
 
->Otra opción hubiersa sido crear directamente dentro de `api` un archivo `avo.js` pero como vamos a tener más rutas dentro de `avo` optamos por esa opción.
+>Otra opción hubiera sido crear directamente dentro de `api` un archivo `avo.js` pero como vamos a tener más rutas dentro de `avo` optamos por esa opción.
 
 En `index.ts` Next.js espera una función que recibe en el primer parámetro el `req` y en el segundo el `res` y los maneja como es habitual en Node.js, armando un ejemplo básico:
 
@@ -145,9 +157,11 @@ const allAvos = async (req: NextApiRequest, res: NextApiResponse) => {
 export default allAvos
 ```
 
-Si ingresamos a `http://localhost:3000/api/avo` veremos los datos devueltos por la API. Se recomienda instalar una extensión de Chrome **JSON Formatter** o similar para visualizar mejor el JSON.
+Si ingresamos a `http://localhost:3000/api/avo` veremos los datos devueltos por la API. 
 
-La idea es devolver un objeto que tenga las propiedades `length` y `data`. Luego veremos que en caso de errorr enviaremos `data: []` y un campo adicional `error`.
+> Se recomienda instalar una extensión de Chrome **JSON Formatter** o similar para visualizar mejor el JSON.
+
+La idea es devolver un objeto que tenga las propiedades `length` y `data`. Luego veremos que en caso de error enviaremos `data: []` y un campo adicional `error`.
 
 
 ## Creación endpoint GET `/api/avo/[id]`
