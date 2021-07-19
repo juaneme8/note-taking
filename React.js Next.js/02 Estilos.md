@@ -2,6 +2,7 @@
 Como podremos ver en la [documentación](https://nextjs.org/docs/basic-features/built-in-css-support) es posible utilizar Next.js distintas técnicas para estilar nuestra aplicación.
 
 ## Hoja de Estilos Global
+
 Si queremos importar una hoja de estilos global se recomienda hacerlo en `pages/_app.js` y del siguiente modo `import '../styles.css'` notar que Next.js extiende el concepto de `import` más allá de JavaScript. Estos estilos aplicarán a todas las páginas y componentes de nuestra aplicación, es por eso que para evitar conflictos se recomienda sólo importarlo en `pages/_app.js`.
 
 > Recordemos que `_app.js` que es el root component y los distintos *page componentes* son renderizados allí:
@@ -18,6 +19,8 @@ import styles from './Button.module.css'
 ```
 
 En producción son concatenados en *many minified and code-split* `.css` asegurándonos que la cantidad de CSS cargada para pintar la aplicación sea mínima.
+
+> Por otra parte si queremos reutilizar un estilo en más de un componente podemos utilizar la hoja de estilos `global.css`.
 
 
 

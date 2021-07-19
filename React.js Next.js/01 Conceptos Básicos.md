@@ -3,16 +3,19 @@
 > Basado en el curso de Platzi de Next.js, es posible clonar un [repositorio](https://www.github.com/jonalvarezz/platzi-nextjs/tree/main) del autor con los pasos iniciales utilizando TypeScript.
 > Basado en la lista de reproducción de [The Net Ninja](https://www.youtube.com/watch?v=A63UxsQsEbU&ab_channel=TheNetNinja).
 > Basado en algunos videos del canal de [Self Teach Me](https://www.youtube.com/watch?v=DWCCkcJgvf0&ab_channel=SelfTeachMe).
+> Basado en lista de reproducción de [Codevolution](https://www.youtube.com/watch?v=9P8mASSREYM&list=PLC3y8-rFHvwgC9mj0qv972IO5DmD-H0ZH). (VIDEO 6 COMPLETO)
 
 > Contenido extra:
 > [Next.js + TailwindCSS](https://betterprogramming.pub/how-to-set-up-next-js-with-tailwind-css-b93ccd2d4164)
 
 # Introducción
-Construir una aplicación en React demanda muchas decisiones por ejemplo **qué tipo de CSS vamos a utilizar** (CSS in JS o global CSS), **qué bundler vamos a utilizar** si usaremos Webpack o Rollup. Una vez decidido esto debemos configurar **Babel** para que funcione con ellos. Lo mismo si trabajamos con **TypeScript** debemos configurar todo lo anterior en función de esto. Si usamos **imágenes** también debemos tener en cuenta varios aspectos. 
+React es una librería que nos permite construir interfaces de usuario pero como tal demanda muchas decisiones de nuestra parte por ejemplo **qué tipo de CSS vamos a utilizar** (CSS in JS o global CSS), **qué bundler vamos a utilizar** si usaremos Webpack o Rollup. Una vez decidido esto debemos configurar **Babel** para que funcione con ellos. Lo mismo si trabajamos con **TypeScript** debemos configurar todo lo anterior en función de esto. Si usamos **imágenes** también debemos tener en cuenta varios aspectos. 
 
 Normalmente estas decisiones las tomamos buscando optimizar nuestro entorno de **desarrollo** pero quizás no son óptimas para **producción**. Por ejemplo tener Webpack y Babel configurado de cero por nosotros nos genera lo que se conoce como *total cost of ownership* que da cuenta de **cuanto le cuesta a tu empresa** el tiempo que gastas en mantener ese framework o arquitectura que vos mismo creaste **y si esto representa un valor agregado para el usuario**.
 
-Resumiendo React al ser una **librería** de UI nos deja la responsabilidad de definir el entorno en el que la vamos a operar, lo cual también representa una debilidad pues ¿cómo sabemos si el entorno construido es el correcto? **Next.js** es un **framework** de React.js creado por Vercel que ya ha tomado estas decisiones por nosotros constituyendo un ambiente optimizado tanto para desarrollo como para producción. 
+Resumiendo React al ser una **librería** de UI nos deja la responsabilidad de definir el entorno en el que la vamos a operar, lo cual también representa una debilidad pues ¿cómo sabemos si el entorno construido es el correcto? **Next.js** en su documentación se define como *"The React Framework for Production"*, es decir es un **framework** de React.js creado por Vercel que ya ha tomado estas decisiones por nosotros constituyendo un ambiente optimizado tanto para desarrollo como para producción. Next.js incluye características de routing, styling, authentication, bundle optimizations,sin la necesidad de instalar paquetes extra.
+
+Podemos pensar en Next.js como un full-stack Framework ya que nos permite crear APIs que luego pueden ser llamadas por la aplicación frontend en React.
 
 
 # Pre-rendering
@@ -57,6 +60,10 @@ Next.js nos ofrece tanto SSR *(server side rendering)* , SSG *(static site gener
 
 * **Fast Refresh** nos permite que al hacer un cambio lo veremos reflejado casi de manera instantánea en la aplicación.
 
+* Soporta diferentes patrones de **autenticación**
+
+* Cuenta con un **sistema para crear la build en desarrollo y otro sistema muy optimizado para hacerlo en producción** permitiéndonos concentrar más en el código y no en la configuración.
+
   
 # SSR, SSG y ISR
 Con Next.js podemos realizar SSR, SSG, ISR.
@@ -90,7 +97,7 @@ ISR es una implementación híbrida que nos permite actualizar contenido estáti
 
 Existen dos formas de instalar Next.js una automática y otra manual, ambas pueden ser vistas en la [documentación](https://nextjs.org/docs)
 
-La manera **automática** es con `npx create-next-app stream-it` y luego de ingresar este comando Next nos va a crear una serie de carpetas y archivos con la estructura del proyecto. 
+La manera **automática** es con `npx create-next-app stream-it` y luego de ingresar este comando Next nos va a crear una serie de carpetas y archivos con la estructura del proyecto. Luego navegamos hacia esa carpeta y ejecutamos `npm run dev` o `yarn dev` para ejecutar la aplicación.
 
 > El nombre del proyecto no podrá tener letras mayúsculas, es por eso que usamos **kebab-case**
 
@@ -153,17 +160,81 @@ export default function Home() {
 
 
 
-## Levantar Proyecto
-
-Contamos con dos builds uno de desarrollo y uno de producción: Usamos `npm run dev` cuando estemos trabajando de manera **local** y `npm start` para **producción**.
-
-
-
 
 # Estructura de Archivos
+## `package.json`
+
+El archivo `package.json` contiene las dependencias (`next`, `react` y `react-dom`), las dependencias de desarrollo (`eslint` y `eslint-config-next`) y los scripts del proyecto:
+
+* `"dev: next dev"` ejecuta la aplicación en modo desarrollo con hot-code-reloading y error reporting.
+* `"build: next build"` compila la aplicación y la prepara para producción.
+* `"start: next start"` debemos ejecutarlo después de `build` para ejecutar la aplicación compilada en producción. Si estamos desarrollando sitios estáticos con React simplemente tendremos que hostear la aplicación pero no usamos el script `start`. Con Next.js al ser un framework full-stack podremos tener un servidor al cual iniciar (a pesar de que también es posible crear sitios completamente estáticos que no requieren un servidor).
+* `"lint: next lint"` realiza el linteo de todos los archivos de la aplicación.
+
+
+
+## `package-lock.json` o `yarn.lock`
+
+Este archivo nos permite asegurar una instalación consistente de las dependencias.
+
+
+
+## `.gitignore`
+
+Archivos que queremos que no formen parte del sistema de control de versiones.
+
+
+
+## `README.md`
+
+Readme autogenerado por Next.js con instrucciones básicas.
+
+
+
+## `next.config.js`
+
+Archivo de configuración de Next.js.
+
+Por default tendremos `reactStrictMode: true` con lo cual estamos habilitando un modo disponible en desarrollo con el cual obtenemos notificación de problemas potenciales de la aplicación como ser *unsafe life cycles*, *legacy API usage* y otras cosas más.
+
+
+
+## `.eslintrc`
+
+Configuración de ESLint.
+
+
+
+## `.next`
+
+La carpeta `.next` se genera cuando ejecuctamos el script `dev` o `build`. Desde esta carpeta es servida nuestra aplicación
+
+
+
+## `node_modules`
+
+La carpeta `node_modules` es donde son instaladas todas las dependencias. 
+
+
+
+## `styles`
+
+La carpeta `styles` por default contiene algunos de los archivos `global.css` y los estilos específicos de componentes como ser `Home.module.css`. Sin embargo, podemos alojarlos en otras carpetas si así quisiéramos.
+
+
+
+## `public`
+
+Next.js puede [servir archivos estáticos](https://nextjs.org/docs/basic-features/static-file-serving) como imágenes, si las colocamos dentro de la carpeta `public` en el directorio raíz. Los archivos dentro de esta carpeta podrán ser accedidos desde el código comenzando con la URL base `/`
+Por ejemplo para trabajar con `/public/img/logo.svg` en `components/Logo` directamente lo referenciamos como `'/img/logo.svg`.
+
+>A diferencia de lo que ocurre cuando utilizamos create-react-app, cuando trabajamos con Next.js en la carpeta `public` no tenemos un archivo `index.html`. Esto se debe a que será Next.js con el pre-renderizado quién generará dicho HTML.
+
+
+
 ## `pages`
 
-* En Next.js trabajamos con un **routing basado en el file system**, por lo que cada archivo que tengamos en `pages` representará una ruta de la página.  Es decir que si creamos un archivo `about.js` en `pages` con el siguiente contenido:
+La carpeta `pages` es la responsable del routing de la aplicación. En Next.js tenemos un **routing basado en el file system**, por lo que cada archivo que tengamos en `pages` representará una ruta de la página.  Es decir que si creamos un archivo `about.js` en `pages` con el siguiente contenido:
 
 ```jsx
 function About() {
@@ -173,30 +244,19 @@ function About() {
 export default About
 ```
 
+* ### `index.js`
+
+  ``index.js` representa el archivo que será servido cuando visitemos `http://localhost:3000`
+
 Cuando ingresamos a una `/about`  podremos acceder a ese componente.
 
-*  Carpeta `api` es para crear una API para eso cualquier archivo ubicado dentro de `pages/api` será mapeado con la url `/api/*` y tratado como un endpoint de la API en lugar de como una página.
 
-    Por ejemplo si en `pages/api` tenemos el siguiente archivo `hello.js`:
 
-  ```js
-  export default (req, res) => {
-    res.statusCode = 200
-    res.json({ name: 'John Doe' })
-  }
-  ```
+* ### `_app.js`
 
-  Luego cuando ingresemos a `http://localhost:3000/api/hello` obtendremos el JSON `{ name: 'John Doe' }`
+`_app.js` que es el root component y los distintos *page componentes* son renderizados allí.
 
-  
-
-## `index.js`
-
-`index.js` representa la página home.
-
-## `_app.js`
-
-`_app.js` que es el root component y los distintos *page componentes* son renderizados allí:
+> Es posible definir en este archivo el layout de nuestra aplicación.
 
 ```jsx
 const App= ({ Component, pageProps }) => {
@@ -209,19 +269,28 @@ export default App;
 
 > Si tenemos el server corriendo y este archivo no existe y lo creamos, tendremos que reiniciarlo.
 
-## `public`
 
-Next.js puede [servir archivos estáticos](https://nextjs.org/docs/basic-features/static-file-serving) como imágenes, si las colocamos dentro de la carpeta `public` en el directorio raíz. Los archivos dentro de esta carpeta podrán ser accedidos desde el código comenzando con la URL base `/`
-Por ejemplo para trabajar con `/public/img/logo.svg` en `components/Logo` directamente lo referenciamos como `'/img/logo.svg`.
 
-## `styles`
+* ### `api`
 
-Es donde tenemos los archivos `.css` y los `module.css`
+Carpeta `api` nos permite crear una API para nuestra aplicación para eso cualquier archivo ubicado dentro de `pages/api` será mapeado con la url `/api/*` y tratado como un endpoint de la API en lugar de como una página.
 
-En Next.js por default trabajamos con **CSS Modules** a fin de poder tener los mismos nombres de clases en múltiples componentes sin que se pisen. De esta manera puedo tener selectores menos específicos o utilizar nombres de clases comunes como `.container` más de una vez asignándole estilos distintos. Si a estos elementos los visualizamos en las DevTools veríamos que al nombre de la clase le agrega un **hash** de modo que sea único. 
-Por otra parte si queremos reutilizar un estilo en más de un componente podemos utilizar la hoja de estilos `global.css`.
+Por ejemplo si en `pages/api` tenemos el siguiente archivo `hello.js`:
+
+```js
+export default (req, res) => {
+  res.statusCode = 200
+  res.json({ name: 'John Doe' })
+}
+```
+
+Luego cuando ingresemos a `http://localhost:3000/api/hello` obtendremos el JSON `{ name: 'John Doe' }`
+
+
 
 ## `components`
+
+Esta carpeta no forma parte del conjunto de carpetas creado por create-next-app sino que se trata de un agregado opcional para el flujo de trabajo.
 
 Cuando tenemos componentes que no son páginas como [metodología de trabajo](https://www.youtube.com/watch?v=DWCCkcJgvf0&ab_channel=SelfTeachMe) podemos crear una carpeta `components` fuera de `pages` y en ella al luego una carpeta para cada componente por ejemplo `Tabs` donde tendremos `Tabs.js`, sus estilos `Tabs.css` y sus archivos de testing `Tabs.test.js`.
 
@@ -292,3 +361,17 @@ Como es de esperar en `Tabs` recibimos este contenido via la prop `children` que
 
 
 
+## Levantar Proyecto
+
+Contamos con dos builds uno de desarrollo y uno de producción: Usamos `npm run dev` cuando estemos trabajando de manera **local** y `npm start` para **producción**.
+
+Cuando ejecutamos `npm run dev` la ejecución es transferida a `_app.js` donde tenemos el siguiente código:
+
+```jsx
+	function MyApp({Component, pageProps}){
+        return <Component {...pageProps}/>
+    }
+	export default MyApp;
+```
+
+Cuando navegamos a `http://localhost:3000/` `Component` se referirá al componente definido en `index.js`

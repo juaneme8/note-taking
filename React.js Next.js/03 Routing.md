@@ -1,10 +1,13 @@
 # Routing
 
-El concepto de routing involucra lo relacionado con páginas y navegación. A diferencia de lo que ocurre cuando trabajamos con **create-react-app** por ejemplo en Next.js tenemos una solución para no tener que preocuparnos por eso.  Cada página en Next.js está representada por un archivo dentro de la carpeta `pages` por lo que se conoce como routing basado ene l filesystem.
+El concepto de routing involucra lo relacionado con páginas y navegación. A diferencia de lo que ocurre cuando trabajamos con **create-react-app** donde debemos configurar un paquete de terceros, configurarlo y escribir código para cada ruta, con Next.js tenemos una solución para no tener que preocuparnos por eso.  
 
-Existen dos formas de hacer routing que se conocen como **rutas estáticas**  y  **rutas dinámicas** 
+La convención establecida por Next.js consiste en que cuando un archivo es agregado dentro de la carpeta `pages` pasa a estar disponible como una ruta. Esto se conoce como routing basado en el filesystem.
 
-## Rutas Estáticas
+
+
+## Rutas Estáticas   
+
 Gracias a este **routing basado en el filesystem** si dentro de `pages` creamos una **página básica** llamada `about.js` y en ella un componente funcional, si vamos a `/about` la veremos. 
 
 > Escribir los nombres de los archivos en minúscula, ya que las rutas son *case sensitive* (esto antes no era así fue incorporado en Next.js 10) por lo que si ponemos en la barra de direcciones otra capitalización obtendremos un 404.
@@ -13,10 +16,22 @@ Si queremos tener la ruta `/ninjas` una opción es crear un archivo `ninjas.js`,
 
 >Esto es útil si tenemos pensado luego agregar más cosas en esa carpeta por ejemplo si tenemos pensado tener una ruta `/ninjas/1` veremos luego que para esto será necesario una archivo `[id].js` dentro de `ninjas`.
 
-## Rutas Dinámicas
-Las rutas dinámicas son aquellas dependientes de variables como por ejemplo `/product/123`. 
 
-Si queremos mostrar una página dinámica cuando el usuario vaya a `/product/123` debemos crear la carpeta `product` y dentro de ella un archivo `[productId].js`.
+
+## Rutas Anidadas
+
+Las rutas anidadas en Next.js pueden lograrse simplemente anidando carpetas dentro de `pages`.
+
+Por ejemplo si queremos mostrar una página cuando el usuario navega a `localhost:3000/blog` y otra cuando navega a `localhost:3000/blog/first` y `localhost:3000/blog/second` tenemos dos formas de hacerlo:
+
+* La primera es crear un archivo `blog.js` y una carpeta `blog` y dentro de ella dos archivos  `first.js` y `second.js`. 
+* La segunda es crear una carpeta `blog` y en ella tres archivos `index.js`, `first.js` y `second.js`. Esta es la más recomendada porque nos quedan los archivos relacionados juntos.
+
+## Rutas Dinámicas
+
+En aplicaciones complejas, muchas veces no es posible definir las rutas con paths predefinidos. En aquellos casos en que las rutas son dependientes de variables como por ejemplo `/product/123` se las conoce como **rutas dinámicas**.
+
+Si queremos mostrar un listado de productos cuando el usuario se dirige a `/product` y detalles de un producto cuando va `/product/123` debemos crear la carpeta `product` y dentro de ella un archivo`index.js` y otro `[productId].js`.
 
 > Las páginas dinámicas se crean utilizando la siguiente sintaxis `[variable].js` siendo variable el nombre con el que quiero representar a ese parámetro.
 
@@ -71,6 +86,7 @@ export default (req, res) => {
 Como consecuencia de esto al hacer un *request* a `http://localhost:3000/api/user/:id` obtendremos un json con el id.
 
 ## Routing *«under the hood»*
+
 Cuando generamos el build para producción con `yarn build` veremos datos acerca de las páginas que hemos creado, pudiendo caer en las siguientes categorías:
 
 * (Server): server-side renders at runtime (uses `getInitialProps` or `getServerSideProps`)
