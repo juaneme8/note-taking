@@ -3,7 +3,7 @@
 > Basado en el curso de Platzi de Next.js, es posible clonar un [repositorio](https://www.github.com/jonalvarezz/platzi-nextjs/tree/main) del autor con los pasos iniciales utilizando TypeScript.
 > Basado en la lista de reproducción de [The Net Ninja](https://www.youtube.com/watch?v=A63UxsQsEbU&ab_channel=TheNetNinja).
 > Basado en algunos videos del canal de [Self Teach Me](https://www.youtube.com/watch?v=DWCCkcJgvf0&ab_channel=SelfTeachMe).
-> Basado en lista de reproducción de [Codevolution](https://www.youtube.com/watch?v=9P8mASSREYM&list=PLC3y8-rFHvwgC9mj0qv972IO5DmD-H0ZH). (VIDEO 6 COMPLETO)
+> Basado en lista de reproducción de [Codevolution](https://www.youtube.com/watch?v=9P8mASSREYM&list=PLC3y8-rFHvwgC9mj0qv972IO5DmD-H0ZH). (VIDEO 10 COMPLETO 20/7)
 
 > Contenido extra:
 > [Next.js + TailwindCSS](https://betterprogramming.pub/how-to-set-up-next-js-with-tailwind-css-b93ccd2d4164)
