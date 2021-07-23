@@ -4,7 +4,7 @@
 > Basado en el [video](https://youtu.be/LMRAEUPkFXI) de James Quick. 
 > Basado en el [blog post](https://medium.com/better-programming/how-to-set-up-next-js-with-tailwind-css-b93ccd2d4164) para la Introducción a Next.js con Tailwind - [repositorio](https://github.com/jamesqquick/nextjs-pokedex-with-tailwind-css)
 >
-> Para este proyecto utilizaremos Next.js tanto con **SS (*static site generation*) para el listado de los pokmones y **SSR** (*server side enerin*) para la página con los detalles de un okmon en particular, para evitar tener que hacer 15 páginas estáticas.
+> Para este proyecto utilizaremos Next.js tanto con **SS** (*static site generation*) para el listado de los pokmones y **SSR** *(server side rendering)* para la página con los detalles de un okmon en particular, para evitar tener que hacer 15 páginas estáticas.
 
 Utilizaremos la API: 
 https://pokeapi.co/api/v2/pokemon

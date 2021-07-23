@@ -82,7 +82,7 @@ En `[reviewId].js` podemos acceder a los parámetros dinámicos con `router.quer
 
 ### Catch-all Route
 
-Next.js tiene una característica de routing llamada *catch-all routes* ideal para cuando tenemos muchas urls que muestran el mismo componente, el caso típico es la documentación de un proyecto donde tenemos direcciones de tipo `/docs/feature1/concept1` con múltiples *features* y múltiples *concepts*  en cada *feature*. Lógicamente queremos tener una ruta única para cada tema. Otra situación en la cual resulta de utilidad es cuando queremos pasar *filter parameters* para una página, por ejemplo una página de inmuebles donde queremos filtrar por presupuesto, la url sería `/houses/100000/1000000` y recibiríamos ambos valores siendo posible el filtrado.
+Next.js tiene una característica de routing llamada *catch-all routes* ideal para cuando tenemos muchas urls que muestran el mismo componente, el caso típico es la documentación de un proyecto donde tenemos direcciones de tipo `/docs/feature1/concept1` con múltiples *features* y múltiples *concepts*  en cada *feature*. Lógicamente queremos tener una ruta única para cada tema. Otra situación en la cual resulta de utilidad es cuando queremos pasar *filter parameters* para una página, por ejemplo una página de inmuebles donde queremos filtrar por presupuesto, la url sería `/houses/100000/1000000` y recibiríamos ambos valores siendo posible el filtrado, es decir en una situación donde recibimos parámetros opcionales.
 
 Suponiendo 20 *features* y 20 *concepts* serían necesarios 400 rutas, como hemos visto no serán necesarios 400 archivos sino que podemos utilizar rutás dinámicas y haría falta crear dentro de pages una carpeta`[featureId]` y un archivo `[conceptId].js` (sin contar los archivos para renderizar los componentes de las rutas incompleta). Además si queremos agregar un nivel por ejemplo `/docs/feature1/concept1/example1` hará falta un nuevo nivel de anidamiento carpeta `[featureId]`, carpeta `[conceptId]` y archivo `[exampleId].js` (también sin contar los archivos para poder resolver las rutas intermedias). En situaciones como estas donde todas las páginas tendrán el mismo layout podemos hacer uso de la característica llamada *catch-all routes* que es un archivo que matchea con todas las rutas. Creamos una carpeta `docs` y dentro un archivo `[...params].js` (por convención se le suele dar este nombre) y dentro definimos un componente. Como consecuencia de esto matcheará con todos los paths que comiencen con `/docs/...` 
 
@@ -220,6 +220,102 @@ En el componente `<Link>` tenemos la prop `replace` que reemplaza la historia en
 
 
 
+## Navegación Programática
+
+La mayoría de las veces realizaremos la navegación entre las distintas páginas utilizando el componente `Link`. Sin embargo, en ocasiones puede que necesitemos redireccionar al un usuario programáticamente hacia alguna página por algún motivo.
+
+Una opción podría ser un redireccionamiento unos segundos después de mostrar la página 404 cuando el usuario ingresa a una ruta inexistente.
+
+A continuación implementamos esa situación en el archivo `pages/404.js` y para ello usamos el hook `const router = useRouter()` de next y luego en el `useEffect` utilizamos un timer con `setTimeOut` y con `router.push('/')` hacemos el redireccionamiento a `/`. 
+
+Si quisiéramos navegar hacia atrás en la historia podríamos utilizar `router.go(-1)` o bien `router.go(1)` si quisiéramos navegar hacia adelante.
+
+```jsx
+import Link from 'next/link'
+import { useEffect } from 'react'
+import { useRouter } from 'next/router'
+
+const NotFound = () => {
+  const router = useRouter()
+
+  useEffect(() => {
+    setTimeout(() => {
+      // router.go(-1)
+      // router.go(1)
+      router.push('/')
+    }, 3000)
+  }, [])
+
+  return (
+    <div className="not-found">
+      <h1>Ooops...</h1>
+      <h2>That page cannot be found :(</h2>
+      <p>Going back to the <Link href="/"><a>Homepage</a></Link> is 3 seconds...</p>
+    </div>
+  );
+}
+ 
+export default NotFound;
+```
+
+
+
+Otra opción podría ser en un sitio de e-commerce cuando el usuario presiona el botón "Finalizar Compra" y es redirigido a una ruta con el listado de los artículos comprados.
+
+```jsx
+	<button onClick={handleClick}>Finalizar Compra</button>
+```
+
+
+
+Luego en `handleClick`:
+
+```
+const handleClick = () => {
+	router.push('/product')
+}
+```
+
+
+
+> Es posible navigar programáticamente a rutas estáticas, dinámicas, anidadas e incluso a *catch-all routes*.
+
+
+
+### `replace`
+
+De manera similar a lo visto con `<Link>` donde teníamos la prop `replace` , en la navegación programática contamos con el método `router.replace('/product')`que reemplaza la historia en lugar de agregar una url en el stack. 
+
+
+
+# Página 404
+
+Si intentamos navegar a cualquier ruta que no esté definida en la carpeta `pages`, veremos una página 404 por default. Es posible mostrar una página personalizada creando en `pages` el archivo `404.js`. Luego como es de esperar este componente se mostrará en pantalla automáticamente cada vez que ingresemos a una url que no tenga una página asociada:
+
+```jsx
+import React from 'react';
+import Link from 'next/link';
+const NotFound = () => {
+  return (
+    <div>
+      <h1>Ooooops...</h1>
+      <h2>Página No Encontrada</h2>
+      <p>
+        Ir al{' '}
+        <Link href="/">
+          <a>Inicio</a>
+        </Link>
+      </p>
+    </div>
+  );
+};
+
+export default NotFound;
+
+```
+
+
+
 ## Custom Page Extensions
 
 Cuando trabajamos con unit tests necesitaremos crear archivos similares a `index.spec.js` y no queremos que Next.js haga una ruta a partir de ellos como por ejemplo http://localhost:3000/index.spec
@@ -236,3 +332,4 @@ Como indica la [documentación](https://nextjs.org/docs/api-reference/next.confi
 
 
 Por lo tanto si en cambio colocamos como `pageExtensions: ['page.js']` los archivos deberían ser renombrados a `_document.page.tsx`, `_app.page.tsx`, `about.page.js`, etc  y lo mismo en `api` 
+
