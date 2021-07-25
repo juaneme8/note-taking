@@ -1,4 +1,4 @@
-# Recursos
+# Conceptos Básicos
 > Basado en la [playlist](https://www.youtube.com/watch?v=_c26Fyi7RFA&list=PLvq-jIkSeTUbpfewvbKLhHctdkgadAy-K&ab_channel=jonmircha) de youtube de jonmircha.
 > Encontramos recursos adicionales en https://jonmircha.com/figma
 
