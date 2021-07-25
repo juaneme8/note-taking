@@ -18,25 +18,13 @@ Resumiendo React al ser una **librería** de UI nos deja la responsabilidad de d
 Podemos pensar en Next.js como un full-stack Framework ya que nos permite crear APIs que luego pueden ser llamadas por la aplicación frontend en React.
 
 
-# Pre-rendering
-Una de las características más destacadas de Next.js es el pre-rendering, es decir que nos permite crear sitios prerenderizados. Esto significa que los componentes de React fueron renderizados en HTML para el momento en que llegan al navegador. **A partir de ese momento la página se comporta como una SPA** y el routing lo podemos manejar del lado cliente en el navegador.  
-
-Como contraste de esto tenemos el CSR *(client side rendering)* donde los componentes son renderizados en HTML en el navegador. Si en lugar de Next.js utilizamos create-react-app que tiene CSR, el usuario verá una pantalla en blanco durante unos segundos al actualizar la página, mientras que con Next.js verá el contenido de manera inmediata. 
-
-Cuando utilizamos `useEffect()` es el navegador quien realiza el fetch de los datos (inicialmente recibimos una página en blanco lo cual podemos constatar en Network yendo a Preview), mientras que en Next.js gracias a `getStaticProps` y `getServerSideProps` obtendremos los datos en el servidor por lo que recibimos la página con información.
-
-> Si en una aplicación creada con CRA deshabilitamos JavaScript veremos una página en blanco ya que se construye en el cliente. Sin embargo, si utilizamos Next.js como hacemos un pre-rendering, podremos verla sin tener JavaScript habilitado. 
-
-Expresando esto mismo de manera técnica decimos que Next.js tiene un **FCP** (*first contentful paint*) más rápido. En este [artículo](https://web.dev/user-centric-performance-metrics/) encontramos más información al respecto. 
-
-Next.js nos ofrece tanto SSR *(server side rendering)* , SSG *(static site generation)* y ISR (*Incremental static regeneration*).
 
 # Ventajas
-* **mejora en la performance** ya que los componentes están pre-renderizados eso implica menos trabajo en el navegador.
+* Gracias al pre-rendering **mejora en la performance** ya que implica menos trabajo en el navegador.
 
-* **mejoras en términos de SEO** *(search engine optimization)*.
+* Gracias al pre-rendering tenemos **mejoras en términos de SEO** *(search engine optimization)*.
 
-* **mejor información disponible a la hora de compartir enlaces** de las páginas. Con Next.js gracias al SSR tendremos información del título de la página, imágenes, etc que no tendríamos si usamos CRA. Si Googleamos a [facebook debugger](https://developers.facebook.com/tools/debug/) podremos simular cómo se verán los enlaces cuando sean compartidos.
+* Gracias al pre-rendering también tenemos **mejor información disponible a la hora de compartir enlaces** de las páginas. Con Next.js gracias al SSR tendremos información del título de la página, imágenes, etc que no tendríamos si usamos CRA. Si Googleamos a [facebook debugger](https://developers.facebook.com/tools/debug/) podremos simular cómo se verán los enlaces cuando sean compartidos.
 
 * **Creación de REST API de manera sencilla**
 
@@ -65,34 +53,6 @@ Next.js nos ofrece tanto SSR *(server side rendering)* , SSG *(static site gener
 * Cuenta con un **sistema para crear la build en desarrollo y otro sistema muy optimizado para hacerlo en producción** permitiéndonos concentrar más en el código y no en la configuración.
 
   
-# SSR, SSG y ISR
-Con Next.js podemos realizar SSR, SSG, ISR.
-
-Podemos ver más información en esta [página](https://www.netlify.com/blog/2020/12/02/next.js-should-i-use-ssr-or-ssg/) 
-
-## SSR
-SSR es cuando los componentes de React son renderizados en páginas HTML en el servidor, luego de un request del navegador es decir  **at run-time**. 
-Tenemos la **ventaja** de que los datos estarán siempre actualizados.
-
-
-
-## SSG
-SSG es cuando los componentes de React son renderizados en páginas HTML en el momento de desplegar la aplicación, es decir **at build-time**. Tenemos la ventaja de que el TTFB (*time to first byte*) es más rápido.
-
-
-
-## ISR
-
-ISR es una implementación híbrida que nos permite actualizar contenido estático sin la necesidad de hacer *rebuild* de todo el sitio cuando cambiamos algo. Es una alternativa ideal para aprovechar las ventajas de las páginas estáticas y a la vez escalar a millones de páginas.
-
-
-
-> Resumen de [Guía de ISR por Lee Robinson](https://www.smashingmagazine.com/2021/04/incremental-static-regeneration-nextjs/). 
->
-> Trabajar con SSG, nos aporta sitios estáticos pre-renderizados que pueden ser subidos a CDN y disponibles globalmente en poco tiempo y además tenemos contenido que puede ser accedido muy rápido e indexado también rápidamente a los crawlers. Sin embargo tiene algunas desventajas. En sitios estáticos de gran escala, podrá llevar horas esperar el *build* del sitio. En caso de duplicar la cantidad de páginas también duplicaría el tiempo requerido. Es por esto que fue necesaria una solución híbrida como ISR. 
->
-> Considerando el caso de un equipo donde el código está desacoplado del contenido ya que usan un Headless CMS, el cambio de un precio en un artículo demandaría el *rebuild* de todo el sitio lo cual podría llevar horas. ISR apunta a interpretar donde fueron los cambios y realizar una actualización incremental sin la necesidad de hacer un *rebuild* entero.
-
 # Instalación
 
 Existen dos formas de instalar Next.js una automática y otra manual, ambas pueden ser vistas en la [documentación](https://nextjs.org/docs)
