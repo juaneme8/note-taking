@@ -60,7 +60,7 @@ Si ahora hacemos el commit veremos: **nothing to commit, working tree clean**
 Si ahora hacemos un cambio veremos nuevamente: **Changes not staged for commit:**
 
 # Resumiendo
-Suponiendo que tenemos un archivo `biografia.txt` lo primero que hacemos es inicializar el repositorio local, agregar el archivo al staging area y guardar los cambios.
+Suponiendo que tenemos un archivo `biografia.txt` lo primero que hacemos es inicializar el repositorio local, agregar el archivo al staging area y guardar los cambios haciendo un commit.
 `git init`
 `git add biografia.txt`
 `git commit -m "versión 1"`.

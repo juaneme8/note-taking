@@ -1,9 +1,6 @@
 # Introducción
 > Platzi - Curso Profesional de Git y GitHub (COMPLETO 43 VIDEOS)
-> [Playlist](https://www.youtube.com/watch?v=cEGIFZDyszA&list=PL6gx4Cwl9DGAKWClAD_iKpNC0bGHxGhcx) de thenewboston.
 > [Playlist](https://www.youtube.com/watch?v=3RjQznt-8kE&list=PL4cUxeGkcC9goXbgTDQ0n_4TBzOO0ocPR) the The Net Ninja.
-> Curso Udemy - GitHub Ultimate Master Git and GitHub - Beginner to Expert
-> [Video](https://www.youtube.com/watch?v=kEPF-MWGq1w&ab_channel=PeladoNerd) Pelado Nerd
 
 ## Motivación
 Cuando trabajamos un archivo de texto plano (por ejemplo `archivo.txt`) y decidimos realizar cambios, en lugar de guardar el archivo con nuevo nombre `archivo_v2.txt`, `archivo_final.txt`. etc, utilizando el **sistema de control de versiones Git** podremos guardar sólo los cambios que realizamos en dichos archivos. Gracias a Git también podremos manejar los cambios que realicen otros miembros del equipo sobre esos mismos archivos posibilitando así el trabajo colaborativo sin superponerse.   
@@ -12,7 +9,7 @@ De manera local trabajaremos con Git en la terminal o línea de comandos y si qu
 
 > Git se trata de una *source control management tool*
 > En todas las máquinas que clonen el repositorio hay una copia de toda la historia del proyecto.
-> Git es ideal para el manejo de archivos de texto plano (código fuente) mientras que si bien puede utilizarse también con archivos binarios no será tan eficiente a la hora de versionar los cambios. Las buenas prácticas indican que los archivos binarios no deben ser agregados al repositorio y debemos ignorarlos. Por ejemplo una imagen es un archivo binario. Cuando trabajamos con imágenes, ante un cambio por cuestiones de caché puede que GitHub continúe mostrándonos una versión vieja (esto se soluciona actualizando con `CTRL+F5`.
+> Git es ideal para el manejo de archivos de texto plano (código fuente) mientras que si bien puede utilizarse también con archivos binarios no será tan eficiente a la hora de versionar los cambios. Las buenas prácticas indican que los archivos binarios no deben ser agregados al repositorio y debemos ignorarlos. Por ejemplo una imagen es un archivo binario. Cuando trabajamos con imágenes, ante un cambio por cuestiones de caché puede que GitHub continúe mostrándonos una versión vieja (esto se soluciona actualizando con `CTRL+F5`).
 > Hablamos de **cambios atómicos** ya que cada uno de los cambios se guarda de manera independiente.
 
 
@@ -26,7 +23,8 @@ De manera local trabajaremos con Git en la terminal o línea de comandos y si qu
 * Favorece la **programación colaborativa**. No sólo en un equipo de trabajo sino de cara al código open-source (sumando además la posibilidad de hacer fork y pull requests).
 * Es posible **trabajar en nuevas funcionalidades sin alterar el código principal** (concepto de ramas)
 * **Posibilidad de sincronizar los cambios en un repositorio remoto online** (GitHub, GitLab, etc).
-* 
+
+  
 
 ## Terminología
 ### Sistema Distribuido:
@@ -35,7 +33,7 @@ Git se presenta como un **sistema de control de versiones distribuido**, en el q
 En los **sistemas de control de versiones centralizados** como SVN en cambio, el código y las distintas versiones de están en el servidor, por lo que cada desarrollador para guardar todos los cambios y actualizaciones que realizaba a los archivos, debía estar fuertemente atado a la conexión a Internet, de otra manera los cambios nunca podrán reflejarse en el **servidor central**.
 
 ### CLI vs GUI
-Utilizaremos línea de comandos o **CLI** (_*command line interface_*) en lugar de una **GUI** (_*graphical user interface_*) por varios motivos.
+Utilizaremos línea de comandos o **CLI** (*command line interface*) en lugar de una **GUI** (*graphical user interface*) por varios motivos.
 * Debido a que es el modo en que fue diseñado git originalmente, por lo que los **new features** aparecen disponibles primero para línea de comandos y luego para los entornos gráficos.
 * La **ayuda online** que suele ser brindada usando CLI como método standard (ya que la mayoría de los clientes gráficos tienen los mismos comandos).
 * La línea de comandos nos aporta **más potencia** ya que los clientes gráficos suelen cubrir sólo los comandos más comunes.   
@@ -55,9 +53,9 @@ El **working directory** o **workspace** por otra parte, es la carpeta que conti
 ### Estados Repositorio Local
 En el **repositorio git local** existen tres estados o áreas en los que pueden estar los archivos manejados por Git: *working directory*, *staging area* y *git repository*.
 
-|                   |              |                |      |
-| :---------------: | :----------: | :------------: | :--: |
-| WORKING DIRECTORY | STAGING AREA | GIT REPOSITORY |      |
+|                   |              |                |
+| :---------------: | :----------: | :------------: |
+| WORKING DIRECTORY | STAGING AREA | GIT REPOSITORY |
 
 El **working directory** contiene todos los archivos y carpetas de la aplicación los cuales pueden estar o no manejados por Git (de cualquier modo Git estará al tanto de esos archivos). En el otro extremo tenemos el **repositorio** que contiene todos los cambios que han sido guardados o *committed*. En el medio tenemos el **staging area** (memoria RAM o estado temporal de preparación) que se utiliza para preparar el siguiente commit.
 
@@ -69,17 +67,17 @@ Git almacena el **estado** de todos los archivos que maneja y lo hace a través 
 > Como **git versiona archivos, no carpetas**. Es por esto que si una cierta tecnología nos obliga a tener carpetas vacías, podemos colocarle dentro *dummy files* vacíos a modo de preservarlas. 
 
 ## `.gitignore`
-No todos los archivos con los que trabajamos deben ir al repositorio. Suponiendo que estemos trabajando con archivos que contienen contraseñas o API keys no queremos que estas vayan al repositorio ya que podrían ser vistos por alguien más (sobre todo en proyectos  open-source donde el repositorio es público).
+No todos los archivos con los que trabajamos deben ir al repositorio. Por ejemplo si estamos trabajando con archivos que contienen contraseñas o API keys no queremos que estas vayan al repositorio ya que podrían ser vistos por alguien más (sobre todo en proyectos  open-source donde el repositorio es público).
 
 Para evitar que un archivo se agregado al repositorio debemos colocarlo en un archivo `.gitignore` que creamos en la raíz del proyecto y donde colocamos la lista de todos los archivos a ignorar.
 
 Supongamos que tenemos un archivo `app.log` que no queremos que forme parte del repositorio, para ello dentro podemos colocar tanto `app.log` o directamente `*.log` para omitir todos los archivos que terminen con `.log`. A partir de ese momento si hacemos `git status` nos dejará de aparecer ese archivo como archivo no trackeado.
 
-> Recordemos que no es una buena práctica incluir archivos binarios en el repositorio. Las imágenes por ejemplo deberían ser subidas por f, CDN (*content delivery network*), hosting externo (como imgur), rsync, etc. Si quisiéramos evitar la presencia de imágenes `.jpg` en el repositorio podríamos poner `*.jpg`.
+> Recordemos que no es una buena práctica incluir archivos binarios en el repositorio. Las imágenes por ejemplo no deberían ser incluidas y deberíamos buscar otra alternativa como CDN (*content delivery network*), hosting externo (como imgur), rsync, etc. Si quisiéramos evitar la presencia de imágenes `.jpg` en el repositorio podríamos poner `*.jpg`.
 > Es posible poner comentarios en el `.gitignore` con `#`
 > Es posible generar excepciones sobre los archivos a ignorar con `!` por ejemplo si queremos ignorar todos los archivos del directorio `content` menos uno llamado `file1.txt` podemos poner `content/*` y luego `!content/file1.txt`.
 
 # `readme.md`
  El archivo `readme.md` tiene el propósito de describir de qué se trata el repositorio. Es un archivo `.md`, es decir del lenguaje de marcado Markdown que nos permite formatear archivos de texto plano. Este archivo está ubicado en la raíz del repositorio.
 
-> También es posible agregar código html en ese archivo.
+> Tambien es posible agregar código html en ese archivo.
