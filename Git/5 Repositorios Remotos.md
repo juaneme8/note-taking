@@ -15,7 +15,7 @@ Además de la creación de repositorios podremos efectuar otras tareas con GitHu
 * New organization (empresa)
 * New project (conjunto de repositorios)
 
-## Interfaz Gráfica
+## Interfaz Gráfica Web
 Utilizando GitHub también podremos introducir cambios manuales en el código y luego generar un commit en la rama principal o bien crear una nueva rama e iniciar un pull request.
 
 # `git clone`
@@ -23,7 +23,7 @@ El comando `git clone url` nos permite traernos datos de un repositorio remoto, 
 Luego efectúo los cambios que considero con el flujo habitual `git add .`, `git commit -m "mensaje"`, etc y cuando termino hago `git push`para que el `HEAD` del `main` branch se envíe al repositorio remoto.
 
 > Lógicamente en caso de que se trate de un repositorio público podremos clonarlo sin la solicitud de credenciales. Sin embargo necesitaremos que el dueño del repositorio nos agregue como **colaboradores** para poder hacer un push a dicho repositorio remoto.
-> Al clonar un repositorio los alias con las direcciones del repositorio remoto se crean automáticamente, lo cual podremos chequear con  `git remove -v` donde veremos que `origin` tiene definida la misma dirección para **fetch** y para **push**.
+> Al clonar un repositorio los alias con las direcciones del repositorio remoto se crean automáticamente, lo cual podremos chequear con  `git remote -v` donde veremos que `origin` tiene definida la misma dirección para **fetch** y para **push**.
 > A la hora de clonar un repositorio si ejecutamos `git clone url` creará una carpeta con el mismo nombre del repositorio remoto mientras que si queremos personalizarlo podremos ponerle `git clone url nombreCarpeta`
 
 # `git fetch`
@@ -46,7 +46,7 @@ El comando `git pull` nos permite traer código de un repositorio remoto.
 
 > Cuando creamos un repositorio en GitHub y seleccionamos la opción de crear un archivo `README.md`, luego de establecer el remoto, antes de hacer `git push origin main` (supongamos que tenemos varios commits locales) debemos hacer un pull pues de lo contrario nos saldrá un mensaje rechazando dicho pull dado que el remoto tiene trabajo que no tenemos en la copia local. Sin embargo, si hacemos el pull con `git pull origin master` nos aparecerá el error *fatal: refusing to merge unrelated histories* por lo que ponemos `git pull origin master --allow-unrelated-histories` y luego ingresamos el mensaje de commit deseado.
 
->Cuando realizamos cambios localmente y hacemos `git pull origin main` (antes de pasarlos a staging y hacer el commit), si ese pull traería datos nuevos puede que nos aparezca un mensaje indicándonos: **Your local changes to the following files would be overwritten... Please commit your changes or stash them before you merge** e indicando los archivos en los cuales sucedería esta sobrescritura. Stash es una técnica para solucionar errores. Si vemos que no va a generar errores, hacemos el commit, luego el pull y por último el push.
+>Cuando realizamos cambios localmente y hacemos `git pull origin main` (antes de pasarlos a staging y hacer el commit), si ese pull traería datos nuevos puede que nos aparezca un mensaje indicándonos: **Your local changes to the following files would be overwritten... Please commit your changes or stash them before you merge** e indicando los archivos en los cuales sucedería esta sobrescritura. Si vemos que no va a generar errores, hacemos el commit, luego el pull y por último el push.
 >Si bien hasta ahora hemos visto como traernos datos del mismo repositorio al cual pusheamos, cuando trabajemos con proyectos forkeados obtendremos datos de una fuente y los enviaremos a otra dirección.
 
 # `git remote`
@@ -83,7 +83,7 @@ Luego el manager o la persona a la que se lo hayamos asignado, recibirá esta so
 
 En caso de que el reviewer me indique que debo corregir algo, lo agrego al mismo branch en el que venía trabajando y así hasta que me lo acepte.
 
-Finalmente, el hecho de que los cambios hayan sido aprobados no significa que el merge esté listo, sino que al lado del nombre de aquella persona que fue asignado como *reviewer* aparecerá un tilde verde. Si esta persona es además un **colaborador** del repositorio, podrá además hacer click en **Merge pull request **. Por último podré borrar el branch en un botón que nos ofrece **Delete branch**. 
+Finalmente, el hecho de que los cambios hayan sido aprobados no significa que el merge esté listo, sino que al lado del nombre de aquella persona que fue asignado como *reviewer* aparecerá un tilde verde. Luego podrá además hacer click en **Merge pull request **. Por último podré borrar el branch en un botón que nos ofrece **Delete branch**. 
 
 En este flujo de trabajo profesional, en caso de que los cambios sean aprobados se logra un merge a `staging`. Luego también se realiza un **pull-request** a `main`.
 
@@ -120,11 +120,11 @@ Esto mismo desde la consola  se puede realizar creando otra fuente para hacer pu
 A continuación ejecutamos `git pull upstream main` para traernos todos los cambios del repositorio original y `git push origin main` para empujar los cambios a nuestro repositorio remoto. En ese momento nos aparecerá un mensaje **This branch is even with repoOwner:main**
 
 > Tener presente que el repositorio deberá ser público para poder hacer un Fork.
-> Fork es una característica de GitHub
+> Fork al igual que Pull-request es una característica de GitHub
 
 # Deployment
-Dijimos anteriormente que la rama `main` se suele enviar al servidor de producción. La forma de enviar a producción es similar al flujo de trabajo que venimos utilizando. Suponiendo que tenemos un servidor montado en Linux debemos clonar en él el repositorio. Luego en caso de realizar cambios tendremos que hacer `git pull origin main` para poder acceder a esos cambios. Sin embargo, esto que hemos hecho no es una buena práctica pues debemos proteger el `.git`, ya que alguien podría tener acceso a todos nuestros cambios. Existen formas de protegerlo con Apache y otras con NGINX. Otra forma es realizar esto utilizando **Travis CI** que conecta automáticamente las ramas de GitHub con el servidor. Suponiendo que lo configuramos con una rama `deploy` cuando le hacemos push a esa rama, Travis CI detectará esto y lo enviará al servidor. De la misma manera funcionará si el código debe ser construído. Esta es una herramienta de pago excepto que se trate de un proyecto open-source.
-Otra alternativa instalable es **Jenkis** cuyas funcionalidades son muy avanzadas.
+Dijimos anteriormente que la rama `main` se suele enviar al servidor de producción. La forma de enviar a producción es similar al flujo de trabajo que venimos utilizando. Suponiendo que tenemos un servidor montado en Linux debemos clonar en él el repositorio. Luego en caso de que se hayan desarrollado nuevas características, para acceder a ellas tendremos que hacer `git pull origin main` para poder acceder a esos cambios. Sin embargo, esto que hemos hecho no es una buena práctica pues debemos proteger el `.git`, ya que alguien podría tener acceso a todos nuestros cambios. Existen formas de protegerlo con Apache y otras con NGINX. Otra forma es realizar esto utilizando **Travis CI** que conecta automáticamente las ramas de GitHub con el servidor. Suponiendo que lo configuramos con una rama `deploy` cuando le hacemos push a esa rama, Travis CI detectará esto y lo enviará al servidor. De la misma manera funcionará si el código debe ser construído. Esta es una herramienta de pago excepto que se trate de un proyecto open-source.
+Otra alternativa instalable es **Jenkis** cuyas funcionalidades son más  avanzadas.
 
 # GitHub Pages
 GitHub tiene un servicio de hosting llamado GitHub Pages. Gracias a esto el contenido del repositorio podrá ser visto online.
