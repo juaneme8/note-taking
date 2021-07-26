@@ -167,15 +167,67 @@ Algunas particularidades de `getStaticProps`
 
 #### Static Generation Builds
 
-Hasta ahora analizamos Static Generation en modo desarrollo, vamos a ver la salida que obtenemos al hacer el build optimizado para produción. En primer lugar borramos la carpeta `.next` que se genera cuando ejecutamos `npm run dev`. Luego ejecutamos `npm run build`.
+Hasta ahora analizamos Static Generation en modo desarrollo, vamos a ver la salida que obtenemos al hacer el build optimizado para produción. 
+
+En primer lugar borramos la carpeta `.next` que se genera cuando ejecutamos `npm run dev`. Luego ejecutamos `npm run build` y la carpeta de salida también será `.next` pero con distinto contenido.
 
 
 
+##### Salida de la terminal
+
+En la terminal veremos información acerca de cada ruta de nuestra aplicación:
+
+| Page | Size | First Load JS |
+| :--: | :--: | :-----------: |
+
+**Page** se refiere a la ruta
+**Size** al peso de los assets descargados al navegar la página del lado cliente.
+**First Load JS** peso de los assets descargados del servidor al visitar la página.
 
 
 
+Luego veremos un apartado **First Load JS shared by all** donde veremos el código que es descargado independientemente de la ruta que estemos:
+
+* `chunks/framwork.923004.js`: código de `node_modules` como ser React.
+* `chunks/main.477735.js` código relacionado con las páginas y componentes.
+* `chunks/pages/_app.2767dd.js` código de `_app.js` que es un componente que envuelve todas las páginas de la aplicación.
+* `chunks/webpack.972781.js`: runtime código de webpack
+* `css/01db3197b29cb52779ce.css`: consiste en el css de `global.css`.
+
+> La columna de **First Load JS** será pintada de colores verde, rojo o amarillo de acuerdo a la performance arrojada por el tamaño de estos archivos.
 
 
+
+Luego veremos información del tipo de pre-rendering efectuado en cada página que hemos creado, pudiendo caer en las siguientes categorías:
+
+* (Server): server-side renders at runtime (uses `getInitialProps` or `getServerSideProps`)
+* (Static): automatically rendered as static HTML (uses no initial props).
+* (SSG): automatically generated as static HTML + JSON (uses `getStaticProps`)
+* (ISR): incremental static regeneration (uses revalidate in `getStaticProps`)
+
+
+
+Las páginas en las que utilizamos `getStaticProps`  para hacer fetching de datos externos (nuestro ejemplo `/users`) caerán en la tercera categoría SSG mientras que aquellas páginas en las que no, caerán en la segunda categoría.
+
+Además veremos que Next.js nos crea múltiples archivos de JavaScript en lo que se conoce como **code splitting** y veremos la estrategia también de **hash assets** para solucionar el tema de caché.
+
+:warning: Se recomienda realizar curso optimización web
+
+Si dentro del navegador vamos a Network en las DevTools veremos que Next.js nos hace el **code splitting** y cada página tiene su chunk específico `2d57ec00e72a16...` además también veremos otros paquetes que son reutilizados por todas las páginas como `webpack-c2126667a5f965...` o `framework.c6faa22799416a6...`. Con esto notamos que que Next.js ya ha realizado optimizaciones de manera automática.
+
+> En modo de **desarrollo** también veremos este proceso ya que cada página tiene su propio *javascript bundle* que obtenemos cuando la navegamos por primera vez.  
+
+Si hacemos click derecho en "Ver código fuente" (o bien en Response en Network) veremos que el contenido principal de la página ya viene incluido en el HTML de la respuesta. Esto significa que no hay *client side rendering* y todo lo que estamos viendo ya viene del servidor. **Esto es muy importante en términos de SEO** (search engine optmization) como ya todo viene prerenderizado es mucho más amigable para los motores de búsqueda y también a la hora de compartir la página en redes sociales ya que la información estará disponible.
+
+
+
+##### Salida en carpeta `.next`
+
+En la carpeta `.next` nos encontramos con varias carpetas, nos centraremos en `server` y `static`. 
+
+En carpeta`server/pages` veremos distintos archivos y unos de ellos son `users.html` y `users.json`, esto se corresponde con lo visto anteriormente donde nos indicaba que la ruta `/users` tenía SSG con HTML + JSON. En cambio `index.html` , `404.html` como vimos en el output de la terminal al ser una páginas estáticas sólo tenemos un archivo HTML.
+
+También en `server` veremos una serie de archivos `.js` que no serán enviados al navegador y son una transformación de las páginas y componentes de la aplicación. La hidratación en cambio se produce con los archivos de la carpeta `static/chunks/pages` donde tenemos archivos de javascript que serán enviados al navegador y tendrán el código para **hidratar** la página y hacerla interactiva. También veremos otros archivos que no tienen relación con el código escrito `framework-92300432...`, `main-47...`, `polyfills-a5...`, `webpack...`
 
 #### Incremental Static Regeneration (ISR)
 

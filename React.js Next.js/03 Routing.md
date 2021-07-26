@@ -149,26 +149,6 @@ export default (req, res) => {
 
 Como consecuencia de esto al hacer un *request* a `http://localhost:3000/api/user/:id` obtendremos un json con el id.
 
-## Routing *«under the hood»*
-
-Cuando generamos el build para producción con `yarn build` veremos datos acerca de las páginas que hemos creado, pudiendo caer en las siguientes categorías:
-
-* (Server): server-side renders at runtime (uses `getInitialProps` or `getServerSideProps`)
-* (Static): **automatically rendered as static HTML (uses no initial props)**.
-* (SSG): automatically generated as static HTML + JSON (uses `getStaticProps`)
-* (ISR): incremental static regeneration (uses revalidate in `getStaticProps`)
-
-
-
-En nuestro caso todo lo ha generado con el algoritmo de forma estática (segunda categoría). Además veremos que Next.js nos crea múltiples archivos de JavaScript en lo que se conoce como **code splitting** y veremos la estrategia también de **hash assets** para solucionar el tema de caché.
-
-:warning: Se recomienda realizar curso optimización web
-
-Corremos el servidor node para **producción** con `yarn start` si vamos a Network en las DevTools veremos que Next.js nos hace el **code splitting** y cada página tiene su chunk específico `2d57ec00e72a16...` además también veremos otros paquetes que son reutilizados por todas las páginas como `webpack-c2126667a5f965...` o `framework.c6faa22799416a6...`. Con esto notamos que que Next.js ya ha realizado optimizaciones de manera automática.
-En modo de **desarrollo** también veremos este proceso ya que cada página tiene su propio *javascript bundle* que obtenemos cuando la navegamos por primera vez. 
-
-Otra optimización que hace Next.js es el **prerendering**  o **SSR** *(server side rendering)* lo cual podemos verificar (luego de ejecutar `yarn build` y `yarn start`). Si abrimos la dirección home `localhost:3000` y hacemos click derecho en "Ver código fuente" (o bien en Response en Network) veremos que el contenido principal de la página ya viene incluido en el HTML de la respuesta. Esto significa que no hay *client side rendering* y todo lo que estamos viendo ya viene del servidor. **Esto es muy importante en términos de SEO** (search engine optmization) como ya todo viene prerenderizado es mucho más amigable para los motores de búsqueda y también a la hora de compartir la página en redes sociales ya que la información estará disponible.
-
 
 
 ## Enlazando Páginas
