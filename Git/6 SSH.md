@@ -18,7 +18,14 @@ El uso del protocolo SSH nos permite conectarnos y autenticar con servidores y s
 
 La *SSH key* se trata de un archivo que tiene una clave con la cual podremos utilizar en GitHub para clonar, pushear, etc.
 
+
+
+> Si en GitLab tenemos activado el 2FA e intentamos acceder mediante HTTPS nos indicará que debemos generar un token personal con permisos de lectura y escritura. Una vez hecho esto cuando intentemos hacer alguna acción como push, pull, fetch, etc debemos ingresar dicho token como si fuera la contraseña. En caso de haber trabajado con otra contraseña anteriormente, debemos eliminarla en las credenciales de windows o editarla por esta otra.
+
+
+
 # GitLab y GitHub
+
 Debemos generar claves tanto para GitLab como para GitHub y necesitamos un modo de que el cliente ssh sepa qué clave utilizar para cada servicio.
 Si bien para la generación de claves utiliza un algoritmo distinto, el proceso para trabajar con dos servicios lo encontramos explicado en [este artículo](https://dev.to/vyasriday/managing-different-ssh-keys-for-gitlab-and-github-4k5g)
 
