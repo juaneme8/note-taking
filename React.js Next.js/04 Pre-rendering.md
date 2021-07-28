@@ -51,7 +51,7 @@ Tenemos la **ventaja** de que los datos estarán siempre actualizados.
 
 ## Static Site Generation
 
-
+Static Generation es un tipo de pre-rendering donde las páginas HTML son generadas *at build-time*.
 
 ## Inscremental Static Regeneration
 
@@ -228,6 +228,48 @@ En la carpeta `.next` nos encontramos con varias carpetas, nos centraremos en `s
 En carpeta`server/pages` veremos distintos archivos y unos de ellos son `users.html` y `users.json`, esto se corresponde con lo visto anteriormente donde nos indicaba que la ruta `/users` tenía SSG con HTML + JSON. En cambio `index.html` , `404.html` como vimos en el output de la terminal al ser una páginas estáticas sólo tenemos un archivo HTML.
 
 También en `server` veremos una serie de archivos `.js` que no serán enviados al navegador y son una transformación de las páginas y componentes de la aplicación. La hidratación en cambio se produce con los archivos de la carpeta `static/chunks/pages` donde tenemos archivos de javascript que serán enviados al navegador y tendrán el código para **hidratar** la página y hacerla interactiva. También veremos otros archivos que no tienen relación con el código escrito `framework-92300432...`, `main-47...`, `polyfills-a5...`, `webpack...`
+
+
+
+##### Ejecutar la aplicación
+
+Luego de ejecutar `npm run build` con el comando`npm start` podremos servir al navegador los archivos de la aplicación recién construida. 
+
+A partir de ahora nos planteamos dos escenarios. El primero será suponiendo que no tenemos ningún `Link` en `index.js` que nos permita navegar a `/users` y el segundo caso suponiendo que sí tenemos ese enlace.
+
+**Caso 1**: Cuando no tenemos ningún `Link` en el `index.js` a `/users` 
+
+>  En el navegador y **con las DevTools abiertas** hacer click derecho en el icono de actualizar y elegir **Vaciar caché y volver a cargar la página de manera forzada**.
+
+
+
+Si ingresamos a `localhost:3000/` y vamos a Network veremos los recursos que son descargados. En primer lugar vemos `localhost` que representa el archivo `index.html` que vimos en la carpeta `.next/server/` y el chunk `index.24...` También veremos archivos relacionados con css, framework, webpack, _app, etc pero no vemos nada relacionado con `/users` ya que Next.js sabe que no hay forma de navegar hacia esa ruta desde `/`. 
+
+Si en cambio ingresamos a `/users` descargaremos `users` que representa el `users.html` en `/server` y el chunk `users-35aa9...` para el javascript de lado cliente.
+
+
+
+**Caso 2**: Cuando tenemos un`Link` en `index.js` a `/users` 
+
+Supongamos que en `index.js` tenemos un enlace usando el componente `Link` a `/users`
+
+```jsx
+<Link href="/users">
+	<a>Users</a>	
+</Link>
+```
+
+Como consecuencia de eso cuando ingresemos a `/` (si hicimos otra vez el build debemos limpiar el caché y recargar de manera forzada nuevamente) veremos que fueron descargados dos chunks que comienzan con `users-35a...` y `users.json`. Gracias a esto cuando naveguemos a `/users` el proceso será instantáneo **sin la necesidad de nuevos requests al servidor** (no estamos descargando `users.html`).
+
+
+
+Esta **optimización** se conoce como **Link Prefetching** y es el comportamiento default en pre-rendering en Static Generation y consiste en que para cualquier componente `Link` que tengamos en el viewport (inicialmente o al scrollear) se realizará el pre-fetching incluyendo los datos correspondientes.
+
+
+
+El recurso `users.html` sólo es descargado cuando navegamos directamente a `/users`, mientras que si navegamos desde el root descargamos el `users-35...` y `users.json` y con este JavaScript y JSON construimos la UI del lado cliente. Cuando una página con `getStaticProps` es pre-renderizada *at build-time* además del HTML genera un JSON con el resultado de ejecutar `getStaticProps`. Este JSON será usado en el *client side routing* cuando usemos `next/link` o `next/router`.
+
+
 
 #### Incremental Static Regeneration (ISR)
 
