@@ -185,27 +185,40 @@ En el shell prompt podemos ver `root@5aacf34bd61d:` donde `root` es el usuario l
 
 
 
-### Algunos Comandos
+### Comandos
 
-Con `echo hello` mostraremos hello en la terminal.
-
-Con `whoami` mostraremos `root`
-
-Con `echo $0` mostramos la ubicación del shell, en mi caso veo `bash`. 
-
-> El nombre bash es un acrónico de **Bourne Again Shell**, ya que es una versión mejorada de Bourne shell y además parafraseando la noción de "born again".
+> Lo relacionado a comandos de Linux se unificó con los apuntes de Terminal y Línea de Comandos.
 
 
 
-Con `↑` y `↓` recorremos los últimos comandos.
+### Manejador de Paquetes Ubuntu
 
-Con `history` obtenemos un listado de los últimos comandos ejecutados y tienen asociado un número. Luego con un signo de exclamación y ese número podremos volver a ejecutarlos. Por ejemplo:`!2`
+En la actualidad los sistemas operativos o plataformas de desarrollo vienen con manejadores de paquetes como npm, yarn, pip, NuGet, etc. En Ubuntu contamos con `apt` (*advance package tool*).
+
+* apt: nos muestra una lista de subcomandos que podemos ejecutar
+* apt list: nos entrega un listado de los nombre de los paquetes.
+* apt search
+* apt show
+* ....
+
+Si bien `apt` es más nuevo, en muchos tutoriales veremos el uso de otro manejador de paquetes llamado `apt-get`.
 
 
 
+#### Instalar Paquete
+
+Si queremos instalar el editor de texto **nano** podemos hacerlo con `apt install nano` y procederá a buscarlo en la base de datos de paquetes y nos dirá que no lo encuentra. 
+
+```bash
+E: Unable to locate package nano
+```
+
+ Con `apt list` veremos los paquetes disponibles son pocos por lo que debemos actualizar la base de datos de paquetes y para ello ejecutamos `apt update`.  Si luego de eso ejecutamos `apt list` ya la cantidad de paquetes disponibles veremos que será mucho mayor.
+
+Siempre antes de instalar un paquete debemos ejecutar `apt update` y luego instalamos el paquete deseado.
 
 
-> En  Linux utilizamos *forward slash* `/` para separar directorios y archivos mientras que en Windows utilizamos *backward slash* `\`
->
-> Linux es un sistema operativo key sensitive por lo que no será lo mismo `Echo $0` que `echo $0` y el primero no funcionará. 
 
+#### Eliminar Paquete
+
+Si queremos eliminar el paquete **nano** podemos hacerlo con el comando `apt remove nano`
