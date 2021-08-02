@@ -73,7 +73,8 @@ Con el comando `ls` *(list)* listamos el contenido del directorio donde estamos,
 
 
 
-Con `ls -l` (*long*) listamos los archivos con su fecha de creación, peso (en bytes), permisos, etc.
+Con `ls -1` listamos los archivos uno por fila.
+Con `ls -l` (*long*) listamos los archivos uno por fila con su fecha de creación, peso (en bytes), permisos, etc.
 Con `ls -lh` *(human)* vemos el peso de los archivos en M, K, etc.
 Con `ls -a` (*all*) veremos todos los archivos inclusive los ocultos
 Con `ls -S` (*size*) veremos todos los archivos y directorios ordenados por tamaño ordenado descendentemente.
@@ -151,46 +152,6 @@ sudo apt install tree
 
 
 
-### Comando `mkdir`
-
-El comando `mkdir` nos permite crear una carpeta.
-```bash
-mkdir proyecto1
-```
-
-
-
-### Comando `touch`
-
-El comando `touch` me permite crear archivos vacíos.
-```bash
-touch archivo .txt
-```
-
-
-
-### Comando `cat`
-
-El comando `cat` nos permite mostrar el contenido de un archivo
-```bash
-cat archivo .txt
-```
-
-
-
-### Comando `rm`
-
-El comando `rm` nos permite borrar un archivo. 
-```bash
-rm archivo .txt
-```
-
-Si queremos borrar una carpeta `rm -rf proyecto1` (recursivo y forzado)
-
-> Debemos tener precaución a la hora de utilizar este comando.
-
-
-
 ## Obtener Ayuda
 
 Si queremos obtener ayuda sobre un comando en particular podemos ingresar `rm --help`
@@ -242,18 +203,103 @@ En el File System de Linux tenemos la siguiente jerarquía:
 
 
 
+## Manipulación de Archivos y Directorios
 
+### Comando `mkdir`
 
-### Navegar el File System
+El comando `mkdir` nos permite crear una carpeta. Por ejemplo si queremos crear una carpeta "test".
 
-`pwd` (*print working directory*) nos permite mostrar en qué directorio nos encontramos dentro del file system.
-
-`ls` (*list*) nos permite listar los archivos y directorios donde nos encontremos. Por default mostrará varios elementos en la misma línea.
-
- * `ls -1` para mostrar un elemento por línea.
- * `ls -l` *long listing* para mostrar un elemento por línea y con información extra. Permisos, dueño, tamaño, fecha, etc.
- * `cd` admite un path relativo o absoluto.
+```bash
+mkdir test
+```
 
 
 
-## Manipulación de Archivos 
+### Comando `mv`
+
+El comando `mv` nos permite renombrar archivos y carpetas o moverlo de ubicación. 
+
+Por ejemplo para renombrar un directorio:
+
+```bash
+mv test docker
+```
+
+Mientras que si queremos renombrar un archivo:
+
+```
+mv hello.txt hello-docker.txt
+```
+
+
+
+### Comando `touch`
+
+El comando `touch` me permite crear archivos vacíos.
+
+```bash
+touch file.txt
+```
+
+
+
+Si queremos crear múltiples archivos de una sola vez, podemos hacerlo con:
+
+```bash
+touch file1.txt file2.txt file3.txt
+```
+
+
+
+### Comando `cat`
+
+El comando `cat` nos permite mostrar el contenido de un archivo
+
+```bash
+cat archivo .txt
+```
+
+
+
+### Comando `rm`
+
+El comando `rm` nos permite borrar archivos y directorios.
+
+Por ejemplo para eliminar un archivo: 
+
+```bash
+rm file.txt
+```
+
+
+
+También es posible borrar más de un archivo a la vez:
+
+```bash
+rm file1.txt file2.txt file3.txt
+```
+
+
+
+O bien podemos borrar todos los archivos que tengan un cierto patrón, por ejemplo todos los archivos que comiencen con un cierto nombre:
+
+```bash
+rm file*
+```
+
+
+
+Para eliminar un directorio debemos hacerlo con `rm -r test` con lo cual eliminaremos la carpeta y todo su contenido recursivamente.
+
+> En ocasiones también tendremos que forzar el borrado lo cual hacemos con `rm -rf test` (recursivo y forzado)
+
+
+
+## Editor Nano
+
+Si queremos crear el archivo `file1.txt` y a la vez abrirlo en el editor de texto nano podemos hacerlo con:
+
+```bash
+nano file1.txt
+```
+
