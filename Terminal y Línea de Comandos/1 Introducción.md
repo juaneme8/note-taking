@@ -39,7 +39,7 @@ Si estamos trabajando en un sistema Linux (o en Windows utilizando WSL) tendremo
 4. como hijo de `usr` tendremos `lib`
 
 ## Primeros Pasos
-Cuando abrimos la terminal nos encontramos en `~` que se conoce como *virgulilla* (`ALT+126`) y hace referencia al directorio personal del usuario que está logueado, por lo que si está logueado el usuario foo y hacemos `pwd` será `home/foo`. Si estamos en Windows con Git Bash (Linux emulado) será `/c/Users/foo`
+Cuando abrimos la terminal nos encontramos en `~` que se conoce como *virgulilla* o *tilde* en inglés (`ALT+126`) y hace referencia al directorio personal del usuario que está logueado, por lo que si está logueado el usuario foo y hacemos `pwd` será `home/foo`. Si estamos en Windows con Git Bash (Linux emulado) será `/c/Users/foo`. Si estamos en el usuario root será `/root`
 
 
 
@@ -49,11 +49,9 @@ Cuando abrimos la terminal nos encontramos en `~` que se conoce como *virgulilla
 
 El comando `echo` se utiliza para mostrar líneas de texto que son pasadas como argumento en la línea de comandos. Por ejemplo podremos poner: `echo Hola Mundo` y mostraremos "Hola Mundo" en pantalla.
 
-Con `echo $0` mostramos la ubicación del shell, en mi caso veo `bash`. 
+Con `echo $0` mostramos la ubicación del shell, con una imagen de Ubutu en un contenedor de Docker veo `bash`  (lo mismo veo desde WSL) y si lo hago en Git Bash veo `/usr/bin/bash`
 
 > El nombre bash es un acrónico de **Bourne Again Shell**, ya que es una versión mejorada de Bourne shell y además parafraseando la noción de "born again".
->
-> Linux es un sistema operativo **key sensitive** y los comandos debemos escribirlos en minúsculas. Por ejemplo no será lo mismo `Echo $0` que `echo $0`. 
 
 
 
@@ -83,21 +81,27 @@ Con `ls -r`*(reverse)* listamos los archivos en orden reverso al alfabético.
 
 También es posible combinar opciones poniendo `ls -lahS` o `ls -lahr`
 
+
+
+> Los elementos que nos aparecen en azul son directorios y los blancos son archivos.
+>
+> También es posible listar los archivos de otro directorio sin moverme de donde me encuentro, por ejemplo `ls /bin`.
+
 ### Comando `cd`
 Con el comando `cd` *(change directory*) podremos navegar entre directorios.
-Por ejemplo queremos navegar al directorio `Pictures` podemos hacerlo con el comando `cd Pictures` *(change directory)*
+Podemos utilizarlos con  **rutas relativas** (por ejemplo con `cd boot`) o **rutas absolutas** (aquellas que comienzan con el *root directory* `/`)
+
+> **Operadores de ruta relativa**: Podemos utilizar `.` para referirnos al directorio actual y  `..` para referinos al directorio padre. Podemos utilizar `cd ..` para navegar al directorio padre. 
 
 Si queremos navegar a `home` (`~`) bastará con poner `cd` sin parámetros.
 
-**Operadores de ruta relativa**: Podemos utilizar `.` para referirnos al directorio actual y  `..` para referinos al directorio padre. 
 
-Podemos utilizar `cd ..` para navegar al directorio padre. 
 > A diferencia de lo que ocurre cuando usamos Windows, debemos colocar un espacio entre `cd` y `..`.
-
+>
 > Si queremos **navegar al disco** c debemos poner `cd /c` (de la misma manera que en Windows pondríamos `cd C:`
-
-> En Linux y MacOS puedo tener los nombres de las carpeta son **case sensitive**, esto significa que si tengo una carpeta llamada `carpeta` y otra llamada `Carpeta` y son dos distintas, mientras que en Windows si intento crear la segunda me dirá que ya existe una carpeta con ese nombre.
-
+>
+> Linux es un sistema operativo **key sensitive** y los comandos debemos escribirlos en minúsculas. Por ejemplo no será lo mismo `Echo $0` que `echo $0`.  Los nombres de las carpeta también son **case sensitive**, esto significa que si tengo una carpeta llamada `carpeta` y otra llamada `Carpeta` y son dos distintas, mientras que en Windows si intento crear la segunda me dirá que ya existe una carpeta con ese nombre.
+>
 > El **autocompletado** me permite si quiero navegar a una carpeta llamada `Users` puedo poner `cd U` y presionar `TAB` y me mostrará todas las que comienzan con esa letra, si sólo hubiera una con los caracteres ingresados la autocompletará.
 
 
@@ -209,7 +213,7 @@ En el File System de Linux tenemos la siguiente jerarquía:
 
 * `/` : es el directorio raíz.
 
-  * `bin`: es donde tenemos los binarios o programas.
+  * `bin`: es donde tenemos los binarios o programas. Si hacemos `ls /bin` veremos dentro programas como `echo`, `pwd`, etc.
 
   * `boot`: es donde tenemos archivos relacionados con el booteo.
 
