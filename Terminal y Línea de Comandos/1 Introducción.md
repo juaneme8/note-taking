@@ -43,11 +43,65 @@ Cuando abrimos la terminal nos encontramos en `~` que se conoce como *virgulilla
 
 
 
-## Comandos
+## Obtener Ayuda
+
+Si queremos obtener ayuda sobre un comando en particular podemos ingresar `rm --help`
+
+
+
+## File System
+
+Así como en Windows tenemos:
+
+* C:/
+
+  * Program Files
+
+  * Windows
+
+
+
+En el File System de Linux tenemos la siguiente jerarquía:
+
+* `/` : es el directorio raíz.
+
+  * `bin`: es donde tenemos los binarios o programas. Si hacemos `ls /bin` veremos dentro programas como `echo`, `pwd`, etc.
+
+  * `boot`: es donde tenemos archivos relacionados con el booteo.
+
+  * `dev` (devices): es donde tenemos archivos necesarios para acceder a dispositivos. 
+
+  * `etc` (editable text configuration): es donde tenemos archivos de configuración.
+
+  * `home`: es donde tenemos el directorio home de cada uno de los usuarios de la máquina.
+
+  * `root`: es el home del usuario root.
+
+  * `lib` (library) es donde almacenamos librerias de dependencias.
+
+  * `var` (variable) es donde almacenamos archivos que cambian frecuentemente como ser archivos de aplicaciones, logs, etc. 
+
+  * `proc` (process) es donde almacenamos archivos que representan programas en ejecución.
+
+    
+
+> En Linux todo es una archivo incluyendo dispositivos, directorios, sockets, etc 
+
+
+
+> En  Linux utilizamos *forward slash* `/` para separar directorios y archivos mientras que en Windows utilizamos *backward slash* `\`
+
+
+
+## Comandos Básicos
 
 ### Comando `echo`
 
-El comando `echo` se utiliza para mostrar líneas de texto que son pasadas como argumento en la línea de comandos. Por ejemplo podremos poner: `echo Hola Mundo` y mostraremos "Hola Mundo" en pantalla.
+El comando `echo` se utiliza para mostrar líneas de texto que son pasadas como argumento en la línea de comandos. Por ejemplo podremos poner: `echo Hola Mundo` y mostraremos "Hola Mundo" en pantalla. 
+
+>Luego veremos con el operador de redirección que es posible colocar ese mismo mensaje como contenido de un archivo en lugar de mostrarlo en la pantalla.
+
+ 
 
 Con `echo $0` mostramos la ubicación del shell, con una imagen de Ubutu en un contenedor de Docker veo `bash`  (lo mismo veo desde WSL) y si lo hago en Git Bash veo `/usr/bin/bash`
 
@@ -152,57 +206,6 @@ sudo apt install tree
 
 
 
-## Obtener Ayuda
-
-Si queremos obtener ayuda sobre un comando en particular podemos ingresar `rm --help`
-
-
-
-## File System
-
-Así como en Windows tenemos:
-
-* C:/
-
-  * Program Files
-
-  * Windows
-
-
-
-En el File System de Linux tenemos la siguiente jerarquía:
-
-* `/` : es el directorio raíz.
-
-  * `bin`: es donde tenemos los binarios o programas. Si hacemos `ls /bin` veremos dentro programas como `echo`, `pwd`, etc.
-
-  * `boot`: es donde tenemos archivos relacionados con el booteo.
-
-  * `dev` (devices): es donde tenemos archivos necesarios para acceder a dispositivos. 
-
-  * `etc` (editable text configuration): es donde tenemos archivos de configuración.
-
-  * `home`: es donde tenemos el directorio home de cada uno de los usuarios de la máquina.
-
-  * `root`: es el home del usuario root.
-
-  * `lib` (library) es donde almacenamos librerias de dependencias.
-
-  * `var` (variable) es donde almacenamos archivos que cambian frecuentemente como ser archivos de aplicaciones, logs, etc. 
-
-  * `proc` (process) es donde almacenamos archivos que representan programas en ejecución.
-
-    
-
-> En Linux todo es una archivo incluyendo dispositivos, directorios, sockets, etc 
-
-
-
-> En  Linux utilizamos *forward slash* `/` para separar directorios y archivos mientras que en Windows utilizamos *backward slash* `\`
->
-
-
-
 ## Manipulación de Archivos y Directorios
 
 ### Comando `mkdir`
@@ -251,15 +254,97 @@ touch file1.txt file2.txt file3.txt
 
 
 
-### Comando `cat`
+### Editar Archivos con Nano
 
-El comando `cat` nos permite mostrar el contenido de un archivo
+> Si no lo tenemos instalado debemos ejecutar `apt install nano` y si no lo encuentra `apt update`
+
+Si queremos crear el archivo `file1.txt` y a la vez abrirlo en el editor de texto nano podemos hacerlo con:
 
 ```bash
-cat archivo .txt
+nano file1.txt
+```
+
+Luego realizamos los cambios y con `^X` indicamos que queremos salir por lo que luego nos preguntará si queremos guardarlo y para hacerlo ingresamos la letra `Y` y luego `ENTER` para confirmar el nombre sugerido.
+
+
+
+### Comando `cat`
+
+El comando `cat` (*concatenate*) nos permite mostrar el contenido de un archivo.
+
+```bash
+cat file.txt
+```
+
+Este comando es útil si el contenido del archivo es corto y entra en una página mientras que si es largo nos conviene utilizar el comando `more`.
+
+
+
+El nombre del comando `cat` es una abreviatura de *concatenate*, lo cual nos da una pista de que podremos concatenar más de un archivo y mostrarlos juntos en pantalla:
+
+```bash
+cat file1.txt file2.txt
 ```
 
 
+
+### Comando `more`
+
+El comando `more` es útil cuando tenemos archivos largos y no queremos mostrar todo el contenido de una sino que lo queremos de manera paginada:
+
+```
+more /etc/adduser.conf
+```
+
+Con la tecla `ENTER` podremos avanzar una línea a la vez.
+Con la tecla `SPACE` podremos avanzar una página a a la vez.
+Con la tecla `Q` podremos salir del modo de navegación.
+
+
+
+El problema con `more` es que sólo es posible hacer scroll hacia abajo, mientras que si queremos movernos en ambas direcciones debemos utilizar `less`.
+
+
+
+### Comando `less`
+
+El comando `less` viene a reemplazar a `more` y nos brinda la posibilidad de hacer scroll hacia arriba.
+
+```
+less /etc/adduser.conf
+```
+
+Con las `↑↓` navegamos el archivo hacia arriba y hacia abajo.
+Con la tecla `ENTER` podremos avanzar una línea a la vez.
+Con la tecla `SPACE` podremos avanzar una página a a la vez.
+
+
+
+> Si no lo tenemos instalado `apt install less`
+
+
+
+### Comando `head`
+
+El comando `head` nos permite mostrar las primeras líneas de un archivo.
+
+```
+head /etc/adduser.conf
+```
+
+Si queremos especificar la cantidad de líneas que queremos mostrar: `head -n 10 /etc/adduser.conf`
+
+
+
+### Comando `tail`
+
+El comando `tail` nos permite mostrar las últimas líneas de un archivo.
+
+```
+tail /etc/adduser.conf
+```
+
+Si queremos especificar la cantidad de líneas que queremos mostrar: `tail-n 10 /etc/adduser.conf`
 
 ### Comando `rm`
 
@@ -295,11 +380,171 @@ Para eliminar un directorio debemos hacerlo con `rm -r test` con lo cual elimina
 
 
 
-## Editor Nano
+## Redirección
 
-Si queremos crear el archivo `file1.txt` y a la vez abrirlo en el editor de texto nano podemos hacerlo con:
+En Linux tenemos el concepto de *standard input/output*, donde *standard input* representa el teclado y *standard output* represente la pantalla. Se conoce como redirección al hecho de cambiar la fuente de entrada o de salida.
+
+
+
+Cuando ejecutamos el comando `cat file1.txt`, este programa lee datos del archivo y los imprime en *standard output* es decir en la pantalla. Utilizando el operador de redirección del *standard output* `>`  podemos colocar el contenido leído en otro archivo:
 
 ```bash
-nano file1.txt
+cat file1.txt > file2.txt
 ```
+
+
+
+Si queremos concatenar dos archivos en un archivo resultante:
+
+```
+cat file1.txt file2.txt > combined.txt
+```
+
+
+
+Esto no está liimitado a usarlo con `cat` sino que podremos utilizarlo en casi cualquier comando:
+
+```bash
+echo hello > hello.txt
+```
+
+
+
+También podremos generar un archivo a partir de una lista de archivos:
+
+```bash
+ls -l /etc > list.txt
+```
+
+
+
+> De la misma manera que tenemos el operador de redirección del *standard output* `>` tenemos el operador de redirección del standard input `<`.
+
+
+
+## Búsqueda de Texto
+
+### Comando `grep`
+
+El comando `grep` (*global regular expression print*) nos permite buscar texto en un archivo, por ejemplo si queremos buscar la cadena "hello" en el archivo `file.txt`:
+
+```
+grep hello file.txt
+```
+
+
+
+Recordemos que como todo en Linux la búsqueda es case sensitive, para hacerlo case insentitive debemos agregar `-i`
+
+```bash
+grep -i hello file.txt
+```
+
+```bash
+grep -i root /etc/passwd
+```
+
+
+
+Búsqueda en múltiples archivos:
+
+* Podemos especificarlos todos:
+
+```bash
+grep -i hello file1.txt file2.txt
+```
+
+
+
+* Podemos especificar un patrón:
+
+```bash
+grep -i hello file*
+```
+
+
+
+Búsqueda texto en los archivos de un determinado directorio, pero para eso debemos usar también la opción `-r` de recursiva (para hacer una búsqueda en el directorio y todos su subdirectorios):
+
+```bash
+grep -i -r hello /etc
+```
+
+O lo que es lo mismo combinando opciones:
+
+```
+grep -ir hello /etc
+```
+
+
+
+Si queremos buscar en el directorio actual:
+
+```
+grep -ir hello .
+```
+
+
+
+## Búsqueda de Archivos y Directorio
+
+### Comando `find`
+
+Con el comando `find`  nos permite buscar archivos y directorios. 
+
+Si lo utilizamos sin argumentos podremos mostrar todos los archivos y directorios en el directorio actual.
+
+```bash
+find
+```
+
+
+
+Si queremos buscar en un directorio en particular se lo pasamos como argumento:
+
+```bash
+find /etc
+```
+
+#### Filtros
+
+* Si queremos filtrar sólo los directorios podemos agregarle la opción `-type d`
+
+```
+find -type d
+```
+
+
+
+* Si queremos filtrar sólo los archivos podemos agregarle la opción `-type f`
+
+```
+find -type f
+```
+
+
+
+* Si queremos filtrar todos los archivos cuyo nombre comienza con "f"
+
+```
+find -type f -name "f*"
+```
+
+
+
+* Si queremos filtrar los archivos cuyo nombre comienza con "f" o con "F"
+
+```
+find -type f -iname "f*"
+```
+
+
+
+* Si queremos filtrar todos los archivos `.py` y grabar un archivo de texto con ese listado
+
+```
+find / -type f -name "*.py" > python-files.txt
+```
+
+> Notar que en la búsqueda queremos comenzar por el *root directory*.
 
