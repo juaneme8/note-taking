@@ -548,3 +548,178 @@ find / -type f -name "*.py" > python-files.txt
 
 > Notar que en la búsqueda queremos comenzar por el *root directory*.
 
+
+
+## Encadenar Comandos
+
+### Operador semi-colon `;`
+
+Es posible encadenar comandos separándolos por `;` y colocándolos en la misma línea y recién después del último presionar `ENTER`.
+
+```bash
+mkdir test ; cd test ; echo hello
+```
+
+Suponiendo que ya tenemos un directorio `test` nos tiraría error el primer comando pero los otros dos se ejecutarían igualmente. 
+
+### Operador AND `&&`
+
+El **operador AND** nos permite ejecutar varios comandos encadenados de izquierda a derecha deteniéndose cuando uno falle.
+
+En este caso suponiendo que ya tenemos un directorio `test`  como va a fallar el primer comando no se ejecutarán los otros dos.
+
+```bash
+mkdir test && cd test && echo hello
+```
+
+
+
+### Operador OR `||`
+
+El **operador OR** nos permite que si el comando de la izquierda falla se ejecute el de la derecha y en caso de que el de la izquierda no falle el de la derecha no se ejecute.
+
+```bash
+mkdir test || echo "El directorio ya existe"
+```
+
+
+
+### Operador Pipe `|`
+
+El **operador pipe** nos permite tomar la salida de un comando y enviarla a otro comando. 
+
+Anteriormente hemos utilizado el comando `less` para mostrar el contenido de un archivo de manera paginada por ejemplo `less /etc/adduser.conf` pero supongamos que ahora queremos listar los archivos de la carpeta `/bin` de manera paginada. Para eso haciendo uso del **operador pipe** podríamos hacer:
+
+```bash
+ls /bin | less
+```
+
+
+
+De manera similar si queremos motrar los primeros resultados:
+
+```
+ls /bin | head -n 5
+```
+
+
+
+## Comando Multi-línea
+
+Es posible dividir un comando largo en múltiples líneas, de manera tal de evitar tener que hacer un scroll horizontal y favorecer la legibilidad.
+
+En lugar de ingresar:
+
+```
+mkdir hello; cd hello; echo done
+```
+
+
+
+Ingresamos
+
+```
+root@2f75...: ~# mkdir hello;\
+```
+
+Cuando presionamos `ENTER` veremos que el prompt pasa a ser `>`
+
+```
+> cd hello;\
+```
+
+```
+> echo done
+```
+
+
+
+## Variables de Entorno
+
+Las **variables de entorno** nos permiten almacenar configuraciones que luego serán leídas por nuestras aplicaciones.
+
+### Comando `printenv`
+
+* Para listar todas las variables de entorno disponibles en esta máquina.
+
+```bash
+printenv
+```
+
+
+
+```bash
+HOSTNAME=17fd53d105f6
+PWD=/
+HOME=/root
+
+...
+
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+```
+
+
+
+La variable de entorno `PATH` es una lista de directorios separados por `:` y es en esos directorios en los cuales el sistema operativo buscará los programas que intentemos ejecutar.
+
+Cuando intentamos ejecutar un programa y nos aparece un mensaje indicando que no fue encontrado, a pesar de que lo tenemos instalado esto sucede debido a que la ubicación de este programa no está en dicha variable.
+
+
+
+* Para conocer el valor de una variable de entorno en particular podremos hacerlo de dos formas:
+
+```bash
+printenv PATH
+```
+
+```
+echo $PATH
+```
+
+
+
+* Para setear una variable de entorno en la sesión actual de la terminal, por lo que si cerramos y abrimos una nueva, no existirá.
+
+```
+export DB_USER=mosh
+```
+
+> Si estamos corriendo un Linux con Docker podremos cerrar la sesión actual de la terminal con `exit` y con `docker ps -a` veremos el proceso detenido. Si queremos reiniciarlo podemos hacerlo con `docker start -i 2f7` siendo `2f7` las primeras tres letras del contenedor.
+
+
+
+* Para setear una variable de entorno de manera persistente debemos hacerlo en `.bashrc` que encontramos en el root directory.
+
+```bash
+cd ~
+nano .bashrc
+```
+
+
+
+Podemos editarlo con nano o hacer uso de una redirección:
+
+```bash
+echo DB_USER=mosh > .bashrc
+```
+
+Pero si hiciéramos esto estaríamos reemplazando la totalidad del archivo con el nuevo contenido, mientras que lo que queremos es agregar nuevo contenido, por lo que debemos utilizar `>>`
+
+```bash
+echo DB_USER=mosh >> .bashrc
+```
+
+
+
+> No debemos almacenar información sensible en variables de entorno, ya que estará almacenada en texto plano y podría ser accedida por cualquiera con acceso a la máquina.
+
+
+
+Luego con `cat .bashrc` podemos verificar que los cambios en el archivo se hicieron exitosamente. Sin embargo estos serán cargados recién en la próxima sesión de la terminal, dado que el archivo `.bashrc` se carga sólo al iniciar. Por lo que si hacemos `echo $DB_USER` no nos devolverá nada hasta que iniciemos otra. 
+
+
+
+### Comando `source`
+
+Si bien para obtener los nuevos valores del archivo `.bashrc` podemos ejecutar `exit` y luego `docker start -i 2f7` otra opción es hacerlo con el comando `source .bashrc` desde el directorio home (`~`) o bien ejecutar `source ~/.bashrc` desde cualquier ubicación.
+

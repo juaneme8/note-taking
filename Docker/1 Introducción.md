@@ -1,6 +1,6 @@
 # Docker
 
-> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 21 COMPLETO)
+> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 22 COMPLETO)
 
 ## ¿Qué es Docker?
 
@@ -153,7 +153,13 @@ Luego podremos publicar esta imagen en Docker Hub de modo tal que cualquier pued
 
 ## Linux
 
-Docker fue construida utilizando conceptos básicos de Linux es por eso que es importante conocer los comandos básicos de Linux para aumentar la productividad y simplificar la búsqueda de errores
+Docker fue construida utilizando conceptos básicos de Linux es por eso que es importante conocer los comandos elementales de Linux para aumentar la productividad y simplificar la búsqueda de errores
+
+
+
+### Comandos
+
+> Lo relacionado a comandos de Linux se unificó con los apuntes de Terminal y Línea de Comandos.
 
 
 
@@ -163,7 +169,9 @@ Linux es software open-source y es por eso que muchos individuos y comunidades h
 
 
 
-En hub.docker.com podemos encontrar la imagen `ubuntu` y con `docker pull ubuntu` podríamos obtenerla. Otra forma de hacerlo con el *shortcut* `docker run ubuntu` que hace que si tenemos la imagen Docker iniciará un contenedor con esta imagen y sino la pulleará detrás de escenas y luego iniciará un contenedor.
+## Iniciar Contenedor
+
+En [hub.docker.com](hub.docker.com) podemos encontrar la imagen `ubuntu` y con `docker pull ubuntu` podríamos obtenerla. Otra forma de hacerlo con el *shortcut* `docker run ubuntu` que hace que si tenemos la imagen Docker iniciará un contenedor con esta imagen y sino la pulleará detrás de escenas y luego iniciará un contenedor.
 
 A continuacón como no interactuamos con el contenedor, este se detendrá. Esto lo podemos verificar con el comando `docker ps`  con el cual podremos ver la lista de procesos o contenedores en ejecución que en nuestro caso no entrega nada pues no tenemos nada corriendo. Mientras que con `docker ps -a` veremos todos los procesos incluso los contenedores que se detuvieron y en ese caso sí vemos el contenedor en cuestión.
 
@@ -185,40 +193,9 @@ En el shell prompt podemos ver `root@5aacf34bd61d:` donde `root` es el usuario l
 
 
 
-### Comandos
-
-> Lo relacionado a comandos de Linux se unificó con los apuntes de Terminal y Línea de Comandos.
+Si queremos cerrar la sesión de la terminal podemos ejecutar `exit` y luego con `docker ps -a` veremos el proceso detenido. Si queremos reiniciarlo podemos hacerlo con `docker start -i 2f7` siendo `2f7` las primeras tres letras del contenedor.
 
 
 
-### Manejador de Paquetes Ubuntu
+> Podremos escribir las primeras dos o tres letras a menos que haya un contenedor que tenga las mismas, en cuyo caso tendremos que escribir mas caracteres.
 
-En la actualidad los sistemas operativos o plataformas de desarrollo vienen con manejadores de paquetes como npm, yarn, pip, NuGet, etc. En Ubuntu contamos con `apt` (*advance package tool*).
-
-* apt: nos muestra una lista de subcomandos que podemos ejecutar
-* apt list: nos entrega un listado de los nombre de los paquetes.
-* apt search
-* apt show
-* ....
-
-Si bien `apt` es más nuevo, en muchos tutoriales veremos el uso de otro manejador de paquetes llamado `apt-get`.
-
-
-
-#### Instalar Paquete
-
-Si queremos instalar el editor de texto **nano** podemos hacerlo con `apt install nano` y procederá a buscarlo en la base de datos de paquetes y nos dirá que no lo encuentra. 
-
-```bash
-E: Unable to locate package nano
-```
-
- Con `apt list` veremos los paquetes disponibles son pocos por lo que debemos actualizar la base de datos de paquetes y para ello ejecutamos `apt update`.  Si luego de eso ejecutamos `apt list` ya la cantidad de paquetes disponibles veremos que será mucho mayor.
-
-Siempre antes de instalar un paquete debemos ejecutar `apt update` y luego instalamos el paquete deseado.
-
-
-
-#### Eliminar Paquete
-
-Si queremos eliminar el paquete **nano** podemos hacerlo con el comando `apt remove nano`
