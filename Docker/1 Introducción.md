@@ -1,6 +1,6 @@
 # Docker
 
-> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 22 COMPLETO)
+> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 23 COMPLETO)
 
 ## ¿Qué es Docker?
 

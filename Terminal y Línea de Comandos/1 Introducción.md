@@ -723,3 +723,95 @@ Luego con `cat .bashrc` podemos verificar que los cambios en el archivo se hicie
 
 Si bien para obtener los nuevos valores del archivo `.bashrc` podemos ejecutar `exit` y luego `docker start -i 2f7` otra opción es hacerlo con el comando `source .bashrc` desde el directorio home (`~`) o bien ejecutar `source ~/.bashrc` desde cualquier ubicación.
 
+
+
+## Procesos
+
+Los procesos son instancias de un programa en ejecución.
+
+
+
+### Comando `ps`
+
+El comando `ps` nos permite ver todas los procesos en ejecución.
+
+```bash
+  PID TTY          TIME CMD
+    1 pts/0    00:00:00 bash
+    9 pts/0    00:00:00 ps
+```
+
+En la columna **PID** vemos el identificador único de cada proceso.
+
+En la columna **TTY** que significa *teletypewriter*  vemos una referencia al tipo de terminal en la que está logueado el usuario. Vemos `pts/0` donde `pts` significa  *pseudo terminal slave* y el `0` hace referencia a la primera ventana de la terminal. Si abrimos otra ventana y ejecutamos el mismo comando veremos `pts/1`
+
+En la columna **CMD** con PID 9 vemos un proceso `ps` que solo existió mientras preparamos ese comando para mostrar la salida con esos datos en pantalla, es por esto que si lo volvemos a ejecutar veremos nuevamente a `ps` pero con un nuevo PID.
+
+Por otra parte `bash` es el programa con el cual interactuamos, que toma nuestros comandos y se los pasa a Linux para que sean ejecutados.
+
+En la columna **TIME** vemos la cantidad de tiempo de CPU consumido por el proceso, que en nuestro caso al ser muy livianos es prácticamente 0. En ocasiones notaremos que el sistema se vuelve lento a causa de un proceso y debemos proceder a matarlo.
+
+Por ejemplo si ejecutamos `sleep 100` durante 100 segundos estará el prompt durmiendo y luego de ese tiempo volverá a estar activo. Si queremos en cambio enviar ese proceso al *background* para poder ejecutar otros comandos mientras tanto, ejecutamos `sleep 100 &`. Si ejecuutamos `ps` veremos ese proceso ya que bajo la columna `CMD` dirá `sleep`.
+
+
+
+### Comando `kill`
+
+El comando `kill` nos permite eliminar un proceso determinado. Por ejemplo suponiendo que con `ps` obtenemos la siguiente salida:
+
+```bash
+  PID TTY          TIME CMD
+    1 pts/0    00:00:00 bash
+   15 pts/0    00:00:00 sleep
+   17 pts/0    00:00:00 ps
+```
+
+Si queremos eliminar el proceso `sleep` tendremos que hacer
+
+```bash
+kill 15
+```
+
+
+
+## Manejo de Usuarios
+
+### Comando `useradd`
+
+El comando `useradd` nos permite agregar un nuevo usuario  
+
+Si ingresamos `useradd` veremos las opciones con las cuales podemos utilizar este comando. 
+
+> Veremos que existe una forma corta (con un guion) y una forma larga (con dos guiones) de ingresar estas opciones, por ejemplo podremos crear un usuario junto con su directorio home con `useradd -m` o con `useradd --create-home`
+
+
+
+Si queremos crear un usuario john y su directorio home:
+
+```
+useradd -m john
+```
+
+
+
+Podremos constatar esta acción revisando el archivo de configuración que contiene información de las cuentas de usuario: `cat /etc/passwd`, que nos entregará entre otras cosas lo siguiente:
+
+```
+john:x:1000:1000::/home/john:/bin/sh
+```
+
+Veremos que tenemos múltiples campos separados por `:`.
+
+Primero tenemos `john` que es el nombre de usuario, luego `x` que significa que el password está almacenado en otro lugar, luego `1000` es el userId, luego `1000` es el groupId, luego `/home/john` es el directorio home de este usuario y por último `/bin/sh` es el programa de shell utilizado. 
+
+El programa`/bin/sh` hace referencia al programa Shell original (que luego fuera mejorado por Bash). Si quiséramos utilizar Bash en lugar Shell deberíamos utilizar el comando `usermod`
+
+### Comando `usermod`
+
+El comando `usermod` nos permite modificar un usuario existente.
+
+
+
+### Comando `userdel`
+
+El comando `userdel` nos permite eliminar un usuario.
