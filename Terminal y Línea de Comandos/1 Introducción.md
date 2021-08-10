@@ -794,7 +794,7 @@ useradd -m john
 
 
 
-Podremos constatar esta acción revisando el archivo de configuración que contiene información de las cuentas de usuario: `cat /etc/passwd`, que nos entregará entre otras cosas lo siguiente:
+Podremos constatar la creación de este usuario revisando el archivo de configuración que contiene información de las cuentas de usuario: `cat /etc/passwd`, que nos entregará entre otras cosas lo siguiente:
 
 ```
 john:x:1000:1000::/home/john:/bin/sh
@@ -802,16 +802,161 @@ john:x:1000:1000::/home/john:/bin/sh
 
 Veremos que tenemos múltiples campos separados por `:`.
 
-Primero tenemos `john` que es el nombre de usuario, luego `x` que significa que el password está almacenado en otro lugar, luego `1000` es el userId, luego `1000` es el groupId, luego `/home/john` es el directorio home de este usuario y por último `/bin/sh` es el programa de shell utilizado. 
+Primero tenemos `john` que es el nombre de usuario, luego `x` que significa que el password está almacenado en otro lugar, luego `1000` es el userId, luego `1000` es el groupId, luego `/home/john` es el directorio home de este usuario y por último `/bin/sh` es el programa Shell (el original, que luego fuera mejorado por Bash) que será utilizado cuando el usuario se loguea. 
 
-El programa`/bin/sh` hace referencia al programa Shell original (que luego fuera mejorado por Bash). Si quiséramos utilizar Bash en lugar Shell deberíamos utilizar el comando `usermod`
+
 
 ### Comando `usermod`
 
 El comando `usermod` nos permite modificar un usuario existente.
+
+Si queremos que al loguearnos en lugar de utilizar Shell utilicemos Bash, deberíamos utilizar el comando `usermod`. Nuevamente ingresando `usermod` veremos las opciones con las cuales podemos utilizar este comando y para lograr lo dicho anteriormente debemos usar `usermod -s SHELL` o `usermod --shell SHELL`
+
+```
+usermod -s /bin/bash john
+```
+
+Nuevamente con `cat /etc/passwd` veremos que los cambios fueron aplicados.
+
+
+
+### Loguin con Usuario
+
+Los **passwords** son almacenados encriptados en `/etc/shadow` archivo que podremos abrir con `cat /etc/shadow` pero sólo desde el root user.
+
+
+
+Si queremos loguearnos como el usuario recién creado abrimos una nueva ventana de la terminal y con `docker ps` podremos ver los contenedores en ejecución. Luego suponiendo que el id `17fd53d105f6` y para correr una sesión de bash ejecutamos `docker exec -it 17f bash`  con lo que nos loguearemos también como root. Como queremos loguearnos como `john` debemos primero cerrar la sesión con `exit` y ejecutar `docker exec -it -u john 17f bash` 
+
+* Si ejecutamos  `whoami` obtendremos `john`
+* Si ejecutamos `cd ~` y luego `pwd` veremos `/home/john`
+* En el prompt veremos un signo `$` en lugar del `#` lo cual da cuenta que somos un usuario normal y no root. Es por esto que si queremos ejecutar `cat /etc/shadow` obtendremos **Permission denied**. 
 
 
 
 ### Comando `userdel`
 
 El comando `userdel` nos permite eliminar un usuario.
+
+```bash
+userdel john
+```
+
+
+
+### Comando `adduser`
+
+Hasta ahora estuvimos trabajando con `useradd` que es la API original (todos los comandos comienzan con `user`), mientras que `adduser` es un script de perl más interactivo que usa `useradd` *under the hood*. 
+
+Este comando debemos ejecutarlo desde root.
+
+Si ejecutamos `adduser bob` veremos en pantalla que se crea el usuario `bob`, luego se crea un grupo `bob` y por último se inserta el usuario a ese grupo. También creará un directorio para dicho usuario `/home/bob`, copiará archivos de configuración y nos dará la posibilidad de ingresar un password y otros datos del usuario. 
+
+Decimos que es más interactivo por todos los datos que nos solicita y como con Docker normalmente vamos a deployar nuestras aplicaciones no vamos a querer hacer uso de dicha interactividad y usaremos `useradd`.
+
+
+
+## Manejo de Grupos
+
+El uso de grupos posibilita que todos los miembros de dichos grupos tengan los mismos permisos.
+
+Cada usuario de Linux tiene un **grupo primario** (creado automáticamente al crear el usuario con el mismo nombre del usuario) y opcionalmente puede tener uno o más **grupos secundarios**. 
+
+
+
+Como cada archivo tiene un dueño y un grupo, si no existiera este grupo primario y un usuario miembro de varios grupos crea un archivo, sería imposible saber a qué grupo pertenece el archivo. 
+
+
+
+De manera similar a lo visto para el manejo de usuarios, para el manejo de grupos tenemos tres comandos `groupadd`, `groupmod`y `groupdel`.
+
+### Comando `groupadd`
+
+El comando `groupadd`nos permite agregar un grupo.
+
+```bash
+groupadd developers
+```
+
+Los grupos son almacenados en un archivo que podremos visualizar con `cat /etc/group` que nos entregará una lista donde veremos `developers:x:1001:` siendo `1001` el id del grupo.
+
+
+
+Si queremos agregar un usuario a un grupo podemos hacerlo con `usermod` con `-G` que nos permitirá establecerle grupos suplementarios o con `-g` para establecerle el grupo primario. Por ejemplo si queremos agregar el usuario `john` al grupo `developers`:
+
+```bash
+usermod -G developers john
+```
+
+
+
+Si revisamos en el archivo `/etc/passwd` lo relativo al usuario `john` como hemos cambiado los grupos secundarios y allí sólo almacenamos el primario, no veremos nada nuevo:
+
+* `cat /etc/passwd | grep john`
+* `grep john /etc/passwd`
+
+
+
+Por lo que si queremos ver los grupos a los que pertenece un usuario (tanto primario como secuendarios) podemos ejecutar:
+
+```bash
+groups john
+```
+
+
+
+### Comando `groupmod`
+
+El comando `groupmod`nos permite modificar un grupo.
+
+### Comando `groupdel`
+
+El comando `groupdel`nos permite eliminar un grup o.
+
+
+
+## Shell Scrips
+
+Los archivos terminados con `.sh` reciben el nombre de Shell Scripts y en ellos podemos ingresar cualquiera de los comandos estudiados hasta ahora.
+
+Por ejemplo si desde `/home` escribimos`echo echo Hello > deploy.sh` **(está bien tener dos veces seguidas el comando echo)**, vamos a crear un archivo `deploy.sh` y adentro de el dirá `echo Hello`
+
+Para ejecutar el script debemos ingresar `./deploy.sh` pero nos aparecerá el mensaje:
+
+```bash
+bash: ./deploy.sh: Permission denied
+```
+
+
+
+## Permisos de Archivos
+
+Si queremos obtener los permisos de un archivo debemos ejecutar `ls -l`.
+
+Suponiendo que estamos en `/home`  en la primera columna veremos:
+
+```bash
+-rw-r--r-- 1 root root   11 Aug 10 17:23 deploy.sh
+drwxr-xr-x 2 john john 4096 Aug  9 11:40 john
+```
+
+* Si la primera letra es una `d` es un directorio y si es un guión `-` es un archivo.
+* Luego tenemos 9 letras divididas en 3 grupos de 3 letras. En cada grupo tenemos permisos de lectura `r`, de escritura `w` y de ejecución `x`.  Si tenemos `rw-` significa que tenemos permiso de lectura, de escritura pero no de ejecución.  Los directorios por default tienen permiso de ejecución para poder dirigirnos a ellos utilizando el comando `cd`, es decir `cd directorio`.
+* El primer grupo de letras representa los permisos para el usuario dueño del archivo, el segundo para el grupo dueño del archivo y el tercero para todos los demás.
+
+
+
+### Comando `chmod`
+
+El comando `chmod`nos permite cambiar los permisos de un archivo. Podemos cambiar los permisos relativos al usuario `u`, al grupo `g` o a todos los demás `o`:
+
+```
+chmod u u+x deploy.sh
+```
+
+Ahora veremos que si hacemos `ls -l` el archivo cambió a color verde pues ahora es ejecutable.
+
+> Si quisiéramos en cambio eliminar los permisos de ejecución `chmod u u-x deploy.sh`
+>
+> Si intetamos ejecutarlo desde otro usuario obtendremos **Permission denied**
+
