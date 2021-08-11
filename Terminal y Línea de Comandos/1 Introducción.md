@@ -749,7 +749,7 @@ Por otra parte `bash` es el programa con el cual interactuamos, que toma nuestro
 
 En la columna **TIME** vemos la cantidad de tiempo de CPU consumido por el proceso, que en nuestro caso al ser muy livianos es prácticamente 0. En ocasiones notaremos que el sistema se vuelve lento a causa de un proceso y debemos proceder a matarlo.
 
-Por ejemplo si ejecutamos `sleep 100` durante 100 segundos estará el prompt durmiendo y luego de ese tiempo volverá a estar activo. Si queremos en cambio enviar ese proceso al *background* para poder ejecutar otros comandos mientras tanto, ejecutamos `sleep 100 &`. Si ejecuutamos `ps` veremos ese proceso ya que bajo la columna `CMD` dirá `sleep`.
+Por ejemplo si ejecutamos `sleep 100` durante 100 segundos estará el prompt durmiendo y luego de ese tiempo volverá a estar activo. Si queremos en cambio enviar ese proceso al *background* para poder ejecutar otros comandos mientras tanto, ejecutamos `sleep 100 &`. Si ejecutamos `ps` veremos ese proceso ya que bajo la columna `CMD` dirá `sleep`.
 
 
 
@@ -780,7 +780,7 @@ El comando `useradd` nos permite agregar un nuevo usuario
 
 Si ingresamos `useradd` veremos las opciones con las cuales podemos utilizar este comando. 
 
-> Veremos que existe una forma corta (con un guion) y una forma larga (con dos guiones) de ingresar estas opciones, por ejemplo podremos crear un usuario junto con su directorio home con `useradd -m` o con `useradd --create-home`
+> Veremos que existe una forma corta (con un guion) y una forma larga (con dos guiones) de ingresar estas opciones, por ejemplo podremos crear un usuario junto con su directorio home con `useradd -m nombre` o con `useradd --create-home nombre`
 
 
 
@@ -808,7 +808,7 @@ Primero tenemos `john` que es el nombre de usuario, luego `x` que significa que 
 
 El comando `usermod` nos permite modificar un usuario existente.
 
-Si queremos que al loguearnos en lugar de utilizar Shell utilicemos Bash, deberíamos utilizar el comando `usermod`. Nuevamente ingresando `usermod` veremos las opciones con las cuales podemos utilizar este comando y para lograr lo dicho anteriormente debemos usar `usermod -s SHELL` o `usermod --shell SHELL`
+Si queremos que al loguearnos en lugar de utilizar Shell utilicemos Bash, deberíamos utilizar el comando `usermod` para generar este cambio. Nuevamente ingresando `usermod` veremos las opciones con las cuales podemos utilizar este comando y para lograr lo dicho anteriormente debemos usar `usermod -s /bin/xxx usuario` o `usermod --shell /bin/xxx usuario`
 
 ```
 usermod -s /bin/bash john
@@ -816,19 +816,7 @@ usermod -s /bin/bash john
 
 Nuevamente con `cat /etc/passwd` veremos que los cambios fueron aplicados.
 
-
-
-### Loguin con Usuario
-
-Los **passwords** son almacenados encriptados en `/etc/shadow` archivo que podremos abrir con `cat /etc/shadow` pero sólo desde el root user.
-
-
-
-Si queremos loguearnos como el usuario recién creado abrimos una nueva ventana de la terminal y con `docker ps` podremos ver los contenedores en ejecución. Luego suponiendo que el id `17fd53d105f6` y para correr una sesión de bash ejecutamos `docker exec -it 17f bash`  con lo que nos loguearemos también como root. Como queremos loguearnos como `john` debemos primero cerrar la sesión con `exit` y ejecutar `docker exec -it -u john 17f bash` 
-
-* Si ejecutamos  `whoami` obtendremos `john`
-* Si ejecutamos `cd ~` y luego `pwd` veremos `/home/john`
-* En el prompt veremos un signo `$` en lugar del `#` lo cual da cuenta que somos un usuario normal y no root. Es por esto que si queremos ejecutar `cat /etc/shadow` obtendremos **Permission denied**. 
+Los **passwords** son almacenados encriptados en `/etc/shadow` archivo que podremos abrir con `cat /etc/shadow` pero sólo desde el **root** user.
 
 
 
@@ -844,7 +832,7 @@ userdel john
 
 ### Comando `adduser`
 
-Hasta ahora estuvimos trabajando con `useradd` que es la API original (todos los comandos comienzan con `user`), mientras que `adduser` es un script de perl más interactivo que usa `useradd` *under the hood*. 
+Hasta ahora estuvimos trabajando con `useradd` que es la API original (todos los comandos comienzan con `user`), mientras que `adduser` es un *script de perl* más interactivo que usa `useradd` *under the hood*. 
 
 Este comando debemos ejecutarlo desde root.
 
@@ -876,7 +864,9 @@ Los grupos son almacenados en un archivo que podremos visualizar con `cat /etc/g
 
 
 
-Si queremos agregar un usuario a un grupo podemos hacerlo con `usermod` con `-G` que nos permitirá establecerle grupos suplementarios o con `-g` para establecerle el grupo primario. Por ejemplo si queremos agregar el usuario `john` al grupo `developers`:
+Si queremos agregar un usuario a un grupo podemos hacerlo con `usermod` con `-G` para grupos suplementarios o con `-g` para establecerle el grupo primario.
+
+Por ejemplo si queremos agregar el usuario `john` al grupo `developers` (desde el usuario `root`)
 
 ```bash
 usermod -G developers john

@@ -199,3 +199,13 @@ Si queremos cerrar la sesión de la terminal podemos ejecutar `exit` y luego con
 
 > Podremos escribir las primeras dos o tres letras a menos que haya un contenedor que tenga las mismas, en cuyo caso tendremos que escribir mas caracteres.
 
+
+
+## Loguin con Usuario
+
+Si estamos logueados con root y queremos loguearnos como un usuario normal abrimos una nueva ventana de la terminal y con `docker ps` podremos ver los contenedores en ejecución. Luego suponiendo que el id `17fd53d105f6` y para correr una sesión de bash ejecutamos `docker exec -it 17f bash`  con lo que nos loguearemos también como **root**. Como queremos loguearnos como `john` debemos primero cerrar la sesión con `exit` y ejecutar `docker exec -it -u john 17f bash` 
+
+* Si ejecutamos  `whoami` obtendremos `john`.
+* Si ejecutamos `cd ~` y luego `pwd` veremos `/home/john`.
+* En el prompt veremos un signo `$` en lugar del `#` lo cual da cuenta que somos un usuario normal y no root. Es por esto que si queremos ejecutar `cat /etc/shadow` obtendremos **Permission denied**. 
+
