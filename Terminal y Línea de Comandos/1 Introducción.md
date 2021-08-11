@@ -1,6 +1,5 @@
-VIDEOS 2 COMPLETO
 # Introducción a la terminal y Línea de Comandos
-> Basado en el Curso de Platzi de Enrique Devars
+> Basado en el Curso de Platzi de Enrique Devars - VIDEOS 2 COMPLETO
 >
 > Agregados sobre comandos de Linux de Ultimate Docker Course de Mosh Hamedani
 
@@ -11,7 +10,7 @@ La terminal se caracteriza por brindarnos **flexibilidad** para realizar todo ti
 La terminal es una **interfaz gráfica** que muestra el *prompt* y simula una **línea de comandos** o **shell**. La **shell** es un programa que en función de los comandos que le pasamos le indica al **sistema operativo** la acción que debe realizar.
 
 Existen distintos tipos de **shells**:
-* Bash Shell (el curso es basado en esta shell y utilizando Arch Linux)
+* Bash Shell (el curso de Devars es basado en esta shell y utilizando la distribución de Linux liviana Arch Linux)
 * Z Shell (presente en macOS de 2019 en adelante, casi los mismos comandos que Bash Shell)
 * PowerShell (shell de windows con algunos comandos diferentes)
 
@@ -20,7 +19,7 @@ Existen distintos tipos de **shells**:
 > En caso de trabajar con Windows para utilizar Bash Shell es posible utilizar **Windows Subsystem for Linux (WSL)** 
 
 ## Instalación WSL
-1. Ir a Add or remove programs -> Optional features --> More Windows Features y agregar **Windows Subsystem for Linux** y presionar OK. Luego nos aparecerá un cartel de actualización y nos pedirá reiniciar.
+1. Ir a **Add or remove programs -> Optional features --> More Windows Features** y agregar **Windows Subsystem for Linux** y presionar OK. Luego nos aparecerá un cartel de actualización y nos pedirá reiniciar.
 2. Luego de reiniciar ir nuevamente a la misma pantalla y esta vez elegir **Virtual Machine Platform** nuevamente nos pedirá reiniciar.
 3. Por último ir a Microsoft Store y descargar Ubuntu 20.04 LTS.
 4. Asignar un nombre de usuario y contraseña.
@@ -39,7 +38,9 @@ Si estamos trabajando en un sistema Linux (o en Windows utilizando WSL) tendremo
 4. como hijo de `usr` tendremos `lib`
 
 ## Primeros Pasos
-Cuando abrimos la terminal nos encontramos en `~` que se conoce como *virgulilla* o *tilde* en inglés (`ALT+126`) y hace referencia al directorio personal del usuario que está logueado, por lo que si está logueado el usuario foo y hacemos `pwd` será `home/foo`. Si estamos en Windows con Git Bash (Linux emulado) será `/c/Users/foo`. Si estamos en el usuario root será `/root`
+Cuando abrimos la terminal nos encontramos en `~` que se conoce como *virgulilla* o *tilde* en inglés (`ALT+126`) y hace referencia al directorio personal del usuario que está logueado. Esto significa que si está logueado el usuario `foo` y hacemos `pwd` será `home/foo` mientras que si está logueado el usuario `root` será `/root`. 
+
+> En Windows con Git Bash (Linux emulado) si estamos en `~` con el usuario `foo` obtendremos `/c/Users/foo`. 
 
 
 
@@ -103,13 +104,13 @@ El comando `echo` se utiliza para mostrar líneas de texto que son pasadas como 
 
  
 
-Con `echo $0` mostramos la ubicación del shell, con una imagen de Ubutu en un contenedor de Docker veo `bash`  (lo mismo veo desde WSL) y si lo hago en Git Bash veo `/usr/bin/bash`
+Con `echo $0` mostramos la ubicación del shell, con una imagen de Ubuntu en un contenedor de Docker veo `bash`  (lo mismo veo desde WSL) y si lo hago en Git Bash veo `/usr/bin/bash`
 
 > El nombre bash es un acrónico de **Bourne Again Shell**, ya que es una versión mejorada de Bourne shell y además parafraseando la noción de "born again".
 
 
 
-### Comando  `whoiam`
+### Comando  `whoami`
 
 El comando `whoami` nos permite ver cual es el usuario que está ejecutando la terminal, en nuestro caso veremos `root`.
 
@@ -148,12 +149,11 @@ Podemos utilizarlos con  **rutas relativas** (por ejemplo con `cd boot`) o **rut
 
 > **Operadores de ruta relativa**: Podemos utilizar `.` para referirnos al directorio actual y  `..` para referinos al directorio padre. Podemos utilizar `cd ..` para navegar al directorio padre. 
 
-Si queremos navegar a `home` (`~`) bastará con poner `cd` sin parámetros.
+* Si queremos navegar a `home` (`~`) bastará con poner `cd` sin parámetros.
+* Si queremos navegar a la raíz (`/`) debemos poner `cd /`
 
 
 > A diferencia de lo que ocurre cuando usamos Windows, debemos colocar un espacio entre `cd` y `..`.
->
-> Si queremos **navegar al disco** c debemos poner `cd /c` (de la misma manera que en Windows pondríamos `cd C:`
 >
 > Linux es un sistema operativo **key sensitive** y los comandos debemos escribirlos en minúsculas. Por ejemplo no será lo mismo `Echo $0` que `echo $0`.  Los nombres de las carpeta también son **case sensitive**, esto significa que si tengo una carpeta llamada `carpeta` y otra llamada `Carpeta` y son dos distintas, mientras que en Windows si intento crear la segunda me dirá que ya existe una carpeta con ese nombre.
 >
@@ -182,7 +182,7 @@ Si queremos obtener un listado de todos los comandos ingresados podemos escribir
 ```
 Si quisiéramos ejecutar el comando `clear` podríamos poner `!16`
 
-Esto lo hace gracias a un archivo llamado `history` (o `.bash.history` si trabajamos con Git Bash) y ubicado en `home`
+Esto lo hace gracias a un archivo llamado `.bash_history` en el directorio home del usuario.
 
 
 
@@ -384,8 +384,6 @@ Para eliminar un directorio debemos hacerlo con `rm -r test` con lo cual elimina
 
 En Linux tenemos el concepto de *standard input/output*, donde *standard input* representa el teclado y *standard output* represente la pantalla. Se conoce como redirección al hecho de cambiar la fuente de entrada o de salida.
 
-
-
 Cuando ejecutamos el comando `cat file1.txt`, este programa lee datos del archivo y los imprime en *standard output* es decir en la pantalla. Utilizando el operador de redirección del *standard output* `>`  podemos colocar el contenido leído en otro archivo:
 
 ```bash
@@ -410,6 +408,14 @@ echo hello > hello.txt
 
 
 
+Si queremos crear un script que muestre este mensaje en pantalla:
+
+```bash
+echo echo Hello > deploy.sh
+```
+
+
+
 También podremos generar un archivo a partir de una lista de archivos:
 
 ```bash
@@ -428,7 +434,7 @@ ls -l /etc > list.txt
 
 El comando `grep` (*global regular expression print*) nos permite buscar texto en un archivo, por ejemplo si queremos buscar la cadena "hello" en el archivo `file.txt`:
 
-```
+```bash
 grep hello file.txt
 ```
 
@@ -446,23 +452,17 @@ grep -i root /etc/passwd
 
 
 
-Búsqueda en múltiples archivos:
-
-* Podemos especificarlos todos:
+Búsqueda de texto en múltiples archivos especificados uno a uno:
 
 ```bash
 grep -i hello file1.txt file2.txt
 ```
 
-
-
-* Podemos especificar un patrón:
+Búsqueda de texto en múltiples archivos especificados mediante un patrón:
 
 ```bash
 grep -i hello file*
 ```
-
-
 
 Búsqueda texto en los archivos de un determinado directorio, pero para eso debemos usar también la opción `-r` de recursiva (para hacer una búsqueda en el directorio y todos su subdirectorios):
 
@@ -472,15 +472,13 @@ grep -i -r hello /etc
 
 O lo que es lo mismo combinando opciones:
 
-```
+```bash
 grep -ir hello /etc
 ```
 
-
-
 Si queremos buscar en el directorio actual:
 
-```
+```bash
 grep -ir hello .
 ```
 
@@ -678,7 +676,9 @@ echo $PATH
 
 
 
-* Para setear una variable de entorno en la sesión actual de la terminal, por lo que si cerramos y abrimos una nueva, no existirá.
+### Comando `export`
+
+El comando `export` nos permite setear una variable de entorno en la sesión actual de la terminal, por lo que si cerramos y abrimos una nueva, no existirá.
 
 ```
 export DB_USER=mosh
@@ -688,14 +688,12 @@ export DB_USER=mosh
 
 
 
-* Para setear una variable de entorno de manera persistente debemos hacerlo en `.bashrc` que encontramos en el root directory.
+Para setear una variable de entorno de manera persistente debemos hacerlo en `.bashrc` que encontramos en el directorio home del usuario, es decir  `/root` o `/home/foo` para el usuario `foo`.
 
 ```bash
 cd ~
 nano .bashrc
 ```
-
-
 
 Podemos editarlo con nano o hacer uso de una redirección:
 
@@ -860,13 +858,9 @@ Decimos que es más interactivo por todos los datos que nos solicita y como con 
 
 El uso de grupos posibilita que todos los miembros de dichos grupos tengan los mismos permisos.
 
-Cada usuario de Linux tiene un **grupo primario** (creado automáticamente al crear el usuario con el mismo nombre del usuario) y opcionalmente puede tener uno o más **grupos secundarios**. 
-
-
+Cada usuario de Linux tiene un **grupo primario** (creado automáticamente al crear el usuario, con el mismo nombre del usuario) y opcionalmente puede tener uno o más **grupos secundarios**. 
 
 Como cada archivo tiene un dueño y un grupo, si no existiera este grupo primario y un usuario miembro de varios grupos crea un archivo, sería imposible saber a qué grupo pertenece el archivo. 
-
-
 
 De manera similar a lo visto para el manejo de usuarios, para el manejo de grupos tenemos tres comandos `groupadd`, `groupmod`y `groupdel`.
 
@@ -897,7 +891,9 @@ Si revisamos en el archivo `/etc/passwd` lo relativo al usuario `john` como hemo
 
 
 
-Por lo que si queremos ver los grupos a los que pertenece un usuario (tanto primario como secuendarios) podemos ejecutar:
+### Comando `groups`
+
+El comando `groups` nos permite conocer los grupos a los que pertenece un usuario (tanto primario como secundarios) 
 
 ```bash
 groups john
@@ -911,7 +907,7 @@ El comando `groupmod`nos permite modificar un grupo.
 
 ### Comando `groupdel`
 
-El comando `groupdel`nos permite eliminar un grup o.
+El comando `groupdel`nos permite eliminar un grupo.
 
 
 
@@ -931,7 +927,7 @@ bash: ./deploy.sh: Permission denied
 
 ## Permisos de Archivos
 
-Si queremos obtener los permisos de un archivo debemos ejecutar `ls -l`.
+Si queremos obtener los permisos de un archivo debemos listarlos de manera larga con `ls -l`.
 
 Suponiendo que estamos en `/home`  en la primera columna veremos:
 
@@ -941,22 +937,62 @@ drwxr-xr-x 2 john john 4096 Aug  9 11:40 john
 ```
 
 * Si la primera letra es una `d` es un directorio y si es un guión `-` es un archivo.
-* Luego tenemos 9 letras divididas en 3 grupos de 3 letras. En cada grupo tenemos permisos de lectura `r`, de escritura `w` y de ejecución `x`.  Si tenemos `rw-` significa que tenemos permiso de lectura, de escritura pero no de ejecución.  Los directorios por default tienen permiso de ejecución para poder dirigirnos a ellos utilizando el comando `cd`, es decir `cd directorio`.
+* Luego tenemos 9 letras divididas en 3 grupos de 3 letras. En cada grupo tenemos permisos de lectura `r`, de escritura `w` y de ejecución `x`.  Si tenemos `rw-` significa que tenemos permiso de lectura, de escritura pero no de ejecución.  Los directorios por default tienen permiso de ejecución para poder dirigirnos a ellos utilizando el **comando** `cd`, es decir `cd directorio`.
 * El primer grupo de letras representa los permisos para el usuario dueño del archivo, el segundo para el grupo dueño del archivo y el tercero para todos los demás.
 
 
 
 ### Comando `chmod`
 
-El comando `chmod`nos permite cambiar los permisos de un archivo. Podemos cambiar los permisos relativos al usuario `u`, al grupo `g` o a todos los demás `o`:
+El comando `chmod`nos permite cambiar los permisos de un archivo desde el usuario que es dueño del archivo.
+
+Podemos cambiar los permisos relativos al usuario `u`, al grupo `g` o a todos los demás `o`. 
+
+Cuando creamos un archivo los permisos que tiene inicialmente son son `-rw-r--r--`. Si queremos agregarle al usuario permisos de ejecución:
 
 ```
-chmod u u+x deploy.sh
+chmod u+x deploy.sh
 ```
 
-Ahora veremos que si hacemos `ls -l` el archivo cambió a color verde pues ahora es ejecutable.
+> Si quisiéramos en cambio eliminar los permisos de ejecución debemos ejecutar `chmod u-x deploy.sh`
 
-> Si quisiéramos en cambio eliminar los permisos de ejecución `chmod u u-x deploy.sh`
->
-> Si intetamos ejecutarlo desde otro usuario obtendremos **Permission denied**
+Ahora veremos que si hacemos `ls -l` el archivo cambió a color verde pues ahora es ejecutable y que en el primer grupo tenemos la `x` de ejecutable. Veremos que los permisos de este archivo pasaron a ser `-rwxr--r--` es decir que ahora es ejecutable pero sólo por este usuario.
+
+
+
+> Si intentamos ejecutar este script desde otro usuario obtendremos **Permission denied**.  Si quisiéramos que cualquiera lo pueda ejecutar deberíamos correr `chmod o+x deploy.sh`
+
+
+
+* Para aplicar permisos a mas de un grupo de usuarios
+
+```
+chmod og+x deploy.sh
+```
+
+
+
+* Para aplicar permisos a más de un grupo y agregar o quitar más de un tipo de permisos:
+
+```
+chmod og+x+w-r deploy.sh
+```
+
+En este caso por ejemplo estaremos agregando el permiso de ejecución, el de escritura y quitando el de lectura para los miembros del grupo y para el resto de los  usuarios.
+
+
+
+* Para aplicar permisos a más de un archivo a la vez 
+
+```
+chmod u+x file1.sh file2.sh
+```
+
+
+
+* Para aplicar permisos a todos los archivos que cumplan un cierto patrón
+
+```
+chmod u+x *.sh
+```
 
