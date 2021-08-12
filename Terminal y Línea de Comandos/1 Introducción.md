@@ -2,6 +2,8 @@
 > Basado en el Curso de Platzi de Enrique Devars - VIDEOS 2 COMPLETO
 >
 > Agregados sobre comandos de Linux de Ultimate Docker Course de Mosh Hamedani
+>
+> Agregados video [30 Comandos Linux para manejar tu Server](https://youtu.be/0BA4k3jweaE) del Pelado Nerd 
 
 ## Motivaciones
 La terminal se caracteriza por brindarnos **flexibilidad** para realizar todo tipo de tareas con unos pocos comandos, **velocidad** a la hora de realizarlos y es **fundamental a la hora de trabajar con servidores remotos** es la única opción ya que no contamos con una interfaz gráfica.
@@ -43,10 +45,6 @@ Cuando abrimos la terminal nos encontramos en `~` que se conoce como *virgulilla
 > En Windows con Git Bash (Linux emulado) si estamos en `~` con el usuario `foo` obtendremos `/c/Users/foo`. 
 
 
-
-## Obtener Ayuda
-
-Si queremos obtener ayuda sobre un comando en particular podemos ingresar `rm --help`
 
 
 
@@ -94,7 +92,37 @@ En el File System de Linux tenemos la siguiente jerarquía:
 
 
 
+## Teclas Rápida
+
+Limpiar Pantalla: `Ctrl+L`
+
+Cancelar Comando: `Ctrl+C`
+
+Búsqueda Inversa de Comandos: `Ctrl+R`
+
+Ir al final de comando: `Ctrl+E`
+
+Ir al principio de comando: `Ctrl+A`
+
+Eliminar la palabra donde tengo el cursor `Ctrl+W`
+
+Intercambiar el caracter donde tengo el cursor por el anterior `Ctrl+T`
+
+Intercambiar palabras (tengo que tener el cursor al terminar la palabra) `ESC+T`
+
+Salir de un servidor `Ctrl+D` (es equivalente a escribir `exit`)
+
+
+
 ## Comandos Básicos
+
+### Comando `help`
+
+El comando `help` nos permite obtener ayuda sobre cualquier comando, por ejemplo `rm --help`, `rsync --help` para obtener información sobre `rm` y `rsync` respectivamente.
+
+>  Si queremos filtrar además del resultado de dicha ayuda (utilizando el comando `grep` y **pipes**) podemos ingresar `rsync --help | grep verbose` con lo cual mostraremos solo la/s línea/s donde aparece la palabra "verbose" en la ayuda.
+
+
 
 ### Comando `echo`
 
@@ -131,7 +159,7 @@ Con el comando `ls` *(list)* listamos el contenido del directorio donde estamos,
 Con `ls -1` listamos los archivos uno por fila.
 Con `ls -l` (*long*) listamos los archivos uno por fila con su fecha de creación, peso (en bytes), permisos, etc.
 Con `ls -lh` *(human)* vemos el peso de los archivos en M, K, etc.
-Con `ls -a` (*all*) veremos todos los archivos inclusive los ocultos
+Con `ls -a` (*all*) veremos todos los archivos inclusive los ocultos. En Linux los archivos ocultos son aquellos que comienzan con un punto.
 Con `ls -S` (*size*) veremos todos los archivos y directorios ordenados por tamaño ordenado descendentemente.
 Con `ls -r`*(reverse)* listamos los archivos en orden reverso al alfabético.
 
@@ -184,6 +212,8 @@ Si quisiéramos ejecutar el comando `clear` podríamos poner `!16`
 
 Esto lo hace gracias a un archivo llamado `.bash_history` en el directorio home del usuario.
 
+> Si sabemos que utilizamos un comando que tenía la cadena "hola" podemos hacer uso del comando `grep` y de un pipe: `history | grep hola`. Esto mismo podemos hacerlo también ingresando `CONTROL+R` y escribiendo por ejemplo "hola" y nos mostrará el último comando que ingresamos que tenía esa cadena y si presionamos `CONTROL+R` nuevamente iremos hacia atrás. Si queremos ejecutarlo tal cual presionamos `ENTER` y sino la flecha hacia el costado para editarlo.
+
 
 
 ### Comando `file`
@@ -203,6 +233,123 @@ Si queremos tener sólo una profundidad de dos niveles podríamos poner `tree -L
 ```bash
 sudo apt install tree
 ```
+
+
+
+### Comando `du`
+
+El comando `du` *disk usage* nos permite ver el uso de disco de un directorio:
+
+```bash
+du -sh /var/lib
+```
+
+Con `-s` o `--summarize` indicamos que queremos mostrar solo el total.
+Con `-h` o `--human-readable` indicamos que queremos mostrar K, M, G en lugar de bytes.
+
+
+
+Si queremos ver cuánto pesa cada uno de los archivos o directorios dentro de un directorio podemos hacerlo con:
+
+```
+du -sh /var/lib/*
+```
+
+Esto puede ser de utilidad cuando tenemos un directorio que ocupa mucho espacio y queremos individualizar que subdirectorio es el responsable.
+
+
+
+### Comando `stat`
+
+El comando `stat` nos muestra información sobre un archivo.
+
+```bash
+stat file1.txt
+```
+
+Obtendremos información sobre su tamaño, directorio en el cual está montado, permisos, fecha de modificación, de último acceso, de cambios, etc.
+
+
+
+### Comando `zip`
+
+El comando `zip` nos permite comprimir un directorio
+
+```bash
+zip -r images.zip images
+```
+
+Indicamos el argumento `-r` luego el nombre que queremos de salida y por último la carpeta de entrada.
+
+
+
+### Comando `unzip`
+
+El comando `unzip` nos permite descomprimir un directorio
+
+```bash
+unzip images.zip
+```
+
+
+
+### Comando `zipinfo`
+
+El comando `zipinfo` nos permite ver el contenido de un zip pero sin descomprimirlo
+
+```bash
+zipinfo images.zip
+```
+
+
+
+### Comando `cal`
+
+El comando `cal` muestra un calendario en pantalla del mes actual.
+
+* Si queremos ver un mes y un año en particular podemos pasarlo como argumento. Por ejemplo si queremos ver Enero del 2022:
+
+```
+cal 01 2022
+```
+
+
+
+### Comando `date`
+
+El comando `date`  nos permite mostrar la fecha y hora actual.
+
+* Si queremos mostrar una fecha futura, por ejemplo dentro de 7 días:
+
+```
+date -d "+7 days"
+```
+
+
+
+### Comando `bc`
+
+El comando `bc` nos permite abrir una aplicación de una calculadora simple.
+
+> Para cerrar la aplicación escribir `quit` 
+
+### Comando `curl`
+
+El comando `curl` nos permite hacer un request HTTP mediante comando, es decir que visitaremos una página y veremos su contenido en pantalla.
+
+```
+curl https://www.google.com.ar
+```
+
+
+
+> Si hacemos `curl ifconfig.me` podremos visitar esa página y nos devolverá la ip pública desde donde la estamos visitando es decir la el servidor.
+
+
+
+### Comando `df`
+
+El comando `df` muestra el espacio usado y libre en cada disco.
 
 
 
@@ -236,13 +383,59 @@ mv hello.txt hello-docker.txt
 
 
 
+### Comando `cp`
+
+El comando `cp` nos permite copiar archivos o directorios.
+
+Si queremos duplicar un archivo en el mismo directorio:
+
+```
+cp file1.txt file1.txt.copia
+```
+
+
+
+Si queremos copiar un archivo a otro directorio (previamente creado)
+
+```
+cp file1.txt documents/
+```
+
+Con `ls documents/` podremos verificar que ahora tenemos un archivo `file1.txt`
+
+
+
+Si queremos copiar un directorio debemos utilizar `cp -a` con lo cual le estamos diciendo que queremos utilizar varios argumentos incluido el `-r` par que sea una copia recursiva.
+
+```
+cp -a myMusic/ myMedia/
+```
+
+
+
+### Comando `rsync`
+
+El comando `rsync` es útil para cuando tenemos que copiar gran cantidad archivos de un directorio a otro. Si bien esto podríamos hacerlo utilizando `cp`, con `rsync` tenemos la ventaja de que es capaz dedetectar si algunos de los archivos ya existen en el destino y en ese caos no copiarlos. Esto será útil para realizar backups o si anteriormente hemos efectuado una copia que falló y parte de esos archivos ya están en el destino. En caso de que utilizáramos `cp` deberíamos realizar la copia entera.
+
+Suponiendo que tenemos un directorio `origen` con los archivos que queremos copiar y otro `destino`:
+
+```bash
+rsync -av origen/ destino/
+```
+
+Con `-v` indicamos que muestre la progresión en pantalla.
+
+
+
 ### Comando `touch`
 
-El comando `touch` me permite crear archivos vacíos.
+El comando `touch` nos  permite crear archivos vacíos.
 
 ```bash
 touch file.txt
 ```
+
+> Utilizando el operador de redirección podemos hacer esto mismo con `> file.txt`. *La **salida** del primer comando tirala a `file.txt`. Como no tengo nada como primer comando inserto 0*
 
 
 
@@ -376,7 +569,7 @@ rm file*
 
 Para eliminar un directorio debemos hacerlo con `rm -r test` con lo cual eliminaremos la carpeta y todo su contenido recursivamente.
 
-> En ocasiones también tendremos que forzar el borrado lo cual hacemos con `rm -rf test` (recursivo y forzado)
+> En ocasiones también tendremos que forzar el borrado lo cual hacemos con `rm -rf test` (recursivo y forzado, es decir sin preguntarnos)
 
 
 
@@ -437,6 +630,24 @@ El comando `grep` (*global regular expression print*) nos permite buscar texto e
 ```bash
 grep hello file.txt
 ```
+
+
+
+Si queremos filtrar todas las líneas que no dicen "hello"
+
+```bash
+grep -v hello file.txt
+```
+
+
+
+Si queremos mostrar los archivos que cumplen con un filtro:
+
+```
+grep -l hello file.txt
+```
+
+> Esto tendrá sentido si estamos haciendo una búsqueda en un directorio por ejemplo con`grep -rl hello .`
 
 
 
@@ -548,6 +759,14 @@ find / -type f -name "*.py" > python-files.txt
 
 
 
+* Si queremos buscar los archivos en el directorio en el que estoy con fecha de modificación mayor a 5 días:
+
+```
+find . -mtime + 5
+```
+
+
+
 ## Encadenar Comandos
 
 ### Operador semi-colon `;`
@@ -601,6 +820,14 @@ ls /bin | head -n 5
 ```
 
 
+
+Es posible encadenar el uso de pipes, por ejemplo si tenemos un archivo `readme.txt` podríamos hacer:
+
+```bash
+cat readme.txt | grep hola | grep juan
+```
+
+Es decir que estamos filtrando en primer lugar el contenido del archivo y luego filtrando nuevamente lo obtenido luego del primer filtro.
 
 ## Comando Multi-línea
 
@@ -751,6 +978,16 @@ En la columna **TIME** vemos la cantidad de tiempo de CPU consumido por el proce
 
 Por ejemplo si ejecutamos `sleep 100` durante 100 segundos estará el prompt durmiendo y luego de ese tiempo volverá a estar activo. Si queremos en cambio enviar ese proceso al *background* para poder ejecutar otros comandos mientras tanto, ejecutamos `sleep 100 &`. Si ejecutamos `ps` veremos ese proceso ya que bajo la columna `CMD` dirá `sleep`.
 
+Otra forma de hacer esto es ingresar `sleep 1m`, luego `Ctrl+Z` para enviarlo al *background*. Sin embargo esto hará que el proceso se frene y luego `bg` podremos hacer que siga corriendo allí, luego con `fg` lo traemos al *foreground*.
+
+
+
+Si queremos mostrar los procesos padres e hijos vinculados en forma de árbol podemos utilizar el comando `ps` con estos tres argumentos:
+
+```
+ps fax
+```
+
 
 
 ### Comando `kill`
@@ -769,6 +1006,26 @@ Si queremos eliminar el proceso `sleep` tendremos que hacer
 ```bash
 kill 15
 ```
+
+
+
+### Comando `killall`
+
+El comando `killall` nos permite matar todos los procesos que tengan en su nombre una cierta cadena de texto
+
+```
+killall cadena
+```
+
+
+
+### Comando `top`
+
+El comando `top` nos permite ver una lista de procesos que están corriendo en el servidor ordenados por el uso de CPU y memoria.
+
+> Con la tecla  `?` accederemos a una pantalla que nos muestra todos los atajos de teclado.
+>
+> Con la tecla `q` salimos
 
 
 
@@ -984,5 +1241,49 @@ chmod u+x file1.sh file2.sh
 
 ```
 chmod u+x *.sh
+```
+
+
+
+## Creación de Alias
+
+### Comando `alias`
+
+En muchas oportunidades debemos utilizar el mismo comando muchas veces  e ingresarlo manualmente reduce nuestra productividad y nos distrae de lo que verdaderamente estamos haciendo. Con el comando `alias`  es posible crear un alias para escribir más rápido esos comandos más utilizados.
+
+* Si queremos ver los alias que tenemos actualmente definidos en nuestro perfil almacenados en `.bashrc` que tenemos en `~`:
+
+```
+alias
+```
+
+> Como parte de la salida veremos `alias ll='ls -alF'` lo cual significa que ingresar `ll` es equivalente a ingresar `ls -alF`
+
+
+
+* Si queremos crear un alias temporario (que solo esté disponible mientras dure la sesión)
+
+```
+alias nombre_alias="comando"
+```
+
+* Si queremos crear un alias permanente debemos guardarlo en `.bashrc`
+
+```
+#My custom aliases
+alias home=”ssh -i ~/.ssh/mykep.pem tecmint@192.168.0.100”
+alias ll="ls -alF"
+```
+
+Luego debemos guardar el archivo y será automáticamente cargado en la próxima sesión, mientras que si queremos utilizar los alias en la sesión actual debemos ejecutar `source ~/.bashrc`
+
+
+
+### Comando `unalias`
+
+El comando `unalias` nos permite eliminar un alias agregado mediante la línea de comandos:
+
+```
+unalias nombre_alias
 ```
 
