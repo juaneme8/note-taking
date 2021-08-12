@@ -329,7 +329,7 @@ date -d "+7 days"
 
 ### Comando `bc`
 
-El comando `bc` nos permite abrir una aplicación de una calculadora simple.
+El comando `bc`  *(basic calculator)* nos permite abrir una aplicación de una calculadora simple.
 
 > Para cerrar la aplicación escribir `quit` 
 
@@ -1283,7 +1283,101 @@ Luego debemos guardar el archivo y será automáticamente cargado en la próxima
 
 El comando `unalias` nos permite eliminar un alias agregado mediante la línea de comandos:
 
-```
+```bash
 unalias nombre_alias
+```
+
+
+
+## Comandos Avanzados
+
+### Comando `netstat`
+
+> Basado en https://www.youtube.com/watch?v=8UZFpCQeXnM
+
+> No lo pude probar con el contenedor con la imagen de Alpine Linux por dificultades de instalación en red corporativa.
+
+El comando `netstat` *(network statistics)* nos permite conocer las conexiones de red actuales y la actividad a nivel puertos en el servidor. Nos permitirá saber qué servicios están corriendo y en qué puertos.
+
+```
+netstat
+```
+
+
+
+> Si queremos conocer las opciones con las cuales podemos usar este comando ejecutar `netstat -?`
+
+
+
+Por ejemplo si tenemos abiertas las páginas web yahoo.com y example.com, un ftp y estamos conectados a dos máquinas en la red local veremos:
+
+| Proto | Local Address       | Foreign Address    | State       |
+| ----- | ------------------- | ------------------ | ----------- |
+| TCP   | 192.168.0.12: 52913 | 74.125.44.25:https | ESTABLISHED |
+| TCP   | 192.168.0.12: 62976 | 22.134.45.78:https | ESTABLISHED |
+| TCP   | 192.168.0.12: 63510 | 42.33.44.55:ftp    | ESTABLISHED |
+| TCP   | 192.168.0.12: 63562 | BobPC:445          | ESTABLISHED |
+| TCP   | 192.168.0.12: 63037 | MikePC:65137       | ESTABLISHED |
+
+> Si no estamos conectados a nada obtendremos una salida en blanco, mientras que si estamos conectados veremos una tabla con los siguientes datos: Proto, Local Address, Foreign Address, State. 
+
+> Debemos tener presente que **la salida no será instantánea ya que está utilizando DNS para resolver números a nombres**. Por ejemplo para mostrar los nombres de las computadoras BobPC y MikePC a las cuales estamos conectados.
+
+
+
+* Si queremos mostrar sólo números y no nombres, y obtener de esta manera una salida instantánea podemos ejecutar:
+
+```
+netstat -n
+```
+
+
+
+| Proto | Local Address       | Foreign Address        | State       |
+| ----- | ------------------- | ---------------------- | ----------- |
+| TCP   | 192.168.0.12: 52913 | 74.125.44.25:**443**   | ESTABLISHED |
+| TCP   | 192.168.0.12: 62976 | 22.134.45.78:**443**   | ESTABLISHED |
+| TCP   | 192.168.0.12: 63510 | 42.33.44.55:**21**     | ESTABLISHED |
+| TCP   | 192.168.0.12: 63562 | **192.168.0.13**:445   | ESTABLISHED |
+| TCP   | 192.168.0.12: 63037 | **192.168.0.14**:65137 | ESTABLISHED |
+
+
+
+* Si queremos ver no sólo las conexiones actuales sino también los puertos TCP y UDP que están escuchando conexiones:
+
+```
+netstat -a
+```
+
+
+
+La dirección IP con todos ceros  `0.0.0.0` es nuestra propia computadora y esto hace referencia que el puerto no está escuchando en una dirección IP específica sino en todas las disponibles en todas 
+
+```
+TCP    0.0.0.0:135            DESKTOP-6FT7863:0      LISTENING
+```
+
+
+
+* Si queremos conocer qué programa está haciendo esas conexiones
+
+```
+netstat -b
+```
+
+
+
+Si queremos conocer el nombre completo de los dominios a los cuales estamos conectados:
+
+```
+netstat -f
+```
+
+ 
+
+* Si queremos ver nuestra tablas de ruteo del servidor
+
+```
+neststat -nr
 ```
 
