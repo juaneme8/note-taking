@@ -4,9 +4,19 @@
 > Basado en el [video](https://www.youtube.com/watch?v=nQDFBd5NFA8) de Madness Labs.
 
 ## Introducción
+
 Cuando queremos enviar un mensaje y que no sea descubierto por otras personas, procedemos a cifrarlo con una contraseña de modo tal que la persona en el otro extremo con esa contraseña pueda descifrarlo. Sin embargo, si enviamos esta contraseña, la intercepción por una persona no deseada le permitiría acceder al mensaje. 
-El **cifrado asimétrico de un sólo camino** mediante llaves públicas y privadas viene a solucionar este problema. Las llaves públicas y privadas son creadas por aquella persona que quiere recibir un mensaje. Como ambas llaves están vinculadas matemáticamente, aquello cifrado con la llave pública sólo puede ser abierto con la llave privada. Como consecuencia de esto cuando queremos **recibir** un mensaje, enviamos la llave pública. Esto no representa un riesgo, ya que por ser pública no se comprometen los datos si es interceptada por alguien. Luego el emisor del mensaje junto con la llave pública realizará un cifrado del mensaje y lo envía al receptor. Aunque sean intervenidas la llave pública y el mensaje secreto, estos no podrán ser descubiertos sin la llave privada. El receptor en cambio, con la llave privada convierte el mensaje cifrado en el mensaje real. 
+
+Antiguamente se utilizaba el  **Telnet** para entre otras cosas controlar una computadora remotamente. Sin embargo, este tiene la característica de que cualquier persona en la red podría ver el tráfico y así descubrir los comandos e información que estaba siendo enviada.
+
+Utilizando en cambio **SSH** gracias al cifrado asimétrico de un sólo camino mediante **llaves públicas y privadas** viene a solucionar este problema. Las llaves públicas y privadas son creadas por aquella persona que quiere recibir un mensaje. Como ambas llaves están vinculadas matemáticamente, aquello cifrado con la llave pública sólo puede ser abierto con la llave privada. Como consecuencia de esto cuando queremos **recibir** un mensaje, enviamos la llave pública. Esto no representa un riesgo, ya que por ser pública no se comprometen los datos si es interceptada por alguien. Luego el emisor del mensaje junto con la llave pública realizará un cifrado del mensaje y lo envía al receptor. Aunque sean intervenidas la llave pública y el mensaje secreto, estos no podrán ser descubiertos sin la llave privada. El receptor en cambio, con la llave privada convierte el mensaje cifrado en el mensaje real. 
 Si queremos hacer el flujo inverso de información, bastará con que el hasta ahora emisor genere una llave pública y privada y repita la lógica anterior. 
+
+
+
+> Como analogía podemos pensar que Telnet es como enviar una hoja de papel con el mensaje escrito. SSH en cambio es como enviar el mensaje desde A dentro de un portafolio cerrado con un candado, B al recibirlo le coloca otro candado y lo vuelve a enviar al emisor que abre su candado y lo envía al receptor que luego abre su candado y accede al mensaje. Esto mismo se repite cuando el 
+
+
 
 Cuando nos conectamos a GitHub mediante una conexión HTTPS debemos ingresar de manera permanente el usuario y la contraseña, si bien HTTPS es una conexión segura el nombre de usuario y la contraseña se están guardando en un entorno local por que ante un robo de la pc pueden ser crackeados y alguien podría lograr el acceso al repositorio. Para evitar esto agregamos más seguridad trabajando con llaves públicas y privadas con la ventaja adicional de que no tendremos que estar ingresando usuario y contraseña todo el tiempo. 
 
@@ -187,3 +197,28 @@ Ingresamos `yes` y a continuación nos pedirá la *passphrase* y al completarla 
 `Welcome to GitLab, @juaneme8!`
 
 Luego podremos clonar con SSH repositorios
+
+
+
+# SSH en Linux
+
+> Basado en https://youtu.be/RMS5zBYQIqA
+
+
+
+## Instalación
+
+En primer lugar debemos instalar un **servicio de SSH en el servidor**, el cual generalmente viene instalado en las distribuciones mas comunes de Linux. En caso de que no esté instalado podemos instalarlo con `apt-get install openssh-server` y luego asegurarnos que esté corriendo y activado `sytemctl enable ssh`. Luego debemos instalar un **cliente SSH**, en Linux y Mac ya viene instalado por defecto mientras que en Windows podemos utilizar `Putty` para conectarnos a servidores con SSH corriendo.
+
+
+
+## Conexión a Servidor
+
+Para conectarnos con el usuario `root` al servidor con IP `94.237.92.33` debemos ejecutar el siguiente comando:
+
+```
+ssh root@94.237.92.33
+```
+
+Luego nos preguntará si queremos agregar la *fingerprint* del servidor a la lista de servidores confiados. De esta forma cuando nos conectemos nuevamente se asegurará que la key sea la misma con lo cual tendremos certeza de estar en el servidor deseado.
+

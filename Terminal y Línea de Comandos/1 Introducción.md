@@ -353,6 +353,16 @@ El comando `df` muestra el espacio usado y libre en cada disco.
 
 
 
+### Comando `wget`
+
+El comando `wget` nos permite descargar un archivo de internet:
+
+```
+wget fredrikson.com.ar/resume.pdf
+```
+
+
+
 ## Manipulación de Archivos y Directorios
 
 ### Comando `mkdir`
@@ -436,6 +446,8 @@ touch file.txt
 ```
 
 > Utilizando el operador de redirección podemos hacer esto mismo con `> file.txt`. *La **salida** del primer comando tirala a `file.txt`. Como no tengo nada como primer comando inserto 0*
+>
+> Si el archivo `file.txt` ya existe le cambia la fecha de modificación a la actual.
 
 
 
