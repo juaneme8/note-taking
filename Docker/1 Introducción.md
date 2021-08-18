@@ -1,6 +1,6 @@
 # Docker
 
-> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 27 COMPLETO)
+> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 31 COMPLETO)
 
 ## ¿Qué es Docker?
 
@@ -107,8 +107,6 @@ Utilizando Docker podemos escribir estas instrucciones dentro de un Dockerfile p
 
 
 
-
-
 > 1. Comenzamos de una imagen base que podría ser un Linux vacío (`FROM linux`)  al cual luego le instalaríamos Node o sino podemos usar una imagen construida sobre la base de Linux con Node ya instalado  (`FROM node` ). Estas imagenes están disponibles en [Docker Hub](hub.docker.com) que como dijimos es el registro de imagenes Docker. Una vez allí podremos buscar "node" y veremos que el nombre de la imagen oficial es `node` y por eso ponemos `FROM node`. En Docker Hub veremos que hay múltiples imagenes node cada una de las cuales fue creada sobre una distribución de distinta de Linux y lo especificaremos mediante un tag. En nuestro caso utilizaremos una distribución liviana de Linux llamada `alpine`
 >
 > 2. Luego debemos copiar los archivos de la aplicación por lo que ponemos `COPY . /app` con esto le decimos que queremos copiar todos los archivos del directorio actual en el directorio `/app` de la imagen.
@@ -203,9 +201,57 @@ Si queremos cerrar la sesión de la terminal podemos ejecutar `exit` y luego con
 
 ## Loguin con Usuario
 
-Si estamos logueados con root y queremos loguearnos como un usuario normal abrimos una nueva ventana de la terminal y con `docker ps` podremos ver los contenedores en ejecución. Luego suponiendo que el id `17fd53d105f6` y para correr una sesión de bash ejecutamos `docker exec -it 17f bash`  con lo que nos loguearemos también como **root**. Como queremos loguearnos como `john` debemos primero cerrar la sesión con `exit` y ejecutar `docker exec -it -u john 17f bash` 
+Si estamos logueados con root y queremos loguearnos como un usuario normal **en ese mismo contenedor** abrimos una nueva ventana de la terminal y con `docker ps` podremos ver los contenedores en ejecución. Luego suponiendo que el id `17fd53d105f6` y para correr una sesión de bash ejecutamos `docker exec -it 17f bash`  con lo que nos loguearemos también como **root**. Como queremos loguearnos como `john` debemos primero cerrar la sesión con `exit` y ejecutar `docker exec -it -u john 17f bash` 
 
 * Si ejecutamos  `whoami` obtendremos `john`.
 * Si ejecutamos `cd ~` y luego `pwd` veremos `/home/john`.
 * En el prompt veremos un signo `$` en lugar del `#` lo cual da cuenta que somos un usuario normal y no root. Es por esto que si queremos ejecutar `cat /etc/shadow` obtendremos **Permission denied**. 
 
+
+
+# Imagenes Docker
+
+## Imagenes vs Contenedores
+
+Las **imagenes** contienen todos todos archivos y configuraciones que necesita la aplicación para correr: un sistema operativo reducido, librerías externas, archivos de la aplicación, variables de entorno. Una vez que tenemos una imagen podemos iniciar un contenedor de ella.
+
+Los **contenedores** proporcionan un entorno aislado para ejecutar la explicación, pueden ser iniciados y detenidos y técnicamente son un proceso del sistema operativo. Se trata de un proceso especial que tiene su propio filesystem provisto por la imagen. 
+
+Si tenemos un contenedor corriendo y desde otra ventana de la terminal ejecutamos `docker ps` podremos obtener el *container id* y para iniciar otro contenedor a partir de la misma imagen debemos ejecutar `docker run -it ubuntu` (siendo `ubunto` el nombre del contenedor). Sin embargo si vamos a `/home` no veremos los mismos archivos que hayamos generado allí usando el otro contenedor. **Es por eso que decimos que un contenedor es un entorno aislado** que obtiene el filesystem de la imagen pero tiene su propia capa de escritura (de modo que lo que escribamos en uno, no será visible en los otros contenedores). Sin embargo, luego veremos que existe un modo de compartir datos entre contenedores.
+
+
+
+## Dockerizar Aplicación
+
+Cuando tenemos una aplicación React y queremos correrla en una nueuva máquina debemos seguir una serie de pasos empezando por instalar Node.js, ejecutar `npm install` y por último `npm start` para iniciarla. Utilizando Docker buscamos no tener que seguir todos estos pasos cada vez que deseamos utilizar una máquina nueva. Vamos a *dockerizar* la aplicación y meterla en una imagen con la cual podremos deployarla en cualquier lugar.
+
+### Dockerfile
+
+El archivo `Dockerfile` contiene instrucciones para construir la imagen, ya hemos visto algunas ahora repasaremos la lista completa:
+
+* `FROM` para especificar la imagen base.
+* `WORKDIR` para especificar el directorio de trabajo.
+* `COPY` 
+* `ADD` 
+* `RUN` para ejecutar comandos del sistema operativo.
+* `ENV` para configurar variables de entorno.
+* `EXPOSE` para especificar el puerto del contenedor
+* `USER` para especificar el usuario que puede correr la aplicación (normalmente será un usuario con privilegios limitados).
+* `CMD` 
+* `ENTRYPOINT`
+
+
+
+### Elección de Imagen
+
+ En [docs.docker.com/samples/](https://docs.docker.com/samples/)
+
+Versionar imagenes
+
+Compartir imagenes
+
+Guardar y cargar imagenes
+
+Reducir tamaño imagenes
+
+Acelerar buillds
