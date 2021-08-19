@@ -1,6 +1,6 @@
 # Docker
 
-> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 31 COMPLETO)
+> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 32 COMPLETO)
 
 ## ¿Qué es Docker?
 
@@ -103,7 +103,7 @@ En esta aplicación que es muy simple debemos seguir varios pasos lo cual nos pe
 
 Utilizando Docker podemos escribir estas instrucciones dentro de un Dockerfile para empaquetar nuestra aplicación.
 
-> Visual Studio Code al crear el archivo `Dockerfile` nos preguntará si queremos instalar una extensión.**Docker | Microsoft**
+> Visual Studio Code al crear el archivo `Dockerfile` nos preguntará si queremos instalar una extensión.**Docker | Microsoft** lo cual aceptamos.
 
 
 
@@ -231,20 +231,101 @@ El archivo `Dockerfile` contiene instrucciones para construir la imagen, ya hemo
 
 * `FROM` para especificar la imagen base.
 * `WORKDIR` para especificar el directorio de trabajo.
-* `COPY` 
-* `ADD` 
+* `COPY` nos permite copiar archivos y directorios a la imagen.
+* `ADD` nos permite también copiar archivos y directorios a la imagen pero con características extra.
 * `RUN` para ejecutar comandos del sistema operativo.
 * `ENV` para configurar variables de entorno.
 * `EXPOSE` para especificar el puerto del contenedor
 * `USER` para especificar el usuario que puede correr la aplicación (normalmente será un usuario con privilegios limitados).
-* `CMD` 
+* `CMD` para especificar el comando que debe ser ejecutado al iniciar la aplicación.
 * `ENTRYPOINT`
 
 
 
-### Elección de Imagen
+### Establecer Imagen Base
 
- En [docs.docker.com/samples/](https://docs.docker.com/samples/)
+En primer lugar creamos un archivo `Dockerfile` y vamos a trabajar con la instrucción `FROM` que como dijimos usaremos para especificar la imagen base. La imagen base podrá ser un sistema operativo como Linux o Windows o un OS + un entorno de ejecución (si somos desarrolladores JavaScript nos convendrá empezar por una imagen node). En [docs.docker.com/samples/](https://docs.docker.com/samples/) podemos encontrar ejemplos de `Dockerfile` para los distintos stacks tecnológicos. 
+
+> Las imágenes pueden estar en cualquier *registry*, el default es **DockerHub** pero por ejemplo Microsoft usa **mcr** (microsoft container registry). En caso de utilizar otro *registry* debemos ingresar la dirección completa. 
+
+
+
+En [hub.docker.com](hub.docker.com) buscamos "node" y dentro del repositorio de la imagen oficial nos encontramos con muchas imagenes. Si vamos al apartado tags podremos ver la versión de Node y sobre qué distro+versión de Linux está instalado. Podremos filtrar por versión 14 y veremos nuevamente muchas imagenes y a su vez cada una tendrá distintas versiones segun el CPU (cuando hagamos el pull descargará la más adecuada para nuestra arquitectura).
+
+
+
+Siempre debemos especificar una versión ya que si ponemos simplemente`FROM node` es como si pusiéramos `FROM node:latest` y esto no es recomendable ya que si en un futuro volvemos a reconstruir la imagen de la aplicación y hay una versión de Node, la reconstruirá con esa nueva versión.
+
+
+
+Por ejemplo dentro del tag `14-buster` veremos:
+
+* linux/amd64
+* linux/arm/v7
+* linux/arm64/v8
+
+Todas estas pesan comprimidas alrededor de 300 MB y descomprimida estará cerca del GB. Como buscamos velocidad en nuestros deployments utilizaremos una **Alpine Linux**, buscando el tag `14.16.0-alpine3.13` que tiene un tamaño comprimido cercano a los 40 MB.
+
+> Agosto 2021 cuando dentro de la imagen oficial de Node filtramos por Alpine nos encontramos con `current-alpine3.14`.
+
+En el `Dockerfile` pondremos `FROM node:14.16.0-alpine3.13` y para construir la imagen desde el directorio del proyecto, pondremos:
+
+```bash
+docker build -t react-app .
+```
+
+* Con `-t react-app` le indicamos el tag que queremos darle a la imagen.
+* Con `.` indicamos donde puede encontrar el archivo `Dockerfile`
+
+
+
+Con `docker images` o `docker image ls` veremos todas las imagenes disponibles.
+
+Para iniciar un contenedor con esta imagen ejecutamos 
+
+```bash
+docker run -it react-app
+```
+
+* Con `-it` indicamos que queremos ejecutarlo en modo interactivo.
+
+  
+
+A partir de este momento estaremos en un entorno Node por lo que podremos poner código JavaScript y Node.js lo ejecutará. Como queremos navegar el filesystem, presionamos `Ctrl+C` dos veces y así detendremos el contenedor.
+
+
+
+```
+docker run -it react-app bash
+```
+
+Con `bash` indicamos el comando a ejecutar cuando iniciemos el contenedor.
+
+
+Pero como Alpine Linux no viene con Bash obtendremos un error. Usaremos en cambio shell que sí viene incorporado.
+
+```
+docker run -it react-app sh
+```
+
+Con `sh` indicamos que queremos ejecutar shell cuando iniciemos el contenedor.
+
+Luego podremos ejecutar `ls` y veremos todos los directorios de Linux o `node --version` para conocer la versión de Node que tenemos instalada.
+
+ Hasta ahora en esta imagen tenemos Alpine Linux y Node.js pero no tenemos los archivos de la nuestra aplicación por lo que debemos copiarlos.
+
+
+
+### Copiar Archivos de la Aplicación
+
+El siguiente paso es copiar los archivos de la aplicación en la imagen y esto lo hacemos en el `Dockerfile` con las instrucciones `COPY` o `ADD`  (que tiene algunas características adicionales). Solo podremos copiar cosas del directorio de trabajo actual (donde tenemos el `Dockerfile`). Esto es así ya que cuando ejecutamos `docker build -t react-app .` **Docker Client** envía a **Docker Engine** el contenido de este directorio (*build context*) y comienza a ejecutar las instrucciones del `Dockerfile`.
+
+* Si ponemos `COPY package.json /app` copiaría el archivo `package.json` en el directorio `/app` dentro de la imagen que como no existe lo crearía. 
+
+* Si queremos copiar más de un archivo usamos `COPY package.json README.md /app/` notar que es necesario terminar con `/` cuando copiamos más de un archivo, de lo contrario obtendremos un error de sintaxis.
+* Si queremos copiar todos los archivos que cumplen un cierto patrón `COPY package*.json /app/`
+
+(video 33 1min 48)
 
 Versionar imagenes
 
