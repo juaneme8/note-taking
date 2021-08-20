@@ -295,7 +295,7 @@ A partir de este momento estaremos en un entorno Node por lo que podremos poner 
 
 
 
-```
+```bash
 docker run -it react-app bash
 ```
 
@@ -304,7 +304,7 @@ Con `bash` indicamos el comando a ejecutar cuando iniciemos el contenedor.
 
 Pero como Alpine Linux no viene con Bash obtendremos un error. Usaremos en cambio shell que sí viene incorporado.
 
-```
+```bash
 docker run -it react-app sh
 ```
 
@@ -320,12 +320,90 @@ Luego podremos ejecutar `ls` y veremos todos los directorios de Linux o `node --
 
 El siguiente paso es copiar los archivos de la aplicación en la imagen y esto lo hacemos en el `Dockerfile` con las instrucciones `COPY` o `ADD`  (que tiene algunas características adicionales). Solo podremos copiar cosas del directorio de trabajo actual (donde tenemos el `Dockerfile`). Esto es así ya que cuando ejecutamos `docker build -t react-app .` **Docker Client** envía a **Docker Engine** el contenido de este directorio (*build context*) y comienza a ejecutar las instrucciones del `Dockerfile`.
 
-* Si ponemos `COPY package.json /app` copiaría el archivo `package.json` en el directorio `/app` dentro de la imagen que como no existe lo crearía. 
+* Si queremos copiar `package.json` en el directorio `/app` dentro de la imagen (como no existe ese directorio lo creará). 
 
-* Si queremos copiar más de un archivo usamos `COPY package.json README.md /app/` notar que es necesario terminar con `/` cuando copiamos más de un archivo, de lo contrario obtendremos un error de sintaxis.
-* Si queremos copiar todos los archivos que cumplen un cierto patrón `COPY package*.json /app/`
+```
+COPY package.json /app
+```
 
-(video 33 1min 48)
+
+
+* Si queremos copiar más de un archivo:
+
+```dockerfile
+COPY package.json README.md /app/
+```
+
+> Notar que es necesario terminar con `/` cuando copiamos más de un archivo, de lo contrario obtendremos un error de sintaxis.
+
+
+
+* Si queremos copiar todos los archivos que cumplen un cierto patrón:
+
+```dockerfile
+COPY package*.json /app/
+```
+
+
+
+En nuestro caso queremos copiar todo el contenido del directorio de trabajo en `/app         `
+
+```dockerfile
+COPY . /app
+```
+
+Con `/app` estamos utilizando una ruta absoluta, si queremos utilizar rutas relativas debemos utilizar la instrucción `WORKDIR`
+
+```dockerfile
+WORKDIR /app
+COPY . .
+```
+
+
+
+* Si queremos copiar un archivo que tiene un espacio en su nombre, debemos utilizar una array de strings donde cada elemento representa un argumento de la instrucción.
+
+```dockerfile
+COPY ["hello world.txt", "."]
+```
+
+
+
+Utilizando la instrucción `ADD` podremos realizar lo mismo que con `COPY` y dos funciones extra:
+
+* Copiar un archivo de una URL en nuestra imagen
+
+```dockerfile
+ADD http://.../file.json .
+```
+
+* Podremos pasarle un archivo comprimido y lo descomprimirá automáticamente en el directorio
+
+```dockerfile
+ADD file.zip .
+```
+
+La instrucción `ADD` es aconsejable utilizarlo sólo cuando necesitemos estas dos caracterísitcas, siempre que sea posible utilizar `COPY`
+
+
+
+Por último creamos la imagen e iniciamos un contenedor con esta imagen:
+
+```bash
+docker build -t react-app .
+```
+
+```
+docker run -it react-app sh
+```
+
+
+
+Veremos que estamos en `/app` ya que es nuestro diectorio de trabajo y con `ls` podremos ver todos los archivos y directorios que tenemos en nuestro proyecto (incluido `node_modules`).
+
+
+
+ (video 33 1min 48)
 
 Versionar imagenes
 
