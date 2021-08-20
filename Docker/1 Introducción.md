@@ -1,6 +1,6 @@
 # Docker
 
-> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 37 COMPLETO)
+> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 38 COMPLETO)
 
 ## ¿Qué es Docker?
 
@@ -209,9 +209,13 @@ Si estamos logueados con root y queremos loguearnos como un usuario normal **en 
 
 
 
-# Imagenes Docker
+## Aplicación Docker
 
-## Imagenes vs Contenedores
+Cuando tenemos una aplicación React y queremos correrla en una nueuva máquina debemos seguir una serie de pasos empezando por instalar Node.js, ejecutar `npm install` y por último `npm start` para iniciarla. Utilizando Docker buscamos no tener que seguir todos estos pasos cada vez que deseamos utilizar una máquina nueva. Vamos a *dockerizar* la aplicación y meterla en una imagen con la cual podremos deployarla en cualquier lugar.
+
+
+
+### Imagenes vs Contenedores
 
 Las **imagenes** contienen todos todos archivos y configuraciones que necesita la aplicación para correr: un sistema operativo reducido, librerías externas, archivos de la aplicación, variables de entorno. Una vez que tenemos una imagen podemos iniciar un contenedor de ella.
 
@@ -220,10 +224,6 @@ Los **contenedores** proporcionan un entorno aislado para ejecutar la explicaci�
 Si tenemos un contenedor corriendo y desde otra ventana de la terminal ejecutamos `docker ps` podremos obtener el *container id* y para iniciar otro contenedor a partir de la misma imagen debemos ejecutar `docker run -it ubuntu` (siendo `ubunto` el nombre del contenedor). Sin embargo si vamos a `/home` no veremos los mismos archivos que hayamos generado allí usando el otro contenedor. **Es por eso que decimos que un contenedor es un entorno aislado** que obtiene el filesystem de la imagen pero tiene su propia capa de escritura (de modo que lo que escribamos en uno, no será visible en los otros contenedores). Sin embargo, luego veremos que existe un modo de compartir datos entre contenedores.
 
 
-
-## Dockerizar Aplicación
-
-Cuando tenemos una aplicación React y queremos correrla en una nueuva máquina debemos seguir una serie de pasos empezando por instalar Node.js, ejecutar `npm install` y por último `npm start` para iniciarla. Utilizando Docker buscamos no tener que seguir todos estos pasos cada vez que deseamos utilizar una máquina nueva. Vamos a *dockerizar* la aplicación y meterla en una imagen con la cual podremos deployarla en cualquier lugar.
 
 ### `Dockerfile`
 
@@ -439,6 +439,10 @@ Luego creamos la imagen (y como parte del build se descargarán  e instalarán l
 
 
 
+> Cada vez que volvamos a crear la imagen tardará un tiempo considerable debido a la instalación de las dependencias y esto es algo que luego optimizaremos.
+
+
+
 ### Comando `ENV`
 
 El comando `ENV` nos permite setear variables de entorno.
@@ -467,7 +471,7 @@ Luego reconstruimos la imagen e iniciamos un nuevo contenedor.
 
 ### Comando `EXPOSE`
 
- Cuando trabajamos con React.js de manera tradicional, ejecutamos `npm start` y luego vamos a `localhost:3000` para acceder a la aplicación. Cuando ejecutemos esta aplicación en un contenedor **el puerto estará abierto en el contenedor** y no en el host. En la misma máquina podremos tener múltiples contenedores corriendo la misma imagen y todos ellos estarán escuchando en el puerto 3000. El puerto 3000 del host no se mapeará automáticamente con los contenedores. Veremos luego cómo mapear un puerto del host con un puerto del contenedor.
+Cuando trabajamos con React.js de manera tradicional, ejecutamos `npm start` y luego vamos a `localhost:3000` para acceder a la aplicación. Cuando ejecutemos esta aplicación en un contenedor **el puerto estará abierto en el contenedor** pero no en el host. En la misma máquina podremos tener múltiples contenedores corriendo la misma imagen y todos ellos estarán escuchando en el puerto 3000. Veremos luego cómo mapear un puerto del host con un puerto del contenedor.
 
 
 
@@ -479,17 +483,72 @@ EXPOSE 3000
 
 
 
+### Comando `USER`
+
+ Por default Docker ejecuta las aplicaciones con el usuario `root` que es el que tienen el nivel de privilegios más alto lo cual podría ocasionar agujeros de seguridad en nuestra aplicación. Debemos crear un usuario regular con privilegios limitados.
+
+Antes de hacerlo en el `Dockerfile` lo haremos en una sesión de shell en Alpine Linux:
+
+```bash
+docker run -it alpine
+```
 
 
 
+En primer lugar con el comando `addgroup` vamos a crear un grupo primario llamado `app` para luego crear un usuario y agregarlo a dicho grupo:
 
-Versionar imagenes
+```bash
+addgroup app
+```
 
-Compartir imagenes
 
-Guardar y cargar imagenes
 
-Reducir tamaño imagenes
+A continuación creamos un usuario con el comando `adduser` (el comando `useradd` no está disponible en Alpine Linux). Lo hacemos con las opciones `-G` para crear un grupo primario y `-S` para crear un *system user* (no es un usuario normal sino que es un usuario para ejecutar la aplicación).
 
-Acelerar buillds
+```bash
+adduser -S -G app app
+```
 
+> Es una práctica común darle el mismo nombre al grupo y al usuario (en este caso ambos son `app`).
+
+
+
+Para verificar los grupos del usuario `app`
+
+```bash
+groups app
+```
+
+
+
+Es posible combinar los primeros dos comandos en uno que realice ambas tareas:
+
+```bash
+addgroup app && adduser -S -G app app
+```
+
+
+
+Esta línea es la que agregaremos al `Dockerfile`
+
+```dockerfile
+RUN addgroup app && adduser -S -G app app
+```
+
+
+
+Luego indicamos que queremos utilizar el usuario `app` para todos los comandos que se ejecuten a continuación:
+
+```dockerfile
+USER app
+```
+
+
+
+Luego reconstruimos la imagen e iniciamos un nuevo contenedor. Para verificar que el usuario actual de la sesión es `app` ejecutamos:
+
+```
+whoami
+```
+
+Si ejecutamos `ls -l` veremos que todos los archivos son de `root` y como somos `app` caemos dentro de "others" en términos de permisos, por lo que como tiene `r--` no tenemos permisos de ejecución.
