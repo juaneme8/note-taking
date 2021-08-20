@@ -1,6 +1,6 @@
 # Docker
 
-> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 32 COMPLETO)
+> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 34 COMPLETO)
 
 ## ¿Qué es Docker?
 
@@ -225,7 +225,7 @@ Si tenemos un contenedor corriendo y desde otra ventana de la terminal ejecutamo
 
 Cuando tenemos una aplicación React y queremos correrla en una nueuva máquina debemos seguir una serie de pasos empezando por instalar Node.js, ejecutar `npm install` y por último `npm start` para iniciarla. Utilizando Docker buscamos no tener que seguir todos estos pasos cada vez que deseamos utilizar una máquina nueva. Vamos a *dockerizar* la aplicación y meterla en una imagen con la cual podremos deployarla en cualquier lugar.
 
-### Dockerfile
+### `Dockerfile`
 
 El archivo `Dockerfile` contiene instrucciones para construir la imagen, ya hemos visto algunas ahora repasaremos la lista completa:
 
@@ -242,9 +242,9 @@ El archivo `Dockerfile` contiene instrucciones para construir la imagen, ya hemo
 
 
 
-### Establecer Imagen Base
+### Comando `FROM`
 
-En primer lugar creamos un archivo `Dockerfile` y vamos a trabajar con la instrucción `FROM` que como dijimos usaremos para especificar la imagen base. La imagen base podrá ser un sistema operativo como Linux o Windows o un OS + un entorno de ejecución (si somos desarrolladores JavaScript nos convendrá empezar por una imagen node). En [docs.docker.com/samples/](https://docs.docker.com/samples/) podemos encontrar ejemplos de `Dockerfile` para los distintos stacks tecnológicos. 
+El comando `FROM` nos permite establecer la imagen base que podrá ser un sistema operativo como Linux o Windows o un OS + un entorno de ejecución (si somos desarrolladores JavaScript nos convendrá empezar por una imagen node). En [docs.docker.com/samples/](https://docs.docker.com/samples/) podemos encontrar ejemplos de `Dockerfile` para los distintos stacks tecnológicos. 
 
 > Las imágenes pueden estar en cualquier *registry*, el default es **DockerHub** pero por ejemplo Microsoft usa **mcr** (microsoft container registry). En caso de utilizar otro *registry* debemos ingresar la dirección completa. 
 
@@ -268,7 +268,13 @@ Todas estas pesan comprimidas alrededor de 300 MB y descomprimida estará cerca 
 
 > Agosto 2021 cuando dentro de la imagen oficial de Node filtramos por Alpine nos encontramos con `current-alpine3.14`.
 
-En el `Dockerfile` pondremos `FROM node:14.16.0-alpine3.13` y para construir la imagen desde el directorio del proyecto, pondremos:
+En el `Dockerfile` ponemos:
+
+```dockerfile
+FROM node:14.16.0-alpine3.13
+```
+
+Luego para construir la imagen desde el directorio del proyecto:
 
 ```bash
 docker build -t react-app .
@@ -316,7 +322,7 @@ Luego podremos ejecutar `ls` y veremos todos los directorios de Linux o `node --
 
 
 
-### Copiar Archivos de la Aplicación
+### Comando `COPY`
 
 El siguiente paso es copiar los archivos de la aplicación en la imagen y esto lo hacemos en el `Dockerfile` con las instrucciones `COPY` o `ADD`  (que tiene algunas características adicionales). Solo podremos copiar cosas del directorio de trabajo actual (donde tenemos el `Dockerfile`). Esto es así ya que cuando ejecutamos `docker build -t react-app .` **Docker Client** envía a **Docker Engine** el contenido de este directorio (*build context o directory context*) y comienza a ejecutar las instrucciones del `Dockerfile`.
 
@@ -369,7 +375,9 @@ COPY ["hello world.txt", "."]
 
 
 
-Utilizando la instrucción `ADD` podremos realizar lo mismo que con `COPY` y dos funciones extra:
+### Comando `ADD`
+
+El comando `ADD` nos permite realizar lo mismo que con `COPY` y dos funciones extra:
 
 * Copiar un archivo de una URL en nuestra imagen
 
@@ -387,23 +395,11 @@ La instrucción `ADD` es aconsejable utilizarlo sólo cuando necesitemos estas d
 
 
 
-Por último creamos la imagen e iniciamos un contenedor con esta imagen:
-
-```bash
-docker build -t react-app .
-```
-
-```
-docker run -it react-app sh
-```
+Por último creamos la imagen e iniciamos un contenedor con esta imagen y veremos que estamos en `/app` ya que es nuestro directorio de trabajo y con `ls` podremos ver todos los archivos y directorios que tenemos en nuestro proyecto (incluido `node_modules`).
 
 
 
-Veremos que estamos en `/app` ya que es nuestro diectorio de trabajo y con `ls` podremos ver todos los archivos y directorios que tenemos en nuestro proyecto (incluido `node_modules`).
-
-
-
-#### `.dockerignore` 
+### `.dockerignore` 
 
 En el procedimiento anterior hemos copiado `node_modules` lo cual ocasiona que el *build context* sea bastante pesado (cercano a los 150 MB, cosa que vemos en el output del build donde dice *transferrring context*) aún en un proyecto que casi no tiene funcionalidades. A la hora del deployment veremos que el Docker Client debe hablar con un Docker Engine en otra máquina y transferir el contenido del build context por medio de la red. No es necesario transferir este directorio ya que en `package.json` tenemos definidas todas las dependencias y podremos reinstalarlas en la imagen de destino.
 
@@ -417,7 +413,35 @@ node_modules/
 
 Si ahora ejecutamos nuevamente el build veremos que nos aparece como *transferring context* un valor cercano a los 10 KB. 
 
-Como no tenemos la carpeta `node_module`
+
+
+Como no tenemos la carpeta `node_modules` debemos ejecutar `npm install` cosa que haremos a continuación con el comando `RUN`.
+
+
+
+### Comando `RUN`
+
+El comando `RUN` nos permitirá ejecutar cualquier comando y en nuestro caso lo usaremos para instalar las dependencias.
+
+Por lo que en el `Dockerfile` agregamos:
+
+```dockerfile
+RUN npm install
+```
+
+
+
+> Si queremos instalar por ejemplo Python podríamos hacer `RUN apk install python` (usamos `apk` en lugar de `apt` ya que en Alpine Linux viene este manejador de paquetes).
+
+
+
+Luego creamos la imagen (y como parte del build se descargarán  e instalarán las dependencias) e iniciamos un nuevo contenedor. Ahora si hacemos `ls -1` veremos que tenemos la carpeta `node_modules`.
+
+
+
+
+
+
 
 
 
@@ -430,3 +454,4 @@ Guardar y cargar imagenes
 Reducir tamaño imagenes
 
 Acelerar buillds
+
