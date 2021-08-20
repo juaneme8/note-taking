@@ -318,7 +318,7 @@ Luego podremos ejecutar `ls` y veremos todos los directorios de Linux o `node --
 
 ### Copiar Archivos de la Aplicación
 
-El siguiente paso es copiar los archivos de la aplicación en la imagen y esto lo hacemos en el `Dockerfile` con las instrucciones `COPY` o `ADD`  (que tiene algunas características adicionales). Solo podremos copiar cosas del directorio de trabajo actual (donde tenemos el `Dockerfile`). Esto es así ya que cuando ejecutamos `docker build -t react-app .` **Docker Client** envía a **Docker Engine** el contenido de este directorio (*build context*) y comienza a ejecutar las instrucciones del `Dockerfile`.
+El siguiente paso es copiar los archivos de la aplicación en la imagen y esto lo hacemos en el `Dockerfile` con las instrucciones `COPY` o `ADD`  (que tiene algunas características adicionales). Solo podremos copiar cosas del directorio de trabajo actual (donde tenemos el `Dockerfile`). Esto es así ya que cuando ejecutamos `docker build -t react-app .` **Docker Client** envía a **Docker Engine** el contenido de este directorio (*build context o directory context*) y comienza a ejecutar las instrucciones del `Dockerfile`.
 
 * Si queremos copiar `package.json` en el directorio `/app` dentro de la imagen (como no existe ese directorio lo creará). 
 
@@ -403,7 +403,23 @@ Veremos que estamos en `/app` ya que es nuestro diectorio de trabajo y con `ls` 
 
 
 
- (video 33 1min 48)
+#### `.dockerignore` 
+
+En el procedimiento anterior hemos copiado `node_modules` lo cual ocasiona que el *build context* sea bastante pesado (cercano a los 150 MB, cosa que vemos en el output del build donde dice *transferrring context*) aún en un proyecto que casi no tiene funcionalidades. A la hora del deployment veremos que el Docker Client debe hablar con un Docker Engine en otra máquina y transferir el contenido del build context por medio de la red. No es necesario transferir este directorio ya que en `package.json` tenemos definidas todas las dependencias y podremos reinstalarlas en la imagen de destino.
+
+El build context es menor por lo que debemos transfererir **menos datos por la red**, lo que ocasionará que el build será más **rápido**.
+
+De la misma manera que tenemos el archivo `.gitignore`, podemos crear en la raíz un archivo `.dockerignore` y listar allí los archivos y directorios a excluir.
+
+```
+node_modules/
+```
+
+Si ahora ejecutamos nuevamente el build veremos que nos aparece como *transferring context* un valor cercano a los 10 KB. 
+
+Como no tenemos la carpeta `node_module`
+
+
 
 Versionar imagenes
 
