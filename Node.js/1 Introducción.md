@@ -1,0 +1,79 @@
+# Node.js
+>The Net Ninja - Node.js Crash Course (2020) - [Repositorio ](https://github.com/iamshaunjp/node-crash-course)
+>Se suman apuntes
+>* The Net Ninja - Node JS Tutorial for Beginners (2016).
+>* Code with Mosh - The Complete Node.js Course 
+
+## Introducción
+Antiguamente JavaScript corría únicamente en navegadores en el front-end y lo usábamos para aportar interactividad al sitio (por ejemplo al trabajar con Click Events). Node.js nos permite ejecutar código de JavaScript en el servidor o en nuestra pc por lo que decimos que es un _runtime environment_.
+
+Las computadoras entienden **machine code**, como es difícil de leer o escribir (es similar al binario). Es por eso que se utiliza **assembly language** el cual es un poco más simple de entender y ensambla el código en machine code. Como reviste bastante complejidad para leer y escribir, por encima del assembly language nos encontramos con lenguajes de programación como **C++** los cuales son abstracciones del código assembler. En definitiva el código C++ es compilado en machine code por lo que será entendido por la computadora. **JavaScript** es todavía más abstracto respecto a machine code que C++ para simplificar la programación. Sin embargo las computadoras no entienden de manera directa JavaScript ni pueden compilarlo en machine code. Es por eso que no podemos ejecutar JavaScript de manera directa en una computadora, pero sí podemos hacerlo dentro de un navegador. Esto es posible gracias al motor llamado **V8 engine** que se trata de un programa escrito en C++ por Google y compila el JavaScript a machine code en tiempo real. Sin embargo sólo podremos hacerlo dentro del navegador y acá es donde Node.js entra en escena. Se trata de un programa escrito en C++ que utiliza el V8 Engine y como sí podemos ejecutar código C++ en la computadora, seremos capaces de correr código JavaScript tanto en nuestra computadora como en el server.
+Node.js no es simplemente un wrapper del v8 engine, sino que aporta funcionalidades extra a JavaScript como ser:
+* Lectura y escritura de archivos en la computadora
+* Conexión a una base de datos
+* Actuar como servidor de contenido
+
+Como contrapartida perdimos acceso al DOM (document object model) por lo que no podremos interacturar con elementos HTML. 
+> Recordar que document forma parte de window object el cual no existe en Node.js, sino que contamos con global object.
+
+## Características Node.js
+* **Multiplataforma**
+* **Open-source**
+* Permite crear **REST API**s (application programming interface) 
+* Es un **runtime environment** a diferencia de alternativas como ASP.NET, Ruby on Rails, Django que son frameworks. Otra alternativa es Firebase que es entra dentro de la categoría de backend as a service (BaaS).
+* Node tiene una naturaleza **asincrónica** o no bloqueante. Gracias a esto permite crear aplicaciones **escalables**. En el siguiente ejemplo de "hola mundo", pueden atenderse muchas conexiones simultáneamente sin agregar más hardware. Por cada conexión, se activa la devolución de llamada o _callback_, pero si no hay trabajo que hacer, Node.js se dormirá.
+```javascript
+const http = require('http');
+
+const hostname = '127.0.0.1';
+const port = 3000;
+
+const server = http.createServer((req, res) => {
+  res.statusCode = 200;
+  res.setHeader('Content-Type', 'text/plain');
+  res.end('Hola Mundo');
+});
+
+server.listen(port, hostname, () => {
+  console.log(`El servidor ejecutándose en http://${hostname}:${port}/`);
+});
+```
+* Es utilizado por **PayPal, LinkedIn, Netflix, Trello, Walmart, Ebay, NASA**, etc.
+* Si ya manejamos JavaScript no es necesario el aprendizaje de un nuevo lenguaje para el server y es posible compartir código entre front-end y back-end.
+* Tiene una **comunidad** muy grande
+* Gran ecosistema de **open source libraries** que posibilita no tener que desarrollar de cero los building blocks de nuestra aplicación logrando así concentrarnos en lo más específico de nuestro programa.
+> Podremos buscar paquetes en  [npmjs](https://www.npmjs.com/)
+> Podremos comparar paquetes en [npm trends](https://www.npmtrends.com/) 
+* Es ideal para aplicaciones real-time como ser chats gracias a los websockets.
+* Es ideal para data intensive apps pero no para cpu intensive apps (ya que los cálculos harán que el resto de los cliente deba esperar).
+
+## El Rol de JavaScript
+El rol de JavaScript consiste en ejecutar código JavaScript del lado del servidor y manejar requests provenientes del navegador. Por ejemplo ante un usuario que visita el sitio, el navegador hará un request al server por lo que el servidor Node ejecutará código JavaScript para reaccionar a esa solicitud (ya sea comunicandose con una DB o archivos del servidor) y luego formulará una respuesta y la enviará al navegador. Esta respuesta podrá ser HTML (con contenido dinámico), imágenes, CSS, etc. 
+
+## Arquitectura de Node
+En Node.js contamos con un único thread. Cuando un cliente genera un request por ejemplo para procesar una query a una DB, el **single thread** se usará para servir a otro request de otro cliente y mientras tanto monitorea la **event queue** ya que es allí donde la DB pondrá un mensaje de **data ready**.
+
+Arquitecturas de frameworks como ASP.NET en cambio, a **cada request lo manejan con un thread** y en caso de tener un gran número de clientes al mismo tiempo podríamos quedarnos sin threads para atenderlos. En ese caso será necesario esperar a que se liberen threads o bien incorporar más hardware. Es decir que no estamos usando los recursos de manera eficiente.
+Sin embargo es posible implementar una arquitectura asincrónica pero esto demandará trabajo extra, en contraposición con Node.js donde es asincrónica por default.
+
+## Instalación de Node.js
+Descargar de [https://nodejs.org/en/](https://nodejs.org/en/) en el botón de la versión LTS.
+Veremos que tenemos la **versión LTS** (long-term support) que es la versión de número **par** y la versión de número **impar** con las últimas características.
+
+Para verificar si ya lo tenemos instalado ingresar en la terminal:
+`node --version` o `node -v` y en caso de tenerlo veremos el número de versión.
+
+> Es aconsejable actualizar a la versión actual.
+
+> Reiniciar la terminal a la hora de volver a chequear el número de versión.
+
+> En caso de utilizar Unix o Mac es posible también utilizar `nvm` para instalar la versión deseada.
+
+Ingresando `node` podremos comenzar a escribir código JavaScript sin embargo utilizaremos un editor de texto (Visual Studio Code, Sublime, Atom).
+
+```bash
+mkdir first-app
+cd first-app
+code .
+```
+Luego suponiendo que creamos el archivo `test.js` para ejecutar el código ingresamos `node test.js` o bien `node test`

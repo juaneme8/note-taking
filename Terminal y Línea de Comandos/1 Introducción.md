@@ -709,7 +709,7 @@ grep -ir hello .
 
 > Si queremos buscar los scripts que tenemos en un determinado proyecto con Node podemos hacer lo siguiente `cat package.json | grep -A 5 scripts`.
 >
-> Con `-A 5` (de after) indicamos que queremos mostrar también las 5 líneas siguientes a la aparición de la cadena "scripts".
+> Con `-A 5` (de after) indicamos que queremos mostrar también las 5 líneas siguientes a la aparición de la cadena "scripts". Si queremos ver `5` líneas hacia arriba y hacia abajo podemos ejecutar `-5` o `-C 5`
 
 
 
