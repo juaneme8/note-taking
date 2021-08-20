@@ -1,6 +1,6 @@
 # Docker
 
-> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 34 COMPLETO)
+> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 36 COMPLETO)
 
 ## ¿Qué es Docker?
 
@@ -436,6 +436,32 @@ RUN npm install
 
 
 Luego creamos la imagen (y como parte del build se descargarán  e instalarán las dependencias) e iniciamos un nuevo contenedor. Ahora si hacemos `ls -1` veremos que tenemos la carpeta `node_modules`.
+
+
+
+### Comando `ENV`
+
+El comando `ENV` nos permite setear variables de entorno.
+
+```dockerfile
+ENV API_URL=http://api.myapp.com/
+```
+
+
+
+> También es posible utilizar una sintaxis antigua que omite el signo `=`
+
+```dockerfile
+ENV API_URL http://api.myapp.com/
+```
+
+
+
+Luego reconstruimos la imagen e iniciamos un nuevo contenedor. 
+
+* Con `printenv` podremos ver todas las variables de entorno
+* Con `printenv API_URL` podremos ver el valor de esa variable en particular.
+* Con `echo $API_URL` también podremos ver el valor de esa variable.
 
 
 
