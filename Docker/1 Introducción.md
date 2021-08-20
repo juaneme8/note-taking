@@ -1,6 +1,6 @@
 # Docker
 
-> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 36 COMPLETO)
+> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 37 COMPLETO)
 
 ## ¿Qué es Docker?
 
@@ -464,6 +464,18 @@ Luego reconstruimos la imagen e iniciamos un nuevo contenedor.
 * Con `echo $API_URL` también podremos ver el valor de esa variable.
 
 
+
+### Comando `EXPOSE`
+
+ Cuando trabajamos con React.js de manera tradicional, ejecutamos `npm start` y luego vamos a `localhost:3000` para acceder a la aplicación. Cuando ejecutemos esta aplicación en un contenedor **el puerto estará abierto en el contenedor** y no en el host. En la misma máquina podremos tener múltiples contenedores corriendo la misma imagen y todos ellos estarán escuchando en el puerto 3000. El puerto 3000 del host no se mapeará automáticamente con los contenedores. Veremos luego cómo mapear un puerto del host con un puerto del contenedor.
+
+
+
+El comando `EXPOSE` nos permite **documentar** en qué puerto estará escuchando eventualmente este contenedor, pero no tiene nada que ver con publicar puertos del host por lo que tendremos luego que mapear un puerto del host con el 3000 del contenedor.
+
+```
+EXPOSE 3000
+```
 
 
 
