@@ -1,6 +1,6 @@
 # Docker
 
-> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 42 COMPLETO)
+> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 43 COMPLETO)
 
 ## ¿Qué es Docker?
 
@@ -847,6 +847,10 @@ docker image tag f4b react-app:1
 
 
 
+> También sería posible cambiarle el nombre completamente `docker image f4b juaneme8/react-app:2` en este caso hemos especificado el `2` como tag y si no ponemos  ninguno usará `latest`.
+
+
+
 #### `latest` desactualizado
 
 Si tenemos una imagen con la etiqueta latest y luego creamos una nueva imagen con una etiqueta en particular puede que ejecutemos `docker images` y pensemos que la más actual es una distinta de la que realmente es. En ese caso debemos actualizarla manualmente añadiendole a la nueva la etiqueta `latest` del modo visto. Suponiendo que su ID comienza con `b06`:
@@ -855,3 +859,62 @@ Si tenemos una imagen con la etiqueta latest y luego creamos una nueva imagen co
 docker image tag b06 react-app:latest
 ```
 
+
+
+### Compartir Imágenes
+
+Para compartir imagenes debemos tener una cuenta en [hub.docker.com](hub.docker.com) y luego debemos crear un repositorio que puede alojar múltiples imagenes.
+
+> Con una cuenta gratuita sólo es posible tener un repositorio privado. En la versión paga también es posible vincular con una cuenta GitHub para que cada vez que hagamos un push, DockerHub haga un pull y genere automáticamente una imagen.
+
+Suponiendo que creamo sun repositorio `react-app` debemos renombrar la imagen a `juaneme8/react-app` lo cual hacemos con:
+
+```
+docker image f4b juaneme8/react-app:2
+```
+
+
+
+Luego debemos loguearnos para lo que nos pedirá usuario y contraseña:
+
+```
+docker login
+```
+
+
+
+Finalmente hacemos un push a ese repositorio
+
+```
+docker push juaneme8/react-app:2
+```
+
+ 
+
+A continuación **realizará el push de cada uno de los layers de la imagen**. La primera vez demorará bastante tiempo debido a que está pusheando el layer con las dependencias de npm pero las sucesivas será más rápido (en la medida que no cambiemos las dependencias).
+
+
+
+Luego cuando hagamos cambios tendremos que hacer nuevamente el build
+
+```
+docker build -t react-app:3 .
+```
+
+Le asignamos un nuevo tag a la imagen con nuestro nombre de usuario:
+
+```
+docker image tag react-app:3 juaneme8/react-app:3
+```
+
+Finalmente hacemos el push y veremos que varios de los layers ya existen por lo que es mucho más rápido que la primera vez:
+
+```
+docker push juaneme8/react-app:3
+```
+
+
+
+En DockerHub si exploramos el repositorio veremos ahora ambos tags.
+
+A partir de este momento podremos hacer el pull de la imagen en cualquier máquina que tenga Docker.
