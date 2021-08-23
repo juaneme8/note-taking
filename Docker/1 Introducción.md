@@ -1,6 +1,6 @@
 # Docker
 
-> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 38 COMPLETO)
+> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 40 COMPLETO)
 
 ## ¿Qué es Docker?
 
@@ -552,3 +552,169 @@ whoami
 ```
 
 Si ejecutamos `ls -l` veremos que todos los archivos son de `root` y como somos `app` caemos dentro de "others" en términos de permisos, por lo que como tiene `r--` no tenemos permisos de ejecución.
+
+
+
+### Comando `CMD`
+
+Normalmente para iniciar la aplicación desde el directorio de la aplicación ejecutamos `npm start`
+
+
+
+Como ya tenemos la imagen, para iniciar el contenedor en este caso no utilizaremos el modo interactivo porque no queremos interactuar (correr una sesión de shell) con el contenedor, sino que queremos en cambio ejecutar ese comando
+
+```bash
+docker run react-app npm start
+```
+
+Sin embargo obtendremos un error **permission denied** ya que si analizamos el `Dockerfile`
+
+```dockerfile
+FROM node:14.16.0-alpine3.13
+WORKDIR /app
+COPY . .
+RUN npm install
+ENV API_URL=http://api.myapp.com/
+EXPOSE 3000
+RUN addgroup app && adduser -S -G app app
+USER app
+```
+
+Como podemos ver estamos ejecutando todos los comandos como `root` y a lo último estamos cambiando `app` que es un usuario con privilegios limitados, por lo que colocamos los últimos dos comandos al comienzo:
+
+```dockerfile
+FROM node:14.16.0-alpine3.13
+RUN addgroup app && adduser -S -G app app
+USER app
+WORKDIR /app
+COPY . .
+RUN npm install
+ENV API_URL=http://api.myapp.com/
+EXPOSE 3000
+```
+
+Reconstruimos la imagen e iniciamos nuevamente el contenedor.
+
+```bash
+docker build -t react-app .
+docker run react-app npm start
+```
+
+
+
+Veremos que el webserver inicia en el puerto 3000 pero como ya dijimos es el puerto 3000 del contenedor y no del host, por lo que si entramos a http://localhost:3000 no veremos la aplicación.
+
+Para evitar tener que ingresar `npm start` cada vez que iniciamos el contenedor es que utilizamos el comando `CMD`, con el cual establecemos el **comando default**, en nuestro caso será:
+
+```dockerfile
+CMD npm start
+```
+
+> `CMD` represente el comando default por lo que si tenemos más de una línea con `CMD` sólo la última tendrá validez.
+
+
+
+Por lo que el `Dockerfile` nos queda:
+
+```dockerfile
+FROM node:14.16.0-alpine3.13
+RUN addgroup app && adduser -S -G app app
+USER app
+WORKDIR /app
+COPY . .
+RUN npm install
+ENV API_URL=http://api.myapp.com/
+EXPOSE 3000
+CMD npm start
+```
+
+Luego de reconstruir la imagen iniciamos el contenedor simplemente con:
+
+```bash
+docker run react-app
+```
+
+
+
+> Si bien es posible ejecutar comandos tanto con `RUN` como con `CMD`, tienen la diferencia que `RUN` es ejecutada durante *build-time* es decir mientras estamos construyendo la imagen y `CMD` durante *run-time es decir al iniciar el contenedor.
+
+
+
+El comando `CMD` podemos utilizarlo de dos formas:
+
+* **Shell form**: Docker lo ejecutará dentro de una shell separada (`/bin/sh` en Linux o `cmd` en Windows)
+
+```dockerfile
+CMD npm start
+```
+
+* **Execute form**: nos permite ejecutarlo directamente sin abrir otro proceso de shell. **Es una buena práctica utilizar esta opción**. Además es más simple y rápido hacer la limpieza de recursos al detener contenedores.
+
+```dockerfile
+CMD ["npm", "start"]
+```
+
+
+
+### Comando `ENTRYPOINT`
+
+El comando `ENTRYPOINT` es similar a `CMD` y tiene también la **shell form** y **execute form**:
+
+```dockerfile
+ENTRYPOINT npm start
+```
+
+```dockerfile
+ENTRYPOINT ["npm", "start"]
+```
+
+La diferencia está en que es más simple sobrescribir el comando default (es decir el invocado con `CMD`) de hecho esto es lo que hacemos por ejemplo cuando ejecutamos `docker run -it react-app sh`. Debemos utilizar `CMD` cuando queremos tener flexibilidad de que podremos sobrescribir el comando.
+
+En cambio para sobrescribir el `ENTRYPOINT` es necesario utilizar la opción`--entrypoint` . En la práctica conviene utilizar `ENTRYPOINT` cuando estamos seguros del comando que debe ser ejecutado al iniciar un contenedor.
+
+Sin embargo la elección de uno u otro comando depende de lo que quiera cada programador. Mosh personalmente utiliza`CMD`.
+
+
+
+### Optimizar Builds
+
+Cada vez que hacemos un cambio por más pequeño que sea debemos reconstruir la imagen y esto demora bastante tiempo, lo cual se debe principalmente a la instalación de las dependencias. 
+
+Una imagen es una colección de **layers**, pudiendo pensar a los layers como un pequeño file-system que incluye sólo los archivos modificados. Cuando Docker crea una nueva imagen ejecuta una a una las instrucciones del `Dockerfile` creando un nuevo layer que sólo incluye los archivos que fueron modificados como consecuencia de esa instrucción.
+
+Para la primera instrucción `FROM node:14.16.0-alpine3.13` Docker toma la imagen de Node y la coloca en un layer (en verdad la imagen de Node son varios layers pero a los fines prácticos suponemos que es uno sólo con todos los archivos de Linux y Node). Luego ejecuta la segunda instrucción `RUN addgroup app && adduser -S -G app app` y crea un nuevo layer con los archivos que se modifican luego de ejecutarlo (crea un nuevo layer ya que al crear un usuario o un grupo algo se escribe en el filesystem). De manera similar continúa ejecutando los siguientes comandos y creando layers.
+
+El comando `docker history` nos permite conocer los layers asociados a cada imagen. Podremos visualizar el comando que creo ese layer y el tamaño de esta capa. Debemos leer la tabla de abajo hacia arriba. Primero veremos una serie de layers de Linux y Node.js. Luego veremos un layer de poco tamaño correspondiente al comando para crear un grupo y crear un usuario y añadirlo a dicho grupo. Sobre este comando veremos `RUN /bin/sh -c addgroup app && adduser -S -G app` y el hecho de que sea ejecutado dentro de `/bin/sh` es por haber utilizado la forma "shell" en lugar de la forma "execute" de RUN. Cuando ejecutamos `npm install` (veremos también que es ejecutado en `/bin/sh` por haber usado la forma "shell") todas las dependencias son instaladas y almacenadas en esta capa (veremos que tiene un peso significativo).
+
+```bash
+docker history react-app
+```
+
+
+
+Docker cuenta con un **mecanismo de optimización** por el que cada vez que construye una imagen y llega a una instrucción, supongamos `FROM node:14.16.0-alpine3.13` se fijará si esta no ha cambiando respecto de la última vez y en ese caso no reconstruirá dicho layer sino que lo reutilizará de caché. Repitiendo lo mismo para las restantes instrucciones. Cuando llegamos a `COPY . .` bastará con haber cambiado una línea de código para que no pueda reutilizar ese layer y deberá reconstruirlo. Además como consecuencia de esto todos los layers subsiguientes deberán recontruirse también. Entre esas instrucciones tenemos `npm install` y es el cuello de botellas por el cual debemos esperar cerca de medio minuto para que se instalen todas las dependencias.
+
+Hasta ahora tenemos:
+
+```dockerfile
+COPY . .
+RUN npm install
+```
+
+Una solución puede ser copiar primero los archivos que necesitamos para instalar las dependencias `package.json` y `package-lock.json`, instalar y luego copiar el resto de los archivos. 
+
+```dockerfile
+COPY package*.json .
+RUN npm install
+COPY . .
+```
+
+Como consecuencia de esto al llegar a `COPY package*.json .` si no hemos cambiado ninguna de las dependencias, utilizará el layer del caché y lo mismo hará para `RUN npm install`.  Al llegar a `COPY . .` ese layer sí será reconstruído.
+
+A la hora de ejecutar `docker build -t react-app .` veremos la palabra **CACHED** cada vez que un layer sea reutilizado.
+
+> La primera vez que construyamos la imagen con este nuevo Dockerfile obviamente no reutilizará del caché los layers, pero en la medida que hagamos cambios y volvamos a reconstruirla lograremos el comportamiento esperado de no tener que esperar para la instalación de dependencias.
+
+
+
+La organización del `Dockerfile` para lograr la máxima optimización tiene que ser tal que las instrucciones estables se ubiquen en la parte superior y aquellas que cambian en la parte inferior.
