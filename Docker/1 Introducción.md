@@ -1,6 +1,6 @@
 # Docker
 
-> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 40 COMPLETO)
+> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 41 COMPLETO)
 
 ## ¿Qué es Docker?
 
@@ -221,7 +221,7 @@ Las **imagenes** contienen todos todos archivos y configuraciones que necesita l
 
 Los **contenedores** proporcionan un entorno aislado para ejecutar la explicación, pueden ser iniciados y detenidos y técnicamente son un proceso del sistema operativo. Se trata de un proceso especial que tiene su propio filesystem provisto por la imagen. 
 
-Si tenemos un contenedor corriendo y desde otra ventana de la terminal ejecutamos `docker ps` podremos obtener el *container id* y para iniciar otro contenedor a partir de la misma imagen debemos ejecutar `docker run -it ubuntu` (siendo `ubunto` el nombre del contenedor). Sin embargo si vamos a `/home` no veremos los mismos archivos que hayamos generado allí usando el otro contenedor. **Es por eso que decimos que un contenedor es un entorno aislado** que obtiene el filesystem de la imagen pero tiene su propia capa de escritura (de modo que lo que escribamos en uno, no será visible en los otros contenedores). Sin embargo, luego veremos que existe un modo de compartir datos entre contenedores.
+Si tenemos un contenedor corriendo y desde otra ventana de la terminal ejecutamos `docker ps` podremos obtener el *container id* y para iniciar otro contenedor a partir de la misma imagen debemos ejecutar `docker run -it ubuntu` (siendo `ubuntu` el nombre del contenedor). Sin embargo si vamos a `/home` no veremos los mismos archivos que hayamos generado allí usando el otro contenedor. **Es por eso que decimos que un contenedor es un entorno aislado** que obtiene el filesystem de la imagen pero tiene su propia capa de escritura (de modo que lo que escribamos en uno, no será visible en los otros contenedores). Sin embargo, luego veremos que existe un modo de compartir datos entre contenedores.
 
 
 
@@ -718,3 +718,58 @@ A la hora de ejecutar `docker build -t react-app .` veremos la palabra **CACHED*
 
 
 La organización del `Dockerfile` para lograr la máxima optimización tiene que ser tal que las instrucciones estables se ubiquen en la parte superior y aquellas que cambian en la parte inferior.
+
+
+
+### Eliminar Imágenes
+
+#### Eliminar Imagenes Colgadas
+
+Cuando ejecutamos `docker images` vemos algunas que tienen como nombre y como tag la palabra  `<none>` las cuales se originan en la medida que hacemos rebuilds de las imagenes. 
+
+
+
+Para eliminarlas debemos utilizar el siguiente comando:
+
+```bash
+docker image prune
+```
+
+Debemos verificar si tenemos contenedores corriendo versiones viejas de la imagen, lo cual hacemos con 
+
+```bash
+docker ps
+```
+
+También podemos visualizar aquellos que estan en estado detenido:
+
+```bash
+docker ps -a
+```
+
+Si queremos eliminar los contenedores detenidos que acabamos de visualizar:
+
+```bash
+docker container prune
+```
+
+Y Luego volvemos a ejecutar
+
+```
+docker image prune
+```
+
+
+
+#### Eliminar Imagenes con Tag
+
+Para eliminar una imagen podemos hacerlo con referenciando su nombre o su ID de imagen
+
+```bash
+docker image rm react-app
+```
+
+```
+docker image rm df3
+```
+
