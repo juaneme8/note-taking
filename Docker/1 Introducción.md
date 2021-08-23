@@ -1,6 +1,6 @@
 # Docker
 
-> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 41 COMPLETO)
+> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 42 COMPLETO)
 
 ## ¿Qué es Docker?
 
@@ -761,7 +761,7 @@ docker image prune
 
 
 
-#### Eliminar Imagenes con Tag
+#### Eliminar Imagenes con Nombre
 
 Para eliminar una imagen podemos hacerlo con referenciando su nombre o su ID de imagen
 
@@ -771,5 +771,87 @@ docker image rm react-app
 
 ```
 docker image rm df3
+```
+
+> En lugar de `rm` también podemos utilizar la palabra `remove`.
+
+### Etiquetar Imágenes
+
+Cuando hacemos un build (o rebuild) de una imagen o la bajamos de DockerHub, Docker le asigna automáticamente el tag `latest`, lo cual es simplemente una etiqueta, no significa que sea la versión más actual de la imagen.
+
+> La etiqueta `latest` podemos utilizarla en *development* pero no es aconsejable usarla en *staging* o *production* ya que si algo sale mal dificulta la búsqueda de errores o incluso hacer upgrades/downgrades ya que no sabremos qué versión estamos corriendo realmente.
+
+
+
+Si creamos una imagen como venimos haciendo hasta ahora, le asignará automáticamente el tag `latest`
+
+```bash
+docker build -t react-app .
+```
+
+Cosa que podemos verificar con 
+
+```bash
+docker images
+```
+
+
+
+#### Etiquetado al crear imagen
+
+Para etiquetar una imagen podemos hacerlo a la hora de crear la imagen:
+
+Hay equipos que optan por darles nombres en forma de código
+
+```bash
+docker build -t react-app:buster .
+```
+
+Otra opción es versionar semánticamente. Esta metodología es común en equipos que no sacan *releases* muy seguido:
+
+```bash
+docker build -t react-app:3.1.5 .
+```
+
+Los equipos que sacan *releases* seguido suelen preferir números de *build*
+
+```bash
+docker build -t react-app:76
+```
+
+> Este último método puede ser llevado a cabo por herramientas CI/CD que verificarán el código más reciente del repositorio y construirán una imagen y la etiquetarán automáticamente con el número de build.
+
+
+
+> Una misma imagen puede tener múltiples tags.
+
+Si queremos eliminar una etiqueta
+
+```bash
+docker image rm react-app:1
+```
+
+
+
+#### Etiquetado luego de crearla
+
+Debemos identificar la imagen que queremos etiquetar ya sea por su tag actual o por su ID.
+
+```
+docker image tag react-app:latest react-app:1
+```
+
+```
+docker image tag f4b react-app:1
+```
+
+
+
+#### `latest` desactualizado
+
+Si tenemos una imagen con la etiqueta latest y luego creamos una nueva imagen con una etiqueta en particular puede que ejecutemos `docker images` y pensemos que la más actual es una distinta de la que realmente es. En ese caso debemos actualizarla manualmente añadiendole a la nueva la etiqueta `latest` del modo visto. Suponiendo que su ID comienza con `b06`:
+
+```bash
+docker image tag b06 react-app:latest
 ```
 
