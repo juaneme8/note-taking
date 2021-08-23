@@ -1,6 +1,6 @@
 # Docker
 
-> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 43 COMPLETO)
+> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 44 COMPLETO)
 
 ## ¿Qué es Docker?
 
@@ -735,6 +735,14 @@ Para eliminarlas debemos utilizar el siguiente comando:
 docker image prune
 ```
 
+
+
+> Para obtener ayuda sobre cualquiera de estos comandos `docker image prube --help`, `docker image save --help`, etc.
+>
+> 
+
+
+
 Debemos verificar si tenemos contenedores corriendo versiones viejas de la imagen, lo cual hacemos con 
 
 ```bash
@@ -897,24 +905,49 @@ A continuación **realizará el push de cada uno de los layers de la imagen**. L
 
 Luego cuando hagamos cambios tendremos que hacer nuevamente el build
 
-```
+```bash
 docker build -t react-app:3 .
 ```
 
 Le asignamos un nuevo tag a la imagen con nuestro nombre de usuario:
 
-```
+```bash
 docker image tag react-app:3 juaneme8/react-app:3
 ```
 
 Finalmente hacemos el push y veremos que varios de los layers ya existen por lo que es mucho más rápido que la primera vez:
 
-```
+```bash
 docker push juaneme8/react-app:3
 ```
 
 
 
-En DockerHub si exploramos el repositorio veremos ahora ambos tags.
+En DockerHub si exploramos el rep ositorio veremos ahora ambos tags.
 
 A partir de este momento podremos hacer el pull de la imagen en cualquier máquina que tenga Docker.
+
+
+
+### Guardar Imagenes Comprimida
+
+Suponiendo que tenemos una imagen en una máquina y queremos ponerla en otra sin pasar por DockerHub, en ese caso podremos guardarla como un archivo comprimido y cargarlo en la otra máquina.
+
+```bash
+docker image save --output react-app.tar react-app:3
+```
+
+
+
+> El archivo lo estamos creando en el directorio actual.
+>
+> Si abrimos el archivo veremos que dentro tiene una serie de archivos que representan a cada uno de los layers.
+
+
+
+### Cargar Imagen Comprimida
+
+```bash
+docker image load --input react-app.tar
+```
+
