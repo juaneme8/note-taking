@@ -1,6 +1,6 @@
 # Docker
 
-> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 44 COMPLETO)
+> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 46 COMPLETO)
 
 ## ¿Qué es Docker?
 
@@ -209,7 +209,9 @@ Si estamos logueados con root y queremos loguearnos como un usuario normal **en 
 
 
 
-## Aplicación Docker
+## Imagenes
+
+### Aplicación Docker
 
 Cuando tenemos una aplicación React y queremos correrla en una nueuva máquina debemos seguir una serie de pasos empezando por instalar Node.js, ejecutar `npm install` y por último `npm start` para iniciarla. Utilizando Docker buscamos no tener que seguir todos estos pasos cada vez que deseamos utilizar una máquina nueva. Vamos a *dockerizar* la aplicación y meterla en una imagen con la cual podremos deployarla en cualquier lugar.
 
@@ -951,3 +953,52 @@ docker image save --output react-app.tar react-app:3
 docker image load --input react-app.tar
 ```
 
+
+
+## Contenedores
+
+### Iniciar Contenedores
+
+Repamos a continuación algunos de los comandos usados hasta ahora. 
+
+Para listar las imagenes disponibles
+
+```bash
+docker images
+```
+
+Para ver los contenedores corriendo (recordando que en definitiva son procesos con su propio file-system provisto por la imagen) 
+
+```
+docker ps
+```
+
+
+
+Para iniciar un contenedor con la imagen `react-app` podemos hacerlo con
+
+```bash
+docker run react-app
+```
+
+Luego de unos segundos tendremos el web-server corriendo pero no podremos ingresar ningún comando adicional y si presionamos `CTRL+C` el contenedor se detendrá (lo cual podremos verificar con `docker ps`).
+
+
+
+También es posible ejecutar un contenedor en **modo dettached** (background), de esta manera tendremos la terminal libre y podremos hacer lo que queramos.
+
+```bash
+docker run -d react-app
+```
+
+
+
+Luego de unos segundos cuando haya iniciado el web-server, si ejecutamos `docker ps` veremos ese contenedor y en la última columna `NAME` veremos que le ha asociado un nombre aleatorio provisto por Docker. En el futuro podremos refererirnos a ese contenedor tanto por su `ID` como por su `NAME`.
+
+Si queremos darle nosotros mismos este nombre:
+
+```bash
+docker run -d --name blue-sky react-app
+```
+
+ 
