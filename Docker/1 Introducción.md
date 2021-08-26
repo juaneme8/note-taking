@@ -1,6 +1,6 @@
 # Docker
 
-> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 46 COMPLETO)
+> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 47 COMPLETO)
 
 ## ¿Qué es Docker?
 
@@ -995,10 +995,65 @@ docker run -d react-app
 
 Luego de unos segundos cuando haya iniciado el web-server, si ejecutamos `docker ps` veremos ese contenedor y en la última columna `NAME` veremos que le ha asociado un nombre aleatorio provisto por Docker. En el futuro podremos refererirnos a ese contenedor tanto por su `ID` como por su `NAME`.
 
-Si queremos darle nosotros mismos este nombre:
+Si queremos darle nosotros mismos un nombre podremos hacerlo con:
 
 ```bash
 docker run -d --name blue-sky react-app
 ```
 
  
+
+
+
+### Logs de Errores
+
+Suponiendo que tenemos los contenedores iniciados anteriormente corriendo en el *background*, cuyos datos podremos obtener con:
+
+```
+docker ps
+```
+
+Para conocer qué está sucediendo en ellos (qué salida mostraron o si hubo algun error) podremos realizar
+
+```
+docker logs 655
+```
+
+> Suponiendo que 655 son los primeros tres números del ID del contenedor.
+>
+> En este caso veremos la misma salida que cuando iniciamos el contenedor en el *foreground*
+
+ 
+
+Con `docker logs --help` podremos ver las distintas opciones con las que podemos utilizar este comando.
+
+
+
+#### Log contínuo
+
+Si tenemos un contenedor que está produciendo salidas permanentemente, en lugar de ejecutar `docker log 655` a cada rato, podemos utilizar la opción `-f` o `--follow`
+
+```
+docker logs -f 655
+```
+
+> De esta manera podremos ver los logs en tiempo real, luego tendremos que presionar `CTRL+C` para salir.
+
+
+
+Log de últimas n líneas
+
+Suponiendo que queremos ver sólo las últimas 5 líneas del log
+
+```
+docker logs -n 5
+```
+
+
+
+#### Log con timestamps
+
+```
+docker logs -t 655
+```
+
