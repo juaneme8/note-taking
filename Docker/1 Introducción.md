@@ -1,6 +1,6 @@
 # Docker
 
-> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 47 COMPLETO)
+> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 48 COMPLETO)
 
 ## ¿Qué es Docker?
 
@@ -985,6 +985,8 @@ Luego de unos segundos tendremos el web-server corriendo pero no podremos ingres
 
 
 
+#### Contenedor en el *background*
+
 También es posible ejecutar un contenedor en **modo dettached** (background), de esta manera tendremos la terminal libre y podremos hacer lo que queramos.
 
 ```bash
@@ -1055,5 +1057,43 @@ docker logs -n 5
 
 ```
 docker logs -t 655
+```
+
+
+
+## Publicar Puertos
+
+A pesar de tener dos contenedores corriendo si vamos a `localhost:3000` no podremos acceder a la aplicación. Esto como ya explicamos se debe a que el puerto 3000 está escuchando en el contenedor pero no en el host. Necesitamos publicar este puerto para poder enviar tráfico a través de él.
+
+
+
+Con `docker ps` veremos una columna `PORTS` con el contenido `3000/tcp` donde este `3000` hace referencia al puerto del contenedor.
+
+```bash
+CONTAINER ID   IMAGE     COMMAND                  CREATED         STATUS         PORTS      NAMES
+d588f48d6340   react-app     "docker-entrypoint.s…"   3 seconds ago   Up 2 seconds   3000/tcp   stoic_wozniak
+```
+
+
+
+### Iniciar un contenedor y publicar puerto
+
+```bash
+ docker run -d -p 80:3000 --name c1 react-app
+```
+
+Con `3000:3000` hacemos referencia al puerto `80` del host y `3000` en el contenedor.
+
+ De esta manera bastaría con entrar a `localhost` (puerto `80` por default) para ver la aplicación.
+
+> Al hacer esto nos aparecerá un cartel del Firewall para autorizar el acceso.
+
+docker ps
+
+Si ahora ejecutamos `docker ps` veremos el siguiente mapeo de puertos `0.0.0.0:80->3000/tcp`
+
+```
+CONTAINER ID   IMAGE     COMMAND                  CREATED          STATUS          PORTS                                   NAMES
+26ad639003d0   myapp     "docker-entrypoint.s…"   32 seconds ago   Up 30 seconds   0.0.0.0:80->3000/tcp, :::80->3000/tcp   c1
 ```
 
