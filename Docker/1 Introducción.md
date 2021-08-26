@@ -1,6 +1,6 @@
 # Docker
 
-> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 48 COMPLETO)
+> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 49 COMPLETO)
 
 ## ¿Qué es Docker?
 
@@ -1088,7 +1088,7 @@ Con `3000:3000` hacemos referencia al puerto `80` del host y `3000` en el conten
 
 > Al hacer esto nos aparecerá un cartel del Firewall para autorizar el acceso.
 
-docker ps
+
 
 Si ahora ejecutamos `docker ps` veremos el siguiente mapeo de puertos `0.0.0.0:80->3000/tcp`
 
@@ -1097,3 +1097,42 @@ CONTAINER ID   IMAGE     COMMAND                  CREATED          STATUS       
 26ad639003d0   myapp     "docker-entrypoint.s…"   32 seconds ago   Up 30 seconds   0.0.0.0:80->3000/tcp, :::80->3000/tcp   c1
 ```
 
+
+
+## Ejecutar comandos en contenedores corriendo
+
+Cuando iniciamos un contenedor ejecuta el comando default que especificamos en el `Dockerfile`, en este caso `CMD ["npm", "start"]`
+
+```dockerfile
+FROM node:14.16.0-alpine3.13
+RUN addgroup app && adduser -S -G app app
+USER app
+WORKDIR /app
+COPY . .
+RUN npm install
+ENV API_URL=http://api.myapp.com/
+EXPOSE 3000
+CMD npm start
+```
+
+Sin embargo, si queremos ejecutar un comando tiempo después en un contenedor que está corriendo podremos hacerlo con `docker exec`. Con `docker run` iniciamos un nuevo contenedor y ejecutamos este comando y con `docker exec` ejecutamos un comando en un contenedor que esté corriendo.
+
+```
+docker exec c1 ls
+```
+
+> Siendo `c1` el nombre del contenedor y `ls` el comando que deseamos ejecutar en el.
+
+
+
+Veremos el listado de los archivos del directorio `/app` que es el que hemos establecido como *working directory*. 
+
+
+
+Si queremos abrir una sesión de shell, en el modo interactivo:
+
+```
+docker exec -it c1 sh
+```
+
+> Cuando queramos cerrar la sesión ingresamos `exit` y esto no repercutirá en el estado del contenedor que continuará corriendo como podremos ver con `docker ps`
