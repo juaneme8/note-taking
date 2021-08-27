@@ -1,6 +1,6 @@
 # Docker
 
-> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 49 COMPLETO)
+> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 50 COMPLETO)
 
 ## ¿Qué es Docker?
 
@@ -703,7 +703,7 @@ COPY . .
 RUN npm install
 ```
 
-Una solución puede ser copiar primero los archivos que necesitamos para instalar las dependencias `package.json` y `package-lock.json`, instalar y luego copiar el resto de los archivos. 
+Una solución puede ser copiar prime ro los archivos que necesitamos para instalar las dependencias `package.json` y `package-lock.json`, instalar y luego copiar el resto de los archivos. 
 
 ```dockerfile
 COPY package*.json .
@@ -1115,13 +1115,13 @@ EXPOSE 3000
 CMD npm start
 ```
 
-Sin embargo, si queremos ejecutar un comando tiempo después en un contenedor que está corriendo podremos hacerlo con `docker exec`. Con `docker run` iniciamos un nuevo contenedor y ejecutamos este comando y con `docker exec` ejecutamos un comando en un contenedor que esté corriendo.
+Sin embargo, si queremos ejecutar un comando tiempo después en un contenedor que está corriendo podremos hacerlo con `docker exec`. Con `docker run` iniciamos un nuevo contenedor y ejecutamos este comando default y con `docker exec` ejecutamos un comando en un contenedor que esté corriendo.
 
 ```
 docker exec c1 ls
 ```
 
-> Siendo `c1` el nombre del contenedor y `ls` el comando que deseamos ejecutar en el.
+> Siendo `c1` el nombre del contenedor y `ls` el comando que deseamos ejecutar en el, tener presente que el contenedor continuará corirendo.
 
 
 
@@ -1136,3 +1136,25 @@ docker exec -it c1 sh
 ```
 
 > Cuando queramos cerrar la sesión ingresamos `exit` y esto no repercutirá en el estado del contenedor que continuará corriendo como podremos ver con `docker ps`
+
+
+
+## Detener y Reiniciar Contenedores:
+
+El comando `docker stop` nos permite detener un contenedor:
+
+```
+docker stop c1
+```
+
+> La aplicación de este comando podremos verificarla con `docker ps`
+
+
+
+Si ahora queremos reiniciar un contenedor detenido, lo hacemos con `docker start`
+
+```
+docker start c1
+```
+
+> La diferencia entre `docker run` y `docker start` radica en que `docker start` lo utilizamos para reiniciar un contenedor detenido y `docker run` para iniciar uno nuevo.
