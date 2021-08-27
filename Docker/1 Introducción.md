@@ -1,6 +1,6 @@
 # Docker
 
-> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 50 COMPLETO)
+> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 51 COMPLETO)
 
 ## ¿Qué es Docker?
 
@@ -1158,3 +1158,33 @@ docker start c1
 ```
 
 > La diferencia entre `docker run` y `docker start` radica en que `docker start` lo utilizamos para reiniciar un contenedor detenido y `docker run` para iniciar uno nuevo.
+
+
+
+## Eliminar Contenedores
+
+Existen dos formas de eliminar un contenedor, la primera es:
+
+```
+docker container rm c1
+```
+
+O la versión reducida:
+
+```
+docker rm c1
+```
+
+
+
+Si el contenedor que queremos eliminar está corriendo nos aparecerá un mensaje **"You cannot remove a running container"**. Tenemos dos opciones, la primera es detenerlo para luego eliminarlo y la segunda es utilizar la opción *force*
+
+```
+docker rm -f c1
+```
+
+
+
+> Una vez eliminado lógicamente no lo veremos en los contenedores corriendo `docker ps`, ni en todos los contenedores (incluyendo detenidos) `docker ps -a`. Si queremos chequearlo mediante un comando podríamos hacerlo utilizando pipes con `docker ps -a | grep c1`
+>
+> Como ya explicamos, el comando `docker container prune` nos permite borrar todas los contenedores detenidos.
