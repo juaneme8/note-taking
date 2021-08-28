@@ -1,6 +1,6 @@
 # Docker
 
-> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 51 COMPLETO)
+> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 52 COMPLETO)
 
 ## ¿Qué es Docker?
 
@@ -1011,13 +1011,13 @@ docker run -d --name blue-sky react-app
 
 Suponiendo que tenemos los contenedores iniciados anteriormente corriendo en el *background*, cuyos datos podremos obtener con:
 
-```
+```bash
 docker ps
 ```
 
 Para conocer qué está sucediendo en ellos (qué salida mostraron o si hubo algun error) podremos realizar
 
-```
+```bash
 docker logs 655
 ```
 
@@ -1035,7 +1035,7 @@ Con `docker logs --help` podremos ver las distintas opciones con las que podemos
 
 Si tenemos un contenedor que está produciendo salidas permanentemente, en lugar de ejecutar `docker log 655` a cada rato, podemos utilizar la opción `-f` o `--follow`
 
-```
+```bash
 docker logs -f 655
 ```
 
@@ -1047,7 +1047,7 @@ Log de últimas n líneas
 
 Suponiendo que queremos ver sólo las últimas 5 líneas del log
 
-```
+```bash
 docker logs -n 5
 ```
 
@@ -1055,7 +1055,7 @@ docker logs -n 5
 
 #### Log con timestamps
 
-```
+```bash
 docker logs -t 655
 ```
 
@@ -1092,7 +1092,7 @@ Con `3000:3000` hacemos referencia al puerto `80` del host y `3000` en el conten
 
 Si ahora ejecutamos `docker ps` veremos el siguiente mapeo de puertos `0.0.0.0:80->3000/tcp`
 
-```
+```bash
 CONTAINER ID   IMAGE     COMMAND                  CREATED          STATUS          PORTS                                   NAMES
 26ad639003d0   myapp     "docker-entrypoint.s…"   32 seconds ago   Up 30 seconds   0.0.0.0:80->3000/tcp, :::80->3000/tcp   c1
 ```
@@ -1117,7 +1117,7 @@ CMD npm start
 
 Sin embargo, si queremos ejecutar un comando tiempo después en un contenedor que está corriendo podremos hacerlo con `docker exec`. Con `docker run` iniciamos un nuevo contenedor y ejecutamos este comando default y con `docker exec` ejecutamos un comando en un contenedor que esté corriendo.
 
-```
+```bash
 docker exec c1 ls
 ```
 
@@ -1131,7 +1131,7 @@ Veremos el listado de los archivos del directorio `/app` que es el que hemos est
 
 Si queremos abrir una sesión de shell, en el modo interactivo:
 
-```
+```bash
 docker exec -it c1 sh
 ```
 
@@ -1143,7 +1143,7 @@ docker exec -it c1 sh
 
 El comando `docker stop` nos permite detener un contenedor:
 
-```
+```bash
 docker stop c1
 ```
 
@@ -1153,7 +1153,7 @@ docker stop c1
 
 Si ahora queremos reiniciar un contenedor detenido, lo hacemos con `docker start`
 
-```
+```bash
 docker start c1
 ```
 
@@ -1165,13 +1165,13 @@ docker start c1
 
 Existen dos formas de eliminar un contenedor, la primera es:
 
-```
+```bash
 docker container rm c1
 ```
 
 O la versión reducida:
 
-```
+```bash
 docker rm c1
 ```
 
@@ -1179,7 +1179,7 @@ docker rm c1
 
 Si el contenedor que queremos eliminar está corriendo nos aparecerá un mensaje **"You cannot remove a running container"**. Tenemos dos opciones, la primera es detenerlo para luego eliminarlo y la segunda es utilizar la opción *force*
 
-```
+```bash
 docker rm -f c1
 ```
 
@@ -1188,3 +1188,42 @@ docker rm -f c1
 > Una vez eliminado lógicamente no lo veremos en los contenedores corriendo `docker ps`, ni en todos los contenedores (incluyendo detenidos) `docker ps -a`. Si queremos chequearlo mediante un comando podríamos hacerlo utilizando pipes con `docker ps -a | grep c1`
 >
 > Como ya explicamos, el comando `docker container prune` nos permite borrar todas los contenedores detenidos.
+
+
+
+## File-System de Contenedores
+
+Cada contenedor tiene su propio file-system que es invisible para los otros contenedores.
+
+Si tenemos dos contenedores corriendo y en uno de ellos creamos un archivo, este no lo veremos reflejado en el file-system del otro contenedor.
+
+En primer lugar verificamos tener dos procesos corriendo y obtenemos sus IDs.
+
+```bash
+docker ps
+```
+
+
+
+Luego ejecutamos una sesión de shell en el primero de ellos y creamos un archivo
+
+```bash
+docker exec -it 655 sh
+echo data > data.txt
+exit
+```
+
+
+
+Luego iniciamos una nueva sesión shell en el segundo contenedor y si listamos los archivos veremos que no hay ninguno llamado `data.txt`
+
+```
+docker exec -it 6eb sh
+ls | grep data
+```
+
+
+
+Si eliminamos el contenedor estaremos eliminando también el file-system por lo que se irán los archivos que tengamos allí. Nunca debemos colocar 
+
+alli nuestra data, en cambio debemos utilizar **volumes**.
