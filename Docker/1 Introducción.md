@@ -1226,4 +1226,30 @@ ls | grep data
 
 Si eliminamos el contenedor estaremos eliminando también el file-system por lo que se irán los archivos que tengamos allí. Nunca debemos colocar 
 
-alli nuestra data, en cambio debemos utilizar **volumes**.
+alli nuestra data, en cambio debemos utilizar **volúmenes**.
+
+
+
+## Volumes
+
+Los volúmenes proporcionan un método de almacenamiento por fuera de los contenedores, puede ser en un directorio del host o en algún lugar de la nube.
+
+Podemos ver las opciones de este comando ingresando:
+
+```
+docker volume
+```
+
+Podemos utilizar `docker volume` con los siguientes comandos:
+
+* `create`
+* `inspect`
+* `ls`
+* `prune`
+* `rm`
+
+
+
+**video 53 1.33min**
+
+Para crear un nuevo volumen 
