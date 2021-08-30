@@ -1230,7 +1230,7 @@ alli nuestra data, en cambio debemos utilizar **volúmenes**.
 
 
 
-## Volumes
+## Volúmenes
 
 Los volúmenes proporcionan un método de almacenamiento por fuera de los contenedores, puede ser en un directorio del host o en algún lugar de la nube.
 
