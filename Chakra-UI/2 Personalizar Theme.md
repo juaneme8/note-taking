@@ -1,7 +1,7 @@
 # Personalizar Theme
-Chakra está basado en los lineamientos de [Styled System Theme Specification](https://system-ui.com/theme/)
+Chakra está basado en los lineamientos de [System UI Theme Specification](https://system-ui.com/theme/)
 
-Para personalizarlo creamos un archivo `theme.tsx` `src` si estamos utilizando Vitejs o create-react-app (o en la raíz si estamos trabajando con Next.js).
+Para personalizarlo creamos un archivo `theme.tsx` en la carpeta `src` si estamos utilizando **Vitejs** o **create-react-app** (o en la raíz si estamos trabajando con Next.js).
 
 En un principio colocamos simplemente:
 ```jsx
@@ -11,7 +11,7 @@ export default extendTheme({});
 ```
 Más adelante colocaremos dentro del objeto que recibe `extendTheme` aquellas características que queremos modificar.
 
-Luego para comenzar a usar este `theme` personalizado se lo tenemos que pasar al `ChakraProvider` y esto lo haremos en `main.tsx` (si estamos trabajando con CRA o vitehs) o en `_app.tsx` (si estamos trabajando con Next.js)
+Luego para comenzar a usar este `theme` personalizado se lo tenemos que pasar al `ChakraProvider` y esto lo haremos en `main.tsx` (si estamos trabajando con CRA o Vite) o en `_app.tsx` (si estamos trabajando con Next.js)
 
 Si estamos trabajando con CRA o Vitejs,  `main.tsx` nos quedará:
 ```jsx
@@ -57,7 +57,7 @@ export default App;
 ## Color Personalizado
 En este caso en `theme.tsx` además de `extendTheme` importamos `theme` que usaremos para obtener uno de los colores y asignarlo a nuestro color personalizado.
 
-Supongamos que queremos agregar el color `primary` que represente al color purple de modo tal que si en un futuro queremos cambiarlo a otro, no debemos cambiar en todos los lugares donde lo hayamos usado y bastará sólo con cambiarlo en el theme.
+Supongamos que queremos que `primary` represente al color purple de modo tal que si en un futuro queremos cambiarlo a otro, no debemos cambiar en todos los lugares donde lo hayamos usado y bastará sólo con cambiarlo en el theme.
 
 ```jsx
 import { extendTheme, theme } from '@chakra-ui/react';
@@ -74,26 +74,17 @@ export default extendTheme({
 Luego como ya dijimos le pasamos al `<ChakraProvider>` este `theme` que exportamos.
 
 Como consecuencia de esto podremos usar el color `primary` y mapeará con `purple` y si luego lo cambiamos todos los lugares donde hayamos usado `primary` se verán afectados.
-También podríamos usar `primary.500` y será equivalente a `purple.500`
 
-## Modificar Componentes
-En ocasiones puede que queramos modificar algún valor del default theme, por ejemplo si tenemos que usar un `Container` y queremos especificar su `maxWidth` pero queremos cambiar el valor en `px` que representa el `"container.md"` , podemos hacer un override de una manera similar a la que usamos para definir colores personalizados:
-```jsx
-import { extendTheme, theme } from '@chakra-ui/react';
+> También podríamos usar `primary.500` y será equivalente a `purple.500` 
 
-export default extendTheme({
-  sizes:{
-	  container:{
-		  md: '200px',
-	  } 
-  }
-});
-```
+
 
 ## Estilos Globales
-También es posible agregar estilos globales trabajando con `theme.styles.global`. Este estilo puede ser un objeto una función que recibe las props y retorna un objeto de estilos.
+
+Es posible agregar estilos globales trabajando con `theme.styles.global`. Este estilo puede ser un objeto o una función que recibe las props y retorna un objeto de estilos.
 
 Vamos a ver dos ejemplos en los que usamos `global` como un objeto:
+
 ```jsx
 import { extendTheme, theme } from '@chakra-ui/react';
 
@@ -142,7 +133,9 @@ Luego por ejemplo suponiendo que es en`Layout.js` donde queremos tener el conten
     </Container>
 ```
 
-Dijimos que a `global` también podíamos pasarle una función que recibe las props y retorna un objeto de estilos, por lo que podemos tener:
+
+
+Lo mismo podemos realizarlo utilizando una función que recibe las `props` y retorna un objeto de estilos.
 
 ```jsx
 styles:  {
@@ -157,6 +150,7 @@ styles:  {
 Esto tiene varias utilidades, una de ellas podría ser si queremos definir un color para *light mode* y otro para *dark mode* en ese caso llamamos a `mode(color1, color2)(props)`
 Importamos a `import { mode } from '@chakra-ui/theme-tools';
 `
+
 ```jsx
 styles: {
     global: (props: any) => ({
@@ -164,13 +158,18 @@ styles: {
     }),
  },
 ```
+
 Como consecuencia de esto en *light mode* veremos el texto en color rojo y en *dark mode* se usará el color que estaba por default ya que le pusimos *undefined* como valor.
 
 
-## Modificar Componentes
-Más info en: https://chakra-ui.com/docs/theming/component-style
 
-En ocasiones puede que queramos que nuestros componentes tengan alguna característica ligeramente distinta de los que vienen por default con Chakra-UI. Si queremos modificar alguna característica de un botón y utilizamos otra librería de UI como Material UI tendríamos que crear una carpeta `ui`, luego otra `controls` y allí un archivo `Button.js` donde creamos un componente Button, importamos el componente Button de la librería, modificamos la característica deseada hacemos el spread de las props y luego lo exportamos para usarlo en todos lados. Esto demanda la creación de más componentes, con el consecuente tiempo y trabajo, veremos que con Chakra podemos modificar directamente el *component style* desde el theme.
+## Modificar Componentes Chakra
+
+> Más info en la [documentación](https://chakra-ui.com/docs/theming/component-style)
+
+En ocasiones puede que queramos que nuestros componentes tengan alguna característica ligeramente distinta de los que vienen por default con Chakra-UI. 
+
+Si queremos modificar un botón y utilizamos Material UI tendríamos que crear una carpeta `ui`, luego otra `controls` y allí un archivo `Button.js` donde , importamos el componente Button de la librería, modificamos la característica deseada hacemos el spread de las props y luego lo exportamos para usarlo en todos lados. Esto demanda la creación de más componentes, con el consecuente tiempo y trabajo, veremos que con Chakra podemos modificar directamente el *component style* desde el theme.
 
 Podemos editar el archivo `theme.js` y suponiendo también que queremos modificar el componente `Button` para que tenga bordes completamente redonados y fuente mas pequeña podemos hacer lo siguiente:
 
@@ -191,11 +190,14 @@ components: {
 ```
 
 Luego cada vez que agreguemos un botón tendrá las características que acabamos de definir:
+
 ```jsx
   <Button colorScheme="primary" fontWeight="bold" size="lg">
 
 ```
+
 Otra utilidad la encontramos como consecuencia de que en *dark mode* Chakra-UI cambia algunos colores de los botones, por ejemplo si tenemos un color `twitter` veremos que en *dark mode* es mas clarito. En ese caso podemos asegurarnos tener los colores deseados podemos trabajar con `components.Button.variants.solid`
+
 ```jsx
 components:{
 	Button:{
@@ -213,7 +215,26 @@ components:{
 }
 ```
 
+> En este caso estamos utilizando una función que recibe las props y retorna un objeto de estilos.
+
 Con ``${props.colorScheme}.500`` nos aseguramos que si le pasamos `colorScheme="twitter"` tengamos un `twitter.500`
+
+
+
+Otro ejemplo de personalización de componentes podría ser si tenemos `Container` y queremos especificar su `maxWidth` cambiando el valor en `px` que representa el `"container.md"` , podemos hacer un override de una manera similar a la que usamos para definir colores personalizados:
+```jsx
+import { extendTheme, theme } from '@chakra-ui/react';
+
+export default extendTheme({
+  sizes:{
+	  container:{
+		  md: '200px',
+	  } 
+  }
+});
+```
+
+
 
 # Color Mode
 Chakra incluye un modo de manejar el *color mode* en las aplicaciones. Chakra almacena el *color mode* en el localStorage y le agrega una clase al `body` para asegurarse que sea persistente.
@@ -233,7 +254,7 @@ const config =  {
 
 const theme =  extendTheme({ config })
 
-export  default theme
+export default theme
 ```
 Luego debemos pasarle esta `theme` customizado al `ChakraProvider`.
 
@@ -265,8 +286,10 @@ export default class Document extends NextDocument {
 }
 ```
 
-# Text & Layer Styles
-En la mayoría de los proyectos nos encontraremos repitiendo *text properties* como ser **fontSize**, **fontWeight** o *layer properties* como ser backgroundColor, color, shadow, etc. Las props `textStyle` y `layerStyle` nos permitirán ser consistentes reutilizando estas características. Bastará con pasarle esas propiedades a cualquier componente y adquirirá las propiedades deseadas.
+# Text Styles & Layer Styles
+En la mayoría de los proyectos nos encontraremos repitiendo *text properties* como ser `fontSize`, `fontWeight` o *layer styles* como ser `backgroundColor`, `color`, `boxShadow`, etc. 
+
+Las props `textStyle` y `layerStyle` nos permitirán ser consistentes reutilizando estas características. Bastará con pasarle esas propiedades a cualquier componente y adquirirá las propiedades deseadas.
 
 ## Layer Style
 Los *layer styles* podremos definirlos en el `theme` bajo la propiedad `layerStyles` de modo de que sean reutilizables.

@@ -29,13 +29,13 @@ Podríamos pasarle `divider={<StackDivider/>}` o incluso podríamos pasarle dire
 Podemos indicar la dirección del apilado con la prop `direction` usando `row` o `column`.
 Este componente soporta valores responsivos por lo que podremos tener un `Stack` que para pantallas grandes tiene dirección `row` y para chicas `column`.
 
-Ttambién existen los componentes `HStack` (para dirección horizontal) y `VStack` (para dirección vertical) que además se encargan del centrado.
+También existen los componentes `HStack` (para dirección horizontal) y `VStack` (para dirección vertical) que además se encargan del centrado.
 
 
 # Iconos
 Para utilizar los íconos de Chakra debemos instalar `npm i @chakra-ui/icons`, sin embargo es posible instalar cualquier tipo de librería de íconos que queramos.
 
-Por ejemplo trabajando con React Icons que instalamos con `npm install react-icons`:
+Por ejemplo podemos trabajar con con **React Icons** que instalamos con `npm install react-icons`:
 ```jsx
 import {FaTwitter} from 'react-icons/fa'
 
@@ -54,14 +54,39 @@ A la hora de darle color a un `button` utilizaremos `colorScheme` con lo cual te
 `<Button colorScheme="telegram">1</Button>`
 
 ## `variant` de Button
-Por default los button tendrán la variante `solid` pero también podremos configurar para que sea `ghost`, `outline`, `unstyled`, `link`
+Por default los button tendrán la variante `solid` pero también podremos especificar mediante el atributo `variant` para que sea `ghost`, `outline`, `unstyled`, `link`
 
 ## `leftIcon` y `rightIcon` en Button
 Los botones pueden venir acompañados de íconos, de hecho es posible pasarle cómo icono cualquier componente React:
 `<Button leftIcon={<span>H</span>}` (también podemos usar `rightIcon`)
 
 ## `isLoading` y `loadingText`
-Con la prop `isLoading` podremos mostrar el estado de loading, por default será un spinner (pero podemos cambiarlo con la prop `spinner` por ejemplo `spinner={<BeatLoader size={8} color="white" />}`) y el ancho del botón no cambiará.
+Con la prop `isLoading` podremos agregar un estado de loading al botón, con `loadingText` especificamos el texto que queremos que acompañe al ícono de carga.
+
+```jsx
+<Button
+    isLoading
+    loadingText="Submitting"
+    colorScheme="teal"
+    variant="outline"
+  >
+    Submit
+  </Button>
+```
+
+
+
+Por default será un spinner (pero podemos cambiarlo con la prop `spinner` por ejemplo `spinner={<BeatLoader size={8} color="white" />}`) y el ancho del botón no cambiará.
+
+```jsx
+<Button
+  isLoading
+  colorScheme="blue"
+  spinner={<BeatLoader size={8} color="white" />}
+>
+  Click me
+</Button>
+```
 
 También podemos pasarle `loadingText` con el texto que queremos que aparezca mientras está cargando.
 
@@ -131,7 +156,7 @@ export default function DrawerExample() {
   );
 }
 ```
-En este ejemplo usamos `const btnRef = React.useRef<any>();` (el `any` no es aconsejable pero lo hicimos en este caso para no definir tipos). El propósito de de eso es tener la referencia al botón para que luego de cerrar el drawer pongamos el foco en ese botón nuevamente.
+En este ejemplo usamos `const btnRef = React.useRef<any>();` (el `any` no es aconsejable pero lo hicimos en este caso para no definir tipos). El propósito de eso es tener la referencia al botón para que luego de cerrar el drawer pongamos el foco en ese botón nuevamente.
 
 # Hooks
 ## `useDisclosure`
