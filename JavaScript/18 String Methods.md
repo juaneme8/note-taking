@@ -38,5 +38,5 @@ Notar que `search()` y `indexOf()` no son iguales dado que`indexOf()` adminte un
 
 
 
-```js
+```planejs
 ```

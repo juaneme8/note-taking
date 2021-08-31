@@ -1234,7 +1234,7 @@ alli nuestra data, en cambio debemos utilizar **volúmenes**.
 
 Los volúmenes proporcionan un método de almacenamiento por fuera de los contenedores, puede ser en un directorio del host o en algún lugar de la nube.
 
-Podemos ver las opciones de este comando ingresando:
+Podemos ver los subcomandos ingresando:
 
 ```
 docker volume
@@ -1242,14 +1242,47 @@ docker volume
 
 Podemos utilizar `docker volume` con los siguientes comandos:
 
-* `create`
-* `inspect`
-* `ls`
-* `prune`
-* `rm`
+* `docker volume create`
+* `docker volume inspect`
+* `docker volume ls`
+* `docker volume prune`
+* `docker volume rm`
 
 
 
-**video 53 1.33min**
+Para crear un nuevo volumen llamado `app-data`
 
-Para crear un nuevo volumen 
+```
+docker volume create app-data
+```
+
+
+
+Para inspeccionarlo 
+
+```
+docker volume inspect app-data
+```
+
+Veremos un objeto con las propiedades:
+
+```bash
+[
+    {
+        "CreatedAt": "2021-08-31T00:27:28Z",
+        "Driver": "local",
+        "Labels": {},
+        "Mountpoint": "/var/lib/docker/volumes/app-data/_data",
+        "Name": "app-data",
+        "Options": {},
+        "Scope": "local"
+    }
+]
+```
+
+
+
+* `CreatedAt`,
+
+* `Driver` que dirá `local` en caso de que el volumen sea un directorio en el host, distinto sería si fuera almacenamiento en la nube.
+* `Mountpoint` dirá el directorio donde fue creado este volumen.
