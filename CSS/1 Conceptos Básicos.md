@@ -1,13 +1,14 @@
 # Conceptos Básicos de CSS
-> [w3.org - Conceptos Básicos de CSS](https://www.w3.org/community/webed/wiki/Es/Conceptos_b%C3%A1sicos_de_CSS)
+> Información adicional en la [cocumentación de w3.org](https://www.w3.org/community/webed/wiki/Es/Conceptos_b%C3%A1sicos_de_CSS)
 
-CSS (Cascading Style Sheets) es una tecnología web utilizada para dar estilo y determinar la posición de los elementos que conforman el HTML. 
-Existen 3 versiones de CSS y cada una incorpora nuevas propiedades y las de las versiones anteriores siguen funcionando.
-El nombre hoja de estilos en cascada hace referencia a cómo el CSS afecta a los elementos del html.
+CSS cuyas siglas significan *Cascading Style Sheets* es una tecnología web utilizada para dar estilo y determinar la posición de los elementos que conforman el HTML. 
 
-Esto es llevado a cabo por un **sistema de reglas**
+* Existen **3 versiones de CSS** y cada una incorpora nuevas propiedades y a su vez las de las versiones anteriores siguen funcionando.
 
-No se trata de un lenguaje de programación como JavaScript ni de un lenguaje de marcado como HTML.
+* El nombre hoja de estilos en cascada hace referencia a cómo el CSS afecta a los elementos del html.
+
+* Se basa en un **sistema de reglas**
+* No se trata de un lenguaje de programación como JavaScript ni de un lenguaje de marcado como HTML.
 
 ## Reglas de Estilo
 ```css
@@ -17,7 +18,7 @@ selector {
   property3:value;
 }
 ```
-Lo que está dentro de las llaves se conoce con el nombre de **bloque de declaración** o property block*
+Lo que está dentro de las llaves se conoce con el nombre de *property block*.
 
 Al igual que sucede en HTML los espacios en blanco son ignorados por lo que será lo mismo que:
 ```css
@@ -31,7 +32,7 @@ selector{
   property1:value;
 }
 ```
-Es posible añadir comentarios entre reglas o bien dentro del bloque de declaración (o *property block*)
+Es posible añadir comentarios entre reglas o bien dentro del *property block*
 ## Agrupar Selectores
 Si queremos aplicarle el mismo estilo a `h1` y a `p` podemos escribirlo del siguiente modo:
 ```css
@@ -53,7 +54,7 @@ p {}
 ```css
 #example {}
 ```
-Recordar que los ID son *unique* dentro de cada página.
+> Recordar que los ID deben ser *unique* dentro de cada página.
 
 ## Combinar Selectores
 `p.warning {}` Selecciona los elementos `p` con la clase `warning`.
@@ -572,7 +573,6 @@ Cada selector tiene su lugar en la jerarquía de especificidad. Hay 5 que define
 * `a` (0,0,1)
 * `p a` (0,0,2)
 * `.class` (0,1,0)
-* 
 * `p a.whatever` (0,1,2)
 * `.class.class` (0,2,0)
 * `p.class a.class` (0,2,2)
