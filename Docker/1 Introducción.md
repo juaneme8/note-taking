@@ -1400,6 +1400,67 @@ Si hacemos
 
 ```
 cd data
-cat /data.txt
+ls -l
 ```
 
+Veremos que tenemos el contenido del archivo creado en el otro contenedor.
+
+ 
+
+## Copiar archivos entre host y contenedores
+
+### Copiar archivos del contenedor al host
+
+Supongamos que en un contenedor tenemos un log que queremos analizar y para ello deseamos copiarlo al host.
+
+Primero obtenemos el ID del contenedor que está corriendo y cuyo log vamos a simular (suponemos que es `e1c`).
+
+```
+docker ps
+```
+
+Luego iniciamos una sesión de shell
+
+```
+docker exec -it e1c9043ea8ce sh
+```
+
+```
+echo hello > log.txt
+```
+
+> No olvidar que debemos ingresar `exit` para salir.
+
+
+
+Para copiar este archivo al host utilizamos el comando `docker cp` debemos especificar origen y destino. El origen lo especificamos como `contenedor:ruta` y el destino como `.` porque queremos que sea el directorio actual del host.
+
+```
+docker cp e1c9043ea8ce:/app/log.txt .
+```
+
+Luego con `ls` podremos verificar que la operación fue exitosa.
+
+ 
+
+### Copiar archivos del host al contenedor
+
+Suponemos tenemos un archivo `secret.txt` en el host que como no forma parte del sistema de control de versiones queremos copiarlo manualmente a un contenedor.
+
+```
+echo hello > secret.txt
+```
+
+Luego para copiarlo
+
+```
+docker cp secret.txt  e1c9043ea8ce:/app
+```
+
+Por último iniciamos una sesión de shell
+
+```
+docker exec -it e1c9043ea8ce sh
+```
+
+Donde con `ls` verificamos la existencia del archivo en cuestión.
