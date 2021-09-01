@@ -46,42 +46,10 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 export default App;
 
 ```
-Si estamos usando Vite.js tendremos `main.tsx` con los providers y luego le agregaremos React Router DOM junto con el montaje de `App`
-```jsx
-import React from 'react';
 
-import { ChakraProvider, theme } from '@chakra-ui/react';
-import ReactDOM from 'react-dom';
-
-import App from './app';
-
-ReactDOM.render(
-  <React.StrictMode>
-    <ChakraProvider theme={theme}>
-      <App />
-    </ChakraProvider>
-  </React.StrictMode>,
-  document.getElementById('root')
-);
-```
-
-Luego en `App` es donde usaremos este componente `Layout`
-
-```jsx
-import React from 'react';
-
-import Layout from './layout';
-
-const App: React.FC = () => {
-  return <Layout>Hola</Layout>;
-};
-
-export default App;
-
-```
 
 # React Router  
-Si no estamos trabajando con Next.js que realiza un *filesystem routing* podemos trabajar con React Router: `npm install react-router-dom`  
+Si estamos usando Vite.js como no estamos trabajando con Next.js que realiza un *filesystem routing* podemos trabajar con React Router: `npm install react-router-dom`  
 
 React Router DOM no tiene incluidos los tipos dentro de la librería por lo que debemos instalar también:  
 `npm install @types/react-router-dom`  

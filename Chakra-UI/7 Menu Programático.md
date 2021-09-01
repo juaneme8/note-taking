@@ -96,4 +96,3 @@ export default Navbar;
 
 ```
 
-==StackProps==

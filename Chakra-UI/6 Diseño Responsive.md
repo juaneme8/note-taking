@@ -18,4 +18,5 @@ Por ejemplo si queremos tener un `Stack` que tenga una dirección `row` (pensar 
 Otro ejemplo podríamos ser si queremos tener un color de texto al hacer hover en pantallas chicas y otro en pantallas grandes:
 `<Text _hover={{color: {base:"red.500", sm:"blue.500"}}}`
 
-Notar que ponemos propiedad : objeto responsivo y en este caso pseudo= {{propiedad: objeto}}
+> Notar que ponemos propiedad : objeto responsivo y en este caso pseudo= {{propiedad: objeto}}
+
