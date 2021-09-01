@@ -1232,15 +1232,13 @@ alli nuestra data, en cambio debemos utilizar **volúmenes**.
 
 ## Volúmenes
 
-Los volúmenes proporcionan un método de almacenamiento por fuera de los contenedores, puede ser en un directorio del host o en algún lugar de la nube.
+Los volúmenes proporcionan un método de **almacenamiento por fuera de los contenedores**, puede ser en un directorio del host o en algún lugar de la nube.
 
 Podemos ver los subcomandos ingresando:
 
 ```
 docker volume
 ```
-
-Podemos utilizar `docker volume` con los siguientes comandos:
 
 * `docker volume create`
 * `docker volume inspect`
@@ -1258,7 +1256,7 @@ docker volume create app-data
 
 
 
-Para inspeccionarlo 
+Para inspeccionarlo el volumen recién creado.
 
 ```
 docker volume inspect app-data
@@ -1282,7 +1280,126 @@ Veremos un objeto con las propiedades:
 
 
 
-* `CreatedAt`,
-
-* `Driver` que dirá `local` en caso de que el volumen sea un directorio en el host, distinto sería si fuera almacenamiento en la nube.
+* `Driver` dirá `local` en caso de que el volumen sea un directorio en el host, si queremos usar almacenamiento en la nube tendremos que encontrar un driver para esa plataforma.
 * `Mountpoint` dirá el directorio donde fue creado este volumen.
+
+
+
+Para iniciar un contenedor y pasarle este volumen para que guarde los datos utilizamos la opción `-v app-data:/app/data` siendo `/app/data` un path absoluto en el filesystem del contenedor.
+
+```
+docker run -d -p 4000:3000 -v app-data:/app/data react-app
+```
+
+
+
+No es necesario haber creado el volumen de ante mano, si ponemos un volumen que no existe, Docker lo creará automáticamente, por ejemplo si en lugar de `app-data` que sí creamos ponemos `app-data2`
+
+```
+docker run -d -p 4000:3000 -v app-data2:/app/data react-app
+```
+
+
+
+Lo mismo sucede para el directorio dentro de la aplicación `/app/data` que si no existe Docker lo creará. **Sin embargo esto tiene un inconveniente que veremos a continuación.**
+
+
+
+Para iniciar una sesión de shell sobre ese contenedor (suponiendo que el comando anterior nos devolvío como ID del contenedor `7168b9....`)
+
+```
+docker exec -it 716 sh 
+```
+
+Si una vez allí navegamos a `/app/data` e intentamos crear un archivo `data.txt`:
+
+```
+cd data
+echo data > data.txt
+```
+
+Obtendremos error **can't create data.txt: Permission denied** si hacemos `ls -l` veremos que el dueño del directorio `data` es `root`, siendo sólo este usuario capaz de escribir en este directorio. Al estar trabajando con el usuario `app` caemos dentro de la categoría de permisos others y no podemos escribir. Esto sucede debido a que hemos permitido que Docker cree automáticaemente este directorio.
+
+
+
+Esto lo solucionamos modificando el `Dockerfile` agregando una instrucción para crear el directorio:
+
+```dockerfile
+FROM node:14.16.0-alpine3.13
+RUN addgroup app && adduser -S -G app app
+USER app
+WORKDIR /app
+RUN mkdir data 
+COPY . .
+RUN npm install
+ENV API_URL=http://api.myapp.com/
+EXPOSE 3000
+CMD npm start
+```
+
+Hemos agregado `RUN mkdir data` y nos aseguramos que se ejecute usando el usuario `app` por lo que tendremos permisos de escritura.
+
+Como modificamos el `Dockerfile` debemos reconstruir la imagen:
+
+```
+docker build -t react-app .
+```
+
+Iniciamos un nuevo contenedor:
+
+```
+docker run -d -p 5000:3000 -v app-data:/app/data react-app
+```
+
+> 5000 del host y 3000 del contenedor.
+
+La diferencia será que esta vez el directorio `/app/data` ya existe dentro del file-system de este contenedor y es propiedad del usuario `app`
+
+Por lo que si ahora ejecutamos
+
+```
+docker exec -it 007 sh
+```
+
+> Suponemos que el ID del contenedor comienza con `007`.
+>
+> 
+
+```
+cd data
+echo data > data.txt
+```
+
+Veremos que ahora no nos tira ningún error. 
+
+Gracias al uso de volúmenes podremos borrar el contenedor y el archivo seguirá `data.txt` existiendo.
+
+```
+docker rm -f 007
+```
+
+> Lo forzamos con `-f` porque está todavía corriendo
+
+
+
+Si iniciamos un nuevo contenedor con el mismo mapeo del volumen:
+
+```
+docker run -d -p 5000:3000 -v app-data:/app/data react-app
+```
+
+Ejecutamos una sesión de shell
+
+```
+docker exec -it e1c sh
+```
+
+> Suponemos que el id del contenedor empieza con `e1c`
+
+Si hacemos 
+
+```
+cd data
+cat /data.txt
+```
+
