@@ -1,6 +1,6 @@
 # Docker
 
-> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 52 COMPLETO)
+> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 53 COMPLETO)
 
 ## ¿Qué es Docker?
 
@@ -1236,7 +1236,7 @@ Los volúmenes proporcionan un método de **almacenamiento por fuera de los cont
 
 Podemos ver los subcomandos ingresando:
 
-```
+```bash
 docker volume
 ```
 
@@ -1248,13 +1248,17 @@ docker volume
 
 
 
+### Creación de Volumen
+
 Para crear un nuevo volumen llamado `app-data`
 
-```
+```bash
 docker volume create app-data
 ```
 
 
+
+### Inspección de Volumen
 
 Para inspeccionarlo el volumen recién creado.
 
@@ -1281,27 +1285,32 @@ Veremos un objeto con las propiedades:
 
 
 * `Driver` dirá `local` en caso de que el volumen sea un directorio en el host, si queremos usar almacenamiento en la nube tendremos que encontrar un driver para esa plataforma.
+
 * `Mountpoint` dirá el directorio donde fue creado este volumen.
 
+  
 
+### Iniciar contenedor con Volumen
 
-Para iniciar un contenedor y pasarle este volumen para que guarde los datos utilizamos la opción `-v app-data:/app/data` siendo `/app/data` un path absoluto en el filesystem del contenedor.
+Para iniciar un contenedor y pasarle este volumen para que guarde los datos en él, utilizamos la opción `-v app-data:/app/data` siendo `/app/data` un path absoluto en el filesystem del contenedor.
 
-```
+```bash
 docker run -d -p 4000:3000 -v app-data:/app/data react-app
 ```
 
 
 
+### Creación Automática de Volumen y Directorio en contenedor
+
 No es necesario haber creado el volumen de ante mano, si ponemos un volumen que no existe, Docker lo creará automáticamente, por ejemplo si en lugar de `app-data` que sí creamos ponemos `app-data2`
 
-```
+```bash
 docker run -d -p 4000:3000 -v app-data2:/app/data react-app
 ```
 
 
 
-Lo mismo sucede para el directorio dentro de la aplicación `/app/data` que si no existe Docker lo creará. **Sin embargo esto tiene un inconveniente que veremos a continuación.**
+Lo mismo sucede para el directorio dentro del contenedor de la aplicación `/app/data` que si no existe Docker lo creará. **Sin embargo esto tiene un inconveniente que veremos a continuación.**
 
 
 
@@ -1318,11 +1327,11 @@ cd data
 echo data > data.txt
 ```
 
-Obtendremos error **can't create data.txt: Permission denied** si hacemos `ls -l` veremos que el dueño del directorio `data` es `root`, siendo sólo este usuario capaz de escribir en este directorio. Al estar trabajando con el usuario `app` caemos dentro de la categoría de permisos others y no podemos escribir. Esto sucede debido a que hemos permitido que Docker cree automáticaemente este directorio.
+Obtendremos error **can't create data.txt: Permission denied** si hacemos `ls -l` veremos que el dueño del directorio `data` es `root`, siendo sólo este usuario capaz de escribir en este directorio. Al estar trabajando con el usuario `app` caemos dentro de la categoría de permisos *others* y no podemos escribir. Esto sucede debido a que hemos permitido que Docker cree automáticamente este directorio.
 
 
 
-Esto lo solucionamos modificando el `Dockerfile` agregando una instrucción para crear el directorio:
+Esto lo solucionamos modificando el `Dockerfile` agregando una instrucción para crear el directorio con el usuario `app`.
 
 ```dockerfile
 FROM node:14.16.0-alpine3.13
@@ -1341,13 +1350,13 @@ Hemos agregado `RUN mkdir data` y nos aseguramos que se ejecute usando el usuari
 
 Como modificamos el `Dockerfile` debemos reconstruir la imagen:
 
-```
+```bash
 docker build -t react-app .
 ```
 
 Iniciamos un nuevo contenedor:
 
-```
+```bash
 docker run -d -p 5000:3000 -v app-data:/app/data react-app
 ```
 
@@ -1357,24 +1366,24 @@ La diferencia será que esta vez el directorio `/app/data` ya existe dentro del 
 
 Por lo que si ahora ejecutamos
 
-```
+```bash
 docker exec -it 007 sh
 ```
 
 > Suponemos que el ID del contenedor comienza con `007`.
->
-> 
 
-```
+
+
+```bash
 cd data
 echo data > data.txt
 ```
 
-Veremos que ahora no nos tira ningún error. 
+Veremos que ahora al crear este archivo no nos tira ningún error. 
 
 Gracias al uso de volúmenes podremos borrar el contenedor y el archivo seguirá `data.txt` existiendo.
 
-```
+```bash
 docker rm -f 007
 ```
 
@@ -1384,22 +1393,21 @@ docker rm -f 007
 
 Si iniciamos un nuevo contenedor con el mismo mapeo del volumen:
 
-```
+```bash
 docker run -d -p 5000:3000 -v app-data:/app/data react-app
 ```
 
 Ejecutamos una sesión de shell
 
-```
+```bash
 docker exec -it e1c sh
 ```
 
 > Suponemos que el id del contenedor empieza con `e1c`
 
-Si hacemos 
+Si listamos los archivos dentro del directorio `data`  veremos que tenemos allí al archivo `data.txt` que creamos en el otro contenedor.
 
-```
+```bash
 cd data
-cat /data.txt
+ls
 ```
-
