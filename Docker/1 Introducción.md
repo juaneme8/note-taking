@@ -1413,6 +1413,7 @@ ls
 ```
 
 
+
 ## Copiar archivos entre host y contenedores
 
 ### Copiar archivos del contenedor al host
@@ -1422,18 +1423,15 @@ Supongamos que en un contenedor tenemos un log que queremos analizar y para ello
 Primero obtenemos el ID del contenedor que está corriendo y cuyo log vamos a simular (suponemos que es `e1c`).
 
 
-
+```
 docker ps
-
 ```
 
 Luego iniciamos una sesión de shell
 
 ```
 docker exec -it e1c9043ea8ce sh
-```
 
-```
 echo hello > log.txt
 ```
 
@@ -1459,7 +1457,7 @@ Suponemos tenemos un archivo `secret.txt` en el host que como no forma parte del
 echo hello > secret.txt
 ```
 
-Luego para copiarlo
+Luego para copiarlo 
 
 ```
 docker cp secret.txt  e1c9043ea8ce:/app
@@ -1472,3 +1470,11 @@ docker exec -it e1c9043ea8ce sh
 ```
 
 Donde con `ls` verificamos la existencia del archivo en cuestión.
+
+
+
+## Publicar cambios en un contenedor
+
+Supongamos que tenemos corriendo una aplicación React que visitamos en localhost:3000 y modificamos uno de sus archivos. Estos cambios no los veremos reflejados inmediatamente en el navegador.
+
+Para producción deberíamos crear una nueva imagen
