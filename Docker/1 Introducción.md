@@ -1507,4 +1507,4 @@ Si tenemos el navegador abierto en localhost:5001 cualquier cambio que introduzc
 
 ## Docker Compose
 
-Docker Compose nos permite trabajar de manera simple con una aplicación con múltiples componentes.
+Docker Compose nos permite ejecutar de manera simple aplicaciones con múltiples contenedores. Como ejemplo consideramos una aplicación en la que tenemos front-end (React), back-end (Node.js) y base de datos (MongoDB).
