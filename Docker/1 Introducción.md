@@ -1508,3 +1508,7 @@ Si tenemos el navegador abierto en localhost:5001 cualquier cambio que introduzc
 ## Docker Compose
 
 Docker Compose nos permite ejecutar de manera simple aplicaciones con múltiples contenedores. Como ejemplo consideramos una aplicación en la que tenemos front-end (React), back-end (Node.js) y base de datos (MongoDB).
+
+Docker Compose es una herramienta construida sobre la base de Docker Engine y en la actualidad para Windows y Mac viene incluida en Docker Desktop, lo cual podemos verificar con `docker-compose --version`. 
+
+> En caso de estar utilizando Linux tendremos que ir a https://docs.docker.com/compose/install/ y seguir las instrucciones de instalación.
