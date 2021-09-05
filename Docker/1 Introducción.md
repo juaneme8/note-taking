@@ -1475,6 +1475,36 @@ Donde con `ls` verificamos la existencia del archivo en cuestión.
 
 ## Publicar cambios en un contenedor
 
-Supongamos que tenemos corriendo una aplicación React que visitamos en localhost:3000 y modificamos uno de sus archivos. Estos cambios no los veremos reflejados inmediatamente en el navegador.
+Supongamos que tenemos corriendo una aplicación React que visitamos en localhost:3000 y modificamos uno de sus archivos. Estos cambios no los veremos reflejados inmediatamente en el navegador. Para visualizar estos cambios debemos operar distinto segun estemos en producción o en desarrollo.
 
-Para producción deberíamos crear una nueva imagen
+Para **producción** deberíamos crear una nueva imagen, asignarle un tag apropiado y luego hacer el deploy.
+
+Para **desarrollo** no queremos perder tiempo haciendo una nueva imagen o copiando los archivos al contenedor cada vez que introducimos cambios en el código. Lo que hacemos en cambio será crear un mapeo o binding entre los directorios en el host y los directorios en el contenedor, de manera que cuando hagamos cambios en nuestros archivos sean visibles inmediatamente en el contenedor.
+
+Hasta ahora iniciamos un contenedor con el siguiente comando:
+
+```
+docker run -d -p 5001:3000 -v app-data:/app/data react-app
+```
+
+Usando la misma sintaxis que para los volúmenes podemos mapear un directorio del host con un directorio en el contenedor. En lugar de usar un *named volume* que es un directorio manejado por Docker usaremos el directorio actual de la aplicación. En lugar de escribir el path completo utilizamos el comando `pwd`, pero lo ponemos como `$(pwd)` porque si ponemos `pwd` solo Docker pensará que se trata de un *named volume*
+
+```
+docker run -d -p 5001:3000 -v $(pwd):/app react-app
+```
+
+También podríamos acompañarlo de un *named volume* 
+
+```
+docker run -d -p 5001:3000 -v $(pwd):/app -v app-data:/app/data react-app
+```
+
+
+
+Si tenemos el navegador abierto en localhost:5001 cualquier cambio que introduzcamos gracias a lo que hemos hecho y al *hot reloading* será visto de manera instantánea.
+
+
+
+## Docker Compose
+
+Docker Compose nos permite trabajar de manera simple con una aplicación con múltiples componentes.
