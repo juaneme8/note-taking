@@ -1,6 +1,6 @@
 # React Hooks
 > Basado en lista de reproducción de [Codevolution](https://www.youtube.com/playlist?list=PLC3y8-rFHvwisvxhZ135pogtX7_Oe3Q3A)
-> El código estará en la carpeta md-hooks
+> El código está en el repositorio `md-hooks`
 
 Los Hooks son una característica **incorporada a React versión 16.8** que nos permite contar con determinadas características sin tener que crear una clase (una de ella es la posibilidad de tener estado en un componente).
 
