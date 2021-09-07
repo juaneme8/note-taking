@@ -1,6 +1,6 @@
 # Docker
 
-> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 57 COMPLETO)
+> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 58 COMPLETO)
 
 ## ¿Qué es Docker?
 
@@ -1517,7 +1517,7 @@ Docker Compose es una herramienta construida sobre la base de Docker Engine y en
 
 ### Limpieza del Espacio de Trabajo
 
-Si queremos ordenar el espacio de trabajo y eliminar las imagenes y los contenedores que tengamos corriendo, primero podemos analizar ambos aspectos con:
+Si queremos limpiar el espacio de trabajo y eliminar las imagenes y los contenedores que tengamos corriendo, primero podemos analizar ambos aspectos con:
 
 ```bash
 docker images
@@ -1525,6 +1525,8 @@ docker ps
 ```
 
 
+
+#### Limpieza Manual de Imagenes
 
 Luego para eliminar todas las imagenes, podríamos hacerlo ingresando uno a uno los IDs de la imagen.
 
@@ -1534,7 +1536,9 @@ docker image rm 123 321 111
 
 
 
-Sin embargo existe una forma más simple de hacerlo.
+#### Limpieza Automática de Imágenes
+
+Sin embargo existe una forma automática de hacerlo.
 
 Para obtener información de todas las imagenes, lo hacemos con el comando:
 
@@ -1558,15 +1562,35 @@ Esto nos daría un error si tenemos contenedores basados en estas imágenes **co
 
 
 
-Utilizando una técnica similar a la vista anteriormente, eliminamos los contenedores:
+Utilizando una técnica similar a la vista anteriormente, eliminamos todos  los contenedores:
 
 ```bash
-docker container rm $(docker container ls -q)
+docker container rm -f $(docker container ls -aq)
 ```
+
+> Notar que a la hora de borrar estamos usando la opción `-f` para eliminar de manera forzada a los contenedores que están corriendo.
+>
+> También a la hroa de listar agregamos la opción `-a` para también eliminar los contenedores detenidos.
+
+
 
 Ahora eliminamos las imagenes:
 
 ```bash
 docker image rm $(docker image ls -q)
 ```
+
+
+
+Ahora podremos verificar lo realizado anteriormente con
+
+```
+docker image ls
+docker ps
+docker ps -a
+```
+
+
+
+> Otra forma de hacerlo con Windows es hacer click derecho en el ícono de Docker, luego ir a **Settings**, hacer click en el ícono de **Troubleshoot** y luego click en **Clean/Purge data** que eliminará imagenes, contenedores, volúmenes, etc.
 
