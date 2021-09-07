@@ -1,6 +1,6 @@
 # Docker
 
-> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 53 COMPLETO)
+> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 57 COMPLETO)
 
 ## ¿Qué es Docker?
 
@@ -1512,3 +1512,4 @@ Docker Compose nos permite ejecutar de manera simple aplicaciones con múltiples
 Docker Compose es una herramienta construida sobre la base de Docker Engine y en la actualidad para Windows y Mac viene incluida en Docker Desktop, lo cual podemos verificar con `docker-compose --version`. 
 
 > En caso de estar utilizando Linux tendremos que ir a https://docs.docker.com/compose/install/ y seguir las instrucciones de instalación.
+
