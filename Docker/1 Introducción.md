@@ -1513,3 +1513,60 @@ Docker Compose es una herramienta construida sobre la base de Docker Engine y en
 
 > En caso de estar utilizando Linux tendremos que ir a https://docs.docker.com/compose/install/ y seguir las instrucciones de instalación.
 
+
+
+### Limpieza del Espacio de Trabajo
+
+Si queremos ordenar el espacio de trabajo y eliminar las imagenes y los contenedores que tengamos corriendo, primero podemos analizar ambos aspectos con:
+
+```bash
+docker images
+docker ps
+```
+
+
+
+Luego para eliminar todas las imagenes, podríamos hacerlo ingresando uno a uno los IDs de la imagen.
+
+```bash
+docker image rm 123 321 111 
+```
+
+
+
+Sin embargo existe una forma más simple de hacerlo.
+
+Para obtener información de todas las imagenes, lo hacemos con el comando:
+
+```bash
+docker image ls
+```
+
+Mientras que si sólo queremos obtener los IDs de las imagenes:
+
+```bash
+docker image ls -q
+```
+
+Por lo tanto podríamos pasarle esto al comando `docker image rm`
+
+```bash
+docker image rm $(docker image ls -q)
+```
+
+Esto nos daría un error si tenemos contenedores basados en estas imágenes **corriendo o detenidos**, por lo que tendremos que eliminarlos primero.
+
+
+
+Utilizando una técnica similar a la vista anteriormente, eliminamos los contenedores:
+
+```bash
+docker container rm $(docker container ls -q)
+```
+
+Ahora eliminamos las imagenes:
+
+```bash
+docker image rm $(docker image ls -q)
+```
+
