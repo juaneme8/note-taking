@@ -1,6 +1,6 @@
 # Docker
 
-> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 58 COMPLETO)
+> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 60 COMPLETO)
 
 ## ¿Qué es Docker?
 
@@ -1594,3 +1594,84 @@ docker ps -a
 
 > Otra forma de hacerlo con Windows es hacer click derecho en el ícono de Docker, luego ir a **Settings**, hacer click en el ícono de **Troubleshoot** y luego click en **Clean/Purge data** que eliminará imagenes, contenedores, volúmenes, etc.
 
+
+
+# Aplicación Completa
+
+Trabajaremos con una aplicación formada por múltiples partes frontend, backend y base de datos.
+
+Cuando trabajamos sin Docker para correr la aplicación tenemos que seguir una serie de pasos:
+
+* Descargar el código del frontend y del backend de GitHub
+* Iniciar una ventana de la terminal para el frontend y otra para el backend, instalar las dependencias y luego iniciar los web servers de cada aplicación.
+* Descargar e instalar MongoDB.         
+
+
+
+Con Docker en cambio sólo tendremos que ejecutar un comando. Suponiendo que tenemos creado el archivo `docker-compose.yml` (que nos permitirá componer una aplicación multi-contenedor), sólo tendremos que ejecutar:
+
+```
+docker-compose up
+```
+
+En ese momento veremos los distintos layers relacionados con la instalación de MongoDB, instalación de dependencias, inicialización de webservers, ejecutará tests etc.
+
+Contamos con un *migration script* que realiza el *populate* de algunos elementos iniciales en la base de datos.
+
+
+
+Antes de analizar el archivo `docker-compose.yml` profundizaremos acerca de los formatos `.json` y `.yml`.
+
+
+
+## Formato `JSON` y `YAML`
+
+El formato `.json` es un lenguaje para representar datos de una manera humanamente lejible, como por ejemplo:
+
+```json
+{
+	"name": "The Ultimate Docker Course",
+	"price": 149,
+	"is_published": true,
+	"tags": ["software","devops"],
+	"author":{
+		"first_name":"Mosh",
+		"last_name":"Hamedani"
+	}
+}
+```
+
+
+
+El formato `YML` (es posible utilizar la extensión `.yml` o`.yaml`) también nos permite representar datos pero de una manera áun más simple de leer:
+
+> Utilizamos `---` en la parte superior
+>
+> Utilizamos indentación para indicar jerarquía
+>
+> No utilizamos comillas
+>
+> No utilizamos comas para separar pares key/value
+>
+> Para representar elementos de un array utilizamos guiones e indentación
+
+```yaml
+---
+name: The Ultimate Docker Course
+price: 149
+is_published: true
+tags: 
+	- software
+	- devops
+author:
+	first_name: Mosh
+	last_name: Hamedani
+```
+
+Como podemos ver el formato `YAML` es mas simple de leer pero tiene la contra de que es un poco más lento de parsear que el formato `JSON`. Por ejemplo no sabe a priori si `149` algo es un string o un número por lo que deberá leer todo como un string y luego evaluarlo.
+
+Los archivos `JSON` se usan habitualmente para intercambiar datos entre cliente y servidor y los `YAML` para archivos de configuración.
+
+
+
+## Archivo `docker-compose.yml`
