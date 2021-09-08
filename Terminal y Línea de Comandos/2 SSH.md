@@ -170,7 +170,7 @@ Si tenemos un repositorio y no sabemos si estamos trabajando con HTTPS o con SSH
 * Con HTTPS obtendremos algo como `https://github.com/user/repo.git`
 
 Si estamos usando HTTPS y queremos pasar a usar SSH podemos cambiarlo con el comando 
-`git remote set-url git@github.com:user/repo.git`
+`git remote set-url origin git@github.com:user/repo.git`
 
 # Conexión a GitLab con SSH
 Los pasos a seguir son los mismos que para GitHub pero también es posible consultar la [documentación de GitLab](https://docs.gitlab.com/ee/ssh/).

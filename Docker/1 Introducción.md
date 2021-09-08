@@ -1675,3 +1675,73 @@ Los archivos `JSON` se usan habitualmente para intercambiar datos entre cliente 
 
 
 ## Archivo `docker-compose.yml`
+
+En primer lugar debemos setear la propiedad `version` para ello googleamos "docker compose file" podremos ver una tabla con la versión de compose y la del release de docker engine. 
+
+```yaml
+version: "3.8"
+```
+
+> Notar que **debemos ponerlo entre comillas** ya que Docker Compose espera que sea un string.
+
+
+
+A continuación debemos definir los distintos bloques o servicios con los cuales le diremos a Docker como hacer cada una de las imágenes y cómo iniciar luego los contenedores.
+
+```
+version: "3.8"
+services:
+	frontend:
+	backend:
+	database:
+```
+
+> Les hemos dado a los servicios el nombre `frontend`, `backend`, `database` pero podríamos haberles dado cualquier nombre por ejemplo `web`, `api`, `db`.
+>
+> Cada servicio tiene su propio Dockerfile
+
+```
+version: "3.8"
+services:
+	web:
+		build: ./frontend
+	api:
+		build: ./backend
+	db:
+		image: mongo:4.0-xenial
+```
+
+
+
+> Con `build: ./frontend` hacemos referencia a donde tenemos el archivo `Dockerfile`.
+>
+> Para la base de datos no vamos a crear una imagen sino que vamos a descargar una de DockerHub y e en lugar de `build` utilizamos `image: mongo:4.0-xenial` siendo `xenial` Ubuntu 16. Utilizamos una imagen de Linux ya que las de Windows son muy pesadas.
+
+
+
+A la hora de hacer el mapeo de puertos como podemos tener mas de uno debemos utilizar la sintaxis de array:
+
+```
+version: "3.8"
+services:
+	web:
+		build: ./frontend
+		ports:
+			- 3000:3000
+	api:
+		build: ./backend
+		ports:
+			- 3001:3001
+	db:
+		image: mongo:4.0-xenial
+		ports:
+			- 27017:27017
+```
+
+
+
+Al poner `3000:3000` estamos mapeando el 3000 del host con el 3000 del contenedor (en ese orden).
+
+
+
+Googleando ["compose version 3"](https://docs.docker.com/compose/compose-file/compose-file-v3/) podremos ver todas las propiedades válidas las mas comunes build, `image`, `ports`, `volume`, `environment`, etc
