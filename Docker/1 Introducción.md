@@ -1,6 +1,6 @@
 # Docker
 
-> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 60 COMPLETO)
+> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 61 COMPLETO)
 
 ## ¿Qué es Docker?
 
@@ -1688,7 +1688,7 @@ version: "3.8"
 
 A continuación debemos definir los distintos bloques o servicios con los cuales le diremos a Docker como hacer cada una de las imágenes y cómo iniciar luego los contenedores.
 
-```
+```yaml
 version: "3.8"
 services:
 	frontend:
@@ -1696,11 +1696,13 @@ services:
 	database:
 ```
 
-> Les hemos dado a los servicios el nombre `frontend`, `backend`, `database` pero podríamos haberles dado cualquier nombre por ejemplo `web`, `api`, `db`.
->
-> Cada servicio tiene su propio Dockerfile
+> Les hemos dado a los servicios el nombre `frontend`, `backend`, `database` pero podríamos haberles dado cualquier nombre por ejemplo `web`, `api`, `db`. 
 
-```
+Así como anteriormente para iniciar el contenedor ingresabamos manualmente el comando `docker run -p ... -v ... react-app` la idea es ingresar aca propiedades que nos permitan luego correr el contenedor con esas opciones.
+
+Para cada servicio podemos crear las imagenes o descargarlas de DockerHub. Para el caso del servicio `web` y `api` queremos crearlas por lo que utilizamos la propiedad `build` y hacemos referencia a la ubicación del `Dockerfile`. Para el servicio `db` en cambio queremos descargar la imagen de DockerHub y usamos la propiedad `image`.
+
+```yaml
 version: "3.8"
 services:
 	web:
@@ -1711,17 +1713,13 @@ services:
 		image: mongo:4.0-xenial
 ```
 
-
-
-> Con `build: ./frontend` hacemos referencia a donde tenemos el archivo `Dockerfile`.
->
-> Para la base de datos no vamos a crear una imagen sino que vamos a descargar una de DockerHub y e en lugar de `build` utilizamos `image: mongo:4.0-xenial` siendo `xenial` Ubuntu 16. Utilizamos una imagen de Linux ya que las de Windows son muy pesadas.
+> Para `db` utilizamos` mongo:4.0-xenial` siendo `xenial` Ubuntu 16. Utilizamos una imagen de Linux ya que las de Windows son muy pesadas.
 
 
 
 A la hora de hacer el mapeo de puertos como podemos tener mas de uno debemos utilizar la sintaxis de array:
 
-```
+```yaml
 version: "3.8"
 services:
 	web:
@@ -1742,6 +1740,89 @@ services:
 
 Al poner `3000:3000` estamos mapeando el 3000 del host con el 3000 del contenedor (en ese orden).
 
+> MongoDB por defecto escucha en el puerto `27017` y para poder utilizar un *database client* como MondoDB Compass lo mapeamos al mismo puerto del host.
 
 
-Googleando ["compose version 3"](https://docs.docker.com/compose/compose-file/compose-file-v3/) podremos ver todas las propiedades válidas las mas comunes build, `image`, `ports`, `volume`, `environment`, etc
+
+Googleando ["compose version 3"](https://docs.docker.com/compose/compose-file/compose-file-v3/) podremos ver todas las propiedades válidas las mas comunes son `build`, `image`, `ports`, `volume`, `environment`, etc
+
+
+
+Para la api necesitamos una **variable de entorno** que indique donde está la base de datos. 
+
+Esto podemos hacerlo de dos formas:
+
+La primera es utilizando la **sintaxis de listas** ya que podremos tener múltiples variables de entorno:
+
+```yaml
+version: "3.8"
+services:
+	web:
+		build: ./frontend
+		ports:
+			- 3000:3000
+	api:
+		build: ./backend
+		ports:
+			- 3001:3001
+		environment: 
+			- DB_URL=mongodb://db/vidly
+	db:
+		image: mongo:4.0-xenial
+		ports:
+			- 27017:27017
+```
+
+Cuando iniciamos una aplicación con Docker Compose se crea una **Network** en la cual tendremos tres **Hosts** con nombres equivalentes a los que le hemos dado a los servicios `web`, `api` y `db`. Es por eso que a la hora de especificar el *connection string* usamos `DB_URL=mongodb://db/vidly` siendo `db` el nombre de la red y `vidly` la base de datos.
+
+La otra forma es utilizando la **sintaxis property-value** y tiene la ventaja de que tendremos un mejor highlighting. 
+
+```yaml
+version: "3.8"
+services:
+	web:
+		build: ./frontend
+		ports:
+			- 3000:3000
+	api:
+		build: ./backend
+		ports:
+			- 3001:3001
+		environment: 
+			DB_URL: mongodb://db/vidly
+	db:
+		image: mongo:4.0-xenial
+		ports:
+			- 27017:27017
+```
+
+
+
+No queremos que MondoDB escriba datos en el file system temporario del contenedor, es por eso que debemos utilizar un volumen.
+
+```yaml
+version: "3.8"
+services:
+	web:
+		build: ./frontend
+		ports:
+			- 3000:3000
+	api:
+		build: ./backend
+		ports:
+			- 3001:3001
+		environment: 
+			DB_URL: mongodb://db/vidly
+	db:
+		image: mongo:4.0-xenial
+		ports:
+			- 27017:27017
+		volumes:
+			- vidly:/data/db
+volumes:
+	vidly:
+```
+
+> MongoDB utiliza como directorio default `/data/db`. Queremos que todo lo que el contenedor escriba allí se almacene en un volumen.
+>
+> En la parte de abajo agregamos nuevamente `vidly` pero sin valor. La idea es que debemos definir un volumen primero para luego utilizarlo en el servicio.
