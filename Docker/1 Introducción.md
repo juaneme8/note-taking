@@ -1,6 +1,6 @@
 # Docker
 
-> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 61 COMPLETO)
+> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 62 COMPLETO)
 
 ## ¿Qué es Docker?
 
@@ -1826,3 +1826,46 @@ volumes:
 > MongoDB utiliza como directorio default `/data/db`. Queremos que todo lo que el contenedor escriba allí se almacene en un volumen.
 >
 > En la parte de abajo agregamos nuevamente `vidly` pero sin valor. La idea es que debemos definir un volumen primero para luego utilizarlo en el servicio.
+
+
+
+## Crear Imagenes
+
+Como Docker Compose está hecho sobre Docker Engine, todo lo que hicimos anteriormente como crear imagenes, listarlas, iniciar contenedores con ellas, etc está disponible.
+
+
+
+Si ejecutamos `docker-compose` podremos ver todos los subcomandos que podemos ejecuctar, estos impactarán sobre la aplicación como un todo es decir en múltiples contenedores.
+
+
+
+Para obtener información sobre un subcomando en particular:
+
+```
+docker-compose build --help
+```
+
+* `--no-cache` sirve para evitar el uso de caché al crear la imagen y esto puede ser útil cuando tenemos algun inconveniente y queremos forzar un *full rebuild*
+
+* `--pull` sirva para intentar hacer un pull de una nueva versión de la imagen.
+
+
+
+En nuestro caso usaremos simplemente:
+
+```
+docker-compose build
+```
+
+Docker utilizará lo que pueda del caché y es por esto que si queremos forzar un *full rebuild* debemos poner la opción `--no-cache`
+
+
+
+Luego podremos ver que tenemos tres imagenes con:
+
+```
+docker images
+```
+
+> El nombre del directorio aparecerá como prefijo del nombre de las imagenes `vidly_api`, `vidly_web`, etc.  
+
