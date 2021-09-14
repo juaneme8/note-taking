@@ -1,6 +1,6 @@
 # Docker
 
-> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 62 COMPLETO)
+> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 63 COMPLETO)
 
 ## ¿Qué es Docker?
 
@@ -1868,4 +1868,60 @@ docker images
 ```
 
 > El nombre del directorio aparecerá como prefijo del nombre de las imagenes `vidly_api`, `vidly_web`, etc.  
+
+
+
+## Iniciar Aplicación
+
+A la hora de iniciar una aplicación con Docker Compose debemos hacerlo con el comando:
+
+```
+docker-compose up
+```
+
+Si las imagenes están disponibles Docker las correrá dentro de contenedores, en caso contrario creará dichas imágenes previamente.
+
+
+
+Para conocer los subcomandos disponibles
+
+```
+docker-compose
+```
+
+
+
+* `--build` para forzar un rebuild cada vez que queremos iniciar la aplicación, no tendremos que poner `docker-compose build` y `docker-compose up` sino que directamente `docker-compose up --build`
+
+```
+docker-compose up --build
+```
+
+
+
+* `-d` para trabajar en *dettached mode* es decir para iniciar los contenedores en el *background* 
+
+```
+docker-compose up -d
+```
+
+
+
+* `ps` podremos ver todos los contenedores relacionados a esta aplicación
+
+```
+docker-compose ps
+```
+
+> Este comando se diferencia de `docker ps` con el cual vemos todos los contenedores corriendo en todas las aplicaciones.
+
+
+
+## Detener Aplicación
+
+Para detener la aplicación y liberar recursos borrando los contenedores (las imagenes permanecerán)
+
+```
+docker-compose down
+```
 
