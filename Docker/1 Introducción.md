@@ -1,6 +1,6 @@
 # Docker
 
-> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 64 COMPLETO)
+> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 65 COMPLETO)
 
 ## ¿Qué es Docker?
 
@@ -2027,3 +2027,52 @@ ports:
 ```
 
 Es por eso que con Compass podremos conectarnos al contenedor teniendo como hostname **localhost** y como puerto **27017**.
+
+
+
+## Visualizar los logs
+
+Si queremos ver los logs de todos los contenedores de la aplicación podemos hacerlo con:
+
+```
+docker-compose logs
+```
+
+Al lado de cada mensaje podremos ver un identificador del contenedor al cual pertenece dicho log.
+
+
+
+Para ver los posibles subcomandos
+
+```
+docker-compose logs --help
+```
+
+
+
+Si queremos ver continuamente la salida de logs en la medida que aparecen podemos hacer uso del follow con `-f` o `--follow`
+
+```
+docker-compose logs -f
+```
+
+Si queremos mostrar los timestamps de cada log podemos hacerlo con `-t` o `--timestamps`
+
+```
+docker-compose logs -t
+```
+
+
+
+Si queremos ver los logs de cada contenedor individualmente en lugar de todos juntos, primero debemos obtener el id del contenedor:
+
+```
+docker ps
+```
+
+Luego ejecutamos (y agregamos la opción `-f` si queremos salida continua)
+
+```
+docker logs 8c6 -f
+```
+
