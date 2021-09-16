@@ -1,6 +1,6 @@
 # Docker
 
-> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 65 COMPLETO)
+> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 66 COMPLETO)
 
 ## ¿Qué es Docker?
 
@@ -2076,3 +2076,61 @@ Luego ejecutamos (y agregamos la opción `-f` si queremos salida continua)
 docker logs 8c6 -f
 ```
 
+
+
+## Publicar Cambios
+
+Nuevamente no queremos tener que reconstruir las imágenes cada vez que cambiamos el código por lo que otra vez vamos a mapear el directorio del proyecto (como por ejemplo `backend` y `frontend` en nuestro caso) al directorio `app` dentro del contenedor. Así nos aseguramos que los cambios realizados en el directorio del host sean vistos inmediatamnete en el directorio del contenedor. 
+
+
+
+En el `docker-compose.yml` agregamos dentro del servicio `api` la propiedad `volumes` para hacer el mapeo de volúmenes:
+
+```yaml
+version: "3.8"
+services:
+	web:
+		build: ./frontend
+		ports:
+			- 3000:3000
+	api:
+		build: ./backend
+		ports:
+			- 3001:3001
+		environment: 
+			DB_URL: mongodb://db/vidly
+		volumes:
+			- ./backend:/app
+	db:
+		image: mongo:4.0-xenial
+		ports:
+			- 27017:27017
+		volumes:
+			- vidly:/data/db
+volumes:
+	vidly:
+```
+
+
+
+> Notar que estamos utilizando un **path relativo** a diferencia de antes que utilizamos un **path absoluto** cuando hicimos `docker run -v $(pwd)`
+>
+> También notar que estamos mapeando con la carpeta `/app` del contenedor (tendremos una en cada uno de los contenedores).
+
+```bash
+docker run -d -p 5001:3000 -v $(pwd):/app react-app
+```
+
+
+
+Si ahora ejecutamos
+
+```
+docker-compose up
+```
+
+Obtendremos un error **sh: nodemon: not found** y esto se debe a que estamos copiando los archivos pero en el host no tenemos la aplicación instalada (si la teníamos instalada en el contenedor pero ahora estamos compartiendole el código por lo que verá exactamente lo mismo que en el host) por lo que no tenemos `node_modules`. Para solucionar esto navegamos a `cd backend` e instalamos la aplicación `npm i`
+
+En localhost:3001/api podremos acceder al backend. Si hacemos ahora algun cambio y actualizamos lo veremos actualizado.
+
+Podemos aplicar la misma técnica para el frontend.
