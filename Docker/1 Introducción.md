@@ -2134,3 +2134,107 @@ Obtendremos un error **sh: nodemon: not found** y esto se debe a que estamos cop
 En localhost:3001/api podremos acceder al backend. Si hacemos ahora algun cambio y actualizamos lo veremos actualizado.
 
 Podemos aplicar la misma técnica para el frontend.
+
+
+
+## Migrando la Base de Datos
+
+Se conoce como *Database Migration* al hecho de tener la base de datos con algunos datos. Para ello debemos crear un database migration script y lo haremos usando el paquete Migrate Mongo. En el backend en `package.json` veremos que tenemos esta dependencia como `devDependencies`.
+
+En el proyecto de `backend` dentro del directorio `migrations` almacenamos los migration scripts y dentro de `20210208213312-populate-movies` (notar que en el nombre tiene asociado un timestamp). Tenemos una función `up` para upgrading donde agregaremos elementos a la db y una `down` para downgrading donde los eliminaremos.
+
+```js
+module.exports = {
+  async up(db, client) {
+    await db
+      .collection("movies")
+      .insertMany([
+        { title: "Avatar" },
+        { title: "Star Wars" },
+        { title: "Terminator" },
+        { title: "Titanic" },
+      ]);
+  },
+
+  async down(db, client) {
+    await db.collection("movies").deleteMany({
+      title: {
+        $in: ["Avatar", "Star Wars", "Terminator", "Titanic"],
+      },
+    });
+  },
+};
+
+```
+
+
+
+Con el comando `migrate-mongo up` ejecutamos todos los migration scripts para cargar datos a la base de datos. Si lo ejecutamos mas de una vez no hará efecto ya que dentro de la DB tenemos una colección llamada `changelog` con los scripts que fueron ejecutados indicando su `fileName` y`appliedAt`.
+
+
+
+En `package.json` en el apartado de scripts podremos ver el siguiente alias:
+
+```js
+"db:up": "migrate-mongo up",
+```
+
+Esto significa que podremos escribir `npm run db:up` y es lo mismo que poner `migrate-mongo up`
+
+
+
+Queremos que se ejecute la migración de la base de datos al iniciar la aplicación y si nos fijamos en el `Dockerfile` veremos que tenemos:
+
+``` 
+CMD ["npm", "start"]
+```
+
+En el `docker-compose.yml` podemos reemplazar este comando agregando la propiedad `command` dentro del servicio `api` acompañado del comando que deseamos ejecutar:
+
+```
+command: migrate-mongo up && npm start
+```
+
+
+
+Por lo que nos quedará así:
+
+```dockerfile
+version: "3.8"
+services:
+	web:
+		build: ./frontend
+		ports:
+			- 3000:3000
+	api:
+		build: ./backend
+		ports:
+			- 3001:3001
+		environment: 
+			DB_URL: mongodb://db/vidly
+		volumes:
+			- ./backend:/app
+		command: migrate-mongo up && npm start
+	db:
+		image: mongo:4.0-xenial
+		ports:
+			- 27017:27017
+		volumes:
+			- vidly:/data/db
+volumes:
+	vidly:
+```
+
+Sin embargo hay un problema con esta implementación ya que puede que el servidor de la base de datos no esté disponible al momento de ejecutar este comando (a pesar de que el contenedor esté corriendo puede que el motor de la base datos aún no esté disponible ya que suele tardar varios segundos). 
+
+En estos casos debemos utilizar un waiting script. Para ello googleamos "docker wait for container" para acceder a un artículo titulado *Control startup and shutdown order in Compose* podremos encontrar las herramientas que nos permiten tener esta capacidad. Dentro de ellas utilizaremos **wait-for-it**, ingresando al repositorio podremos descargar el script `wait-for-it.sh`. Gracias a este script podremos esperar a que el motor de la db esté disponible antes de hacer algun trabajo.
+
+Incorporamos el archivo `wait-for` (lo estamos renombrando) dentro del proyecto y colocamos:
+
+`command: ./wait-for db:27017 && migrate-mongo up && npm start`
+
+> Esperará a tener tráfico en el puerto 27017.
+
+
+
+El comando es bastante largo por lo que podremos utilizar otra técnica usando un  *entry point script* mediante un archivo `docker-entrypoint.sh`.
