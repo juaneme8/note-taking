@@ -1,6 +1,6 @@
 # Docker
 
-> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 67 COMPLETO)
+> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 68 COMPLETO)
 
 ## ¿Qué es Docker?
 
@@ -2316,3 +2316,76 @@ volumes:
 
 Queremos verificar que todo esto funcione, para ello primero ejecutamos `docker-compose down` con lo cual los contenedores se eliminan pero el volumen persiste. Para eliminarlo manualmente primero obtenemos su nombre con `docker volume ls` y luego lo borramos con `docker volume rm vidly_vidly` (nombreAplicación_nombreVolumen). Si ahora ejecutamos `docker-compose up` y vamos al endpoint que devuelve todas las películas localhost:3001/api/movies (o a Compass y revisamos esa colección) veremos que se ha hecho la database migration.
 
+
+
+## Ejecutar Tests
+
+En ambos proyectos (frontend y backend) tenemos una serie de tests automatizados:
+
+* tests unitarios
+* tests de integración
+
+Podemos ejecutarlos yendo al directorio correspondiente por ejemplo`cd frontend` y ejecutando el comando `npm test`
+
+Si bien este es el modo más rápido de obtener feedback acerca de nuestro código, también podemos ejecutar los tests dentro de un contenedor.
+
+
+
+Debemos modificar el archivo `docker-compose.yaml` y agregar un nuevo servicio `web-tests`:
+
+```yaml
+web-tests:
+	image: vidly_web
+	volumes:
+		_ ./frontend:/app
+	command: npm test
+```
+
+> Estamos reutilizando la imagen creada por el servicio `web` por eso ponemos `image: vidly_web`
+>
+> No necesitamos puertos y dejamos los volumenes igual que en `web` ya que queremos que los cambios que hagamos en el código se vean reflejados en el contenedor de manera inmediata.
+
+
+
+El archivo completo nos queda:
+
+```yaml
+version: "3.8"
+services:
+	web:
+		build: ./frontend
+		ports:
+			- 3000:3000
+	web-tests:
+		image: vidly_web
+		volumes:
+			_ ./frontend:/app
+		command: npm test
+	api:
+		build: ./backend
+		ports:
+			- 3001:3001
+		environment: 
+			DB_URL: mongodb://db/vidly
+		volumes:
+			- ./backend:/app
+		command: ./docker-entrypoint.sh
+	db:
+		image: mongo:4.0-xenial
+		ports:
+			- 27017:27017
+		volumes:
+			- vidly:/data/db
+volumes:
+	vidly:
+```
+
+
+
+Cuando ejecutamos `docker-compose up` veremos en pantalla el resultado de los tests.
+
+Si hacemos un cambio se ejecutarán nuevamente los tests y esto llevará algo de tiempo.
+
+Así como definimos un servicio `web-tests` podemos definir uno `api-tests` para los tests del backend.
+
+Este método tiene la ventaja que no tenemos que abrir distintas ventanas para correr los tests del front y del back y tenemos todo en un lugar.
