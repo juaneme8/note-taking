@@ -1,6 +1,6 @@
 # Docker
 
-> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 66 COMPLETO)
+> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 67 COMPLETO)
 
 ## ¿Qué es Docker?
 
@@ -2139,7 +2139,7 @@ Podemos aplicar la misma técnica para el frontend.
 
 ## Migrando la Base de Datos
 
-Se conoce como *Database Migration* al hecho de tener la base de datos con algunos datos. Para ello debemos crear un database migration script y lo haremos usando el paquete Migrate Mongo. En el backend en `package.json` veremos que tenemos esta dependencia como `devDependencies`.
+Se conoce como *Database Migration* al hecho de tener la base de datos con algunos datos. Existen varias alternativas pero en nuestro caso hemos utilizado la heramienta __Migrate Mongo__ para crear un un *database migration script*. En `package.json` veremos que tenemos este paquete dentro de las `devDependencies`.
 
 En el proyecto de `backend` dentro del directorio `migrations` almacenamos los migration scripts y dentro de `20210208213312-populate-movies` (notar que en el nombre tiene asociado un timestamp). Tenemos una función `up` para upgrading donde agregaremos elementos a la db y una `down` para downgrading donde los eliminaremos.
 
@@ -2169,7 +2169,7 @@ module.exports = {
 
 
 
-Con el comando `migrate-mongo up` ejecutamos todos los migration scripts para cargar datos a la base de datos. Si lo ejecutamos mas de una vez no hará efecto ya que dentro de la DB tenemos una colección llamada `changelog` con los scripts que fueron ejecutados indicando su `fileName` y`appliedAt`.
+Con el comando `migrate-mongo up` ejecutamos todos los *migration scripts* (en nuestro caso sólo tenemos uno) para cargar datos a la base de datos. Si lo ejecutamos mas de una vez no hará efecto ya que dentro de la DB tenemos una colección llamada `changelog` con los scripts que fueron ejecutados indicando su `fileName` y`appliedAt`.
 
 
 
@@ -2189,17 +2189,17 @@ Queremos que se ejecute la migración de la base de datos al iniciar la aplicaci
 CMD ["npm", "start"]
 ```
 
-En el `docker-compose.yml` podemos reemplazar este comando agregando la propiedad `command` dentro del servicio `api` acompañado del comando que deseamos ejecutar:
+Así como está se ejecutará el comando `npm start`. Para lograr hacer la migración antes de esto debemos modificar el archivo `docker-compose.yml` agregando la propiedad `command` dentro del servicio `api` acompañado del comando que deseamos ejecutar:
 
-```
+```bash
 command: migrate-mongo up && npm start
 ```
 
 
 
-Por lo que nos quedará así:
+Por lo que el `docker-compose.yml` se vería así:
 
-```dockerfile
+```yaml
 version: "3.8"
 services:
 	web:
@@ -2225,16 +2225,94 @@ volumes:
 	vidly:
 ```
 
+
+
 Sin embargo hay un problema con esta implementación ya que puede que el servidor de la base de datos no esté disponible al momento de ejecutar este comando (a pesar de que el contenedor esté corriendo puede que el motor de la base datos aún no esté disponible ya que suele tardar varios segundos). 
 
-En estos casos debemos utilizar un waiting script. Para ello googleamos "docker wait for container" para acceder a un artículo titulado *Control startup and shutdown order in Compose* podremos encontrar las herramientas que nos permiten tener esta capacidad. Dentro de ellas utilizaremos **wait-for-it**, ingresando al repositorio podremos descargar el script `wait-for-it.sh`. Gracias a este script podremos esperar a que el motor de la db esté disponible antes de hacer algun trabajo.
+En estos casos debemos utilizar un *waiting script*. Para ello googleamos "docker wait for container" para acceder a un artículo titulado *Control startup and shutdown order in Compose* podremos encontrar las herramientas que nos permiten tener esta capacidad. Dentro de ellas utilizaremos **wait-for-it**, ingresando al repositorio podremos descargar el script `wait-for-it.sh`. Gracias a este script podremos esperar a que el motor de la db esté disponible antes de hacer algun trabajo.
 
-Incorporamos el archivo `wait-for` (lo estamos renombrando) dentro del proyecto y colocamos:
+Incorporamos el archivo `wait-for` (lo estamos renombrando) dentro de la raíz del proyecto y colocamos:
 
 `command: ./wait-for db:27017 && migrate-mongo up && npm start`
 
-> Esperará a tener tráfico en el puerto 27017.
+> Esperará a tener tráfico en el puerto default de MongoDB que es el 27017.
+
+
+
+```yaml
+version: "3.8"
+services:
+	web:
+		build: ./frontend
+		ports:
+			- 3000:3000
+	api:
+		build: ./backend
+		ports:
+			- 3001:3001
+		environment: 
+			DB_URL: mongodb://db/vidly
+		volumes:
+			- ./backend:/app
+		command: ./wait-for db:27017 && migrate-mongo up && npm start
+	db:
+		image: mongo:4.0-xenial
+		ports:
+			- 27017:27017
+		volumes:
+			- vidly:/data/db
+volumes:
+	vidly:
+```
 
 
 
 El comando es bastante largo por lo que podremos utilizar otra técnica usando un  *entry point script* mediante un archivo `docker-entrypoint.sh`.
+
+```
+#!/bin/sh
+
+echo "Waiting for MongoDB to start..."
+./wait-for db:27017 
+
+echo "Migrating the databse..."
+npm run db:up 
+
+echo "Starting the server..."
+npm start 
+```
+
+
+
+Para ejecutar este archivo debemos indicar `command: ./docker-entrypoint.sh` por lo que el archivo `docker-compose.yml` nos queda:
+
+```yaml
+version: "3.8"
+services:
+	web:
+		build: ./frontend
+		ports:
+			- 3000:3000
+	api:
+		build: ./backend
+		ports:
+			- 3001:3001
+		environment: 
+			DB_URL: mongodb://db/vidly
+		volumes:
+			- ./backend:/app
+		command: ./docker-entrypoint.sh
+	db:
+		image: mongo:4.0-xenial
+		ports:
+			- 27017:27017
+		volumes:
+			- vidly:/data/db
+volumes:
+	vidly:
+```
+
+
+
+Queremos verificar que todo esto funcione, para ello primero ejecutamos `docker-compose down` con lo cual los contenedores se eliminan pero el volumen persiste. Para eliminarlo manualmente primero obtenemos su nombre con `docker volume ls` y luego lo borramos con `docker volume rm vidly_vidly` (nombreAplicación_nombreVolumen). Si ahora ejecutamos `docker-compose up` y vamos al endpoint que devuelve todas las películas localhost:3001/api/movies (o a Compass y revisamos esa colección) veremos que se ha hecho la database migration.
+
