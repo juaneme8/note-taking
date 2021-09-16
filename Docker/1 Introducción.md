@@ -2389,3 +2389,9 @@ Si hacemos un cambio se ejecutarán nuevamente los tests y esto llevará algo de
 Así como definimos un servicio `web-tests` podemos definir uno `api-tests` para los tests del backend.
 
 Este método tiene la ventaja que no tenemos que abrir distintas ventanas para correr los tests del front y del back y tenemos todo en un lugar.
+
+
+
+# Deployment
+
+El propósito de esta sección es tomar la aplicación con la que venimos trabajando y colocarla en la nube.
