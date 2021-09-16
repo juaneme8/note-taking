@@ -1,6 +1,6 @@
 # Docker
 
-> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 63 COMPLETO)
+> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 64 COMPLETO)
 
 ## ¿Qué es Docker?
 
@@ -1925,3 +1925,105 @@ Para detener la aplicación y liberar recursos borrando los contenedores (las im
 docker-compose down
 ```
 
+
+
+## Docker Networking
+
+Cuando ejecutamos la aplicación Docker Compose crea automáticamente una red y agrega los contenedores a esa red.
+
+Esto lo podemos comprobar de la siguiente forma:
+
+```
+docker-compose up -d
+```
+
+La primera línea que veremos será **"Creating network "vidly_default" with the default driver**
+
+
+
+Para listar las redes disponibles:
+
+```
+docker network ls
+```
+
+> La instalación default de Docker viene con tres redes `bridge`, `host` y `none`. Además veremos a la red `vidly_default` creada por Docker Compose que tiene tres hosts o contenedores.
+
+
+
+Tendremos los hosts `web`, `api` y `db` y pueden comunicarse entre sí utilizando su nombre.
+
+
+
+Si queremos ver los contenedores corriendo:
+
+```
+docker ps
+```
+
+Luego iniciamos una sesión shell en el contenedor de `vidly_web` y haremos un ping a `vidly_api`
+
+```
+docker exec -it 8cg sh
+```
+
+Luego le hacemos un ping
+
+```
+ping api
+```
+
+Obtenemos **ping: permission denied (are you root?)** 
+
+Salimos con `exit`.
+
+Esto se debe a que desde el Dockerfile hemos establecido que queremos trabajar con el usuario `app` que no tiene permisos de ping, lo que hacemos será loguearnos como `root` user
+
+```
+docker exec -it -u root 8c6 sh
+```
+
+Ahora al iniciar la sesión de shell veremos en el prompt el `#` que da cuenta de que tenemos los privilegios mas altos y el comando `ping` nos funcionará
+
+```
+ping api
+```
+
+Cada contenedor tiene asociada una dirección IP y en este caso veremos  la dirección asociada a este a `api`.
+
+
+
+Docker viene con un **servidor DNS** embebido que contiene los nombres e IP de los contenedores. 
+
+Dentro de cada contenedor tenemos un componente llamado **DNS Resolver** que habla con el **servidor de DNS** para obtener la direcciones IP deseadas. En nuestro caso dentro del contenedor `web` tenemos un DNS resolver que le pregunta al servidor de DNS la dirección ip de `api` y este luego se lo da en respuesta. Luego el contenedor `web` utilizará la IP para comunicarse con `api`.
+
+
+
+Para obtener la dirección IP del contenedor:
+
+```
+ifconfig
+```
+
+> Veremos los adaptadores de red `eth0` (dentro de este apartado veremos la IP del contenedor) y `lo`.
+
+
+
+Cuando definimos la variable de entorno en el servicio `api`
+
+```
+DB_URL: mongodb://db/vidly
+```
+
+Estamos referenciando a `db` que es el nombre del host (o contenedor)
+
+
+
+> Debemos tener presente que el host `db` solo está disponible dentro del entorno de Docker, es decir que si desde el host ingresamos en localhost/db no obtendremos nada sino que podremos hacerlo a través de mapeo de puertos.
+
+```
+ports:
+			- 27017:27017
+```
+
+Es por eso que con Compass podremos conectarnos al contenedor teniendo como hostname **localhost** y como puerto **27017**.
