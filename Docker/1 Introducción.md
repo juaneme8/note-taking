@@ -2394,4 +2394,14 @@ Este método tiene la ventaja que no tenemos que abrir distintas ventanas para c
 
 # Deployment
 
-El propósito de esta sección es tomar la aplicación con la que venimos trabajando y colocarla en la nube.
+El propósito de esta sección es tomar la aplicación con la que venimos trabajando y deployarla, es decir colocarla en la nube.
+
+
+
+## Opciones de Deploy
+
+A la hora de hacer un deployment podremos elegir entre hacerlo en un:
+
+* **host único**. Esta implementación tiene la desventaja de que si el servidor está offline la aplicación no será accesible. Además en caso de tener muchos usuarios no sería posible manejarlos
+* **cluster** o grupo de servidores o cluster. 
+
