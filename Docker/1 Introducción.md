@@ -2419,3 +2419,18 @@ Para deployar la aplicación necesitamos un VPS (*virtual private server*), exis
 * Amazon Web Services (AWS)
 
 > Para utilizar todos estos servicios es necesario una tarjeta de crédito o de débito.
+
+
+
+## Instalar Docker Machine
+
+Una vez que tenemos el servidor debemos contar con Docker Machine para comunicarnos con Docker Engine de ese servidor desde el entorno de desarrollo. De esta manera podremos ejecutar comandos Docker en la terminal y serán enviados al Docker Engine del servidor.
+
+En github.com/docker/machine/releases podremos descargar la versión actual.
+
+Para verificar que la instalación fue exitosa:
+
+```
+docker-machine --version
+```
+
