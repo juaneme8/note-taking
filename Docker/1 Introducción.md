@@ -1,6 +1,6 @@
 # Docker
 
-> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 68 COMPLETO)
+> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 71 COMPLETO)
 
 ## ¿Qué es Docker?
 
@@ -2402,6 +2402,20 @@ El propósito de esta sección es tomar la aplicación con la que venimos trabaj
 
 A la hora de hacer un deployment podremos elegir entre hacerlo en un:
 
-* **host único**. Esta implementación tiene la desventaja de que si el servidor está offline la aplicación no será accesible. Además en caso de tener muchos usuarios no sería posible manejarlos
-* **cluster** o grupo de servidores o cluster. 
+* **host único**. Esta implementación tiene la desventaja de que si el servidor está offline la aplicación no será accesible. Además en caso de crecer rápidamente y tener cientos de miles de usuarios un sólo servidor no sería capaz de manejarlos.
+* **cluster** o grupo de servidores o cluster. Tienen como ventaja la alta disponibilidad y la escalabilidad. Para trabajar con clusters necesitamos herramientas de orquestación como Docker Swarm o Kubernetes
 
+Lo aconsejable es comenzar de manera simple con un host único y luego transicionar hacia un cluster en caso de que sea necesario.
+
+
+
+## Obtener un VPS
+
+Para deployar la aplicación necesitamos un VPS (*virtual private server*), existen distintas alternativas, que tomando algunas de ellas ordenadas de las mas simples a las mas complejas:
+
+* Digital Ocean
+* Google Cloud Platform (GCP)
+* Microsoft Azure
+* Amazon Web Services (AWS)
+
+> Para utilizar todos estos servicios es necesario una tarjeta de crédito o de débito.
