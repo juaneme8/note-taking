@@ -1,6 +1,6 @@
 # Docker
 
-> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 72 COMPLETO)
+> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 75 COMPLETO)
 
 ## ¿Qué es Docker?
 
@@ -2356,6 +2356,8 @@ services:
 		build: ./frontend
 		ports:
 			- 3000:3000
+		volumes:
+			- ./frontend:/app
 	web-tests:
 		image: vidly_web
 		volumes:
@@ -2438,7 +2440,7 @@ docker-machine --version
 
 ## Crear Servidor con Docker Machine
 
-```
+```bash
 docker-machine create \
 --driver digitalocean \
 --digitalocean-access-token=aa9...\
@@ -2462,3 +2464,65 @@ Docker Machine creará una máquina virtual con Ubuntu (esto lo veremos en el ou
 
 
 ## Conexión a Servidor
+
+Para ver todas las Docker Machines debemos ejecutar:
+
+```bash
+docker-machine ls
+```
+
+En la columna SWARM vemos un `-` ya que no forma parte de un cluster sino que se trata de un host único.
+
+En la columna DOCKER veremos la versión de Docker Engine que tenemos en esa máquina.
+
+
+
+Para conectarnos utilizaremos **SSH** (*secure shell*) si bien la configuración manual puede ser laboriosa Docker Machine se encarga de hacerlo por nosotros y simplemente tendremos que ejecutar:
+
+```bash
+docker-machine ssh vidly
+```
+
+
+
+## Configuración para Producción
+
+El archivo `docker-compose.yml` que hemos creado hasta el momento está pensado para desarrollo, mientras que para producción tendremos que modificarlo bastante:
+
+* El volumen que nos perrmite compartir el código fuente con el contenedor para desarrollar rápidamente no debemos incluirlo.
+* Los servicios para los tests automatizados  `web-tests` y `api-tests` no debemos incluirlos ya que no queremos ejecutar tests en producción pues esto alentaría nuestro servidor.
+
+Creamos un archivo `docker-compose.prod.yml`
+
+```yaml
+version: "3.8"
+services:
+	web:
+		build: ./frontend
+		ports:
+			- 80:3000
+		restart: unless-stopped
+	api:
+		build: ./backend
+		ports:
+			- 3001:3001
+		environment: 
+			DB_URL: mongodb://db/vidly
+		command: ./docker-entrypoint.sh
+		restart: unless-stopped
+	db:
+		image: mongo:4.0-xenial
+		ports:
+			- 27017:27017
+		volumes:
+			- vidly:/data/db
+		restart: unless-stopped
+volumes:
+	vidly:
+```
+
+> En el servicio `web` cambiamos el mapeo de puertos utilizando ahora el puerto 80 del host ya que queremos ingresar simplemente la dirección IP.
+>
+> A todos los contenedores les agregamos la propiedad `restart` si colocamos `restart: no` significa que si el contenedor crashea no será reiniciado sino que tendremos que conectarnos por ssh y reiniciarlo manualmente. Si googleamos docker compose file format, yendo luego a version 3 podremos acceder a la propiedad restart y ver los posibles valores que puede tomar. En nuestro caso usaremos `restart: unless-stopped`
+
+De manera similar debemos crear un archivo Docker Compose para los entornos de testing y staging.
