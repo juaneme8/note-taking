@@ -1,6 +1,6 @@
 # Docker
 
-> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 71 COMPLETO)
+> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 72 COMPLETO)
 
 ## ¿Qué es Docker?
 
@@ -2409,7 +2409,7 @@ Lo aconsejable es comenzar de manera simple con un host único y luego transicio
 
 
 
-## Obtener un VPS
+## Plataformas VPS
 
 Para deployar la aplicación necesitamos un VPS (*virtual private server*), existen distintas alternativas, que tomando algunas de ellas ordenadas de las mas simples a las mas complejas:
 
@@ -2424,13 +2424,41 @@ Para deployar la aplicación necesitamos un VPS (*virtual private server*), exis
 
 ## Instalar Docker Machine
 
-Una vez que tenemos el servidor debemos contar con Docker Machine para comunicarnos con Docker Engine de ese servidor desde el entorno de desarrollo. De esta manera podremos ejecutar comandos Docker en la terminal y serán enviados al Docker Engine del servidor.
+Una vez que tenemos el servidor debemos contar con **Docker Machine** para comunicarnos con Docker Engine de ese servidor desde el entorno de desarrollo. De esta manera podremos ejecutar comandos Docker en la terminal y serán enviados al Docker Engine del servidor.
 
-En github.com/docker/machine/releases podremos descargar la versión actual.
+En [github.com/docker/machine/releases](github.com/docker/machine/releases) podremos descargar la versión actual.
 
 Para verificar que la instalación fue exitosa:
 
-```
+```bash
 docker-machine --version
 ```
 
+
+
+## Crear Servidor con Docker Machine
+
+```
+docker-machine create \
+--driver digitalocean \
+--digitalocean-access-token=aa9...\
+vidly
+```
+
+> Se trata de un comando largo, por eso lo dividimos en múltiples líneas (`\` en Linux o ``` en Windows donde deberíamos usar PowerShell para tal fin)
+>
+> En la documentación [docs.docker.com/machine/drivers](http://docs.docker.com/machine/drivers) podemos ver un ejemplo de uso para DigitalOcean donde indica que debemos poner`--driver digitalocean --digitalocean-access-token=aa9... nombre`. 
+>
+> Si tenemos un server propio debemos poner `--driver none`
+>
+> El access token lo debemos obtener de la DigitalOcean en el apartado API.
+>
+> En caso de obtener algun error y no poder instalar la versión más reciente de Docker Engine en el servidor ver la solución propuesta en [este](https://www.digitalocean.com/community/questions/unable-to-verify-the-docker-daemon-is-listening) enlace que básicamente consiste en agregar `--engine-install-url "https://releases.rancher.com/install-docker/19.03.9.sh" \`
+>
+> En último lugar le damos al servidor un nombre, en este caso `vidly`
+
+Docker Machine creará una máquina virtual con Ubuntu (esto lo veremos en el output del comando y también en la documentación asociada a DigitalOcean) y en ella instalará Docker. Luego podremos comnicarnos remotamente con Docker Engine desde nuestra máquina.
+
+
+
+## Conexión a Servidor
