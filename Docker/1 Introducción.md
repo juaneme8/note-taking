@@ -674,7 +674,7 @@ La diferencia está en que es más simple sobrescribir el comando default (es de
 
 En cambio para sobrescribir el `ENTRYPOINT` es necesario utilizar la opción`--entrypoint` . En la práctica conviene utilizar `ENTRYPOINT` cuando estamos seguros del comando que debe ser ejecutado al iniciar un contenedor.
 
-Sin embargo la elección de uno u otro comando depende de lo que quiera cada programador. Mosh personalmente utiliza`CMD`.
+Sin embargo la elección de uno u otro comando depende de lo que quiera cada programador. Mosh personalmente utiliza `CMD` salvo al trabajar con web server de nginx.
 
 
 
@@ -2674,3 +2674,181 @@ Para verificar que todo funcione correctamente:
 docker-compose -f docker-compose.prod.yml build
 ```
 
+
+
+## Deploy de Aplicación
+
+En primer lugar listamos las Docker Machines:
+
+```bash
+docker-machine ls
+```
+
+
+
+Debemos utilizar una serie de variables de entorno para comunicarnos con la docker machine, estas podemos listarlas con:
+
+```bash
+docker-machine env vidly
+```
+
+Para setear esas variables de entorno:
+
+```bash
+eval $(docker-machine env vidly)
+```
+
+
+
+A partir de este momento cualquier comando que escribamos será enviado al docker machine (docker client estará hablando con docker engine) y veremos que en la columna `ACTIVE` pasamos a tener un `*`.
+
+
+
+```bash
+docker images
+```
+
+Por lo tanto para deployar la aplicación solo debemos ejeceutar:
+
+```bash
+docker-compose -f docker-compose.prod.yml up -d 
+```
+
+
+
+Si obtenemos un error **Missing write access to /app** puede estar asociado a tener una versión vieja de docker engine en la VPS que cuando en el `Dockerfile` del backend hacemos `WORKDIR /app` a pesar de haber creado un usuario `app` lo crea como `root` y luego no nos deja copiar allí los archivos.
+
+Pasamos de tener:
+
+```dockerfile
+FROM node:14.16.0-alpine3.13
+
+RUN addgroup app && adduser -S -G app app
+USER app
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+
+EXPOSE 300|
+
+CMD ["npm","start"]
+```
+
+
+
+Antes de cambiar de usuario creamos como root un directorio `/app` y cambiamos su dueño de modo que `app` lo sea.
+
+
+
+```dockerfile
+FROM node:14.16.0-alpine3.13
+
+RUN addgroup app && adduser -S -G app app
+RUN mkdir /app && chown app:app /app
+USER app
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+
+EXPOSE 3000
+
+CMD ["npm","start"]
+```
+
+Luego de estos cambios queremos forzar el rebuild por lo tanto ejecutamos:
+
+```bash
+docker-compose -f docker-compose.prod.yml up -d --build
+```
+
+
+
+Si nos parece tedioso tener que ejecutar estos comandos podríamos colocarlos en un script `deploy.sh` y cada vez que queramos hacer un deploy lo ejecutamos.
+
+
+
+## Troubleshooting
+
+Para obtener la dirección IP del servidor (otra opción sería hacerlo desde el panel de DigitalOcean)
+
+```
+docker-machine ls
+```
+
+Suponiendo que la IP es 104.131.24.150 e ingresamos en esa dirección desde el navegador deberíamos ver el frontend. Mientras que si ingresamos a 104.131.24.150:3001/api deberíamos acceder al backend.
+
+Si no podemos acceder al frontend podemos comenzar a buscar el error.
+
+Con `docker ps` debemos fijarnos en la colmna STATUS que no esté reiniciandose permanentemente el contenedor asociado a la iamgen `vidly_web` (veríamos algo como **Restarting (1) 33 seconds ago**) esto tiene que ver con la política de reinicio que establecimos.
+
+Ahora debemos analizar los logs para ello primero obtenemos el id del contenedor
+
+```
+docker ps
+```
+
+```
+docker logs 00eb...
+```
+
+Si vemos un **Permission denied** se debe a que estamos utilizando nginx con un usuario no root (si bien no es una buena práctica lo mas rápido para solucionarlo es eliminar la parte donde creamos ese usuario y cambiamos a el en `Dockerfile.prod`).
+
+> Para lograr utilizar nginx con un usuario no root es posible pero demanda algo mas de trabajo. Ver la documentación de nginx en DockerHub.
+
+```dockerfile
+# Step 1: Build stage
+FROM node:14.16.0-alpine3.13 AS build-stage
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+
+# Step 2: Production
+FROM nginx:1.12-alpine
+COPY --from=build-stage /app/build /usr/share/nginx/html
+EXPOSE 80
+ENTRYPOINT ["nginx","-g","daemon off;"]
+```
+
+Hemos quitado las líneas:
+
+```bash
+RUN addgroup app && adduser -S -G app app
+USER app
+```
+
+
+
+Luego de cambiar esto corremos el comando nuevamente (ahora sin dettached mode)
+
+```bash
+docker-compose -f docker-compose.prod.yml up --build
+```
+
+Otro posible issue sería si no tenemos la variable de entorno `REACT_APP_API_URL` seteada y los requests están siendo efectuados a localhost:3001/api/movies. En ese caso debemos modificar el `Dockerfile.prod` y agregar dicha variable de entorno.
+
+Debemos definir las variables de entorno en el build stage ya que en React cuando ejecutamos `npm build` son hardcodeadas en el código optimizado.
+
+```
+# Step 1: Build stage
+FROM node:14.16.0-alpine3.13 AS build-stage
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+ENV REACT_APP_API_URL=http://104.131.24.150:3001/api
+RUN npm run build
+
+# Step 2: Production
+FROM nginx:1.12-alpine
+COPY --from=build-stage /app/build /usr/share/nginx/html
+EXPOSE 80
+ENTRYPOINT ["nginx","-g","daemon off;"]
+```
+
+> Notar que la IP la acompañamos de `http://`
