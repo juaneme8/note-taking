@@ -1,6 +1,6 @@
 # Docker
 
-> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 75 COMPLETO)
+> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 76 COMPLETO)
 
 ## ¿Qué es Docker?
 
@@ -703,7 +703,7 @@ COPY . .
 RUN npm install
 ```
 
-Una solución puede ser copiar prime ro los archivos que necesitamos para instalar las dependencias `package.json` y `package-lock.json`, instalar y luego copiar el resto de los archivos. 
+Una solución puede ser copiar primero los archivos que necesitamos para instalar las dependencias `package.json` y `package-lock.json`, instalar y luego copiar el resto de los archivos. 
 
 ```dockerfile
 COPY package*.json .
@@ -2185,7 +2185,7 @@ Esto significa que podremos escribir `npm run db:up` y es lo mismo que poner `mi
 
 Queremos que se ejecute la migración de la base de datos al iniciar la aplicación y si nos fijamos en el `Dockerfile` veremos que tenemos:
 
-``` 
+``` bash
 CMD ["npm", "start"]
 ```
 
@@ -2269,7 +2269,7 @@ volumes:
 
 El comando es bastante largo por lo que podremos utilizar otra técnica usando un  *entry point script* mediante un archivo `docker-entrypoint.sh`.
 
-```
+```bash
 #!/bin/sh
 
 echo "Waiting for MongoDB to start..."
@@ -2492,7 +2492,7 @@ El archivo `docker-compose.yml` que hemos creado hasta el momento está pensado 
 * El volumen que nos perrmite compartir el código fuente con el contenedor para desarrollar rápidamente no debemos incluirlo.
 * Los servicios para los tests automatizados  `web-tests` y `api-tests` no debemos incluirlos ya que no queremos ejecutar tests en producción pues esto alentaría nuestro servidor.
 
-Creamos un archivo `docker-compose.prod.yml`
+Creamos un archivo `docker-compose.prod.yml` (podríamos darle cualquier nombre pero es la convención)
 
 ```yaml
 version: "3.8"
@@ -2526,3 +2526,151 @@ volumes:
 > A todos los contenedores les agregamos la propiedad `restart` si colocamos `restart: no` significa que si el contenedor crashea no será reiniciado sino que tendremos que conectarnos por ssh y reiniciarlo manualmente. Si googleamos docker compose file format, yendo luego a version 3 podremos acceder a la propiedad restart y ver los posibles valores que puede tomar. En nuestro caso usaremos `restart: unless-stopped`
 
 De manera similar debemos crear un archivo Docker Compose para los entornos de testing y staging.
+
+
+
+## Reducir tamaño imagenes
+
+Con el comando `docker images` podremos listar las imagenes y en la columna `SIZE` vemos su tamaño. En particular `vidly_web` que es el frontend realizado con React pesa 300MB y queremos reducir este tamaño. En `package.json` tenemos el script `build` que nos permite crear una optimización para producción. Luego de ejecutar `npm run build` tendremos una carpeta `build` con todos estos recursos. 
+
+> Aún en caso de que no utilicemos React la mayoría de los frameworks tienen una herramienta para lograr assets optimizados para producción.
+
+
+
+Una vez que tenemos la carpeta `build` debemos colocar estos recursos dentro del web server y servirlos. Para ello debemos crear una imagen optimizada.
+
+
+
+Inicialmente en el `Dockerfile` teníamos:
+
+```dockerfile
+FROM node:14.16.0-alpine3.13
+
+RUN addgroup app && adduser -S -G app app
+USER app
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+
+EXPOSE 3000
+
+CMD ["npm","start"]
+```
+
+En el `Dockerfile` que teníamos hasta el momento comenzabamos a partir de una imagen de node `FROM node:14.16.0-alpine3.13` para luego poder ejecutar npm y así instalar las dependencias con `npm install` pero si ya las tenemos simplemente debemos copiar los archivos en el web-server. Es por eso que debemos
+
+Dentro del `Dockerfile` podremos tener múltiples *stages* o etapas (por ejemplo build-stage y production-stage) y agregamos la keyword `AS` para darle a cada *stage* esa etiqueta. El uso de etiquetas tiene sentido si luego queremos referenciar ese stage.
+
+Tabién podemos agregar comentarios con `#`
+
+
+
+```dockerfile
+# Step 1: Build stage
+FROM node:14.16.0-alpine3.13 AS build-stage
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+
+# Step 2: Production
+FROM nginx:1.12-alpine
+RUN addgroup app && adduser -S -G app app
+USER app
+COPY --from=build-stage /app/build /usr/share/nginx/html
+EXPOSE 80
+ENTRYPOINT ["nginx","-g","daemon off;"]
+```
+
+> Para el build no necesitamos el usuario sino para servir la aplicación
+>
+> Reemplazamos el comando `CMD` por `RUN` ya que sólo podemos tener un default command para cuando el contenedor inicia.
+>
+> Para producción no necesitamos Node por eso comenzamos a partir de un web  server (nginx, apache, etc). En nuestro caso utilizamos `nginx:1.12-alpine`
+>
+> Notar que no hemos hecho `FROM nginx:1.12-alpine AS production-stage` ya que no teníamos pensado utilizar la etiqueta `production-stage` para referenciarlo.
+>
+> En lugar de un comando default con `CMD` utilizamos `ENTRYPOINT` ya que queremos que cada vez que corramos esta imagen se ejecute este comando sin excepción.
+
+
+
+Utilizando este `Dockerfile.prod` crearemos una imagen
+
+```bash
+docker build -t vidly_web_opt -f Dockerfile.prod .
+```
+
+> El `.` en último lugar representa el *build context*
+
+
+
+Si ahora ejecutamos
+
+```bash
+docker images
+```
+
+Veremos que la imagen `vidly_web_opt` pesa 16MB contra los 300MB que pesaba antes de las optimizaciones.
+
+
+
+Debemos actualizar el `docker-compose.prod.yaml` de modo tal que para el servicio `web` sepa que debe usar el `Dockerfile.prod` para ello debemos expandir la propiedad `build` que pasará de ser 
+
+```yaml
+build: ./frontend
+```
+
+A ser:
+
+```yaml
+build: 
+	context: ./frontend
+	dockerfile: Dockerfile.prod
+```
+
+
+
+También debemos cambiar el mapeo de puertos ya que en el `Dockerfile.prod` estamos exponiendo el puerto 80.
+
+
+
+Finalmente nos queda:
+
+```yaml
+version: "3.8"
+services:
+	web:
+		build: ./frontend
+		ports:
+			- 80:80
+		restart: unless-stopped
+	api:
+		build: ./backend
+		ports:
+			- 3001:3001
+		environment: 
+			DB_URL: mongodb://db/vidly
+		command: ./docker-entrypoint.sh
+		restart: unless-stopped
+	db:
+		image: mongo:4.0-xenial
+		ports:
+			- 27017:27017
+		volumes:
+			- vidly:/data/db
+		restart: unless-stopped
+volumes:
+	vidly:
+```
+
+
+
+Para verificar que todo funcione correctamente:
+
+```bash
+docker-compose -f docker-compose.prod.yml build
+```
+
