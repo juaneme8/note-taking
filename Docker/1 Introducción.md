@@ -1,6 +1,6 @@
 # Docker
 
-> Basado en Ultimate Docker Course de Mosh Hamedani (VIDEO 76 COMPLETO)
+> Basado en Ultimate Docker Course de Mosh Hamedani (COMPLETO)
 
 ## ¿Qué es Docker?
 
@@ -2643,7 +2643,9 @@ Finalmente nos queda:
 version: "3.8"
 services:
 	web:
-		build: ./frontend
+		build: 
+			context: ./frontend
+			dockerfile: Dockerfile.prod
 		ports:
 			- 80:80
 		restart: unless-stopped
@@ -2834,7 +2836,7 @@ Otro posible issue sería si no tenemos la variable de entorno `REACT_APP_API_UR
 
 Debemos definir las variables de entorno en el build stage ya que en React cuando ejecutamos `npm build` son hardcodeadas en el código optimizado.
 
-```
+```dockerfile
 # Step 1: Build stage
 FROM node:14.16.0-alpine3.13 AS build-stage
 WORKDIR /app
@@ -2852,3 +2854,48 @@ ENTRYPOINT ["nginx","-g","daemon off;"]
 ```
 
 > Notar que la IP la acompañamos de `http://`
+
+
+
+## Publicar Cambios
+
+Es importante etiquetar de manera correcta las imagenes antes de deployarlas pues esto nos ayudará en caso de que por ejemplo tengamos un error en producción que no tenemos en staging. Queremos saber qué versión tenemos corriendo en cada entorno.
+
+En el `docker-compose.prod.yml` podemos darle este nombre a la imagen, por ejemplo para la primera versión podemos ponerle `image: vidly_web:1`
+
+
+
+```yaml
+version: "3.8"
+services:
+	web:
+		build: 
+			context: ./frontend
+			dockerfile: Dockerfile.prod
+		image: vidly_web:1
+		ports:
+			- 80:80
+		restart: unless-stopped
+	api:
+		build: ./backend
+		image: vidly_web:1
+		ports:
+			- 3001:3001
+		environment: 
+			DB_URL: mongodb://db/vidly
+		command: ./docker-entrypoint.sh
+		restart: unless-stopped
+	db:
+		image: mongo:4.0-xenial
+		ports:
+			- 27017:27017
+		volumes:
+			- vidly:/data/db
+		restart: unless-stopped
+volumes:
+	vidly:
+```
+
+Para hacer el rebuild ejecutamos `docker-compose -f docker-compose.prod.yml up -d --build`
+
+> Tendríamos que modificar este número manualmente cada vez que hagamos un deploy, es por eso que utilizamos herramientas de CI/CD que se encargan de esto. Estas herramientas automatizarán este proceso fijándose en el repositorio la versión más reciente del código en GitHub, construirán la imagen y la etiquetarán de acuerdo al número de build o en base al último commit.
