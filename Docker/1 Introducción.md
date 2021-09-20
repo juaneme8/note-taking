@@ -630,7 +630,13 @@ EXPOSE 3000
 CMD npm start
 ```
 
-Luego de reconstruir la imagen iniciamos el contenedor simplemente con:
+Luego de reconstruir la imagen
+
+```
+docker build -t react-app .
+```
+
+Iniciamos el contenedor simplemente con:
 
 ```bash
 docker run react-app
@@ -877,7 +883,7 @@ Para compartir imagenes debemos tener una cuenta en [hub.docker.com](hub.docker.
 
 > Con una cuenta gratuita sólo es posible tener un repositorio privado. En la versión paga también es posible vincular con una cuenta GitHub para que cada vez que hagamos un push, DockerHub haga un pull y genere automáticamente una imagen.
 
-Suponiendo que creamo sun repositorio `react-app` debemos renombrar la imagen a `juaneme8/react-app` lo cual hacemos con:
+Suponiendo que creamos un repositorio `react-app` debemos renombrar la imagen a `juaneme8/react-app` lo cual hacemos con:
 
 ```
 docker image f4b juaneme8/react-app:2
