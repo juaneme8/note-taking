@@ -116,19 +116,8 @@ const palindrome = (string) => {
     .join('')
 }
 
-const average = (array) => {
-  if(array.length === 0 ) return 0;
-    
-  const reducer = (sum, item) => {
-    return sum + item
-  }
-
-  return array.reduce(reducer, 0) / array.length
-}
-
 module.exports = {
-  palindrome,
-  average,
+  palindrome
 }
 ```
 
@@ -164,6 +153,7 @@ En primer lugar creamos el archivo `palindrome.test.js` en la carpeta `test`.
 
 ```javascript
 const {palindrome} = require('../utils/for_testing')
+
 test ('palindrome of juaneme8', ()=> {
 	const result = palindrome('juaneme8');
 	
@@ -183,7 +173,7 @@ test ('palindrome of undefined', ()=> {
 
 Con `test()` estamos creando un test y lo que está dentro del callback será lo que ejecutará para comprobar dicha prueba.
 
-Podemos de un vistazo utilizar los tests como documentación del método. En este caso estaremos analizando las condiciones de borde o *corner cases* como ser qué sucede si llamamos al método con un string vacío o directamente con `undefined`.
+Podemos de un vistazo utilizar los tests como documentación del método. En este caso estaremos analizando las condiciones de borde o *corner cases* como ser qué sucede si llamamos al método con un string vacío, `undefined`, etc.
 
 
 
@@ -227,10 +217,6 @@ palindrome
     ✅ of empty string
     ✅ of undefined
 ```
-
-
-
-#### Test de average
 
 
 
@@ -280,6 +266,10 @@ Es posible que lo tengamos en `package.json` y en ese caso debemos modificar el 
 
 
 # Testing API Rest
+
+[🔴 Testing de Backend con Express usando Jest y Supertest - midudev](https://www.youtube.com/watch?v=_xxVJdGNMrs)
+
+
 
 Como sabemos existen distintos tipos de tests: unitarios, de ingregración y *end to end*. 
 
