@@ -108,6 +108,8 @@ Como vamos a probar un método en concreto vamos a desarrollar lo que se conoce 
 
 ```javascript
 const palindrome = (string) => {
+  if(typeof string === 'undefined') return;
+  
   return string
     .split('')
     .reverse()
@@ -115,6 +117,8 @@ const palindrome = (string) => {
 }
 
 const average = (array) => {
+  if(array.length === 0 ) return 0;
+    
   const reducer = (sum, item) => {
     return sum + item
   }
@@ -146,9 +150,17 @@ Jest como dijimos anteriormente está pensado para trabajar por defecto en el cl
 
 ### Utilización Jest
 
-Jest por defecto buscará todos los archivos que terminene en `.test.js` por eso creamos el archivo `palindrome.test.js` en la carpeta `test`.
+> Jest por defecto buscará todos los archivos que terminen en `.test.js`
+>
+> No es necesario importar `jest` ya que una vez que encuentra este archivo sabe que debe utilizar esas dependencias.
 
-No es necesario importar `jest` ya que una vez que encuentra este archivo sabe que debe utilizar esas dependencias.
+
+
+#### Test de palindrome
+
+En primer lugar creamos el archivo `palindrome.test.js` en la carpeta `test`.
+
+
 
 ```javascript
 const {palindrome} = require('../utils/for_testing')
@@ -157,9 +169,79 @@ test ('palindrome of juaneme8', ()=> {
 	
 	expect(result).toBe('8emenauj');
 })
+test ('palindrome of empty string', ()=> {
+	const result = palindrome('');
+	
+	expect(result).toBe('');
+})
+test ('palindrome of undefined', ()=> {
+	const result = palindrome();
+	
+	expect(result).toBeUndefined();
+})
 ```
 
 Con `test()` estamos creando un test y lo que está dentro del callback será lo que ejecutará para comprobar dicha prueba.
+
+Podemos de un vistazo utilizar los tests como documentación del método. En este caso estaremos analizando las condiciones de borde o *corner cases* como ser qué sucede si llamamos al método con un string vacío o directamente con `undefined`.
+
+
+
+En la terminal veremos una salida similar a la siguiente:
+
+```
+✅ palindrome of juaneme8
+✅ palindrome of empty string
+✅ palindrome of undefined
+```
+
+Cuando tengamos más de un archivo nos convendrá agrupar los tests de cada uno de ellos y esto lo hacemos con el método `describe()`
+
+```js
+const {palindrome} = require('../utils/for_testing')
+
+describe('palindrome', ()=> {
+    test ('of juaneme8', ()=> {
+        const result = palindrome('juaneme8');
+
+        expect(result).toBe('8emenauj');
+    })
+    test ('of empty string', ()=> {
+        const result = palindrome('');
+
+        expect(result).toBe('');
+    })
+    test ('of undefined', ()=> {
+        const result = palindrome();
+
+        expect(result).toBeUndefined();
+    })
+})
+```
+
+Ahora en cambio veremos
+
+```
+palindrome
+    ✅ of juaneme8
+    ✅ of empty string
+    ✅ of undefined
+```
+
+
+
+#### Test de average
+
+
+
+#### Métodos Jest
+
+Podemos ver la lista completa de métodos en la [documentación](https://jestjs.io/docs/expect).
+
+* `toBe()`
+* `toBeNull()`
+* `toBeUndefined()`
+* `toEqual()`
 
 
 
