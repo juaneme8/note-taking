@@ -1,8 +1,8 @@
-🧪 [Introducción al Testing desde Cero con JEST ✅ (Bootcamp FullStack Gratuito) - midudev](https://www.youtube.com/watch?v=_DzBez4qMi0)
-
 # Introducción al Testing
 
-La forma más simple de entneder el testing es pensando que nos permitirá comprobar el funcionamiento de un método.
+🧪 [Introducción al Testing con JEST ✅ (Bootcamp FullStack) - midudev](https://www.youtube.com/watch?v=_DzBez4qMi0)
+
+La forma más simple de entender el testing es pensando que nos permitirá comprobar el correcto funcionamiento de un método.
 
 Supongamos que tenemos:
 
@@ -14,7 +14,7 @@ const suma = (a,b) => {
 
 Si bien en este caso podemos darnos cuenta fácilmente qué está mal, en ocasiones será mucho más dificil notarlo. 
 
-
+La importancia de los tests está no sólo en saber si nuestro método funciona o no, sino que también nos permite documentar estos métodos .
 
 ## Test en RunJS
 
@@ -86,7 +86,114 @@ checks.forEach(check => {
 console.log(`${checks.length}` checks performed...);
 ```
 
-Si bien podríamos ampliar la información devuelta en el mensaje de error para aportar mas datos, esto no tiene sentido pues como veremos mas adelante existen herramientas que se encargan de esto.
+Si bien podríamos ampliar la información devuelta en el mensaje de error para aportar mas datos, esto no tiene sentido pues existen herramientas que se encargan de ejecutar una tanda de tests y entregarnos un error detallado que nos permita saber dónde están los fallos y solucionarlos.
+
+
+
+## Testing con Jest 
+
+Jest es un testing framework o *test runner* que inicialmente fue desarrollado para hacer testing en el navegador y luego evolucionó siendo posible utilizarlo en servidor.
+
+```
+npm install jest -D
+```
+
+> Mocha y AVA son otras alternativas que al igual que Jest son frameworks de testing que podríamos haber elegido.
+
+
+
+Supongamos que tenemos una serie de métodos que queremos testear en `utils/for_testing.js`. Si tuviéramos que testearlos utilizando `console.assert()` esto sería complejo por lo que utilizaremos Jest. 
+
+Como vamos a probar un método en concreto vamos a desarrollar lo que se conoce como **test unitario**. Esto es así cuando tenemos una entrada y una salida y no produce **side effects**, ni llama a otras funciones.
+
+```javascript
+const palindrome = (string) => {
+  return string
+    .split('')
+    .reverse()
+    .join('')
+}
+
+const average = (array) => {
+  const reducer = (sum, item) => {
+    return sum + item
+  }
+
+  return array.reduce(reducer, 0) / array.length
+}
+
+module.exports = {
+  palindrome,
+  average,
+}
+```
+
+### Configuración Jest 
+
+Jest como dijimos anteriormente está pensado para trabajar por defecto en el cliente y viene con la capacidad de simular aspectos del DOM. Esto no sólo no lo necesitamos sino que puede ser problemático. Es por eso que en `package.json`  vamos a colocar:
+
+```json
+"jest":{
+	"testEnvironment": "node"
+}
+```
+
+> Otra opción sería colocarlo en `jest.config.js` pero lo ideal es tenerlo todo en un mismo lugar así es más fácil de encontrar y con menos archivos.
+
+> Es posible que en Windows experimentemos problemas si el nombre de la carpeta tiene espacios (por ejemplo si nuestro nombre de usuario los tiene).
+
+
+
+### Utilización Jest
+
+Jest por defecto buscará todos los archivos que terminene en `.test.js` por eso creamos el archivo `palindrome.test.js` en la carpeta `test`.
+
+No es necesario importar `jest` ya que una vez que encuentra este archivo sabe que debe utilizar esas dependencias.
+
+```javascript
+const {palindrome} = require('../utils/for_testing')
+test ('palindrome of juaneme8', ()=> {
+	const result = palindrome('juaneme8');
+	
+	expect(result).toBe('8emenauj');
+})
+```
+
+Con `test()` estamos creando un test y lo que está dentro del callback será lo que ejecutará para comprobar dicha prueba.
+
+
+
+### Configuración Script
+
+En `package.json` debemos modificar el script `"test"` de modo que quede de la siguiente forma:
+
+```json
+"scripts":{
+	"test": "jest --verbose"
+}
+```
+
+> Con `--verbose` le indicamos que queremos que nos entregue la máxima información posible.
+
+
+
+Luego ejecutamos los tests con `npm run test`
+
+
+
+### Configuración ESLINT
+
+Para evitar que el linter nos marque como errores el uso de `test()` y `expect() ` debemos modificar el la configuración de eslint.
+
+Es posible que lo tengamos en `package.json` y en ese caso debemos modificar el objeto `eslintConfig` **agregando** lo siguiente:
+
+```json
+"eslintConfig":{
+	"env":{
+		"jest": true,
+	}
+}
+```
 
 
 
