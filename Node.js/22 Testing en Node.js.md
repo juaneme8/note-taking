@@ -275,6 +275,24 @@ Como sabemos existen distintos tipos de tests: unitarios, de ingregración y *en
 
 En este caso queremos testear una API REST y lo más importante es testear a los endpoints y el efecto que generan en la base de datos por lo tanto decimos que son **tests de integración** (incluso se podría decir que son *e2e*). No utilizamos **tests unitarios** pues estos nos servirían para testear de manera aislada un método.
 
+
+
+Lo primero que podemos hacer es crear un proyecto sobre el cual trabajar:
+
+```
+mkdir testing
+cd testing
+npm init -y
+```
+
+Luego instalamos las dependencias 
+
+```
+npm i express
+```
+
+
+
 A la hora de testear el backend lo primero que debemos hacer es modificar el archivo `package.json` en particular los scripts para asegurarnos cargar con un valor distinto la variable de entorno `NODE_ENV` según ejecutemos estemos en *development* `npm run dev`, *production* `npm start` o *testing* `npm test`.
 
 Si estamos utilizando Windows tendremos que utilizar el paquete `cross-env`.
@@ -312,4 +330,5 @@ npm install supertest -D
 
 
 
-Creamos un directorio `test` y en el un archivo `notes.test.js`
+Creamos un directorio `test` y en el un archivo `notes.test.js` . En esta prueba buscamos verificar que las notas de una api sean devueltas en JSON.
+

@@ -173,9 +173,9 @@ Luego en caso de ejecutar `ncu -u` actualizará el `package.json` de modo que ac
 }
 ```
 
-> Si nos confundimos y no ponemos el -D podríamos moverlo en el `package.json` de `dependencies` a `devDependencies`. Esto es importante ya que en el deploy o en algún CI lograremos que sea más rápido (por ejemplo en caso de tener como dependencia ESLint, esta no tiene sentido que esté en producción ya que no le pasaremos el linter). 
+> En lugar de poner `--save-dev` podemos poner de manera reducida `-D`. En caso de que nos confundamos y no ponemos el `-D` podríamos moverlo en el `package.json` de `dependencies` a `devDependencies`. Esto es importante ya que en el deploy o en algún CI lograremos que sea más rápido (por ejemplo en caso de tener como dependencia Nodemon o ESLint, esto no tiene sentido que esté en producción ya que no le pasaremos el linter). 
 
-> Las peerDependencies son dependencias que tiene que tener el proyecto en el cual utilicemos ese paquete. No son dependencias del proyecto en sí porque eso nos haría depender de una versión específica.
+> Las `peerDependencies` son dependencias que tiene que tener el proyecto en el cual utilicemos ese paquete. No son dependencias del proyecto en sí porque eso nos haría depender de una versión específica.
 
 ### Publicar Paquete:
 Es posible crear nuestros propios paquetes y publicarlos en *npm registry*.
