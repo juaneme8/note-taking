@@ -1,8 +1,26 @@
 # Requests & Responses
 Cada vez que hacemos un cambio tendríamos que detener el proceso `ctrl+c` y volver a ejecutarlo `node server.js`.
->La extensión `nodemon` se encarga de cerrar y volver a abrir el servidor cada vez que realizamos un cambio. 
+
+### Nodemon
+
+La extensión `nodemon` se encarga de cerrar y volver a abrir el servidor cada vez que realizamos un cambio. 
+
+Podemos iniciar nuestra aplicación con *nodemon* así:
+
+```
+node_modules/.bin/nodemon index.js
+```
+
+Para simplificar esto definimos un script npm dedicado en el `package.json`
+
+```
+"dev": "nodemon index.js",
+```
+
+En el script no es necesario especificar la ruta *`node_modules/.bin/nodemon`*, porque *npm* automáticamente sabe buscar el archivo desde ese directorio.
 
 ### Request Object
+
 Dijimos que el objeto `req` contiene información acerca de la solicitud. Con `req.url` donde obtendremos la url visitada por el usuario y con `req.method` obtenemos el tipo de request realizado.
 ```js
 const http = require('http');

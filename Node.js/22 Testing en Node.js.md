@@ -108,23 +108,16 @@ Como vamos a probar un método en concreto vamos a desarrollar lo que se conoce 
 
 ```javascript
 const palindrome = (string) => {
+  if(typeof string === 'undefined') return;
+  
   return string
     .split('')
     .reverse()
     .join('')
 }
 
-const average = (array) => {
-  const reducer = (sum, item) => {
-    return sum + item
-  }
-
-  return array.reduce(reducer, 0) / array.length
-}
-
 module.exports = {
-  palindrome,
-  average,
+  palindrome
 }
 ```
 
@@ -146,20 +139,95 @@ Jest como dijimos anteriormente está pensado para trabajar por defecto en el cl
 
 ### Utilización Jest
 
-Jest por defecto buscará todos los archivos que terminene en `.test.js` por eso creamos el archivo `palindrome.test.js` en la carpeta `test`.
+> Jest por defecto buscará todos los archivos que terminen en `.test.js`
+>
+> No es necesario importar `jest` ya que una vez que encuentra este archivo sabe que debe utilizar esas dependencias.
 
-No es necesario importar `jest` ya que una vez que encuentra este archivo sabe que debe utilizar esas dependencias.
+
+
+#### Test de palindrome
+
+En primer lugar creamos el archivo `palindrome.test.js` en la carpeta `test`.
+
+
 
 ```javascript
 const {palindrome} = require('../utils/for_testing')
+
 test ('palindrome of juaneme8', ()=> {
 	const result = palindrome('juaneme8');
 	
 	expect(result).toBe('8emenauj');
 })
+test ('palindrome of empty string', ()=> {
+	const result = palindrome('');
+	
+	expect(result).toBe('');
+})
+test ('palindrome of undefined', ()=> {
+	const result = palindrome();
+	
+	expect(result).toBeUndefined();
+})
 ```
 
 Con `test()` estamos creando un test y lo que está dentro del *callback* será lo que ejecutará para comprobar dicha prueba.
+
+Podemos de un vistazo utilizar los tests como documentación del método. En este caso estaremos analizando las condiciones de borde o *corner cases* como ser qué sucede si llamamos al método con un string vacío, `undefined`, etc.
+
+
+
+En la terminal veremos una salida similar a la siguiente:
+
+```
+✅ palindrome of juaneme8
+✅ palindrome of empty string
+✅ palindrome of undefined
+```
+
+Cuando tengamos más de un archivo nos convendrá agrupar los tests de cada uno de ellos y esto lo hacemos con el método `describe()`
+
+```js
+const {palindrome} = require('../utils/for_testing')
+
+describe('palindrome', ()=> {
+    test ('of juaneme8', ()=> {
+        const result = palindrome('juaneme8');
+
+        expect(result).toBe('8emenauj');
+    })
+    test ('of empty string', ()=> {
+        const result = palindrome('');
+
+        expect(result).toBe('');
+    })
+    test ('of undefined', ()=> {
+        const result = palindrome();
+
+        expect(result).toBeUndefined();
+    })
+})
+```
+
+Ahora en cambio veremos
+
+```
+palindrome
+    ✅ of juaneme8
+    ✅ of empty string
+    ✅ of undefined
+```
+
+
+
+#### Métodos Jest
+
+Podemos ver la lista completa de métodos en la [documentación](https://jestjs.io/docs/expect).
+
+* `toBe()`
+* `toBeNull()`
+* `toBeUndefined()`
+* `toEqual()`
 
 
 
@@ -199,9 +267,31 @@ Es posible que lo tengamos en `package.json` y en ese caso debemos modificar el 
 
 # Testing API Rest
 
+[🔴 Testing de Backend con Express usando Jest y Supertest - midudev](https://www.youtube.com/watch?v=_xxVJdGNMrs)
+
+
+
 Como sabemos existen distintos tipos de tests: unitarios, de ingregración y *end to end*. 
 
 En este caso queremos testear una API REST y lo más importante es testear a los endpoints y el efecto que generan en la base de datos por lo tanto decimos que son **tests de integración** (incluso se podría decir que son *e2e*). No utilizamos **tests unitarios** pues estos nos servirían para testear de manera aislada un método.
+
+
+
+Lo primero que podemos hacer es crear un proyecto sobre el cual trabajar:
+
+```
+mkdir testing
+cd testing
+npm init -y
+```
+
+Luego instalamos las dependencias 
+
+```
+npm i express
+```
+
+
 
 A la hora de testear el backend lo primero que debemos hacer es modificar el archivo `package.json` en particular los scripts para asegurarnos cargar con un valor distinto la variable de entorno `NODE_ENV` según ejecutemos estemos en *development* `npm run dev`, *production* `npm start` o *testing* `npm test`.
 
@@ -240,4 +330,5 @@ npm install supertest -D
 
 
 
-Creamos un directorio `test` y en el un archivo `notes.test.js`
+Creamos un directorio `test` y en el un archivo `notes.test.js` . En esta prueba buscamos verificar que las notas de una api sean devueltas en JSON.
+
