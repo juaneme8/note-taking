@@ -5,21 +5,22 @@
 >* Code with Mosh - The Complete Node.js Course 
 
 ## Introducción
-Antiguamente JavaScript corría únicamente en navegadores en el front-end y lo usábamos para aportar interactividad al sitio (por ejemplo al trabajar con Click Events). Node.js nos permite ejecutar código de JavaScript en el servidor o en nuestra pc por lo que decimos que es un _runtime environment_.
+Antiguamente JavaScript corría únicamente en navegadores en el frontend y lo usábamos para aportar interactividad al sitio (por ejemplo al trabajar con click events). Node.js nos permite ejecutar código de JavaScript en el servidor o en nuestra pc por lo que decimos que es un _runtime environment_.
 
-Las computadoras entienden **machine code**, como es difícil de leer o escribir (es similar al binario). Es por eso que se utiliza **assembly language** el cual es un poco más simple de entender y ensambla el código en machine code. Como reviste bastante complejidad para leer y escribir, por encima del assembly language nos encontramos con lenguajes de programación como **C++** los cuales son abstracciones del código assembler. En definitiva el código C++ es compilado en machine code por lo que será entendido por la computadora. **JavaScript** es todavía más abstracto respecto a machine code que C++ para simplificar la programación. Sin embargo las computadoras no entienden de manera directa JavaScript ni pueden compilarlo en machine code. Es por eso que no podemos ejecutar JavaScript de manera directa en una computadora, pero sí podemos hacerlo dentro de un navegador. Esto es posible gracias al motor llamado **V8 engine** que se trata de un programa escrito en C++ por Google y compila el JavaScript a machine code en tiempo real. Sin embargo sólo podremos hacerlo dentro del navegador y acá es donde Node.js entra en escena. Se trata de un programa escrito en C++ que utiliza el V8 Engine y como sí podemos ejecutar código C++ en la computadora, seremos capaces de correr código JavaScript tanto en nuestra computadora como en el server.
+Las computadoras entienden **machine code**, como es difícil de leer o escribir (es similar al binario). Es por eso que se utiliza **assembly language** el cual es un poco más simple de entender y ensambla el código en machine code. Como es complejo para leer y escribir, por encima del assembly language nos encontramos con lenguajes de programación como **C++** los cuales son abstracciones del assembler. En definitiva el código C++ es compilado en machine code por lo que será entendido por la computadora. **JavaScript** es todavía más abstracto respecto a machine code que C++ para simplificar la programación. Sin embargo las computadoras no entienden de manera directa JavaScript ni pueden compilarlo en machine code. Es por eso que no podemos ejecutar JavaScript de manera directa en una computadora, pero sí podemos hacerlo dentro de un navegador. Esto es posible gracias al motor llamado **V8 engine** que se trata de un programa escrito en C++ por Google y compila el JavaScript a machine code en tiempo real. Sin embargo sólo podremos hacerlo dentro del navegador y acá es donde Node.js entra en escena. Se trata de un **programa escrito en C++** que utiliza el V8 Engine y como sí podemos ejecutar código C++ en la computadora, seremos capaces de correr código JavaScript tanto en nuestra computadora como en el server.
 Node.js no es simplemente un wrapper del v8 engine, sino que aporta funcionalidades extra a JavaScript como ser:
+
 * Lectura y escritura de archivos en la computadora
-* Conexión a una base de datos
+* Conexión a base de datos
 * Actuar como servidor de contenido
 
 Como contrapartida perdimos acceso al DOM (document object model) por lo que no podremos interacturar con elementos HTML. 
-> Recordar que document forma parte de window object el cual no existe en Node.js, sino que contamos con global object.
+> Recordar que `document` forma parte del objeto `window` el cual no existe en Node.js, sino que contamos con el objeto `global`.
 
 ## Características Node.js
-* **Multiplataforma**
+* **Multiplataforma** 
 * **Open-source**
-* Permite crear **REST API**s (application programming interface) 
+* Permite crear **API REST ** (application programming interface) con la cual vamos a através de endpoints podremos crear información, recuperar, borrar, editar, etc. 
 * Es un **runtime environment** a diferencia de alternativas como ASP.NET, Ruby on Rails, Django que son frameworks. Otra alternativa es Firebase que es entra dentro de la categoría de backend as a service (BaaS).
 * Node tiene una naturaleza **asincrónica** o no bloqueante. Gracias a esto permite crear aplicaciones **escalables**. En el siguiente ejemplo de "hola mundo", pueden atenderse muchas conexiones simultáneamente sin agregar más hardware. Por cada conexión, se activa la devolución de llamada o _callback_, pero si no hay trabajo que hacer, Node.js se dormirá.
 ```javascript
@@ -47,7 +48,30 @@ server.listen(port, hostname, () => {
 * Es ideal para aplicaciones real-time como ser chats gracias a los websockets.
 * Es ideal para data intensive apps pero no para cpu intensive apps (ya que los cálculos harán que el resto de los cliente deba esperar).
 
+​       
+
+## Módulos CommonJS
+
+Para importar módulos en Node.js utilizamos CommonJS Modules de modo que si queremos trabajar con `http` lo hacemos del modo visto anteriormente:
+
+```js
+const http = require('http');
+```
+
+CommonJS son un tipo de módulos creados por Node.js cuando no existían los módulos ECMAScript
+
+En las últimas versiones de Node ha dado soporte al sistema de módulos ECMAScript y es posible trabajar con ellos:
+
+```js
+import http from 'http'
+```
+
+Sin embargo, en la mayor parte de la documentación y foros online encontraremos información basada en CommonJS.
+
+
+
 ## El Rol de JavaScript
+
 El rol de JavaScript consiste en ejecutar código JavaScript del lado del servidor y manejar requests provenientes del navegador. Por ejemplo ante un usuario que visita el sitio, el navegador hará un request al server por lo que el servidor Node ejecutará código JavaScript para reaccionar a esa solicitud (ya sea comunicandose con una DB o archivos del servidor) y luego formulará una respuesta y la enviará al navegador. Esta respuesta podrá ser HTML (con contenido dinámico), imágenes, CSS, etc. 
 
 ## Arquitectura de Node
@@ -64,12 +88,14 @@ Para verificar si ya lo tenemos instalado ingresar en la terminal:
 `node --version` o `node -v` y en caso de tenerlo veremos el número de versión.
 
 > Es aconsejable actualizar a la versión actual.
-
+>
 > Reiniciar la terminal a la hora de volver a chequear el número de versión.
 
-> En caso de utilizar Unix o Mac es posible también utilizar `nvm` para instalar la versión deseada.
+ 
 
-Ingresando `node` podremos comenzar a escribir código JavaScript sin embargo utilizaremos un editor de texto (Visual Studio Code, Sublime, Atom).
+Ingresando `node` podremos comenzar a escribir código JavaScript, esto se conoce como **node-repl interactivo** (repl significa read eval print loop).
+
+Sin embargo normalmente utilizaremos un editor de texto (Visual Studio Code, Sublime, Atom).
 
 ```bash
 mkdir first-app
@@ -77,3 +103,30 @@ cd first-app
 code .
 ```
 Luego suponiendo que creamos el archivo `test.js` para ejecutar el código ingresamos `node test.js` o bien `node test`
+
+
+
+## Versiones npm:
+
+Para conocer la versión que tenemos de npm hacemos lo mismo que antes 
+
+```
+npm -v
+```
+
+
+
+En caso de querer actualizar a la última versión. Si tenemos la 6.14.7 y ejecutamos este comando nos instala la 7.24.0
+
+```
+npm install -g npm
+```
+
+
+
+En cambio queremos actualizar pero en una determinada **versión mayor**. Supongamos que tenemos la 6.14.7 luego de actualizar tendremos la 6.14.15 podemos hacerlo con:
+
+```
+npm install -g npm@6
+```
+

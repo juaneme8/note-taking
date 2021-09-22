@@ -43,7 +43,17 @@ En `package.json` veremos la propiedad `"scripts":` y se trata de comandos a eje
 		"dev": "nodemon index"
 	},
 ```
-Esto nos permitirá luego ejecutar `npm run dev` y será lo mismo que poner `nodemon index`. A la hora de ejecutar el comando determinado por la propiedad `start` o `test` no hará falta poner run podremos poner directamente `npm test` o `npm start`.
+Esto nos permitirá luego ejecutar `npm run dev` y será lo mismo que poner `nodemon index`. A la hora de ejecutar el comando determinado por la propiedad `start` o `test` no hará falta poner run podremos poner directamente `npm test` o `npm start`.+
+
+
+
+Para conocer todos los scripts disponibles debemos ingresar
+
+```bash
+npm run
+```
+
+
 
 ### Paquetes Locales
 En la medida que instalemos paquetes los veremos agregados al `package.json` dentro del objeto dependencies.

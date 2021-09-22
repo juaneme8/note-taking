@@ -159,7 +159,7 @@ test ('palindrome of juaneme8', ()=> {
 })
 ```
 
-Con `test()` estamos creando un test y lo que está dentro del callback será lo que ejecutará para comprobar dicha prueba.
+Con `test()` estamos creando un test y lo que está dentro del *callback* será lo que ejecutará para comprobar dicha prueba.
 
 
 
