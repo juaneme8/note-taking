@@ -77,7 +77,26 @@ for (const entry of Object.entries(person)) {
 console.log(a,b)
 ```
 
+
+
+## Loguear Variable
+
+Si tenemos 
+
+```
+const nombre = 'Juan';
+```
+
+Y queremos hacer un `console.log()` la mayoría de las veces pondremos `console.log('nombre',nombre)`;. Sin embargo existe una forma más fácil de lograr un efecto similar.
+
+```
+console.log({nombre})
+```
+
+Que lo tomará como `{nombre: nombre}`
+
 # Funciones vs Métodos
+
 Las funciones son porciones de código que afectúan una tarea específica al igual que los métodos, sólo que estos últimos estan asociadas a un objeto en particular o a un tipo de dato (por ejemplo en un string `name.toUppercase()`)
 Los métodos se invoan con *dot notation*
 ```js

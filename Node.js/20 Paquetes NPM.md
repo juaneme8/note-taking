@@ -18,3 +18,4 @@ console.log(shortid.generate());
         console.log('Not a URI');
     }
 ```
+

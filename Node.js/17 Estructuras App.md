@@ -6,6 +6,7 @@ Nos permite manejar las rutas de manera más eficiente y ordenada. Lo que haremo
 
 Lo primero que hacemos será crear una carpeta `routes`. 
 Luego analizamos nuestras rutas y si hay varias que tienen una url similar por ejemplo como veremos a continuación las colocaremos en un archivo aparte. 
+
 |        |                   |
 | :----: | :---------------: |
 |  GET   |    **/blogs**     |
@@ -98,4 +99,86 @@ Es conveniente estructurar las vistas en carpetas, ya que normalmente tendremos 
 |	   +-- create.ejs
 |	   +-- details.ejs
 |	   +-- index.ejs
+```
+
+
+
+## Estructura Route-Controller-Service
+
+En cuanto a la estructura de las aplicaciones nos basamos en el [siguiente](https://sodocumentation.net/node-js/topic/10785/route-controller-service-structure-for-expressjs) modelo:
+
+```bash
+├───models
+│   ├───user.model.js
+├───routes
+│   ├───user.route.js
+├───services
+│   ├───user.service.js
+├───controllers
+│   ├───user.controller.js
+```
+
+
+
+### user.model.js
+
+```js
+const mongoose = require('mongoose')
+
+const UserSchema  = new mongoose.Schema({
+    name: String
+})
+
+const User = mongoose.model('User', UserSchema)
+
+module.exports = User;
+```
+
+### user.routes.js
+
+```js
+const express = require('express');
+const router = express.Router();
+
+var UserController = require('../controllers/user.controller')
+
+router.get('/', UserController.getUsers)
+
+module.exports = router;
+```
+
+### user.controllers.js
+
+```js
+const UserService = require('../services/user.service')    
+
+exports.getUsers = async function (req, res, next) {
+    // Validate request parameters, queries using express-validator
+    
+    var page = req.params.page ? req.params.page : 1;
+    var limit = req.params.limit ? req.params.limit : 10;
+    try {
+        var users = await UserService.getUsers({}, page, limit)
+        return res.status(200).json({ status: 200, data: users, message: "Succesfully Users Retrieved" });
+    } catch (e) {
+        return res.status(400).json({ status: 400, message: e.message });
+    }
+}
+```
+
+### user.services.js
+
+```js
+const User = require('../models/user.model')
+
+exports.getUsers = async function (query, page, limit) {
+
+    try {
+        var users = await User.find(query)
+        return users;
+    } catch (e) {
+        // Log Errors
+        throw Error('Error while Paginating Users')
+    }
+}
 ```

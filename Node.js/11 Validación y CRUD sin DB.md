@@ -1,4 +1,4 @@
-# Validación de Entrada:
+#   Validación de Entrada:
 Como buena práctica siempre verificar que lo que envía el cliente (por eso hablamos de **validación de entrada que será distinto a la validación de mongoose** que veremos más adelante) mediante un post o put request sea acorde a lo que esperamos.
 Si bien esto podemos hacerlo manualmente mediante condicionales y caso de detectar algo erróneo enviar un error 400 (bad request) y retornar en aplicaciones de cierta complejidad el contenido de   `req.body` tendrá varias propiedades, por lo que un chequeo manual demandará bastante trabajo. 
 Para evitar esto podemos utilizar un paquete encargado de la validación.
@@ -123,6 +123,8 @@ app.delete('/api/cursos/:id', (req, res) => {
 	res.send(curso);
 });
 ```
+
+En lugar de `res.status(404).send('id inexistente');` podríamos haber puesto `res.status(404).end()`
 
 `schema.validate(body, { abortEarly: false });` retorna un objeto del cual nos interesa analizar la propiedad `error`, es por eso que utilizo *object destructuring*. 
 

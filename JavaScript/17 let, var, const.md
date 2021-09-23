@@ -56,3 +56,4 @@ Cuando utilizamos `const` y `let` se reduce el scope de la variable al bloque do
 Si la varible es declarada con `const` o `let` en el ámbito global o de una función pertenecerá al ámbito global como ocurría con `var`.
 
 Las variables declaradas con `const` no pueden ser reasignadas pero si es posible mutarlas si almacenan un array u objeto cambiando el valor de sus elementos.
+

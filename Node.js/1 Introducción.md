@@ -106,27 +106,3 @@ Luego suponiendo que creamos el archivo `test.js` para ejecutar el código ingre
 
 
 
-## Versiones npm:
-
-Para conocer la versión que tenemos de npm hacemos lo mismo que antes 
-
-```
-npm -v
-```
-
-
-
-En caso de querer actualizar a la última versión. Si tenemos la 6.14.7 y ejecutamos este comando nos instala la 7.24.0
-
-```
-npm install -g npm
-```
-
-
-
-En cambio queremos actualizar pero en una determinada **versión mayor**. Supongamos que tenemos la 6.14.7 luego de actualizar tendremos la 6.14.15 podemos hacerlo con:
-
-```
-npm install -g npm@6
-```
-

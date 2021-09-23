@@ -1,23 +1,7 @@
 # Requests & Responses
 Cada vez que hacemos un cambio tendríamos que detener el proceso `ctrl+c` y volver a ejecutarlo `node server.js`.
 
-### Nodemon
 
-La extensión `nodemon` se encarga de cerrar y volver a abrir el servidor cada vez que realizamos un cambio. 
-
-Podemos iniciar nuestra aplicación con *nodemon* así:
-
-```
-node_modules/.bin/nodemon index.js
-```
-
-Para simplificar esto definimos un script npm dedicado en el `package.json`
-
-```
-"dev": "nodemon index.js",
-```
-
-En el script no es necesario especificar la ruta *`node_modules/.bin/nodemon`*, porque *npm* automáticamente sabe buscar el archivo desde ese directorio.
 
 ### Request Object
 
@@ -157,7 +141,9 @@ En la variable `path` almacenaremos la ruta del archivo que deseamos leer y lo c
 
 ### Status Codes:
 Los códigos de estado describen el tipo de respuesta enviado al navegador y qué tan exitosa fue la solicitud. 
+
 Los códigos más comunes son:
+
 * 200 - OK
 * 301 - Resource moved
 * 404 - Not found
@@ -171,6 +157,10 @@ Existen muchos otros y de acuerdo al rango en el que se encuentran podemos deter
 * Rango de 500: server error codes
 
 El status code lo establecemos con `res.statusCode = 200` y podremos visualizarlo en las *devtools* dentro de la pestaña *Network* en la columna *Status*.
+
+
+
+> En la página [http.cat](http://http.cat) podemos ver un listado de todos los status codes.
 
 ### Redirects:
 En ocasiones puede que tengamos que redireccionar al usuario de una url a otra. Supongamos por ejemplo que solíamos tener la url `/about-me` y luego decidimos que fuera `/about`. Si bien en nuestro sitio cambiamos todas las referencias puede que alguien la tenga guardada e intente entrar a la url original, en ese caso no queremos mostrarles una página 404 sino que querremos redireccionarlos a la nueva.
