@@ -1,6 +1,8 @@
 # Docker
 
-> Basado en Ultimate Docker Course de Mosh Hamedani (COMPLETO)
+> Ultimate Docker Course de Mosh Hamedani (COMPLETO)
+>
+> [Docker 2021 de Pelado Nerd](https://www.youtube.com/watch?v=CV_Uf3Dq-EU) (40 MIN)
 
 ## ¿Qué es Docker?
 
@@ -45,11 +47,12 @@ Por último no necesitamos más una aplicación, podemos eliminarla y eliminar t
 Una **máquina virtual**  es una abstracción de una máquina o pieza de hardware. Es posible correr varias máquinas virtuales en una máquina física.
 Por ejemplo es posible en una Mac y en ella ejecutar dos máquinas virtuales una con Windows y la otra con Linux. Esto se logra gracias a un **Hypervisor** que es un programa con el que podremos manejar máquinas virtuales. Existen  distintos tipos de Hypervisors como *VirtualBox* y *VMware* que son multi-plataforma y *Hyper-v* que funciona solo en Windows.
 La **ventaja** del uso de maquinas virtuales está en que podremos correr en la misma máquina física dos aplicaciones de manera  aislada y si estas tienen dependencias de distintas versiones no se generarán inconvenientes.
+
 La **desventaja** de las máquinas virtuales está dada por el hecho de que cada VM requiere un sistema operativo completo, esto hace que sean lentas para iniciar y que sean bastante demandantes en cuanto a recursos (tomarán una porción del hardware físico es decir CPU, memoria y disco). Si bien podemos configurar cuantos cores o cuanta memoria destinamos para cada VM, tendremos una limitación en términos del número de VMs que podremos ejecutar. En una máquina física con más de 5 VMs ya podríamos comenzar a experimentar inconvenientes.
 
  
 
-Los **contenedores** nos permiten también ejecutar múltiples aplicaciones de manera aislada pero son más livianos pues no necesitan un sistema operativo completo. De hecho, todos los contenedores de una máquina comparten el OS del host. 
+Los **contenedores** nos permiten también ejecutar múltiples aplicaciones de manera aislada pero son más livianos pues no necesitan un sistema operativo completo.  De hecho, todos los contenedores de una máquina comparten el kernel  del host. 
 Además como el OS ya ha iniciado en el host inician más rápido (1 segundo). Por último son menos demandantes en cuanto a recursos de hardware. En un mismo host podremos ejecutar decenas y hasta centenas de contenedores.  
 
 
@@ -61,7 +64,11 @@ Además como el OS ya ha iniciado en el host inician más rápido (1 segundo). P
 Los contenedores son procesos como los demás procesos que se ejecutan en la computadora pero con algunas características especiales. Como dijimos a diferencia de las VM no contienen un OS completo sino que todos los contenedores del host comparten el OS del host (en especial el kernel). El kernel es el encargado de manejar todas las aplicaciones y recursos de hardware (como memoria y CPU). Cada sistema operativo tiene su propio kernel y estos tiene una API en espacial y es por eso que no podemos ejecutar aplicaciones Windows en Linux y esto es debido a que esa aplicación debe hablar con el kernel del sistema operativo que tien por debajo. 
 
 * En una máquina con Linux sólo podremos ejecutar contenedores Linux.
+
 * En una máquina con Windows 10 podremos ejecutar contenedores Windows + Linux, ya que esta versión de Windows viene con un kernel de Linux además del kernel de Windows de siempre.
+
+  Sin embargo cuando corremos un contenedor de Docker Linux en una máquina con Windows puede ser que ande un poco mas lento que si utilizáramos un server Linux, pero para desarrollo funciona muy bien.
+
 * En una máquina con Mac como su kernel no tiene soporte nativo para nuestros contenedores y debemos utilizar una Linux VM para ejecutar contenedores Linux.
 
 
@@ -171,6 +178,8 @@ Linux es software open-source y es por eso que muchos individuos y comunidades h
 
 En [hub.docker.com](hub.docker.com) podemos encontrar la imagen `ubuntu` y con `docker pull ubuntu` podríamos obtenerla. Otra forma de hacerlo con el *shortcut* `docker run ubuntu` que hace que si tenemos la imagen Docker iniciará un contenedor con esta imagen y sino la pulleará detrás de escenas y luego iniciará un contenedor.
 
+> Sin embargo, si queremos asegurarnos de trabajar con la versión *latest* lo ideal es hacer `docker pull ubuntu` y luego `docker run ubuntu` pues en caso de correrlo directo si ya tiene una imagen con una versión vieja descargada utilizara esa.
+
 A continuacón como no interactuamos con el contenedor, este se detendrá. Esto lo podemos verificar con el comando `docker ps`  con el cual podremos ver la lista de procesos o contenedores en ejecución que en nuestro caso no entrega nada pues no tenemos nada corriendo. Mientras que con `docker ps -a` veremos todos los procesos incluso los contenedores que se detuvieron y en ese caso sí vemos el contenedor en cuestión.
 
 Para inicializar un contenedor e interactuar con él lo hacemos con `docker run -it ubuntu` y en ese momento nos aparecerá el shell prompt que es un programa que toma nuestros comandos y se los pasa al OS (o al kernel) para su ejecución.
@@ -268,13 +277,15 @@ Por ejemplo dentro del tag `14-buster` veremos:
 
 Todas estas pesan comprimidas alrededor de 300 MB y descomprimida estará cerca del GB. Como buscamos velocidad en nuestros deployments utilizaremos una **Alpine Linux**, buscando el tag `14.16.0-alpine3.13` que tiene un tamaño comprimido cercano a los 40 MB.
 
-> Agosto 2021 cuando dentro de la imagen oficial de Node filtramos por Alpine nos encontramos con `current-alpine3.14`.
+
 
 En el `Dockerfile` ponemos:
 
 ```dockerfile
 FROM node:14.16.0-alpine3.13
 ```
+
+
 
 Luego para construir la imagen desde el directorio del proyecto:
 
@@ -288,6 +299,8 @@ docker build -t react-app .
 
 
 Con `docker images` o `docker image ls` veremos todas las imagenes disponibles.
+
+> Si tenemos muchas imagenes y sólo queremos mostrar las primeras `docker images | head`.
 
 Para iniciar un contenedor con esta imagen ejecutamos 
 
@@ -678,9 +691,9 @@ ENTRYPOINT ["npm", "start"]
 
 La diferencia está en que es más simple sobrescribir el comando default (es decir el invocado con `CMD`) de hecho esto es lo que hacemos por ejemplo cuando ejecutamos `docker run -it react-app sh`. Debemos utilizar `CMD` cuando queremos tener flexibilidad de que podremos sobrescribir el comando.
 
-En cambio para sobrescribir el `ENTRYPOINT` es necesario utilizar la opción`--entrypoint` . En la práctica conviene utilizar `ENTRYPOINT` cuando estamos seguros del comando que debe ser ejecutado al iniciar un contenedor.
+En cambio para sobrescribir el `ENTRYPOINT` es necesario utilizar la opción`--entrypoint` . 
 
-Sin embargo la elección de uno u otro comando depende de lo que quiera cada programador. Mosh personalmente utiliza `CMD` salvo al trabajar con web server de nginx.
+`ENTRYPOINT` nos permite dejar abierto un comando para después pasarle argumentos. Podríamos tener `ENTRYPOINT ["node"]` y luego al hacer `docker run` deberíamos pasarle como argumento el archivo que queremos que ejecute. Esto es útil en caso de que tengamos varios binarios.
 
 
 
@@ -763,6 +776,10 @@ También podemos visualizar aquellos que estan en estado detenido:
 docker ps -a
 ```
 
+> Docker cuenta con un *garbage collector* que irá limpiando esta lista, por lo que no veremos todos los contenedores detenidos históricamente sino sólo los últimos.
+
+
+
 Si queremos eliminar los contenedores detenidos que acabamos de visualizar:
 
 ```bash
@@ -777,7 +794,7 @@ docker image prune
 
 
 
-#### Eliminar Imagenes con Nombre
+#### Eliminar Imágenes con Nombre
 
 Para eliminar una imagen podemos hacerlo con referenciando su nombre o su ID de imagen
 
@@ -879,7 +896,7 @@ docker image tag b06 react-app:latest
 
 ### Compartir Imágenes
 
-Para compartir imagenes debemos tener una cuenta en [hub.docker.com](hub.docker.com) y luego debemos crear un repositorio que puede alojar múltiples imagenes.
+Si queremos compartir las imagenes podemos hacerlo en un registro de Docker, el registro de Docker oficial como dijimos es DockerHub. Para trabajar con eso debemos tener una cuenta en [hub.docker.com](hub.docker.com) y luego debemos crear un repositorio que puede alojar múltiples imágenes.
 
 > Con una cuenta gratuita sólo es posible tener un repositorio privado. En la versión paga también es posible vincular con una cuenta GitHub para que cada vez que hagamos un push, DockerHub haga un pull y genere automáticamente una imagen.
 
@@ -889,9 +906,17 @@ Suponiendo que creamos un repositorio `react-app` debemos renombrar la imagen a 
 docker image f4b juaneme8/react-app:2
 ```
 
+Otra forma de hacerlo es con:
+
+```
+docker tag f4b juaneme8/react-app:2
+```
+
+De esta manera tendremos más de un elemento con el mismo image id (se trata de la misma imagen con distintos nombres)
 
 
-Luego debemos loguearnos para lo que nos pedirá usuario y contraseña:
+
+ Luego debemos loguearnos para lo que nos pedirá usuario y contraseña:
 
 ```
 docker login
@@ -907,7 +932,7 @@ docker push juaneme8/react-app:2
 
  
 
-A continuación **realizará el push de cada uno de los layers de la imagen**. La primera vez demorará bastante tiempo debido a que está pusheando el layer con las dependencias de npm pero las sucesivas será más rápido (en la medida que no cambiemos las dependencias).
+A continuación **realizará el push de cada uno de los layers de la imagen**. Veremos qeu algunas capaz no tiene que subirlas ya que son por ejemplo las de `node` que ya existen. Aún así la primera vez demorará bastante tiempo debido a que está pusheando el layer con las dependencias de npm pero las sucesivas será más rápido (en la medida que no cambiemos las dependencias). 
 
 
 
@@ -931,13 +956,13 @@ docker push juaneme8/react-app:3
 
 
 
-En DockerHub si exploramos el rep ositorio veremos ahora ambos tags.
+En DockerHub si exploramos el repositorio veremos ahora ambos tags.
 
 A partir de este momento podremos hacer el pull de la imagen en cualquier máquina que tenga Docker.
 
 
 
-### Guardar Imagenes Comprimida
+### Guardar Imágenes Comprimida
 
 Suponiendo que tenemos una imagen en una máquina y queremos ponerla en otra sin pasar por DockerHub, en ese caso podremos guardarla como un archivo comprimido y cargarlo en la otra máquina.
 
@@ -1011,9 +1036,11 @@ docker run -d --name blue-sky react-app
 
  
 
+### Logs
 
+De cara a los logs en los contenedores debemos tener presente que en la aplicación siempre debe escribir estos mensajes en *standard output* y no en un archivo. Esto es así para que puedan ser capturado por Docker y mostrarlos en pantalla. 
 
-### Logs de Errores
+Gracias a esto no tendremos que encargarnos de rotar logs ya que el daemon de Docker se encargará de hacerlo por nosotros.
 
 Suponiendo que tenemos los contenedores iniciados anteriormente corriendo en el *background*, cuyos datos podremos obtener con:
 
@@ -1021,7 +1048,7 @@ Suponiendo que tenemos los contenedores iniciados anteriormente corriendo en el 
 docker ps
 ```
 
-Para conocer qué está sucediendo en ellos (qué salida mostraron o si hubo algun error) podremos realizar
+Para conocer qué está sucediendo en ellos (qué salida mostraron o si hubo algún error) podremos realizar
 
 ```bash
 docker logs 655
@@ -1071,7 +1098,9 @@ docker logs -t 655
 
 A pesar de tener dos contenedores corriendo si vamos a `localhost:3000` no podremos acceder a la aplicación. Esto como ya explicamos se debe a que el puerto 3000 está escuchando en el contenedor pero no en el host. Necesitamos publicar este puerto para poder enviar tráfico a través de él.
 
+Recordar que en el `Dockerfile` el comando `EXPOSE` nos sirve sólo a los fines de documentación.
 
+Por el momento tenemos un contenedor corriendo en una red de Docker que no está compartida con el host.
 
 Con `docker ps` veremos una columna `PORTS` con el contenido `3000/tcp` donde este `3000` hace referencia al puerto del contenedor.
 
@@ -1084,11 +1113,13 @@ d588f48d6340   react-app     "docker-entrypoint.s…"   3 seconds ago   Up 2 sec
 
 ### Iniciar un contenedor y publicar puerto
 
+Para lograr acceder al puerto 3000 lo debo especificar a la hora de hacer el`docker run`
+
 ```bash
  docker run -d -p 80:3000 --name c1 react-app
 ```
 
-Con `3000:3000` hacemos referencia al puerto `80` del host y `3000` en el contenedor.
+Con `80:3000` hacemos referencia al puerto `80` del host y `3000` en el contenedor.
 
  De esta manera bastaría con entrar a `localhost` (puerto `80` por default) para ver la aplicación.
 
@@ -1154,16 +1185,20 @@ docker stop c1
 ```
 
 > La aplicación de este comando podremos verificarla con `docker ps`
+>
+> Si queremos detener más de un contenedor podremos ingresar `docker stop 6ap 7io`
 
 
 
-Si ahora queremos reiniciar un contenedor detenido, lo hacemos con `docker start`
+Si ahora queremos reiniciar un contenedor detenido, lo hacemos con `docker start`. Este contenedor iniciará en *background*.
 
 ```bash
 docker start c1
 ```
 
 > La diferencia entre `docker run` y `docker start` radica en que `docker start` lo utilizamos para reiniciar un contenedor detenido y `docker run` para iniciar uno nuevo.
+>
+> Si bien la filosofía de los contenedores establece que deben ser descartables y no deben almacenar información , al reiniciarlo podríamos acceder a los datos que hubiera en dicho file-system.
 
 
 
@@ -1306,6 +1341,14 @@ docker run -d -p 4000:3000 -v app-data:/app/data react-app
 
 
 
+> En el ejemplo anterior utilizamos un *named volume* `app-data` que es un directorio manejado por Docker pero también podemos especificar una ubicación debemos indicar el path absoluto por ejemplo:  
+>
+> `/Users/j8/ejemplo-docker/app/etc:/etc/todos`
+>
+> Se trata de un volumen bidireccional que podrá ser modificado tanto por el o los contenedores como por el host.
+
+
+
 ### Ejemplo de Persistencia de Datos
 
 No es necesario haber creado el volumen de ante mano, si ponemos un volumen que no existe, Docker lo creará automáticamente, por ejemplo si en lugar de `app-data` que sí creamos ponemos `app-data2`
@@ -1420,6 +1463,48 @@ ls
 
 
 
+### Actualizar código en contenedor
+
+El uso de volúmenes también nos permite en desarrollo  modificar el código de la aplicación al vuelo es decir que no tendremos que reconstruir la imagen, ni reiniciar el contenedor.
+
+Supongamos que tenemos corriendo una aplicación React que visitamos en localhost:3000 y modificamos uno de sus archivos. Estos cambios no los veremos reflejados inmediatamente en el navegador. Para visualizar estos cambios debemos operar distinto segun estemos en producción o en desarrollo.
+
+Para **producción** deberíamos crear una nueva imagen, asignarle un tag apropiado y luego hacer el deploy.
+
+Para **desarrollo** no queremos perder tiempo haciendo una nueva imagen o copiando los archivos al contenedor cada vez que introducimos cambios en el código. Lo que hacemos en cambio será crear un mapeo o binding entre los directorios en el host y los directorios en el contenedor, de manera que cuando hagamos cambios en nuestros archivos sean visibles inmediatamente en el contenedor.
+
+Hasta ahora iniciamos un contenedor con el siguiente comando:
+
+```bash
+docker run -d -p 5001:3000 -v app-data:/app/data react-app
+```
+
+Usando la misma sintaxis que para los volúmenes podemos mapear un directorio del host con un directorio en el contenedor. En lugar de usar un *named volume* que es un directorio manejado por Docker usaremos el directorio actual de la aplicación. En lugar de escribir el path completo utilizamos el comando `pwd`, pero lo ponemos como `$(pwd)` porque si ponemos `pwd` solo Docker pensará que se trata de un *named volume*
+
+```bash
+docker run -d -p 5001:3000 -v $(pwd):/app react-app
+```
+
+También podríamos acompañarlo de un *named volume* 
+
+```bash
+docker run -d -p 5001:3000 -v $(pwd):/app -v app-data:/app/data react-app
+```
+
+
+
+Si tenemos el navegador abierto en `localhost:5001` cualquier cambio que introduzcamos gracias a lo que hemos hecho y al *hot reloading* será visto de manera instantánea. Si es una aplicación Node tendríamos que actualizar el navegador.
+
+
+
+Una vez que terminamos el trabajo del día debemos crear sí una nueva imagen y lo hacemos con:
+
+```bash
+docker build -t react-app:v2 .
+```
+
+
+
 ## Copiar archivos entre host y contenedores
 
 ### Copiar archivos del contenedor al host
@@ -1479,39 +1564,50 @@ Donde con `ls` verificamos la existencia del archivo en cuestión.
 
 
 
-## Publicar cambios en un contenedor
+## Múltiples Contenedores
 
-Supongamos que tenemos corriendo una aplicación React que visitamos en localhost:3000 y modificamos uno de sus archivos. Estos cambios no los veremos reflejados inmediatamente en el navegador. Para visualizar estos cambios debemos operar distinto segun estemos en producción o en desarrollo.
+Cuando tenemos servicios relacionados vamos a trabajar con más de un contenedor. Un ejemplo típico sería cuando tenemos un contenedor con una base de datos y otro que corre una aplicación que se conecta a esa base de datos. Estos dos contenedores van a interactuar.
 
-Para **producción** deberíamos crear una nueva imagen, asignarle un tag apropiado y luego hacer el deploy.
+Esto lo implementaremos de dos formas la primera de ellas es creando una network y la segunda utilizando docker compose que se encarga de hacerlo por nosotros.
 
-Para **desarrollo** no queremos perder tiempo haciendo una nueva imagen o copiando los archivos al contenedor cada vez que introducimos cambios en el código. Lo que hacemos en cambio será crear un mapeo o binding entre los directorios en el host y los directorios en el contenedor, de manera que cuando hagamos cambios en nuestros archivos sean visibles inmediatamente en el contenedor.
+Como dijimos lo primero que hacemos es crear una red de modo tal que ambos contenedores sean capaces de conectarse uno al otro.
 
-Hasta ahora iniciamos un contenedor con el siguiente comando:
 
-```
-docker run -d -p 5001:3000 -v app-data:/app/data react-app
-```
 
-Usando la misma sintaxis que para los volúmenes podemos mapear un directorio del host con un directorio en el contenedor. En lugar de usar un *named volume* que es un directorio manejado por Docker usaremos el directorio actual de la aplicación. En lugar de escribir el path completo utilizamos el comando `pwd`, pero lo ponemos como `$(pwd)` porque si ponemos `pwd` solo Docker pensará que se trata de un *named volume*
-
-```
-docker run -d -p 5001:3000 -v $(pwd):/app react-app
-```
-
-También podríamos acompañarlo de un *named volume* 
-
-```
-docker run -d -p 5001:3000 -v $(pwd):/app -v app-data:/app/data react-app
+```bash
+docker network create todo-app
 ```
 
 
 
-Si tenemos el navegador abierto en localhost:5001 cualquier cambio que introduzcamos gracias a lo que hemos hecho y al *hot reloading* será visto de manera instantánea.
+En primer lugar vamos a crear un contenedor para MySQL:
+
+```bash
+docker run -d \
+--network todo-app --network-alias mysql \
+-v todo-mysql-data:/var/lib/mysql \
+-e MYSQL_ROOT_PASSWORD=secret \
+-e MYSQL_DATABASE=todos \
+mysql:5.
+```
+
+> Con `--network-alias mysql` logramos que al apuntar al nombre `mysql` desde la aplicación resuelva la IP del contenedor. 
+>
+> El resto de las configuraciones y variables de entorno son sugeridas por la imagen en DockerHub.
 
 
 
-## Docker Compose
+Para ver el contenido de la base de datos
+
+```bash
+docker exec -it cca542... mysql -p
+```
+
+Luego nos pedirá la password y luego podremos ingresar los comandos deseados sobre la db, por ejemplo `show databases`.
+
+# **(MINUTO 52)**
+
+#### Docker Compose
 
 Docker Compose nos permite ejecutar de manera simple aplicaciones con múltiples contenedores. Como ejemplo consideramos una aplicación en la que tenemos front-end (React), back-end (Node.js) y base de datos (MongoDB).
 
@@ -1521,7 +1617,7 @@ Docker Compose es una herramienta construida sobre la base de Docker Engine y en
 
 
 
-### Limpieza del Espacio de Trabajo
+#### Limpieza del Espacio de Trabajo
 
 Si queremos limpiar el espacio de trabajo y eliminar las imagenes y los contenedores que tengamos corriendo, primero podemos analizar ambos aspectos con:
 
@@ -1532,7 +1628,7 @@ docker ps
 
 
 
-#### Limpieza Manual de Imagenes
+##### Limpieza Manual de Imágenes
 
 Luego para eliminar todas las imagenes, podríamos hacerlo ingresando uno a uno los IDs de la imagen.
 
@@ -1542,7 +1638,7 @@ docker image rm 123 321 111
 
 
 
-#### Limpieza Automática de Imágenes
+##### Limpieza Automática de Imágenes
 
 Sin embargo existe una forma automática de hacerlo.
 
