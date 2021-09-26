@@ -4,7 +4,7 @@
 >
 > [Docker 2021 de Pelado Nerd](https://www.youtube.com/watch?v=CV_Uf3Dq-EU) (40 MIN)
 
-## ¿Qué es Docker?
+# ¿Qué es Docker?
 
 Docker es una **plataforma para construir, ejecutar y enviar aplicaciones de manera consistente**, de manera tal que si una aplicación funciona en un entorno de desarrollo también funcionará en otras máquinas. 
 
@@ -40,12 +40,12 @@ Por último no necesitamos más una aplicación, podemos eliminarla y eliminar t
 
 
 
-## Contenedores vs Máquinas Virtuales
+# Contenedores vs Máquinas Virtuales
 
 **Un contenedor es un entorno aislado para ejecutar la aplicación** y tiene algunas diferencias comparado con una máquina virtual.
 
 Una **máquina virtual**  es una abstracción de una máquina o pieza de hardware. Es posible correr varias máquinas virtuales en una máquina física.
-Por ejemplo es posible en una Mac y en ella ejecutar dos máquinas virtuales una con Windows y la otra con Linux. Esto se logra gracias a un **Hypervisor** que es un programa con el que podremos manejar máquinas virtuales. Existen  distintos tipos de Hypervisors como *VirtualBox* y *VMware* que son multi-plataforma y *Hyper-v* que funciona solo en Windows.
+Por ejemplo es posible trabajar en una Mac y en ella ejecutar dos máquinas virtuales una con Windows y la otra con Linux. Esto se logra gracias a un **Hypervisor** que es un programa con el que podremos manejar máquinas virtuales. Existen  distintos tipos de Hypervisors como *VirtualBox* y *VMware* que son multi-plataforma y *Hyper-v* que funciona solo en Windows.
 La **ventaja** del uso de maquinas virtuales está en que podremos correr en la misma máquina física dos aplicaciones de manera  aislada y si estas tienen dependencias de distintas versiones no se generarán inconvenientes.
 
 La **desventaja** de las máquinas virtuales está dada por el hecho de que cada VM requiere un sistema operativo completo, esto hace que sean lentas para iniciar y que sean bastante demandantes en cuanto a recursos (tomarán una porción del hardware físico es decir CPU, memoria y disco). Si bien podemos configurar cuantos cores o cuanta memoria destinamos para cada VM, tendremos una limitación en términos del número de VMs que podremos ejecutar. En una máquina física con más de 5 VMs ya podríamos comenzar a experimentar inconvenientes.
@@ -57,11 +57,11 @@ Además como el OS ya ha iniciado en el host inician más rápido (1 segundo). P
 
 
 
-## Arquitectura Docker
+# Arquitectura Docker
 
  Docker tiene una **arquitectura cliente-servidor** en la cual el cliente se comunica con el servidor a través de una API REST. El server recibe el nombre de **Docker Engine** se ejecuta de fondo y se encarga de construir y ejecutar contenedores docker.
 
-Los contenedores son procesos como los demás procesos que se ejecutan en la computadora pero con algunas características especiales. Como dijimos a diferencia de las VM no contienen un OS completo sino que todos los contenedores del host comparten el OS del host (en especial el kernel). El kernel es el encargado de manejar todas las aplicaciones y recursos de hardware (como memoria y CPU). Cada sistema operativo tiene su propio kernel y estos tiene una API en espacial y es por eso que no podemos ejecutar aplicaciones Windows en Linux y esto es debido a que esa aplicación debe hablar con el kernel del sistema operativo que tien por debajo. 
+Los contenedores son procesos como los demás procesos que se ejecutan en la computadora pero con algunas características especiales. Como dijimos a diferencia de las VM no contienen un OS completo sino que todos los contenedores del host comparten el kernel del host. El kernel es el encargado de manejar todas las aplicaciones y recursos de hardware (como memoria y CPU). Cada sistema operativo tiene su propio kernel y estos tiene una API en espacial y es por eso que no podemos ejecutar aplicaciones Windows en Linux y esto es debido a que esa aplicación debe hablar con el kernel del sistema operativo que tien por debajo. 
 
 * En una máquina con Linux sólo podremos ejecutar contenedores Linux.
 
@@ -73,7 +73,7 @@ Los contenedores son procesos como los demás procesos que se ejecutan en la com
 
 
 
-## Instalación Docker
+# Instalación Docker
 
 Para instalar Docker debemos ir a https://docs.docker.com/get-docker/ y hacer click en Docker Desktop for Windows.
 
@@ -83,15 +83,15 @@ La [documentación](https://docs.docker.com/docker-for-windows/install/) indica 
 
 
 
-## Flujo de Trabajo
+# Flujo de Trabajo
 
-A partir de una aplicación debemos agregar un archivo Dockerfile (con esta capitalización y sin extensión) que es un archivo de texto plano con instrucciones que usa Docker para empaquetarla en una **imagen** con todo lo que nuestra aplicación necesita para correr (un OS, un runtime environment como ser Node o Python, archivos de la aplicación, third-party libraries, variables de entorno). Una vez que tenemos la imagen le diremos a **Docker que inicie un contenedor usando esa imagen**. El contenedor es un tipo de proceso especial que tiene su propio filesystem provisto por la image. En lugar de ejecutar la aplicación dentro de un proceso normal le decimos a docker que la ejecute dentro de un contenedor.
+A partir de una aplicación debemos agregar un archivo `Dockerfile` (con esta capitalización y sin extensión) que es un archivo de texto plano con instrucciones que usa Docker para empaquetarla en una **imagen** con todo lo que nuestra aplicación necesita para correr (un OS, un runtime environment como ser Node o Python, archivos de la aplicación, third-party libraries, variables de entorno). Una vez que tenemos la imagen le diremos a **Docker que inicie un contenedor usando esa imagen**. El contenedor es un tipo de proceso especial que tiene su propio filesystem provisto por la image. En lugar de ejecutar la aplicación dentro de un proceso normal le decimos a docker que la ejecute dentro de un contenedor.
 
 Una vez que tenemos esta imagen podemos pushearla a un Docker Registry como DockerHub y luego podemos pullearla hacia cualquier máquina que use Docker. De esta manera tendremos la misma imagen y podremos iniciarla del mismo modo que en desarrollo, bastará con indicarle a Docker que inicie un contenedor con esa imagen. Con esto nos evitamos tener que generar documentación con los pasos a seguir para ese release.
 
 
 
-### Flujo en Development
+## Flujo en Development
 
 Supongamos que queremos desarrollar un simple programa que muestra un mensaje en la consola. Para ello creamos un directorio `hello-docker` y dentro de el un archivo `app.js` con `console.log('Hello Docker');` 
 
@@ -114,7 +114,7 @@ Utilizando Docker podemos escribir estas instrucciones dentro de un Dockerfile p
 
 
 
-> 1. Comenzamos de una imagen base que podría ser un Linux vacío (`FROM linux`)  al cual luego le instalaríamos Node o sino podemos usar una imagen construida sobre la base de Linux con Node ya instalado  (`FROM node` ). Estas imagenes están disponibles en [Docker Hub](hub.docker.com) que como dijimos es el registro de imagenes Docker. Una vez allí podremos buscar "node" y veremos que el nombre de la imagen oficial es `node` y por eso ponemos `FROM node`. En Docker Hub veremos que hay múltiples imagenes node cada una de las cuales fue creada sobre una distribución de distinta de Linux y lo especificaremos mediante un tag. En nuestro caso utilizaremos una distribución liviana de Linux llamada `alpine`
+> 1. Comenzamos de una imagen base que podría ser un Linux vacío (`FROM linux`)  al cual luego le instalaríamos Node o sino podemos usar una imagen construida sobre la base de Linux con Node ya instalado  (`FROM node` ). Estas imagenes están disponibles en [Docker Hub](hub.docker.com) que como dijimos es el registro oficial de imagenes Docker. Una vez allí podremos buscar "node" y veremos que el nombre de la imagen oficial es `node` y por eso ponemos `FROM node`. En Docker Hub veremos que hay múltiples imagenes node cada una de las cuales fue creada sobre una distribución de distinta de Linux y lo especificaremos mediante un tag. En nuestro caso utilizaremos una distribución liviana de Linux llamada `alpine`
 >
 > 2. Luego debemos copiar los archivos de la aplicación por lo que ponemos `COPY . /app` con esto le decimos que queremos copiar todos los archivos del directorio actual en el directorio `/app` de la imagen.
 >
@@ -156,25 +156,25 @@ Luego podremos publicar esta imagen en Docker Hub de modo tal que cualquier pued
 
 
 
-## Linux
+# Linux
 
 Docker fue construida utilizando conceptos básicos de Linux es por eso que es importante conocer los comandos elementales de Linux para aumentar la productividad y simplificar la búsqueda de errores
 
 
 
-### Comandos
+## Comandos
 
 > Lo relacionado a comandos de Linux se unificó con los apuntes de Terminal y Línea de Comandos.
 
 
 
-### Distribuciones
+## Distribuciones
 
 Linux es software open-source y es por eso que muchos individuos y comunidades han creado sus propias versiones de Linux llamadas *distribuciones* para satisfacer sus necesidades como correr en servidores, computadoras de escritorio,dispositivos móviles, etc. Existen miles de distribuciones Linux entre las cuales nos encontramos con Ubuntu, Debian, Alpine, Fedora, CentOS, etc. La mayoría de las distros soportan los mismos comandos pero puede haber alguna que otra diferencia. Utilizaremos Ubuntu.
 
 
 
-## Iniciar Contenedor
+# Iniciar Contenedor
 
 En [hub.docker.com](hub.docker.com) podemos encontrar la imagen `ubuntu` y con `docker pull ubuntu` podríamos obtenerla. Otra forma de hacerlo con el *shortcut* `docker run ubuntu` que hace que si tenemos la imagen Docker iniciará un contenedor con esta imagen y sino la pulleará detrás de escenas y luego iniciará un contenedor.
 
@@ -208,7 +208,7 @@ Si queremos cerrar la sesión de la terminal podemos ejecutar `exit` y luego con
 
 
 
-## Loguin con Usuario
+# Loguin con Usuario
 
 Si estamos logueados con root y queremos loguearnos como un usuario normal **en ese mismo contenedor** abrimos una nueva ventana de la terminal y con `docker ps` podremos ver los contenedores en ejecución. Luego suponiendo que el id `17fd53d105f6` y para correr una sesión de bash ejecutamos `docker exec -it 17f bash`  con lo que nos loguearemos también como **root**. Como queremos loguearnos como `john` debemos primero cerrar la sesión con `exit` y ejecutar `docker exec -it -u john 17f bash` 
 
@@ -218,15 +218,15 @@ Si estamos logueados con root y queremos loguearnos como un usuario normal **en 
 
 
 
-## Imagenes
+# Imagenes
 
-### Aplicación Docker
+## Aplicación Docker
 
 Cuando tenemos una aplicación React y queremos correrla en una nueuva máquina debemos seguir una serie de pasos empezando por instalar Node.js, ejecutar `npm install` y por último `npm start` para iniciarla. Utilizando Docker buscamos no tener que seguir todos estos pasos cada vez que deseamos utilizar una máquina nueva. Vamos a *dockerizar* la aplicación y meterla en una imagen con la cual podremos deployarla en cualquier lugar.
 
 
 
-### Imagenes vs Contenedores
+## Imágenes vs Contenedores
 
 Las **imagenes** contienen todos todos archivos y configuraciones que necesita la aplicación para correr: un sistema operativo reducido, librerías externas, archivos de la aplicación, variables de entorno. Una vez que tenemos una imagen podemos iniciar un contenedor de ella.
 
@@ -236,7 +236,7 @@ Si tenemos un contenedor corriendo y desde otra ventana de la terminal ejecutamo
 
 
 
-### `Dockerfile`
+## `Dockerfile`
 
 El archivo `Dockerfile` contiene instrucciones para construir la imagen, ya hemos visto algunas ahora repasaremos la lista completa:
 
@@ -253,7 +253,7 @@ El archivo `Dockerfile` contiene instrucciones para construir la imagen, ya hemo
 
 
 
-### Comando `FROM`
+## Comando `FROM`
 
 El comando `FROM` nos permite establecer la imagen base que podrá ser un sistema operativo como Linux o Windows o un OS + un entorno de ejecución (si somos desarrolladores JavaScript nos convendrá empezar por una imagen node). En [docs.docker.com/samples/](https://docs.docker.com/samples/) podemos encontrar ejemplos de `Dockerfile` para los distintos stacks tecnológicos. 
 
@@ -337,7 +337,7 @@ Luego podremos ejecutar `ls` y veremos todos los directorios de Linux o `node --
 
 
 
-### Comando `COPY`
+## Comando `COPY`
 
 El siguiente paso es copiar los archivos de la aplicación en la imagen y esto lo hacemos en el `Dockerfile` con las instrucciones `COPY` o `ADD`  (que tiene algunas características adicionales). Solo podremos copiar cosas del directorio de trabajo actual (donde tenemos el `Dockerfile`). Esto es así ya que cuando ejecutamos `docker build -t react-app .` **Docker Client** envía a **Docker Engine** el contenido de este directorio (*build context o directory context*) y comienza a ejecutar las instrucciones del `Dockerfile`.
 
@@ -390,7 +390,7 @@ COPY ["hello world.txt", "."]
 
 
 
-### Comando `ADD`
+## Comando `ADD`
 
 El comando `ADD` nos permite realizar lo mismo que con `COPY` y dos funciones extra:
 
@@ -414,7 +414,7 @@ Por último creamos la imagen e iniciamos un contenedor con esta imagen y veremo
 
 
 
-### `.dockerignore` 
+## `.dockerignore` 
 
 En el procedimiento anterior hemos copiado `node_modules` lo cual ocasiona que el *build context* sea bastante pesado (cercano a los 150 MB, cosa que vemos en el output del build donde dice *transferrring context*) aún en un proyecto que casi no tiene funcionalidades. A la hora del deployment veremos que el Docker Client debe hablar con un Docker Engine en otra máquina y transferir el contenido del build context por medio de la red. No es necesario transferir este directorio ya que en `package.json` tenemos definidas todas las dependencias y podremos reinstalarlas en la imagen de destino.
 
@@ -434,7 +434,7 @@ Como no tenemos la carpeta `node_modules` debemos ejecutar `npm install` cosa qu
 
 
 
-### Comando `RUN`
+## Comando `RUN`
 
 El comando `RUN` nos permitirá ejecutar cualquier comando y en nuestro caso lo usaremos para instalar las dependencias.
 
@@ -458,7 +458,7 @@ Luego creamos la imagen (y como parte del build se descargarán  e instalarán l
 
 
 
-### Comando `ENV`
+## Comando `ENV`
 
 El comando `ENV` nos permite setear variables de entorno.
 
@@ -484,7 +484,7 @@ Luego reconstruimos la imagen e iniciamos un nuevo contenedor.
 
 
 
-### Comando `EXPOSE`
+## Comando `EXPOSE`
 
 Cuando trabajamos con React.js de manera tradicional, ejecutamos `npm start` y luego vamos a `localhost:3000` para acceder a la aplicación. Cuando ejecutemos esta aplicación en un contenedor **el puerto estará abierto en el contenedor** pero no en el host. En la misma máquina podremos tener múltiples contenedores corriendo la misma imagen y todos ellos estarán escuchando en el puerto 3000. Veremos luego cómo mapear un puerto del host con un puerto del contenedor.
 
@@ -498,7 +498,7 @@ EXPOSE 3000
 
 
 
-### Comando `USER`
+## Comando `USER`
 
  Por default Docker ejecuta las aplicaciones con el usuario `root` que es el que tienen el nivel de privilegios más alto lo cual podría ocasionar agujeros de seguridad en nuestra aplicación. Debemos crear un usuario regular con privilegios limitados.
 
@@ -570,7 +570,7 @@ Si ejecutamos `ls -l` veremos que todos los archivos son de `root` y como somos 
 
 
 
-### Comando `CMD`
+## Comando `CMD`
 
 Normalmente para iniciar la aplicación desde el directorio de la aplicación ejecutamos `npm start`
 
@@ -677,7 +677,7 @@ CMD ["npm", "start"]
 
 
 
-### Comando `ENTRYPOINT`
+## Comando `ENTRYPOINT`
 
 El comando `ENTRYPOINT` es similar a `CMD` y tiene también la **shell form** y **execute form**:
 
@@ -697,7 +697,7 @@ En cambio para sobrescribir el `ENTRYPOINT` es necesario utilizar la opción`--e
 
 
 
-### Optimizar Builds
+## Optimizar Builds
 
 Cada vez que hacemos un cambio por más pequeño que sea debemos reconstruir la imagen y esto demora bastante tiempo, lo cual se debe principalmente a la instalación de las dependencias. 
 
@@ -742,9 +742,9 @@ La organización del `Dockerfile` para lograr la máxima optimización tiene que
 
 
 
-### Eliminar Imágenes
+## Eliminar Imágenes
 
-#### Eliminar Imagenes Colgadas
+### Eliminar Imagenes Colgadas
 
 Cuando ejecutamos `docker images` vemos algunas que tienen como nombre y como tag la palabra  `<none>` las cuales se originan en la medida que hacemos rebuilds de las imagenes. 
 
@@ -758,7 +758,7 @@ docker image prune
 
 
 
-> Para obtener ayuda sobre cualquiera de estos comandos `docker image prube --help`, `docker image save --help`, etc.
+> Para obtener ayuda sobre cualquiera de estos comandos `docker image prune --help`, `docker image save --help`, etc.
 >
 > 
 
@@ -794,7 +794,7 @@ docker image prune
 
 
 
-#### Eliminar Imágenes con Nombre
+### Eliminar Imágenes con Nombre
 
 Para eliminar una imagen podemos hacerlo con referenciando su nombre o su ID de imagen
 
@@ -808,7 +808,7 @@ docker image rm df3
 
 > En lugar de `rm` también podemos utilizar la palabra `remove`.
 
-### Etiquetar Imágenes
+## Etiquetar Imágenes
 
 Cuando hacemos un build (o rebuild) de una imagen o la bajamos de DockerHub, Docker le asigna automáticamente el tag `latest`, lo cual es simplemente una etiqueta, no significa que sea la versión más actual de la imagen.
 
@@ -830,7 +830,7 @@ docker images
 
 
 
-#### Etiquetado al crear imagen
+### Etiquetado en Creación
 
 Para etiquetar una imagen podemos hacerlo a la hora de crear la imagen:
 
@@ -866,7 +866,7 @@ docker image rm react-app:1
 
 
 
-#### Etiquetado luego de crearla
+### Etiquetado Posterior
 
 Debemos identificar la imagen que queremos etiquetar ya sea por su tag actual o por su ID.
 
@@ -884,7 +884,7 @@ docker image tag f4b react-app:1
 
 
 
-#### `latest` desactualizado
+### Etiqueta `latest` desactualizada
 
 Si tenemos una imagen con la etiqueta latest y luego creamos una nueva imagen con una etiqueta en particular puede que ejecutemos `docker images` y pensemos que la más actual es una distinta de la que realmente es. En ese caso debemos actualizarla manualmente añadiendole a la nueva la etiqueta `latest` del modo visto. Suponiendo que su ID comienza con `b06`:
 
@@ -894,7 +894,7 @@ docker image tag b06 react-app:latest
 
 
 
-### Compartir Imágenes
+## Compartir Imágenes
 
 Si queremos compartir las imagenes podemos hacerlo en un registro de Docker, el registro de Docker oficial como dijimos es DockerHub. Para trabajar con eso debemos tener una cuenta en [hub.docker.com](hub.docker.com) y luego debemos crear un repositorio que puede alojar múltiples imágenes.
 
@@ -986,9 +986,9 @@ docker image load --input react-app.tar
 
 
 
-## Contenedores
+# Contenedores
 
-### Iniciar Contenedores
+## Iniciar Contenedores
 
 Repamos a continuación algunos de los comandos usados hasta ahora. 
 
@@ -1016,7 +1016,7 @@ Luego de unos segundos tendremos el web-server corriendo pero no podremos ingres
 
 
 
-#### Contenedor en el *background*
+## Contenedor en el *background*
 
 También es posible ejecutar un contenedor en **modo dettached** (background), de esta manera tendremos la terminal libre y podremos hacer lo que queramos.
 
@@ -1036,7 +1036,7 @@ docker run -d --name blue-sky react-app
 
  
 
-### Logs
+## Logs
 
 De cara a los logs en los contenedores debemos tener presente que en la aplicación siempre debe escribir estos mensajes en *standard output* y no en un archivo. Esto es así para que puedan ser capturado por Docker y mostrarlos en pantalla. 
 
@@ -1064,7 +1064,7 @@ Con `docker logs --help` podremos ver las distintas opciones con las que podemos
 
 
 
-#### Log contínuo
+### Log contínuo
 
 Si tenemos un contenedor que está produciendo salidas permanentemente, en lugar de ejecutar `docker log 655` a cada rato, podemos utilizar la opción `-f` o `--follow`
 
@@ -1086,7 +1086,7 @@ docker logs -n 5
 
 
 
-#### Log con timestamps
+### Log con timestamps
 
 ```bash
 docker logs -t 655
@@ -1184,6 +1184,8 @@ El comando `docker stop` nos permite detener un contenedor:
 docker stop c1
 ```
 
+> Notar que no usamos la palabra container sino que está implícito.
+>
 > La aplicación de este comando podremos verificarla con `docker ps`
 >
 > Si queremos detener más de un contenedor podremos ingresar `docker stop 6ap 7io`
@@ -1271,7 +1273,7 @@ alli nuestra data, en cambio debemos utilizar **volúmenes**.
 
 
 
-## Volúmenes
+# Volúmenes
 
 Los volúmenes proporcionan un método de **almacenamiento por fuera de los contenedores**, puede ser en un directorio del host o en algún lugar de la nube.
 
@@ -1289,7 +1291,7 @@ docker volume
 
 
 
-### Creación de Volumen
+## Creación de Volumen
 
 Para crear un nuevo volumen llamado `app-data`
 
@@ -1299,7 +1301,7 @@ docker volume create app-data
 
 
 
-### Inspección de Volumen
+## Inspección de Volumen
 
 Para inspeccionarlo el volumen recién creado.
 
@@ -1331,7 +1333,7 @@ Veremos un objeto con las propiedades:
 
   
 
-### Iniciar contenedor con Volumen
+## Iniciar contenedor con Volumen
 
 Para iniciar un contenedor y pasarle este volumen para que guarde los datos en él, utilizamos la opción `-v app-data:/app/data` siendo `/app/data` un path absoluto en el filesystem del contenedor.
 
@@ -1349,7 +1351,7 @@ docker run -d -p 4000:3000 -v app-data:/app/data react-app
 
 
 
-### Ejemplo de Persistencia de Datos
+## Persistencia de Datos
 
 No es necesario haber creado el volumen de ante mano, si ponemos un volumen que no existe, Docker lo creará automáticamente, por ejemplo si en lugar de `app-data` que sí creamos ponemos `app-data2`
 
@@ -1463,7 +1465,7 @@ ls
 
 
 
-### Actualizar código en contenedor
+Actualizar código en contenedor
 
 El uso de volúmenes también nos permite en desarrollo  modificar el código de la aplicación al vuelo es decir que no tendremos que reconstruir la imagen, ni reiniciar el contenedor.
 
@@ -1505,9 +1507,9 @@ docker build -t react-app:v2 .
 
 
 
-## Copiar archivos entre host y contenedores
+# Copiar archivos entre host y contenedores
 
-### Copiar archivos del contenedor al host
+## Copiar archivos del contenedor al host
 
 Supongamos que en un contenedor tenemos un log que queremos analizar y para ello deseamos copiarlo al host.
 
@@ -1540,7 +1542,7 @@ Luego con `ls` podremos verificar que la operación fue exitosa.
 
  
 
-### Copiar archivos del host al contenedor
+## Copiar archivos del host al contenedor
 
 Suponemos tenemos un archivo `secret.txt` en el host que como no forma parte del sistema de control de versiones queremos copiarlo manualmente a un contenedor.
 
@@ -1564,60 +1566,7 @@ Donde con `ls` verificamos la existencia del archivo en cuestión.
 
 
 
-## Múltiples Contenedores
-
-Cuando tenemos servicios relacionados vamos a trabajar con más de un contenedor. Un ejemplo típico sería cuando tenemos un contenedor con una base de datos y otro que corre una aplicación que se conecta a esa base de datos. Estos dos contenedores van a interactuar.
-
-Esto lo implementaremos de dos formas la primera de ellas es creando una network y la segunda utilizando docker compose que se encarga de hacerlo por nosotros.
-
-Como dijimos lo primero que hacemos es crear una red de modo tal que ambos contenedores sean capaces de conectarse uno al otro.
-
-
-
-```bash
-docker network create todo-app
-```
-
-
-
-En primer lugar vamos a crear un contenedor para MySQL:
-
-```bash
-docker run -d \
---network todo-app --network-alias mysql \
--v todo-mysql-data:/var/lib/mysql \
--e MYSQL_ROOT_PASSWORD=secret \
--e MYSQL_DATABASE=todos \
-mysql:5.
-```
-
-> Con `--network-alias mysql` logramos que al apuntar al nombre `mysql` desde la aplicación resuelva la IP del contenedor. 
->
-> El resto de las configuraciones y variables de entorno son sugeridas por la imagen en DockerHub.
-
-
-
-Para ver el contenido de la base de datos
-
-```bash
-docker exec -it cca542... mysql -p
-```
-
-Luego nos pedirá la password y luego podremos ingresar los comandos deseados sobre la db, por ejemplo `show databases`.
-
-# **(MINUTO 52)**
-
-#### Docker Compose
-
-Docker Compose nos permite ejecutar de manera simple aplicaciones con múltiples contenedores. Como ejemplo consideramos una aplicación en la que tenemos front-end (React), back-end (Node.js) y base de datos (MongoDB).
-
-Docker Compose es una herramienta construida sobre la base de Docker Engine y en la actualidad para Windows y Mac viene incluida en Docker Desktop, lo cual podemos verificar con `docker-compose --version`. 
-
-> En caso de estar utilizando Linux tendremos que ir a https://docs.docker.com/compose/install/ y seguir las instrucciones de instalación.
-
-
-
-#### Limpieza del Espacio de Trabajo
+# Limpieza del Espacio de Trabajo
 
 Si queremos limpiar el espacio de trabajo y eliminar las imagenes y los contenedores que tengamos corriendo, primero podemos analizar ambos aspectos con:
 
@@ -1628,7 +1577,7 @@ docker ps
 
 
 
-##### Limpieza Manual de Imágenes
+## Limpieza Manual de Imágenes
 
 Luego para eliminar todas las imagenes, podríamos hacerlo ingresando uno a uno los IDs de la imagen.
 
@@ -1638,7 +1587,7 @@ docker image rm 123 321 111
 
 
 
-##### Limpieza Automática de Imágenes
+## Limpieza Automática de Imágenes
 
 Sin embargo existe una forma automática de hacerlo.
 
@@ -1695,6 +1644,67 @@ docker ps -a
 
 
 > Otra forma de hacerlo con Windows es hacer click derecho en el ícono de Docker, luego ir a **Settings**, hacer click en el ícono de **Troubleshoot** y luego click en **Clean/Purge data** que eliminará imagenes, contenedores, volúmenes, etc.
+>
+> 
+
+# Múltiples Contenedores
+
+Cuando tenemos servicios relacionados vamos a trabajar con más de un contenedor. Un ejemplo típico sería cuando tenemos un contenedor con una base de datos y otro que corre una aplicación que se conecta a esa base de datos. Estos dos contenedores van a interactuar.
+
+Esto lo implementaremos de dos formas la primera de ellas es creando una network y la segunda utilizando docker compose que se encarga de hacerlo por nosotros.
+
+Como dijimos lo primero que hacemos es crear una red de modo tal que ambos contenedores sean capaces de conectarse uno al otro.
+
+
+
+```bash
+docker network create stock-app
+```
+
+
+
+En primer lugar creamos el contenedor basado en la imagen de mongo:
+
+```
+docker run -dp 27018:27017 --network stock-app --network-alias db -v stock:/data/db mongo:4.0-xenial
+```
+> En Compass debemos conectarnos especificando `localhost:27018`
+
+Luego desde la carperta `backend` creamos la imagen e iniciamos un contenedor con dicha imagen:
+
+```
+docker build -t api:v1 .
+```
+
+```
+docker run -dp 3001:3001 --network stock-app -e MONGO_DB_URI=mongodb://db/stock -e PORT=3001 api:v1
+```
+Por último hacemos lo mismo desde la carpeta `frontend`
+```
+docker build -t web:v1 .
+```
+
+```
+docker run -dp 3000:3000 --network stock-app --network-alias web web:v1
+```
+
+
+
+De esta manera los distintos contenedores podrán comunicarse entre sí. 
+
+Para no tener que ingresar estos comandos manualmente a la hora ejecutar los tres contenedores y lograr un mantenimiento más simple podemos recurrir a una herramienta llamada Docker Compose.
+
+
+
+## Docker Compose
+
+Docker Compose nos permite ejecutar de manera simple aplicaciones con múltiples contenedores usando un sólo archivo y automáticamente los colocará en la misma red. 
+
+Docker Compose es una herramienta construida sobre la base de Docker Engine y en la actualidad para Windows y Mac viene incluida en Docker Desktop, lo cual podemos verificar con `docker-compose --version`. 
+
+Ahora como ejemplo consideramos una aplicación en la que tenemos front-end (React), back-end (Node.js) y base de datos (MongoDB).
+
+
 
 
 
@@ -1789,6 +1799,8 @@ version: "3.8"
 
 
 A continuación debemos definir los distintos bloques o servicios con los cuales le diremos a Docker como hacer cada una de las imágenes y cómo iniciar luego los contenedores.
+
+Debemos utilizar espacios y no tabulaciones pues de lo contrario no funcionará.
 
 ```yaml
 version: "3.8"
@@ -1931,7 +1943,7 @@ volumes:
 
 
 
-## Crear Imagenes
+## Crear Imágenes
 
 Como Docker Compose está hecho sobre Docker Engine, todo lo que hicimos anteriormente como crear imagenes, listarlas, iniciar contenedores con ellas, etc está disponible.
 
@@ -2031,7 +2043,7 @@ docker-compose down
 
 ## Docker Networking
 
-Cuando ejecutamos la aplicación Docker Compose crea automáticamente una red y agrega los contenedores a esa red.
+Como dijimos anteriormente cuando ejecutamos la aplicación Docker Compose crea automáticamente una red y agrega los contenedores a esa red.
 
 Esto lo podemos comprobar de la siguiente forma:
 
@@ -2233,7 +2245,7 @@ docker-compose up
 
 Obtendremos un error **sh: nodemon: not found** y esto se debe a que estamos copiando los archivos pero en el host no tenemos la aplicación instalada (si la teníamos instalada en el contenedor pero ahora estamos compartiendole el código por lo que verá exactamente lo mismo que en el host) por lo que no tenemos `node_modules`. Para solucionar esto navegamos a `cd backend` e instalamos la aplicación `npm i`
 
-En localhost:3001/api podremos acceder al backend. Si hacemos ahora algun cambio y actualizamos lo veremos actualizado.
+En `localhost:3001/api` podremos acceder al backend. Si hacemos ahora algún cambio y actualizamos lo veremos actualizado.
 
 Podemos aplicar la misma técnica para el frontend.
 
@@ -2241,9 +2253,53 @@ Podemos aplicar la misma técnica para el frontend.
 
 ## Migrando la Base de Datos
 
-Se conoce como *Database Migration* al hecho de tener la base de datos con algunos datos. Existen varias alternativas pero en nuestro caso hemos utilizado la heramienta __Migrate Mongo__ para crear un un *database migration script*. En `package.json` veremos que tenemos este paquete dentro de las `devDependencies`.
+Se conoce como *Database Migration* al hecho de tener la base de datos con algunos datos. Existen varias alternativas pero en nuestro caso hemos utilizado la heramienta __Migrate Mongo__ para crear un un *database migration script*. 
+
+En `package.json` veremos que tenemos este paquete dentro de las `devDependencies`.
+
+```
+npm install migrate-mongo --save-dev
+```
+
+Desde el directorio raíz ejecutamos
+
+```
+ .\node_modules\.bin\migrate-mongo init
+```
+
+Lo cual nos creará el directorio `migrations` y el archivo `migrate-mongo-config.js` en este último cambiamos las siguiente línea:
+
+```
+url: process.env.MONGO_DB_URI,
+```
+
+> La de `databaseName` la borramos ya que incluimos todo en la url.
+
+
+
+Luego de esto veremos que se creo el archivo `20210926031908-populate-locations.js`
+
+
+
+En `package.json` agregamos el siguiente script:
+
+```
+"db:up": "migrate-mongo up",
+```
+
+
+
+A continuación creamos el migration script:
+
+```
+.\node_modules\.bin\migrate-mongo create populate-locations
+```
+
+
 
 En el proyecto de `backend` dentro del directorio `migrations` almacenamos los migration scripts y dentro de `20210208213312-populate-movies` (notar que en el nombre tiene asociado un timestamp). Tenemos una función `up` para upgrading donde agregaremos elementos a la db y una `down` para downgrading donde los eliminaremos.
+
+Si analizamos el archivo `20210208213312-populate-movies.js`:
 
 ```js
 module.exports = {
@@ -2291,7 +2347,7 @@ Queremos que se ejecute la migración de la base de datos al iniciar la aplicaci
 CMD ["npm", "start"]
 ```
 
-Así como está se ejecutará el comando `npm start`. Para lograr hacer la migración antes de esto debemos modificar el archivo `docker-compose.yml` agregando la propiedad `command` dentro del servicio `api` acompañado del comando que deseamos ejecutar:
+Así como está se ejecutará el comando `npm start`. Para lograr hacer la migración antes de esto debemos modificar el archivo `docker-compose.yml` agregando la propiedad `command` dentro del servicio `api` acompañado del comando que deseamos ejecutar y lograremos que sobrescriba al comando especificado en el `Dockerfile`.
 
 ```bash
 command: migrate-mongo up && npm start
@@ -2333,7 +2389,7 @@ Sin embargo hay un problema con esta implementación ya que puede que el servido
 
 En estos casos debemos utilizar un *waiting script*. Para ello googleamos "docker wait for container" para acceder a un artículo titulado *Control startup and shutdown order in Compose* podremos encontrar las herramientas que nos permiten tener esta capacidad. Dentro de ellas utilizaremos **wait-for-it**, ingresando al repositorio podremos descargar el script `wait-for-it.sh`. Gracias a este script podremos esperar a que el motor de la db esté disponible antes de hacer algun trabajo.
 
-Incorporamos el archivo `wait-for` (lo estamos renombrando) dentro de la raíz del proyecto y colocamos:
+Incorporamos el archivo `wait-for` (no confundir con wait-for-it que no funciona con sh y en alpine nos dirá que debemos instalar bash) dentro de la raíz del proyecto y colocamos:
 
 `command: ./wait-for db:27017 && migrate-mongo up && npm start`
 
@@ -2549,7 +2605,7 @@ docker-machine create \
 vidly
 ```
 
-> Se trata de un comando largo, por eso lo dividimos en múltiples líneas (`\` en Linux o ``` en Windows donde deberíamos usar PowerShell para tal fin)
+> Se trata de un comando largo, por eso lo dividimos en múltiples líneas (`\` en Linux o ``` en Windows donde deberíamos usar PowerShell para tal fin o ^ en Cmder)
 >
 > En la documentación [docs.docker.com/machine/drivers](http://docs.docker.com/machine/drivers) podemos ver un ejemplo de uso para DigitalOcean donde indica que debemos poner`--driver digitalocean --digitalocean-access-token=aa9... nombre`. 
 >
@@ -2557,7 +2613,7 @@ vidly
 >
 > El access token lo debemos obtener de la DigitalOcean en el apartado API.
 >
-> En caso de obtener algun error y no poder instalar la versión más reciente de Docker Engine en el servidor ver la solución propuesta en [este](https://www.digitalocean.com/community/questions/unable-to-verify-the-docker-daemon-is-listening) enlace que básicamente consiste en agregar `--engine-install-url "https://releases.rancher.com/install-docker/19.03.9.sh" \`
+> En caso de obtener algún error y no poder instalar la versión más reciente de Docker Engine en el servidor ver la solución propuesta en [este](https://www.digitalocean.com/community/questions/unable-to-verify-the-docker-daemon-is-listening) enlace que básicamente consiste en agregar `--engine-install-url "https://releases.rancher.com/install-docker/19.03.9.sh" \`
 >
 > En último lugar le damos al servidor un nombre, en este caso `vidly`
 
@@ -2661,11 +2717,11 @@ EXPOSE 3000
 CMD ["npm","start"]
 ```
 
-En el `Dockerfile` que teníamos hasta el momento comenzabamos a partir de una imagen de node `FROM node:14.16.0-alpine3.13` para luego poder ejecutar npm y así instalar las dependencias con `npm install` pero si ya las tenemos simplemente debemos copiar los archivos en el web-server. Es por eso que debemos
+En el `Dockerfile` que teníamos hasta el momento comenzábamos a partir de una imagen de node `FROM node:14.16.0-alpine3.13` para luego poder ejecutar npm y así instalar las dependencias con `npm install` pero si ya las tenemos simplemente debemos copiar los archivos en el web-server. Es por eso que debemos
 
 Dentro del `Dockerfile` podremos tener múltiples *stages* o etapas (por ejemplo build-stage y production-stage) y agregamos la keyword `AS` para darle a cada *stage* esa etiqueta. El uso de etiquetas tiene sentido si luego queremos referenciar ese stage.
 
-Tabién podemos agregar comentarios con `#`
+También podemos agregar comentarios con `#`
 
 
 
