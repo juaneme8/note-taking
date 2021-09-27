@@ -1798,7 +1798,7 @@ version: "3.8"
 
 
 
-A continuación debemos definir los distintos bloques o servicios con los cuales le diremos a Docker como hacer cada una de las imágenes y cómo iniciar luego los contenedores.
+A continuación debemos definir los distintos bloques o servicios con los cuales le diremos a Docker como hacer cada una de las imágenes y cómo iniciar luego los contenedores. A todos estos contenedores los colocará dentro de la misma red
 
 Debemos utilizar espacios y no tabulaciones pues de lo contrario no funcionará.
 
@@ -1912,7 +1912,7 @@ services:
 
 
 
-No queremos que MondoDB escriba datos en el file system temporario del contenedor, es por eso que debemos utilizar un volumen.
+No queremos que MondoDB escriba datos sólo en el file system temporario del contenedor, es por eso que debemos utilizar un volumen así tendresmos persistencia.
 
 ```yaml
 version: "3.8"
@@ -1981,7 +1981,7 @@ Luego podremos ver que tenemos tres imagenes con:
 docker images
 ```
 
-> El nombre del directorio aparecerá como prefijo del nombre de las imagenes `vidly_api`, `vidly_web`, etc.  
+> El nombre del directorio en el cual tenemos el `docker-compose.yaml` como prefijo del nombre de las imágenes `vidly_api`, `vidly_web`, etc.  
 
 
 
@@ -2021,7 +2021,7 @@ docker-compose up -d
 
 
 
-* `ps` podremos ver todos los contenedores relacionados a esta aplicación
+* `ps` podremos ver todos los contenedores relacionados a esta aplicación.
 
 ```
 docker-compose ps
@@ -2133,14 +2133,14 @@ Estamos referenciando a `db` que es el nombre del host (o contenedor)
 
 
 
-> Debemos tener presente que el host `db` solo está disponible dentro del entorno de Docker, es decir que si desde el host ingresamos en localhost/db no obtendremos nada sino que podremos hacerlo a través de mapeo de puertos.
+> Debemos tener presente que el host `db` solo está disponible dentro del entorno de Docker, es decir que si desde el host ingresamos en `localhost/db` no obtendremos nada sino que podremos hacerlo a través de mapeo de puertos.
 
 ```
 ports:
-			- 27017:27017
+			- 27018:27017
 ```
 
-Es por eso que con Compass podremos conectarnos al contenedor teniendo como hostname **localhost** y como puerto **27017**.
+Es por eso que con Compass podremos conectarnos al contenedor teniendo como hostname **localhost** y como puerto **27018**.
 
 
 
@@ -2194,7 +2194,7 @@ docker logs 8c6 -f
 
 ## Publicar Cambios
 
-Nuevamente no queremos tener que reconstruir las imágenes cada vez que cambiamos el código por lo que otra vez vamos a mapear el directorio del proyecto (como por ejemplo `backend` y `frontend` en nuestro caso) al directorio `app` dentro del contenedor. Así nos aseguramos que los cambios realizados en el directorio del host sean vistos inmediatamnete en el directorio del contenedor. 
+Nuevamente no queremos tener que reconstruir las imágenes cada vez que cambiamos el código por lo que otra vez vamos a mapear el directorio del proyecto (como por ejemplo `backend` y `frontend` en nuestro caso) al directorio `app` dentro del contenedor. Así nos aseguramos que los cambios realizados en el directorio del host sean vistos inmediatamente en el directorio del contenedor. 
 
 
 
@@ -2207,6 +2207,8 @@ services:
 		build: ./frontend
 		ports:
 			- 3000:3000
+		volumes:
+			- ./frontend:/app
 	api:
 		build: ./backend
 		ports:
@@ -2227,13 +2229,13 @@ volumes:
 
 
 
-> Notar que estamos utilizando un **path relativo** a diferencia de antes que utilizamos un **path absoluto** cuando hicimos `docker run -v $(pwd)`
+> Notar que estamos utilizando un **path relativo** a diferencia de antes que utilizamos un **path absoluto** cuando hicimos:
+>
+> ```bash
+> docker run -d -p 5001:3000 -v $(pwd):/app react-app
+> ```
 >
 > También notar que estamos mapeando con la carpeta `/app` del contenedor (tendremos una en cada uno de los contenedores).
-
-```bash
-docker run -d -p 5001:3000 -v $(pwd):/app react-app
-```
 
 
 
@@ -2243,7 +2245,7 @@ Si ahora ejecutamos
 docker-compose up
 ```
 
-Obtendremos un error **sh: nodemon: not found** y esto se debe a que estamos copiando los archivos pero en el host no tenemos la aplicación instalada (si la teníamos instalada en el contenedor pero ahora estamos compartiendole el código por lo que verá exactamente lo mismo que en el host) por lo que no tenemos `node_modules`. Para solucionar esto navegamos a `cd backend` e instalamos la aplicación `npm i`
+Obtendremos un error **sh: nodemon: not found** y esto se debe a que estamos copiando los archivos pero en el host no tenemos la aplicación instalada (si la teníamos instalada en el contenedor pero ahora estamos compartiéndole el código por lo que verá exactamente lo mismo que en el host) por lo que no tenemos `node_modules`. Para solucionar esto navegamos a `cd backend` e instalamos la aplicación `npm i`
 
 En `localhost:3001/api` podremos acceder al backend. Si hacemos ahora algún cambio y actualizamos lo veremos actualizado.
 
@@ -2253,9 +2255,9 @@ Podemos aplicar la misma técnica para el frontend.
 
 ## Migrando la Base de Datos
 
-Se conoce como *Database Migration* al hecho de tener la base de datos con algunos datos. Existen varias alternativas pero en nuestro caso hemos utilizado la heramienta __Migrate Mongo__ para crear un un *database migration script*. 
+Se conoce como *Database Migration* al hecho de tener la base de datos con algunos datos. Existen varias alternativas pero en nuestro caso hemos utilizado la heramienta __Migrate Mongo__.
 
-En `package.json` veremos que tenemos este paquete dentro de las `devDependencies`.
+Instalamos este paquete como dependencia de desarrollo:
 
 ```
 npm install migrate-mongo --save-dev
@@ -2273,33 +2275,19 @@ Lo cual nos creará el directorio `migrations` y el archivo `migrate-mongo-confi
 url: process.env.MONGO_DB_URI,
 ```
 
-> La de `databaseName` la borramos ya que incluimos todo en la url.
-
-
-
-Luego de esto veremos que se creo el archivo `20210926031908-populate-locations.js`
-
-
-
-En `package.json` agregamos el siguiente script:
-
-```
-"db:up": "migrate-mongo up",
-```
-
-
+> Hay otra propiedad llamada `databaseName` pero en nuestro caso pusimos todo en `url` (la variable `MONGO_DB_URI` es `mongodb://db/stock`) por lo que la borramos.
 
 A continuación creamos el migration script:
 
 ```
-.\node_modules\.bin\migrate-mongo create populate-locations
+.\node_modules\.bin\migrate-mongo create populate-movies
 ```
 
+Luego de esto veremos que se creo el archivo `20210926031908-populate-movies.js`
+
+El archivo `20210208213312-populate-movies.js` como veremos a continuación tiene una función `up` para upgrading donde agregaremos elementos a la db y una `down` para downgrading donde los eliminaremos.
 
 
-En el proyecto de `backend` dentro del directorio `migrations` almacenamos los migration scripts y dentro de `20210208213312-populate-movies` (notar que en el nombre tiene asociado un timestamp). Tenemos una función `up` para upgrading donde agregaremos elementos a la db y una `down` para downgrading donde los eliminaremos.
-
-Si analizamos el archivo `20210208213312-populate-movies.js`:
 
 ```js
 module.exports = {
@@ -2325,19 +2313,13 @@ module.exports = {
 
 ```
 
+En `package.json` agregamos el siguiente script:
 
-
-Con el comando `migrate-mongo up` ejecutamos todos los *migration scripts* (en nuestro caso sólo tenemos uno) para cargar datos a la base de datos. Si lo ejecutamos mas de una vez no hará efecto ya que dentro de la DB tenemos una colección llamada `changelog` con los scripts que fueron ejecutados indicando su `fileName` y`appliedAt`.
-
-
-
-En `package.json` en el apartado de scripts podremos ver el siguiente alias:
-
-```js
+```json
 "db:up": "migrate-mongo up",
 ```
 
-Esto significa que podremos escribir `npm run db:up` y es lo mismo que poner `migrate-mongo up`
+Comando `migrate-mongo up` (o con `npm run db:up` ) ejecutamos todos los *migration scripts* para cargar datos a la base de datos. Si lo ejecutamos mas de una vez no hará efecto ya que dentro de la DB tenemos una colección llamada `changelog` con los scripts que fueron ejecutados indicando su `fileName` y `appliedAt` .
 
 
 
@@ -2347,10 +2329,10 @@ Queremos que se ejecute la migración de la base de datos al iniciar la aplicaci
 CMD ["npm", "start"]
 ```
 
-Así como está se ejecutará el comando `npm start`. Para lograr hacer la migración antes de esto debemos modificar el archivo `docker-compose.yml` agregando la propiedad `command` dentro del servicio `api` acompañado del comando que deseamos ejecutar y lograremos que sobrescriba al comando especificado en el `Dockerfile`.
+Así como está se ejecutará sólo el comando `npm start`. Para lograr hacer la migración antes de esto debemos modificar el archivo `docker-compose.yml` agregando la propiedad `command` dentro del servicio `api` acompañado del comando que deseamos ejecutar y lograremos que sobrescriba al comando especificado en el `Dockerfile`.
 
 ```bash
-command: migrate-mongo up && npm start
+command:  sh -c 'npm run db:up && npm start'
 ```
 
 
@@ -2387,11 +2369,13 @@ volumes:
 
 Sin embargo hay un problema con esta implementación ya que puede que el servidor de la base de datos no esté disponible al momento de ejecutar este comando (a pesar de que el contenedor esté corriendo puede que el motor de la base datos aún no esté disponible ya que suele tardar varios segundos). 
 
-En estos casos debemos utilizar un *waiting script*. Para ello googleamos "docker wait for container" para acceder a un artículo titulado *Control startup and shutdown order in Compose* podremos encontrar las herramientas que nos permiten tener esta capacidad. Dentro de ellas utilizaremos **wait-for-it**, ingresando al repositorio podremos descargar el script `wait-for-it.sh`. Gracias a este script podremos esperar a que el motor de la db esté disponible antes de hacer algun trabajo.
+En estos casos debemos utilizar un *waiting script*. Para ello googleamos "docker wait for container" para acceder a un artículo titulado *Control startup and shutdown order in Compose* podremos encontrar las herramientas que nos permiten tener esta capacidad. Dentro de ellas utilizaremos **wait-for-it**, ingresando al repositorio podremos descargar el script `wait-for-it.sh`. Gracias a este script podremos esperar a que el motor de la db esté disponible antes de hacer algún trabajo.
 
 Incorporamos el archivo `wait-for` (no confundir con wait-for-it que no funciona con sh y en alpine nos dirá que debemos instalar bash) dentro de la raíz del proyecto y colocamos:
 
-`command: ./wait-for db:27017 && migrate-mongo up && npm start`
+```
+command:  sh -c './wait-for db:27017 && npm run db:up && npm start'
+```
 
 > Esperará a tener tráfico en el puerto default de MongoDB que es el 27017.
 
@@ -2412,7 +2396,7 @@ services:
 			DB_URL: mongodb://db/vidly
 		volumes:
 			- ./backend:/app
-		command: ./wait-for db:27017 && migrate-mongo up && npm start
+		command: sh -c './wait-for db:27017 && npm run db:up && npm start'
 	db:
 		image: mongo:4.0-xenial
 		ports:
@@ -2472,7 +2456,7 @@ volumes:
 
 
 
-Queremos verificar que todo esto funcione, para ello primero ejecutamos `docker-compose down` con lo cual los contenedores se eliminan pero el volumen persiste. Para eliminarlo manualmente primero obtenemos su nombre con `docker volume ls` y luego lo borramos con `docker volume rm vidly_vidly` (nombreAplicación_nombreVolumen). Si ahora ejecutamos `docker-compose up` y vamos al endpoint que devuelve todas las películas localhost:3001/api/movies (o a Compass y revisamos esa colección) veremos que se ha hecho la database migration.
+Queremos verificar que todo esto funcione, para ello primero ejecutamos `docker-compose down` con lo cual los contenedores se eliminan pero el volumen persiste y a nosotros nos interesa borrarlo para chequear que se haga la migración. Para eliminarlo manualmente primero obtenemos su nombre con `docker volume ls` y luego lo borramos con `docker volume rm vidly_vidly` (nombreAplicación_nombreVolumen). Si ahora ejecutamos `docker-compose up` y vamos al endpoint que devuelve todas las películas `localhost:3001/api/movies` (o a Compass y revisamos esa colección) veremos que se ha hecho la database migration.
 
 
 
@@ -2691,10 +2675,6 @@ De manera similar debemos crear un archivo Docker Compose para los entornos de t
 
 Con el comando `docker images` podremos listar las imagenes y en la columna `SIZE` vemos su tamaño. En particular `vidly_web` que es el frontend realizado con React pesa 300MB y queremos reducir este tamaño. En `package.json` tenemos el script `build` que nos permite crear una optimización para producción. Luego de ejecutar `npm run build` tendremos una carpeta `build` con todos estos recursos. 
 
-> Aún en caso de que no utilicemos React la mayoría de los frameworks tienen una herramienta para lograr assets optimizados para producción.
-
-
-
 Una vez que tenemos la carpeta `build` debemos colocar estos recursos dentro del web server y servirlos. Para ello debemos crear una imagen optimizada.
 
 
@@ -2745,9 +2725,9 @@ ENTRYPOINT ["nginx","-g","daemon off;"]
 
 > Para el build no necesitamos el usuario sino para servir la aplicación
 >
-> Reemplazamos el comando `CMD` por `RUN` ya que sólo podemos tener un default command para cuando el contenedor inicia.
+> Reemplazamos el comando `CMD` por `RUN` ya que sólo podemos tener un único default command para cuando el contenedor inicia.
 >
-> Para producción no necesitamos Node por eso comenzamos a partir de un web  server (nginx, apache, etc). En nuestro caso utilizamos `nginx:1.12-alpine`
+> Para producción no necesitamos Node por eso comenzamos a partir de un web server (nginx, apache, etc). En nuestro caso utilizamos `nginx:1.12-alpine`
 >
 > Notar que no hemos hecho `FROM nginx:1.12-alpine AS production-stage` ya que no teníamos pensado utilizar la etiqueta `production-stage` para referenciarlo.
 >
@@ -3057,3 +3037,4 @@ volumes:
 Para hacer el rebuild ejecutamos `docker-compose -f docker-compose.prod.yml up -d --build`
 
 > Tendríamos que modificar este número manualmente cada vez que hagamos un deploy, es por eso que utilizamos herramientas de CI/CD que se encargan de esto. Estas herramientas automatizarán este proceso fijándose en el repositorio la versión más reciente del código en GitHub, construirán la imagen y la etiquetarán de acuerdo al número de build o en base al último commit.
+
