@@ -1,7 +1,7 @@
 ## Clases
 Las clases en TS son similares a las clases en JS, se trata de un *blueprint* de un objeto. 
 
-En `src` reamos una carpeta `classes`, dentro un archivo `Invoices.ts` Creamos un `constructor` para inicializar las variables con el valor recibido al instanciar el objeto y un método `format()` que retorna un mensaje con las propiedades.
+En `src` creamos una carpeta `classes`, dentro un archivo `Invoices.ts` Creamos un `constructor` para inicializar las variables con el valor recibido al instanciar el objeto y un método `format()` que retorna un mensaje con las propiedades.
 ```ts
 class Invoice {
 	client: string;
@@ -37,4 +37,4 @@ invoices.push(invOne);
 invoices.push(invTwo);
 ```
 
-Por default cuando creamos objetos usando clases todas las propiedades son publicas, por lo que podremos modificarlas haciendo por ejemplo `invOne.client='yoshi';` (siempre respetando el tipo de dato indicado anteriormente).
+Por default cuando creamos objetos usando clases todas las propiedades son públicas, por lo que podremos modificarlas haciendo por ejemplo `invOne.client='yoshi';` (siempre respetando el tipo de dato indicado anteriormente).

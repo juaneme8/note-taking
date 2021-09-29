@@ -211,7 +211,7 @@ let result = minus(5, 1);
 
 TypeScript infiere que `result` es de tipo `number` (lo podemos chequear colocando el mouse por encima) y si intentamos cambiarle el tipo obtendremos un error.
 
-También es posible indicar explícitamente el tipo de valor retornado. Si bien esto no es necesario porque TypeScript lo infiere de manera automática pero en ocasiones puede resultar conveniente usarlo para indicarle a otros developers el tipo de valor devuelto por una función de magnitud.
+También es posible indicar explícitamente el tipo de valor retornado. Si bien esto no es necesario porque TypeScript lo infiere de manera automática pero en ocasiones puede resultar conveniente usarlo a modo de documentación para indicarle a otros developers el tipo de valor devuelto.
 ```ts
 const minus = (a: number, b: number): number => {
 	return a - b;
@@ -220,5 +220,5 @@ const minus = (a: number, b: number): number => {
 let result = minus(5, 1);
 ```
 
-La función `add` descripta anteriormente retorna `void` lo cual podemos ver al pasar el mouse por encima de la palabra add veremos lo siguiente:
-`const add : (a: number, b: number, c?: number | string) => void`
+La función `add` descripta anteriormente retorna `void` lo cual podemos ver al pasar el mouse por encima de la palabra `add` veremos lo siguiente:
+`const add : (a: number, b: number, c?: number | string) => void` como veremos más adelante esto se trata de una **Function Signature**

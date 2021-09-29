@@ -25,4 +25,5 @@ console.log(anchor.href);
 ```
 
 Una ventaja de usar TS para interactuar con el DOM es que tiene tipos específicos para cada elemento html, si al hacer `const anchor = document.querySelector('a');` pasamos el mouse por encima de `anchor` veremos `const anchor: HTMLAnchorElement | null` y si ponemos el signo `!` como dijimos anteriormente veremos solo `const anchor: HTMLAnchorElement `.
+
 Gracias a esto el Intellisence nos ayudará a la hora de sugerirnos los métodos y propiedades apropiados para ese elemento.

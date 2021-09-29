@@ -51,13 +51,14 @@ logDetails = (ninja: { name: string; age: number }) => {
 };
 
 ```
-Si bien el nombre del parámetro recibido podemos cambiarlo por cualquier otro, las propiedades deberán respetar ese nombre `name` y `age`
+Si bien el nombre del parámetro recibido (que es un objeto) podemos cambiarlo por cualquier otro, las propiedades deberán respetar ese nombre `name` y `age`.
 
-También es posible utilizar type aliases y así mismo satisfacer la function signature
+También es posible utilizar **type aliases** y así mismo satisfacer la **function signature**.
 ```ts
 let logDetails: (obj: { name: string; age: number }) => void;
 
 type person = { name: string; age: number };
+
 logDetails = (ninja: person) => {
 	console.log(`${ninja.name} is ${ninja.age} years old`);
 };

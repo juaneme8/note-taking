@@ -1,4 +1,4 @@
-### Modificadores
+## Modificadores
 El comportamiento default es equivalente a si tuviéramos el modificador de acceso `public` antes de cada propiedad.
 ```ts
 class Invoice {

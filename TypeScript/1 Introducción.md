@@ -5,6 +5,8 @@
 # Introducción
 TypeScript es un **lenguaje de programación** creado por Microsoft construido encima de JavaScript y se lo conoce como un **superset de JavaScript** que extiende a ese lenguaje con nuevas características y sintaxis. Cualquier código de JavaScript es código TypeScript, por lo que pueden convivir en un mismo proyecto
 
+Una herramienta interesante es el siguiente [TypeScript Playground](https://www.typescriptlang.org/play) donde podremos ejecutar código TS y probar en la medida que vamos aprendiendo.
+
 Los navegadores por default no entienden TypeScript por lo que tendremos que **compilar** dicho código para convertirlo en JavaScript. 
 
 Una de las características de TypeScript es que nos permite usar **strict types** (a diferencia de JavaScript que usa dynamic types) es decir que añade un sistema de tipos por lo que si determinamos que una variable es de un determinado tipo (por ejemplo `number`) luego esta no podrá ser otro tipo. De esta manera nos obliga a escribir un **código más limpio y menos propenso a errores** y además **se simplifica el proceso de debugging**.

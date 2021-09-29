@@ -29,7 +29,6 @@ Podremos acceder al `form`, al `select` y al `input` de la siguiente forma:
 const form = document.querySelector('.new-item-form') as HTMLFormElement;
 const service= document.querySelector('#service') as HTMLSelectElement;
 const tofrom = document.querySelector('#tofrom') as HTMLInputElement;
-const amount = document.querySelector('#amount ') as HTMLInputElement;
 ```
 
 
@@ -43,4 +42,4 @@ form.addEventListener('submit', (e: Event) => {
 });
 ```
 
-A la hora de mostrar los valores si tenemos un input cuyo `type="number"` podríamos usar `.valueAsNumber` para obtener el número en lugar de `.value` que nos lo mostraría como string.
+> A la hora de mostrar los valores de un input con `type="number"` podríamos usar `.valueAsNumber` para obtener el número en lugar de `.value` que nos lo mostraría como string.

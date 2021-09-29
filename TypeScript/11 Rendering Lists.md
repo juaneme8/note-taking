@@ -1,35 +1,3 @@
-
-10 Rendering Lists
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-````
 ## Rendering Lists
 
 Creamos una nueva clase que utilizaremos para mostrar los elementos en pantalla. Esta clase en su constructor recibe un `<ul>` y cuenta con el método `render()` que recibe `item` que es un objeto implementado con la interface `HasFormatter`, `heading` que es un título y `pos` que puede valer `start` o `end` (se trata de un **union type**) e indica si queremos insertar el elemento al comienzo o al final 
@@ -71,12 +39,3 @@ const ul = document.querySelector('ul')!;
 const list = new ListTemplate(ul);
 list.render(doc, type.value,'end');
 ```
-````
-
-
-
-
-
-Markdown 1491 bytes 200 words 37 lines Ln 1, Col 0
-
-HTML 1173 characters 195 words 26 paragraphs

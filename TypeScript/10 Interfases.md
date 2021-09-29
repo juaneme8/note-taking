@@ -1,5 +1,5 @@
 ## Interfaces
-Las interfaces nos permiten hacer cumplir una cierta estructura para una clase o un objeto pudiendo establecer las propiedades y sus tipos, los métodos y sus valores que retornan. Es diferente a una clase ya que no lo usamos para generar objetos sino para establecer los lineamientos que una clase u objeto deben tener.
+Las interfaces nos permiten hacer cumplir una cierta estructura para una clase o un objeto pudiendo establecer las propiedades y sus tipos, los métodos y sus valores que retornan. **Es diferente a una clase ya que no lo usamos para generar objetos sino para establecer los lineamientos que una clase u objeto deben tener**.
 ```ts
 interface IsPerson {
 	name: string;
@@ -23,7 +23,7 @@ const me: IsPerson = {
 	},
 };
 ```
-Los tipos retornados no es necesario ponerlos explícitamente ya que TS se dará cuenta sin la necesidad de que los pongamos.
+Como ya dijimos los tipos retornados no es necesario ponerlos explícitamente ya que TS se dará cuenta sin la necesidad de que los pongamos.
 
 Es posible declarar una variable que luego deberá respetar la estructura de la interface.
 
