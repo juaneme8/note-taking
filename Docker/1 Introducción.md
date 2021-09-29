@@ -436,7 +436,7 @@ Como no tenemos la carpeta `node_modules` debemos ejecutar `npm install` cosa qu
 
 ## Comando `RUN`
 
-El comando `RUN` nos permitirá ejecutar cualquier comando y en nuestro caso lo usaremos para instalar las dependencias.
+El comando `RUN` nos permitirá ejecutar cualquier comando **al momento de construir la imagen** y en nuestro caso lo usaremos para instalar las dependencias.
 
 Por lo que en el `Dockerfile` agregamos:
 
@@ -572,9 +572,9 @@ Si ejecutamos `ls -l` veremos que todos los archivos son de `root` y como somos 
 
 ## Comando `CMD`
 
+Con el comando `CMD` especificamos el comando **por defecto** que se ejecuta cuando corremos el contenedor.
+
 Normalmente para iniciar la aplicación desde el directorio de la aplicación ejecutamos `npm start`
-
-
 
 Como ya tenemos la imagen, para iniciar el contenedor en este caso no utilizaremos el modo interactivo porque no queremos interactuar (correr una sesión de shell) con el contenedor, sino que queremos en cambio ejecutar ese comando
 
@@ -657,7 +657,7 @@ docker run react-app
 
 
 
-> Si bien es posible ejecutar comandos tanto con `RUN` como con `CMD`, tienen la diferencia que `RUN` es ejecutada durante *build-time* es decir mientras estamos construyendo la imagen y `CMD` durante *run-time es decir al iniciar el contenedor.
+> Si bien es posible ejecutar comandos tanto con `RUN` como con `CMD`, tienen la diferencia que `RUN` es ejecutada durante *build-time* es decir mientras estamos construyendo la imagen y `CMD` durante *run-time* es decir al iniciar el contenedor.
 
 
 
@@ -677,9 +677,21 @@ CMD ["npm", "start"]
 
 
 
+Este comando puede ser sobrescrito fácilmente si le otro comando como argumento, por ejemplo
+
+```
+docker run -it react-app sh
+```
+
+En este caso no ejecutará `npm start`sino que ejecutará `sh`.
+
+Como veremos a continuación con `CMD` más simple sobrescribir el comando default de hecho esto es lo que hacemos por ejemplo cuando ejecutamos `docker run -it react-app sh`. Debemos utilizar `CMD` cuando queremos tener flexibilidad de que podremos sobrescribir el comando.
+
 ## Comando `ENTRYPOINT`
 
-El comando `ENTRYPOINT` es similar a `CMD` y tiene también la **shell form** y **execute form**:
+El comando `ENTRYPOINT` es similar a `CMD` , **también se ejecuta cuando inicia el contenedor** y tiene también la **shell form** y **execute form**. 
+
+
 
 ```dockerfile
 ENTRYPOINT npm start
@@ -689,13 +701,21 @@ ENTRYPOINT npm start
 ENTRYPOINT ["npm", "start"]
 ```
 
-La diferencia está en que es más simple sobrescribir el comando default (es decir el invocado con `CMD`) de hecho esto es lo que hacemos por ejemplo cuando ejecutamos `docker run -it react-app sh`. Debemos utilizar `CMD` cuando queremos tener flexibilidad de que podremos sobrescribir el comando.
-
-En cambio para sobrescribir el `ENTRYPOINT` es necesario utilizar la opción`--entrypoint` . 
+La diferencia está en que `ENTRYPOINT` está pensado para no sobrescribir el comando sino que nos permitirá pasarle argumentos a dicho comando.
 
 `ENTRYPOINT` nos permite dejar abierto un comando para después pasarle argumentos. Podríamos tener `ENTRYPOINT ["node"]` y luego al hacer `docker run` deberíamos pasarle como argumento el archivo que queremos que ejecute. Esto es útil en caso de que tengamos varios binarios.
 
+```dockerfile
+ENTRYPOINT ["node"]
+```
 
+Luego especificamos el archivo que queremos pasarle como argumento a `node`
+
+```
+docker run react-app index.js
+```
+
+En caso de que qusiéramos sobrescribir el `ENTRYPOINT` sería necesario utilizar la opción`--entrypoint` . 
 
 ## Optimizar Builds
 
@@ -2570,7 +2590,7 @@ Para deployar la aplicación necesitamos un VPS (*virtual private server*), exis
 
 Una vez que tenemos el servidor debemos contar con **Docker Machine** para comunicarnos con Docker Engine de ese servidor desde el entorno de desarrollo. De esta manera podremos ejecutar comandos Docker en la terminal y serán enviados al Docker Engine del servidor.
 
-En [github.com/docker/machine/releases](github.com/docker/machine/releases) podremos descargar la versión actual.
+En [github.com/docker/machine/releases](http://github.com/docker/machine/releases) podremos descargar la versión actual.
 
 Para verificar que la instalación fue exitosa:
 

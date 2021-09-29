@@ -14,14 +14,16 @@ Otra característica es que podremos utilizar **modern features** como *arrow fu
 Por último TypeScript incluye características extra como ser **generics**, **interfaces**, **tuples**, etc.
 
 # Instalación
-Por más que trabajemos con TypeScript a la hora de deployar el código deberá ser JavaScript puro por lo que necesitaremos un compilador.
+Debemos instalar un compilador que lleve a cabo la tarea de compilar el código TypeScript de manera de convertirlo en código JavaScript que será lo que finalmente vamos a deployar.
 
 ```bash
 npm install -g typescript 
 ```
-Otra opción es instalarlo como dependencia de desarrollo con `npm install typescript --save-dev`
+> Otra opción es instalarlo como dependencia de desarrollo con `npm install typescript --save-dev`. Es una buena práctica utilizar esta opción ya que así cualquier persona que clone nuestro repositorio podrá tener noción de las dependencias utilizadas.
 
-# Compilar `.ts`
+
+
+## Compilar `.ts`
 Al trabajar con TypeScript los archivos deben tener la extensión `.ts` (`tsx` al trabajar con React) , supongamos que creamos el archivo `sandbox.ts`  de modo que para compilarlo y obtener `sandbox.js` debemos ejecutar `tsc sandbox.ts`
 
 En cambio si quisiéramos que el archivo de salida tuviera otro nombre podemos hacerlo hacerlo con: `tsc sandbox.ts output.js`

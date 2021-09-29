@@ -28,6 +28,8 @@ Si definimos un array como `let names=['luigi','mario','yoshi']` sólo nos dejar
 
 De la misma manera que fijamos el tipo de datos dentro del `array`, tampoco podremos cambiar el tipo de la variable `names = 'hola'` para que esta deje de ser un `array` y se convierta a un `string`
 
+Es decir que estamos fijando tanto el tipo de dato de la variable para que sea un array y el tipo de elementos que almacena dicho array.
+
 Si queremos trabajar con **array con contenido mixto** podemos declararlo inicialmente con contenido de los distintos tipos deseados, por ejemplo `mixed = ['luigi',3,'mario']` y luego TypeScript está al tanto de que queremos poder agregar contenido tanto de números como de strings `mixed.push(10); mixed.push('yoshi')`. Siendo incluso posible modificar por un `string` una posición ocupada por un `number` o viceversa: `mixed[0] = 3`
 
 ## Objectos
@@ -38,11 +40,13 @@ let ninja = {
 	age: 30,
 };
 ```
-A la hora de definir un objeto las propiedades actúan del mismo modo que las variables, es decir que si tengo `name: 'mario'` esta propiedad sólo aceptará `string`, por lo que si hago `ninja.age = '30'` obtengo un error dado que debe ser un `number` y no un `string`.
+Esta variable siempre deberá ser un objeto, pero sí podemos hacer que este sea un nuevo objeto
+
+Las propiedades actúan del mismo modo que las variables, es decir que si tengo `name: 'mario'` esta propiedad sólo aceptará `string`, por lo que si hago `ninja.age = '30'` obtengo un error dado que debe ser un `number` y no un `string`.
 
 Tampoco es posible definir nuevas propiedades que no existían al definir el objeto en primer lugar.
 
-A su vez de manera similar a lo visto anteriormente `ninja` siempre será un objeto. Pero sí podemos hacer que este sea un nuevo objeto
+
 ```ts
 ninja = {
 	name: 'yoshi',
@@ -65,7 +69,8 @@ La variable `character` será inicializada, no le dará un valor pero en un futu
 En el caso de querer trabajar con un `array` de `string`:
 ```ts
 let ninjas: string[];
-// ninjas = [1, 2]; //nos tira error
+// ninjas = [1, 2]; // Error (Type 'number' is not assignable to type 'string'.)
+// ninjas.push('mario') // Eror ('ninjas' is used before being assigned)
 ninjas = ['mario', 'luigi']; //ok
 ```
 
@@ -81,7 +86,7 @@ mixed.push('hello');
 mixed.push(20);
 //mixed.push(false); //error
 ```
-**NOTA:** Los paréntesis sólo hacen falta al estar adelante de una array.
+> Los paréntesis al hacer uniones de tipos sólo hacen falta al estar adelante de un array.
 
 Las uniones de tipo también pueden ser usadas en variables normales, por ejemplo:
 ```ts
@@ -138,7 +143,7 @@ let obj2: {name:any, age:any}
 
 ## Funciones
 ### Tipo de función inferido
-Cuando creamos una función y la almacenamos en una variable, TypeScript inferirá que de ahora en más sólo debe poder almacenar en ella funciones por lo que si intentamos almacenar otro tipo de dato nos dará error.
+Cuando creamos una función y la almacenamos en una variable, de la misma vista para los otros tipos de datos TypeScript inferirá que de ahora en más sólo debe poder almacenar en ella funciones por lo que si intentamos almacenar otro tipo de dato nos dará error.
 ```ts
 let greet = () => {
 	console.log('hello, world!');
