@@ -262,4 +262,5 @@ A la hora de documentar las rutas podemos hacer lo siguiente:
 ```js
 @route POST /api/url/shorten
 @desc Create short URl
+
 ```
