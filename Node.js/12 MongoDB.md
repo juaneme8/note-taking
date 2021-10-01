@@ -10,19 +10,27 @@ Los  datos se guardan en **tablas**. Una tabla es un conjunto de entradas de dat
 El término NoSQL (*not only SQL* o **no solo SQL**) hace referencia a bases de datos que trabajan con colecciones y documentos. 
 
 # MongoDB
-Dentro de las bases de datos NoSQL, probablemente una de las más famosas sea MongoDB. Es un **DBMS** (database management system) muy popular y es usado habitualmente en aplicaciones con Node.js y Express. Como en MongoDB almacenamos objetos (JSON)  en una colección, cuando hacemos el query obtenemos un objeto (JSON) y luego retornamos este objeto (JSON)  al cliente.
+Dentro de las bases de datos NoSQL, probablemente una de las más famosas sea MongoDB. Es un **DBMS** (database management system) muy popular y es usado habitualmente en aplicaciones con Node.js y Express. Como en MongoDB almacenamos objetos (similares a JSON pero que en realidad son binarios BSON)  en una colección, cuando hacemos el query obtenemos un objeto (JSON) y luego retornamos este objeto (JSON)  al cliente.
 
-Las **colecciones** son similares a las tablas y los **documentos** son similares a los registros (*records*) en una arquitectura SQL. Los documentos tienen una apariencia JSON (JavaScript Object Notation) es decir *key/value pairs*.  Contamos con una propiedad *unique id* llamada **_id** la cual es autogenerada.
+MondoDB  tiene **escalabilidad horizontal**, dado que podremos agregar más máquinas(a diferencia de lo que ocurre en un RDBMS donde para mejorar el rendimiento debemos adquirir una máquina más potente, lo que se conoce como escalabilidad vertical).
+
+En MongoDB en lugar de tener relaciones (cosa que podríamos hacer manualmente) lo que haremos será duplicar o triplicar datos cuando corresponda.
+
+Las **colecciones** son similares a las tablas y los **documentos** son similares a los registros (*records*) en una arquitectura SQL. Los documentos tienen una apariencia JSON (JavaScript Object Notation) es decir *key/value pairs*.  Esta similitud hace que sea la opción más elegida cuando se hace backend con JavaScript.
+
+Contamos con una propiedad *unique id* llamada **_id** la cual es autogenerada.
 
 Desde nuestro código podremos conectarnos a una colección en MongoDB para guardar, leer, actualizar o eliminar documentos.
 
-## Setup en PC
-### Explicación 2021
->> Ver capturas en word Capturas MongoDB.docx
+Para la visualización de los datos de la base de datos podemos utilizar Compass, Robo 3T, etc.
+
+## Aplicación de Escritorio
+
+>Capturas en MongoDB.docx
 
 Ir a `C:\Program Files\MongoDB\Server\4.4\bin` y luego escribir en la barra de direcciones cmd para abrir la terminal en esa ruta. Luego ejecutar `mongo --version`  para obtener la versión recientemente instalada. Si intentamos hacer lo mismo desde otra ruta nos dirá:
 
->> mongo' is not recognized as an internal or external command,operable program or batch file. Es por esto que debemos asignar la variable de entorno **PATH**.
+>mongo' is not recognized as an internal or external command,operable program or batch file. Es por esto que debemos asignar la variable de entorno **PATH**.
 
 Ejecutar (`WIN+R`)  `sysdm.cpl` para ir a `Propiedades del Sistema`. Una vez allí ir a `Opciones avanzadas`, luego `Variables de entorno` y en la parte inferior en `Variables del sistema` seleccionar `Path`, click en `Editar` y luego `Nuevo` y pegar la ruta que contiene el MongoDB Server:  `C:\Program Files\MongoDB\Server\4.4\bin`
 
@@ -32,20 +40,28 @@ Para conectar la terminal con MongoDB ejecutamos `mongo` veremos nuestra direcci
 
 * `show dbs` para ver las bases de datos instaladas por default. 
 * `use myFirstDB` para crear una nueva base de datos.
-* `db.students.insert({"FirstName":"Juan"})` para crear una colección especificamos el valor en formato JSON.
+* `db.createCollection('posts')` por convención las colecciones se crean en plural.
+* `db.students.insert({"name":"Juan"})` para crear una colección y a su vez insertar un documento en ella.
 * `show collections` para ver todas las colecciones de esa db.
 * `db.studends.find()` para ver todos las entradas de esa colleción.
+* `db.studends.find({"name":"Juan"})` para ver los estudiantes con ese nombre en la colección.
+* `db.students.update({"name: "Juan"}, {$set:{"user":"@j8"}})` como queremos conservar el docuemento original y cambiar sólo el campo `user` debemos utilizar `$set`. Si hiciéramos directamente `db.students.update({"name: "Juan"}, {"user":"@j8"})` perderíamos todos los campos que teníamos en ese documento.
 
-# Pre 2021
+### Not Existing Path
+
 Ejecutar en la consola `mongod` deberíamos ver un mensaje largo que al final dice `Not existing path`, por lo tanto para crearlo `md C:\data\db`. Luego volvemos a ejecutar `mongod` y no obtenemos la excepción sino que queda a la espera de conexiones.
 
 A continuación en MongoDB Compass, `New Connection` y por último `Connect` (dejamos los valores default de localhost/27017)
 
 > Si ya tenemos mongodb instalado y queremos saber qué versión tenemos ejecutar en la consola `mongod --version`. En caso de querer actualizar podemos seguir los mismos pasos. Una vez completado el proceso en MongoDB Compass no veremos los datos de la base de datos que teníamos sino sólo las que mongo utiliza para sus tareas.
 
-## Setup en la Nube
-En lugar de instalarlo en la PC, es posible usar un servicio en la nube como [MondoDB Atlas](https://www.mongodb.com/cloud/atlas).
+## MongoDB Atlas
+En lugar de instalarlo en la PC, es posible usar un servicio en la nube como [MondoDB Atlas](https://www.mongodb.com/cloud/atlas) que cuenta con un free tier.
 Lo primero que hacemos es crear un **cluster** elegimos el plan gratis, luego el provedor y región (dejar los valores default) y le asignamos un nombre. Luego de unos minutos lo creará.
+
+Un cluster es un set de servidores los cuales estan dispuestos a almacenar las bases de datos. Maneja una serie de réplicas de modo tal que si el servidor primario falla es posible utilizar otro secundario como primario sin pérdidas de información. 
+
+Esta implementación tiene la ventaja que desde el primer momento seremos conscientes de lo que tendremos que hacer para producción en términos de tener que contemplar la seguridad, por ejemplo poniendo contraseña.
 
 Podemos crear la base de datos y la colección yendo a **Collections** y luego a **Add My Own Data**.
 
@@ -58,39 +74,34 @@ Luego vamos a **Connect**, seleccionamos **Connect your Application** y luego co
 
 Debemos reemplazar  \*\*\<username>\*\* por el usuario , \*\*\<password>** por la contraseña definidos anteriormente y \*\*\<dbname>** por el nombre de la base de datos (en caso de que no exista la creará).
 
+
+
+En la parte de Network Access debemos especificar las direcciones IP desde las cuales se puede acceder al clúster. Si queremos que sea accesible desde cualquier IP debemos poner `0.0.0.0`, de todos modos hay otras formas de aportar seguridad a la base de datos. En el caso de producción con un servidor propio, sabremos la IP y podemos especificarla ahí. Distinto será si vamos a deployar en Heroku pues no sabemos la IP.
+
+# MongoDB y Express:
+En las aplicaciones Express podremos trabajar con SQL Server, MySQL, MongoDB, etc sólo será cuestión de cargar el driver de Node.js apropiado.
+
+
+
+## Driver Oficial MongoDB
+
 Si bien podríamos conectarnos y realizar queries utilizando la API standard de MondoDB (`npm install mongodb` y luego `const MongoClient=require('mongodb').MongoClient) `por motivos de simplicidad utilizaremos **mongoose** que está construído sobre `MongoClient`.
 
 Para almacenar el URI podemos crear un archivo `.env.local` en el cual ponemos:
 `MONGO_URI=mongodb+srv://**<username>**:**<password>**@cluster0-niujt.mongodb.net/**<dbname>**?retryWrites=true&w=majority`
 
-# MongoDB y Express:
-En las aplicaciones Express podremos trabajar con SQL Server, MySQL, MongoDB, etc sólo será cuestión de cargar el driver de Node.js apropiado.
 
-Más información en: [https://expressjs.com/en/guide/database-integration.html](https://expressjs.com/en/guide/database-integration .html).
 
-Trabajaremos con **MongoDB** mediante el paquete **Mongoose**.
+## Mongoose
 
-Supongamos que tenemos una colección como la siguiente:
-```json
-{
-"_id": ObjectId(12345),
-"title": "Opening Party",
-"snippet": "all about the...",
-"body": "blah blah blah..."
-}
-```
-Desde nuestro código podremos conectarnos a esa colección en MongoDB para guardar, leer, actualizar o eliminar documentos.
+Mongoose es una **ODM Library** (object document mapping) y eso significa que toma la API standard de MongoDB y proporciona un modo mucho más simple de comunicarnos con la base de datos. Esto lo logra permitiéndonos crear **modelos de datos** con los cuales accedemos a métodos para crear, listar, actualizar y eliminar documentos.
 
-# Mongoose
-Mongoose es una **ODM Library** (object document mapping) y eso significa que toma la API standard de MongoDB y proporciona un modo mucho más simple de comunicarnos con la base de datos. Esto lo logra permitiéndonos crear **modelos de datos** con los cuales accedemos a métodos para crear, listar, actualizar y eliminar documentos. 
-
-## Instalación Mongoose
 ```bash
  npm install mongoose
 ```
 
 ## Conexión a Mongoose
-### Modo 1:
+### Modo 1
 Si colocamos simplemente `mongoose.connect(dbURI)` obtendremos un deprecation warning por lo que le agregamos un segundo argumento que es un options object: `mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })` como se trata de una tarea asincrónica que toma cierto tiempo en realizarse y retorna una promesa.
 
 Como queremos que la conexión con la base de datos sea única (y no una para cada API que tengamos en la carpeta `routes`) lo realizamos en `app.js`
@@ -109,11 +120,11 @@ mongoose.connect(dbURI, {
 ```
 
 > El uso del **paquete debug** nos posibilitaría filtrar los mensajes relacionados con la base datos para aquellos momentos en que no queremos mostrarlos.
-> Notar que en el método catch utilizamos `console.error()`
-> Para no obtener un warning al usar findByIdAndRemove() y findByIdAndUpdate, findOneAndRemove(), findOneAndUpdate() debemos agregar también al **option object** useFindAndModify: false,
+> 
+> Para no obtener un warning al usar `findByIdAndRemove()` y `findByIdAndUpdate()`, `findOneAndRemove()`, `findOneAndUpdate()` debemos agregar también al **option object** `useFindAndModify`: false,
 
 
-### Conexión a Mongoose Modo 2:
+### Modo 2
 ```js
 mongoose.connect(dbURI, {
 	useNewUrlParser: true,
@@ -125,10 +136,11 @@ db.once('open', () => console.log('Conectado a MondoDB'));
 db.on('error', (err) => console.log(err));
 ```
 
-### Conexión en un archivo aparte:
+### Conexión en un archivo aparte
+
 Podemos crear un archivo `/config/connectMongoDB.js` y en el un método llamado `connectMongoDB()` pegar todas estas líneas de código. En la parte inferior exportamos dicho método  `module.exports = connectMongoDB;` De esta manera en `app.js` primero haremos el require `const connectMongoDB = require('./config/dbMongo');` y luego podremos usarla directamente `connectMongoDB();`
 
-### Connection Strings:
+## Connection Strings
 1) Si trabajamos con MongoDB en la nube el connection string será de la forma:
 ```js
  const dbURI = 'mongodb+srv://**<username>**:**<password>**@cluster0-niujt.mongodb.net/**<dbname>**?retryWrites=true&w=majority';
@@ -143,6 +155,10 @@ Podemos crear un archivo `/config/connectMongoDB.js` y en el un método llamado 
 En caso de que la base de datos no esté creada, se creará cuando queramos escribir algo en ella.
 
 ## Schemas & Models
+Con MongoDB no estamos obligados a seguir un esquema de los documentos que almacenamos en una colección. Esto significa que por ejemplo en una colección `students` podremos crear un documento con la propiedad `name` y otra `studentName` y ambas serán aceptadas. Incluso un documento podría tener más propiedades que otro o almacenar datos de distinto tipo. 
+
+Debemos asegurarnos evitar crear documentos con esquemas distintos, aunque esta flexibilidad resultó muy llamativa a muchas startups ya que podían tener distintos esquemas que en definitiva son distintas versiones de los datos almacenados.
+
 Los **schemas** definen la estructura de los datos que conforman el documento, es decir sus propiedades y el tipo de datos de ellas.
 
 Antes de meternos en la sintaxis sabemos que nuestro Schema queremos que tenga las siguientes propieades y el siguiente tipo:
@@ -372,7 +388,7 @@ const courses = await Course
 	.and([{author:'Mosh'},{isPublished:true}])
 ```
 
-### Ejemplos:
+### Ejemplos
 Si queremos obtener precios que sean mayores o iguales a 10 y menores o iguales a 20
 ```js
 const courses = await Course
@@ -464,7 +480,7 @@ Existen dos modos de actualizar documentos, uno de ellos es **Query First** en e
 
 [^1]: Mosh utiliza el método `update()` pero actualmente obtenemos *DeprecationWarning*.
 
-### Query First:
+### Query First
 ```js
 async  function  updateCourse(id) {
 	const  course  =  await  Course.findById(id);
