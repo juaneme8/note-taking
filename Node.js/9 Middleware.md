@@ -184,5 +184,24 @@ Ahora podremos poner en el archivo `styles.css` todos los estilos y sacarlos de 
 
 ## Cors
 
-Cuando intentamos conectanos a una API desde el frontend (ambos corriendo en `localhost`) obtendremos un error **Access to XMLHttpRequest at http://localhost:3001/api/notes from http://localhost:3000 has been blocked by CORS policy**
+Cuando tenemos el frontend corriendo en el puerto 3000 de localhost y la API en el 3001, son orígenes distintos, es por eso que en las dev tools veremos el siguiente mensaje:  **Access to XMLHttpRequest at http://localhost:3001/api/notes from http://localhost:3000 has been blocked by CORS policy**. Si bien normalmente no hay problema para obtener ciertos recursos de otro origen como ser imágenes, CDNs, para ciertos tipos de recursos como fuentes o JSON suele haber inconvenientes. En nuestro caso lo podemos solucionar fácilmente ya que trabajamos con el backend, en caso de que no tuvieramos acceso podríamos recurrir a otras técnicas como hacer un proxy.
 
+Cuando diseñamos la API tenemos la potestad de decirle qué origenes pueden acceder a nuestros recurso. Cuando queremos crear una API pública que pueda ser usada por cualquier utilizamos el middleware llamado cors.
+
+```
+npm install cors -E
+```
+
+> Con `-E` nos aseguramos que nos instale la versión exacta (con `=` y no con `^`)
+
+
+
+```js
+const cors = require('cors');
+
+app.use(cors());
+```
+
+
+
+Lógicamente para aportar seguridad deberíamos especificar los orígenes que aceptamos, pero esto no es una medida de seguridad super efectiva ya que puede ser engañado fácilmente. Otra opción es dejarlo así y delegar la seguridad en otros aspectos como tokens, autenticación.
