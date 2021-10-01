@@ -1,5 +1,5 @@
 # Middleware
-Se llama **middleware** a todo el código que se ejecuta en el servidor entre que recibe un *request* y envía un *response*, por lo que podremos decir que una aplicación express no es otra cosa que un grupo de funciones middleware.
+Se llama middleware a todo el código que se ejecuta en el servidor entre que recibe un *request* y envía un *response*, por lo que podremos decir que una aplicación express no es otra cosa que un grupo de funciones middleware.
 
 No necesariamente tenemos que tener un sólo middleware sino que podremos ejecutar varios hasta enviar una respuesta. Los mismos se ejecutan de arriba hacia abajo hasta que salgamos del proceso o enviemos una respuesta al navegador. 
 
@@ -7,7 +7,7 @@ El método `app.use(func)` es utilizado para montar la función middleware (tamb
 
 Lo mismo ocure para `app.METHOD(path, callback)` siendo `METHOD` GET, PUT, POST en minúsculas el método http para el cual se aplica la función middleware y `path` la ruta o via de acceso para la cual se aplicará,
 
-`app.use(func)` se dispara para todos request (incluso los post requests)  mientas que `app.get(ruta,func)` debe coincidir la ruta del get request para que se ejecute. 
+`app.use(func)` se dispara para todos requests mientas que `app.get(ruta,func)` se dispara para los `GET` en los que coincide la ruta con la especificada. 
 
 Una función middleware tiene acceso a `req`, `res` y `next`
 
@@ -16,23 +16,66 @@ Una función middleware tiene acceso a `req`, `res` y `next`
 app.use(express.json());
 app.use(express.urlencoded());
 ```
-En este caso `express.json()` es una built-in middleware function que reconoce al request object como JSON Object.
-`app.use(express.urlencoded());` lo usaremos cuando los datos provengan de formularios.
+En primer lugar `express.json()` reconoce al request object como un objeto JSON.
+Mientras que `app.use(express.urlencoded());` lo usaremos cuando los datos provengan de formularios.
 
 ## Custom Middleware
+
+Cuando utilizamos `app.use` se ejecutará siempre independientemente del tipo de endpoint. 
+
 ```js
-app.get('/', function(req,res,next){
+app.use((req, res, next) => {
+	console.log(req.method);
+	console.log(req.path);
+	console.log(req.body);
+	console.log('-----');
+    next();
+})
+```
+
+Si queremos que continúe ejecutando los middlewares debemos colocar `next()` pues de lo contrario se quedará cargando.
+
+Esto mismo podemos colocarlo en un módulo independiente, por ejemplo en `loggerMiddleware.js`
+
+```js
+const logger = (req, res, next) => {
+	console.log(req.method);
+	console.log(req.path);
+	console.log(req.body);
+	console.log('-----');
+    next();
+}
+
+module.exports = logger
+```
+
+Luego en `index.js` lo importamos:
+
+```
+const logger = require('./loggerMiddleware')
+
+app.use(logger)
+```
+
+En cambio si queremos que sólo se ejecucte para peticiones `GET` de una ruta determinada:
+
+```js
+app.get('/', (req,res,next) =>{
 	next();
 })
 ```
 
 ### 404 Pages
-Hemos usado custom middleware para manejar las 404 pages, la función se disparará para todos los requests  en la medida que no se haya enviado una respuesta anteriormente.
-Debemos ubicarlo debajo de get handlers sino nunca los alcanzaría dado que estamos entregando una respuesta al navegador con lo cual no continuará ejecutando los restantes middleware. 
+Vamos a utilizar un **custom middleware** para manejar las páginas 404, la función se disparará para todos los requests  en la medida que no se haya enviado una respuesta anteriormente.
+Debemos ubicarlo debajo de los handlers sino nunca los alcanzará dado que estamos entregando una respuesta al navegador con lo cual no continuará ejecutando los restantes middleware. 
+
 ```js
  // 404 page
 app.use((req, res) => {
-	res.status(404).render('404', { title: '404' });
+	//res.status(404).render('404', { title: '404' });
+    res.status(404).json({
+        error: 'Not Found'
+    })
 });
 ```
 
@@ -136,3 +179,10 @@ app.use(express.static('public'));
 ```
 Como consecuencia de esto todo lo que coloquemos en la carpeta **public** estará disponible como static file para el frontend. Si coloco allí al archivo `styles.css` los estilos serán cargados correctamente. Notar que no tenemos la dirección con `/public/styles.css` sino directamente `/styles.css` dado que hemos determinado a `public` como la carpeta pública. De la misma manera también podremos acceder a esta hoja de estilos yendo a `localhost:3000/styles.css` .
 Ahora podremos poner en el archivo `styles.css` todos los estilos y sacarlos de `partials/head.ejs` donde los teníamos internamente.
+
+
+
+## Cors
+
+Cuando intentamos conectanos a una API desde el frontend (ambos corriendo en `localhost`) obtendremos un error **Access to XMLHttpRequest at http://localhost:3001/api/notes from http://localhost:3000 has been blocked by CORS policy**
+

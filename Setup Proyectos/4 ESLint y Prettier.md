@@ -20,7 +20,7 @@ Así como dijimos que ESLint se preocupa tanto del formateo como de la búsqueda
 ## Inicialización ESLint
 Para inicializar la configuración ejecutamos `npx eslint --init` e ingresamos a un wizard donde nos hará una serie de preguntas. 
 
-> Al utilizar `npx` irá a buscar el ejecutable a `/node_modules/bin/` si lo que le pasamos no está instalado lo que hará será bajarla de npm y ejecutarla pero sin agregarlo a las dependencias del proyecto.
+> Al utilizar `npx` irá a buscar el ejecutable a `/node_modules/bin/` si lo que le pasamos no está instalado lo que hará será bajarla de npm y ejecutarla pero sin agregarlo a las dependencias del proyecto. Como nosotros ya lo hemos isntalado podríamos hacer `./node_modules/bin/eslint --init`
 
 1. Elegimos la opción **To check syntax, find problems, and enforce code style**
 2. Elegimos **JavaScript modules** (import/export)
@@ -41,6 +41,10 @@ eslint-plugin-promise@^4.2.1
 `
 
 > Si le indicáramos que vamos a trabajar con TypeScript nos instalaría esas mismas y además: `@typescript-eslint/parser@latest` y `@typescript-eslint/eslintplugin@latest`
+
+
+
+## Configuración
 
 Veremos que nos ha creado el archivo `.eslintrc.json` con el siguiente contenido:
 ```json
@@ -71,12 +75,14 @@ Veremos que nos ha creado el archivo `.eslintrc.json` con el siguiente contenido
 ## Extensión ESLint
 Para tener la integración con el linter y ver los subrayados indicando los errores debemos instalar la extensión `ESLint`.
 
+> Si además queremos tener una indicación del error en la línea en que sucede debemos instalar la extensión `Error Lens`./
+
 Luego de instalarla nos aparecerá en el panel de Problems: *ESLint is disabled since its execution has not been approved or denied yet. Use the light bulb menu to open the approval dialog*. Hacemos click en la lámpara y luego en **Manage Extension Execution** y ponemos **Allow Everywhere**.
 
 En este momento ya nos aparecerán marcados los errores de acuerdo a la guía de **standard**
 
 ## ESLint desde CLI
-Con `npx eslint .` podemos ver un listado de los problemas que tenemos.
+Con `npx eslint .` podemos ver un listado de los problemas que tenemos. Nuevamente podemos hacerlo también con `./node_modules/bin/eslint .`
 
 Con `npx eslint . --fix` los podemos solucionar los problemas que sean solucionables.
 
@@ -113,7 +119,7 @@ Esto podemos ponerlo en una carpeta `.vscode` y dentro en un archivo `settings.j
 	"node": true
 },
 ```
-Con `node: true` podemos agregar variables de entorno (con process.env) para usar en Next.js o CRA.
+Con `node: true` podemos agregar variables de entorno (con `process.env`) .
 
 * Si nos aparece el mensaje **'React' must be in scope when using JSX  react/react-in-jsx-scope** debido a que actualmente no es necesario importar React podemos deshabilitar esta regla del siguiente modo:
 ``rules: { 'react/react-in-jsx-scope' : 'off'}``
@@ -342,7 +348,7 @@ En `"plugins"` agregamos `"import"` (para dps poder poner una regla de import or
 # Trabajo en equipo
 Commitear `eslintrc.json` y asegurarnos que todos tengan instalada la extensión de ESLint.
 
-Además en las Workspace Settings podemos poner lo siguiente:
+Además en las Workspace Settings (`settings.json` en una carpeta `.vscode` en la raíz) podemos poner lo siguiente:
 
 ```json
 {
@@ -356,13 +362,28 @@ Además en las Workspace Settings podemos poner lo siguiente:
 De esta manera nos aseguramos que si uno de los colaboradores tiene instalado Prettier y configurado como formateador no entre en conflicto con nuestra configuración del proyecto.
 
 # ESLint con Node Express
-> Implementación para Armenia Parking
+
+## Implementación I
+
+> Implementación basada en midudev pero [video del Bootcamp](https://www.youtube.com/watch?v=ep_plUeKV1Y)
+
+Instalar el paquete `standard` como dependencia de desarrollo:
+
+```
+npm install standard -D
+```
+
+
+
+## Implementación II
+
 > La verdadera guía es la que se hizo para React aca sólo se fueron pegando los comandos basándonos en ella y agregando alguna particularidad.
 
 1) Instalar ESLint y Prettier
 ``npm install eslint prettier --save-dev``
 
 2) Ejecutamos `npx eslint --init`
+```bash
 1. **To check syntax, find problems, and enforce code style**
 2. **CommonJS** (require/exports)
 3. Framework **None of these**
@@ -372,6 +393,9 @@ De esta manera nos aseguramos que si uno de los colaboradores tiene instalado Pr
 7. Standard
 8. Config file in JavaScript
 9. Instalar con npm
+```
+
+
 
 Nos dirá que va a tener que instalar:
 `
@@ -651,3 +675,4 @@ Agregamos estas reglas relacionadas con hooks
 "no-use-before-define": "off",
 "@typescript-eslint/no-use-before-define": ["error"]
 ```
+
