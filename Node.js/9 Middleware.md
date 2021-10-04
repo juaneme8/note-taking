@@ -165,20 +165,41 @@ Como ya mencionamos habrá un impacto en la performance por lo que debemos evalu
 
 * También existen middlewares para manejo de sesiones, cookies, validación, etc
 
-## Static Files:
-Por el momento si en `head.ejs` hacemos referencia a un archivo `.css`
+
+
+## Archivos Estáticos
+
+Por el momento si en cualquier parte del código hacemos referencia a archivos estáticos, por ejemplo en la vista a un `.css`
 ```html
 <link rel="stylesheet" href="/styles.css"/>
 ```
-Veremos al ir por ejemplo a la home page `localhost:3000/` que en la pestaña Network de las Devtools obtuvimos un 404 para `styles.css`, dado que el servidor no nos permitió obtenerlo. Esto se debe a que el servidor protege de manera automática a todos los archivos
+Veremos al ir por ejemplo a la home page `localhost:3000/` que en la pestaña Network de las Devtools obtuvimos un 404 para `styles.css`, dado que el servidor no nos permitió obtenerlo. Esto se debe a que el servidor protege de manera automática a todos los archivos.
+
+Lo mismo sucedería si creamos una carpeta `images` y colocamos en ella a `logo.png` si vamos a `localhost:3000/images/logo.png` no veríamos la imagen sino que también obtendríamos un 404.
+
 Para permitirle al navegador acceder a archivos estáticos (static assets) como **imágenes**, **css**, **archivos de texto**  debemos indicarle qué archivos deben ser públicos, esto podremos hacerlo con el middleware que viene con express llamado **static middleware**.
 
 ```js
 // middleware & static files
 app.use(express.static('public'));
 ```
-Como consecuencia de esto todo lo que coloquemos en la carpeta **public** estará disponible como static file para el frontend. Si coloco allí al archivo `styles.css` los estilos serán cargados correctamente. Notar que no tenemos la dirección con `/public/styles.css` sino directamente `/styles.css` dado que hemos determinado a `public` como la carpeta pública. De la misma manera también podremos acceder a esta hoja de estilos yendo a `localhost:3000/styles.css` .
-Ahora podremos poner en el archivo `styles.css` todos los estilos y sacarlos de `partials/head.ejs` donde los teníamos internamente.
+Como consecuencia de esto todo lo que coloquemos en la carpeta **public** estará disponible como static file para el frontend. Si coloco allí al archivo `styles.css` y la carpeta `images` los archivos serán accedidos correctamente. Notar que no tenemos la dirección con `/public/styles.css` sino directamente `/styles.css` dado que hemos determinado a `public` como la carpeta pública.
+
+
+
+Si no queremos crear una carpeta `public` y queremos indicar que los archivos estáticos están en `/images` y colocamos allí el archivo `logo.png`
+
+```js
+app.use(express.static('images'));
+```
+
+Accederíamos como `localhost:3000/logo.png`
+
+Mientras que si queremos acceder como `localhost:3000/images/logo.png` podríamos indicarle que sólo en esa ruta utilice ese middleware.
+
+```js
+app.use('/images', express.static('images'));
+```
 
 
 
