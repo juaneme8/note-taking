@@ -188,6 +188,13 @@ require('dotenv').config()
 
 Esta técnica nos permitirá luego usar distintas bases de datos según el entorno en el cual nos encontremos trabajando.
 
+```js
+const { NODE_ENV,MONGO_DB_URI,MONGO_DB_URI_TEST} = process.env;
+const connectionString = NODE_ENV === 'test'
+? MONGO_DB_URI_TEST
+: MONGO_DB_URI;
+```
+
 Debemos agregar el `.env` a `.gitignore` ya que como tiene datos sensibles no queremos que forme parte del sistema de control de versiones.
 
 
@@ -750,15 +757,9 @@ app.use((req, res) => {
 });
 ```
 
-
-
 Es una buena práctica tener un directorio `middleware` en el cual por ejemplo tendremos un archivo `notFound.js` con 
 
-```js
-module.exports = (req, res) => {
-	res.status(404).end();
-}
-```
+
 
 Luego en `index.js`
 

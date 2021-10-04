@@ -8,11 +8,11 @@ Supongamos que tenemos:
 
 ```javascript
 const suma = (a,b) => {
-  return a-b
+  return a-b;
 }
 ```
 
-Si bien en este caso podemos darnos cuenta fácilmente qué está mal, en ocasiones será mucho más dificil notarlo. 
+Si bien en este caso podemos darnos cuenta fácilmente qué está mal, en ocasiones será mucho más difícil notarlo. 
 
 La importancia de los tests está no sólo en saber si nuestro método funciona o no, sino que también nos permite documentar estos métodos .
 
@@ -237,13 +237,13 @@ En `package.json` debemos modificar el script `"test"` de modo que quede de la s
 
 ```json
 "scripts":{
-	"test": "jest --verbose"
+	"test": "jest --verbose --silent"
 }
 ```
 
 > Con `--verbose` le indicamos que queremos que nos entregue la máxima información posible.
-
-
+>
+> Con `--silent` le indicamos que no queremos que nos muestre los `console.log()`.
 
 Luego ejecutamos los tests con `npm run test`
 
@@ -279,7 +279,7 @@ En este caso queremos testear una API REST y lo más importante es testear a los
 
 Lo primero que podemos hacer es crear un proyecto sobre el cual trabajar:
 
-```
+```bash
 mkdir testing
 cd testing
 npm init -y
@@ -287,7 +287,7 @@ npm init -y
 
 Luego instalamos las dependencias 
 
-```
+```bash
 npm i express
 ```
 
@@ -307,6 +307,8 @@ Si estamos utilizando Windows tendremos que utilizar el paquete `cross-env`.
 }
 ```
 
+
+
 Luego en función del valor de `NODE_ENV` será que usaremos uno u otro connection string para conectarnos a la base de datos de producción o a la de pruebas.
 
 ```javascript
@@ -316,7 +318,7 @@ const connectionString = NODE_ENV === 'test'
 : MONGO_DB_URI;
 ```
 
-> Las variables de entorno `MONGO_DB_URI` y `MONGO_DB_URI_TEST` debemos definirlas en un archivo `.env`.
+> Las variables de entorno `MONGO_DB_URI` y `MONGO_DB_URI_TEST` debemos definirlas en un archivo `.env` . Para acceder a esos valores mediante `process.env` debemos tener instalado `dotenv` y colocar en `index.js` `require('dotenv').config()` en la parte de arriba. Si lo colocamos debajo de la conexión a Mongo `require('./mongo')` no obtendremos el connection string.
 >
 > El hecho de crear una base de datos para testing no es buena práctica y al estudiar CI/CD veremos que lo más conveniente sería mockearla.
 
@@ -330,5 +332,62 @@ npm install supertest -D
 
 
 
-Creamos un directorio `test` y en el un archivo `notes.test.js` . En esta prueba buscamos verificar que las notas de una api sean devueltas en JSON.
+Creamos un directorio `test` y en el un archivo `notes.test.js` . En esta prueba buscamos verificar que las notas de una api sean devueltas en JSON. 
+
+
+
+Debemos tener presente que se trata de una operación asíncrona por lo que debemos esperar a que esté el resultado disponible. Esto lo hacemos con `async` y `await`.
+
+```js
+const supertest = require('supertest');
+const app = require('../index');
+
+const api = supertest(app);
+
+test('notes are returned in json', async () => {
+	 await api
+     	.get('/api/notes')
+    	.expect(200)
+    	.expect('Content-Type', /application\/json/)
+});
+```
+
+
+
+> Notar que debemos exportar `app` en`index.js`
+>
+> Notar que usamos una RegEx porque podemos recibir `application/json; charset=utf-8`
+
+
+
+A la salida obtenemos un mensaje que nos dice que ha terminado el test pero tenemos cosas abiertas (por ejemplo el servidor). Además nos sugiere que agreguemos la opción `--detectOpenHandles`, hacemos esto por lo que el script nos queda:
+
+```json
+"test": "cross-env NODE_ENV=test jest --verbose --silent --detectOpenHandles"
+```
+
+
+
+Para cerrar el servidor primero lo almacenamos en `server` que luego exportamos:
+
+```js
+const server = app.listen('3000', () => console.log(`Listening on Port ${PORT}`));
+
+module.exports = { app, server };
+```
+
+
+
+Luego en el test importamos el `server` y creamos un hook  `afterAll()` para que después de todo slos tests se cierre la conexión del servidor.
+
+```js
+const { app, server } = require('../index');
+
+// todos los tests
+// ...
+
+afterAll(() => {
+    server.close()
+})
+```
 
