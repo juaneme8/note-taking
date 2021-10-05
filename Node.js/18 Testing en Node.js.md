@@ -4,6 +4,10 @@
 
 La forma más simple de entender el testing es pensando que nos permitirá comprobar el correcto funcionamiento de un método.
 
+Es importante que los tests sean predecibles, que no dependan de factores externos de modo tal que siempre que los ejecute obtenga el mismo resultado.
+
+A la hora de crear tests es importante verificar que fallan pues quizás nunca falle y eso lo convertiría en un test inútil.
+
 Supongamos que tenemos:
 
 ```javascript
@@ -277,21 +281,7 @@ En este caso queremos testear una API REST y lo más importante es testear a los
 
 
 
-Lo primero que podemos hacer es crear un proyecto sobre el cual trabajar:
-
-```bash
-mkdir testing
-cd testing
-npm init -y
-```
-
-Luego instalamos las dependencias 
-
-```bash
-npm i express
-```
-
-
+## Variables Entorno y Scripts
 
 A la hora de testear el backend lo primero que debemos hacer es modificar el archivo `package.json` en particular los scripts para asegurarnos cargar con un valor distinto la variable de entorno `NODE_ENV` según ejecutemos estemos en *development* `npm run dev`, *production* `npm start` o *testing* `npm test`.
 
@@ -302,10 +292,12 @@ Si estamos utilizando Windows tendremos que utilizar el paquete `cross-env`.
     "scripts": {
         "dev": "cross-env NODE_ENV=development nodemon index.js",
         "start": "cross-env NODE_ENV=production node index.js",
-        "test": "cross-env NODE_ENV=test jest --verbose"
+        "test": "cross-env NODE_ENV=test jest --verbose --silent"
 	},
 }
 ```
+
+
 
 
 
@@ -323,18 +315,14 @@ const connectionString = NODE_ENV === 'test'
 > El hecho de crear una base de datos para testing no es buena práctica y al estudiar CI/CD veremos que lo más conveniente sería mockearla.
 
 
-
+## Test de Endpoints
 Como nuestro propósito es testear los endpoints, utilizaremos la biblioteca [Supertest](https://www.npmjs.com/package/supertest) para acceder a ellos. Nos permite probar servidores HTTP con microservicios que tengan endponts.
 
 ```bash
 npm install supertest -D
 ```
 
-
-
 Creamos un directorio `test` y en el un archivo `notes.test.js` . En esta prueba buscamos verificar que las notas de una api sean devueltas en JSON. 
-
-
 
 Debemos tener presente que se trata de una operación asíncrona por lo que debemos esperar a que esté el resultado disponible. Esto lo hacemos con `async` y `await`.
 
@@ -360,7 +348,9 @@ test('notes are returned in json', async () => {
 
 
 
-A la salida obtenemos un mensaje que nos dice que ha terminado el test pero tenemos cosas abiertas (por ejemplo el servidor). Además nos sugiere que agreguemos la opción `--detectOpenHandles`, hacemos esto por lo que el script nos queda:
+## Resolución de Errores
+
+En la consola obtenemos un mensaje que nos dice que ha terminado el test pero tenemos cosas abiertas (por ejemplo el servidor). Además nos sugiere que agreguemos la opción `--detectOpenHandles`, hacemos esto por lo que el script nos queda:
 
 ```json
 "test": "cross-env NODE_ENV=test jest --verbose --silent --detectOpenHandles"
@@ -378,7 +368,7 @@ module.exports = { app, server };
 
 
 
-Luego en el test importamos el `server` y creamos un hook  `afterAll()` para que después de todo slos tests se cierre la conexión del servidor.
+Luego en el test importamos el `server` y creamos un hook  `afterAll()` con un callback para que después de todos los tests y cierre la conexión del servidor.
 
 ```js
 const { app, server } = require('../index');
@@ -387,7 +377,135 @@ const { app, server } = require('../index');
 // ...
 
 afterAll(() => {
+    moongose.connection.close()
     server.close()
+})
+```
+
+
+
+> Con la versión de mongoose `6.0.9` tuve problemas para ejecutar los tests y con `--detectOpenHandles` obtenía **Jest has detected the following 1 open handle potentially keeping Jest from exiting: ●  Timeout**. Haciendo el downgrade a la versión `5.13.9` esto se soluciona.
+
+
+
+Una vez solucionados todos los mensajes de la consola podemos sacar el `--detectOpenHandles`
+
+```
+"test": "cross-env NODE_ENV=test jest --verbose --silent"
+```
+
+
+
+## Watch Mode
+
+Para no tener que correr el test manualmente con `npm run test` agregamos un nuevo script que se quedará atento a los cambios que hagamos en los archivos y volviendo a ejecutar los tests cuando estos sucedan:
+
+`"test:watch": "cross-env NODE_ENV=test jest --verbose --silent --watch"`
+
+
+
+O lo que es lo mismo reutilizando el script original de test:
+
+```
+"test:watch": "npm run test -- --watch"
+```
+
+> Hacemos referencia al script anterior y queremos pasarle más parámetros. Usamos `--` y luego `--watch` porque queremos pasarle el `--watch` al comando del script `test` y no al `npm run test`
+
+
+
+Luego con `npm run test:watch` ejecutamos los tests y a partir del próximo cambio se ejecutarán automáticamente.
+
+
+
+## Saltar Tests
+
+Si queremos que no ejecuten una serie de tests momentáneamente podemos hacer lo siguiente:
+
+```js
+describe.skip(()=> {
+	test('...', () => {
+		//...
+	});
+	
+	test('...', () => {
+		//...
+	});
+});
+```
+
+
+
+En caso de querer saltear un test individual también podemos hacerlo con:
+
+```js
+test.skip('...', () => {
+		//...
+});
+```
+
+ 
+
+Es posible configurara una regla del linter que muestre warning en caso de que saltemos tests.
+
+
+
+## Estado Inicial
+
+Los tests deben ser predecibles de modo tal que siempre arrojen el mismo resultado. Acabamos de verificar que una ruta devuelve el status code y el Content-Type esperados. Sin embargo, si queremos verificar la cantidad de elementos devueltos dependeríamos de un efecto externo como que alguien haya agregado un elemento a la base de datos de testing y así el test fallaría.
+
+Queremos que antes de cada test tengamos certeza de que el contenido de la base de datos es el esperado. Para ello primero borraremos todas las notas y luego agregaremos las de `initialNotes`.
+
+```js
+const mongoose = require('mongoose');
+const supertest = require('supertest');
+const { app, server } = require('../index');
+const Note = require('../models/Note');
+
+const api = supertest(app);
+
+const initialNotes = [
+    {
+        content: 'Nota 1',
+        important: true,
+        date: new Date()
+    },
+    {
+        content: 'Nota 2',
+        important: true,
+        date: new Date()
+    },
+    {
+        content: 'Nota 3',
+        important: true,
+        date: new Date()
+    }
+]
+
+beforeEach(async () => {
+    await Note.deleteMany({});
+
+    const note1 = new Note(initialNotes[0])
+    await note1.save()
+
+    const note2 = new Note(initialNotes[1])
+    await note2.save()
+
+    const note3 = new Note(initialNotes[2])
+    await note3.save()
+})
+
+describe('GET /api/notes', () => {
+    test('there are three notes', async () => {
+        const res = await api.get('/api/notes')
+        expect(res.body).toHaveLength(initialNotes.length);
+    });
+})
+
+
+afterAll(() => {
+    server.close()
+    mongoose.connection.close();
 })
 ```
 
