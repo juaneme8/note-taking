@@ -532,7 +532,7 @@ afterAll(() => {
 
 
 
-## Peticiones GET
+## Peticiones `GET`
 
 Si queremos testear que el contenido de un elemento en particular tenga ciertas características:
 
@@ -558,7 +558,7 @@ test('there should be a note about Paco', async () => {
 
 
 
-## Peticiones POST
+## Peticiones `POST`
 
 ```js
 test('a new note should be added', async () => {
@@ -608,4 +608,83 @@ test('an empty note should not be added', async () => {
 
 ## Test Helpers
 
-Como podemos ver hay líneas de código que se repiten bastante, es por eso que creamos un archivo dentro de `test` llamado `helpers.js`.
+Como podemos ver hay líneas de código que se repiten bastante, es por eso que creamos un archivo dentro de `test` llamado `helpers.js` donde colocamos esos datos.
+
+Esto demuestra la importancia de los tests a la hora de refactorizar pues podremos tener certeza si algo se ha roto luego de esos cambios.
+
+
+
+Por ejemplo estas líneas que usamos dos veces las convertimos en:
+
+```js
+const res = await api.get('/api/notes');
+const content = res.body.map(note => note.content)
+```
+
+
+
+```js
+const getAllContentFromNotes = async () => {
+	const res = await api.get('/api/notes');
+	return {
+		res,
+		contents: res.body.map(note => note.content)
+	}
+}
+```
+
+> Notar que en `getAllContentFromNotes` retornamos `res` y el array `contents` ya que necesitamos ambos para las comprobaciones que hacemos a continuación.
+
+Luego para usarlo `const {res, contents} = await getAllContentFromNotes()` .
+
+
+
+
+Otra forma es implementando dos métodos:
+
+```js
+const getAllNotes = async () => {
+	return api.get('/api/notes');
+}
+
+const getAllContentFromNotes = (notes) => {
+	return notes.map(note => note.content)
+}
+```
+
+
+
+Luego para utilizarlos:
+
+```js
+const response = await getAllNotes();
+const contents = getAllContentFromNotes(response.body);
+```
+
+
+
+## Peticiones `DELETE`
+
+```js
+test('a note should be deleted', async () => {
+		const response = await getAllNotes()
+
+		const { body: notes } = response;
+
+		const [noteToDelete] = notes;
+
+		await api
+			.delete(`/api/notes/${noteToDelete.id}`)
+			.expect(204)
+
+		const response2 = await getAllNotes();
+		const contents = getAllContentFromNotes(response2.body);
+
+		expect(response2.body).toHaveLength(initialNotes.length - 1)
+		expect(contents).not.toContain(noteToDelete.content)
+	})
+```
+
+
+
+Estamos verificando que la cantidad de notas se reduce en una y que la nota que quisimos borrar no forma parte de las restantes.
