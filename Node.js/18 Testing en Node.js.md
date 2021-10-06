@@ -316,7 +316,7 @@ const connectionString = NODE_ENV === 'test'
 
 
 ## Test de Endpoints
-Como nuestro propósito es testear los endpoints, utilizaremos la biblioteca [Supertest](https://www.npmjs.com/package/supertest) para acceder a ellos. Nos permite probar servidores HTTP con microservicios que tengan endponts.
+Como nuestro propósito es testear los endpoints, utilizaremos la biblioteca Supertest para acceder a ellos. Esta herramienta envuelve nuestro servicio de backend y nos permite testear los endponts. 
 
 ```bash
 npm install supertest -D
@@ -332,11 +332,11 @@ const app = require('../index');
 
 const api = supertest(app);
 
-test('notes are returned in json', async () => {
-	 await api
-     	.get('/api/notes')
-    	.expect(200)
-    	.expect('Content-Type', /application\/json/)
+test('the result should be a json', async () => {
+    await api
+        .get('/api/notes')
+        .expect(200)
+        .expect('Content-Type', /application\/json/);
 });
 ```
 
@@ -446,15 +446,37 @@ test.skip('...', () => {
 
  
 
-Es posible configurara una regla del linter que muestre warning en caso de que saltemos tests.
+> Es posible configurar una **regla del linter** que muestre warning en caso de que salteemos tests.
 
 
 
-## Estado Inicial
+## Testear Archivo Específico
 
-Los tests deben ser predecibles de modo tal que siempre arrojen el mismo resultado. Acabamos de verificar que una ruta devuelve el status code y el Content-Type esperados. Sin embargo, si queremos verificar la cantidad de elementos devueltos dependeríamos de un efecto externo como que alguien haya agregado un elemento a la base de datos de testing y así el test fallaría.
+En ocasiones **cuando estemos testeando un archivo y saltando los tests de otros archivos** puede resultar molesto ver en pantalla datos de los tests saltados. En esos casos podemos editar el script indicando explícitamente el archivo que queremos testear:
 
-Queremos que antes de cada test tengamos certeza de que el contenido de la base de datos es el esperado. Para ello primero borraremos todas las notas y luego agregaremos las de `initialNotes`.
+```bash
+"test": "jest --verbose --silent tests/notes.test.js"
+```
+
+
+
+Si queremos ir más allá y testear un archivo específico y un test específico podemos hacerlo con:
+
+```
+npm run test -- -t 'the first note should be about Juan'
+```
+
+> No es necesario poner el nombre completo podríamos poner simplemente "juan" y en cualquier capitalización.
+
+
+
+## Estado Inicial con `beforeEach`
+
+Los tests deben ser **predecibles** de modo tal que siempre arrojen el mismo resultado. 
+
+Primero verificamos que una ruta devuelve el **status code** y el **Content-Type** esperados. Sin embargo, si queremos verificar por ejemplo la cantidad de elementos devueltos por una ruta dependeríamos de un factor externo como que alguien haya agregado un elemento a la base de datos de testing y así el test fallaría.
+
+Queremos tener la certeza de que el contenido de la base de datos es el esperado. Para ello antes de cada test borraremos todas las notas y luego agregaremos las de `initialNotes`. Esto lo hacemos utilizando el hook `beforeEach`
 
 ```js
 const mongoose = require('mongoose');
@@ -466,17 +488,17 @@ const api = supertest(app);
 
 const initialNotes = [
     {
-        content: 'Nota 1',
+        content: "Notas de Juan",
         important: true,
         date: new Date()
     },
     {
-        content: 'Nota 2',
+        content: "Nota de Paco",
         important: true,
         date: new Date()
     },
     {
-        content: 'Nota 3',
+        content: "Notas de Pedro",
         important: true,
         date: new Date()
     }
@@ -502,10 +524,88 @@ describe('GET /api/notes', () => {
     });
 })
 
-
 afterAll(() => {
     server.close()
     mongoose.connection.close();
 })
 ```
 
+
+
+## Peticiones GET
+
+Si queremos testear que el contenido de un elemento en particular tenga ciertas características:
+
+```js
+test('the first note should be about Juan', async () => {
+const res = await api.get('/api/notes');
+
+expect(res.body[0].content).toBe('Notas de Juan');
+});
+```
+
+Sin embargo, muchas veces queremos verificar el contenido en cualquier posición del array devuelto por la ruta:
+
+```js
+test('there should be a note about Paco', async () => {
+    const res = await api.get('/api/notes');
+
+    const contents = res.body.map(note => note.content);
+
+    expect(contents).toContain('Notas de Paco');
+});
+```
+
+
+
+## Peticiones POST
+
+```js
+test('a new note should be added', async () => {
+    const newNote = {
+    content: 'Notas de De La Mar',
+    important: false,
+    };
+
+    await api
+    .post('/api/notes')
+    .send(newNote)
+    .expect(200)
+    .expect('Content-Type', /application\/json/);
+
+    const res = await api.get('/api/notes');
+
+    const contents = res.body.map(note => note.content);
+
+    expect(contents).toContain('Notas de De La Mar');
+    expect(res.body).toHaveLength(initialNotes.length + 1);
+});
+```
+
+Luego de agregar el elemento a la base de datos estamos chequeando tanto que el contenido sea el deseado como que el número de elementos también sea coherente.
+
+
+
+Debemos chequear las condiciones de borde, por ejemplo que no sea posible agregar un elemento si falta un campo requerido. 
+
+```js
+test('an empty note should not be added', async () => {
+    const newNote = {
+    important: false,
+    };
+    await api.post('/api/notes').send(newNote).expect(400);
+
+    const res = await api.get('/api/notes');
+    expect(res.body).toHaveLength(initialNotes.length);
+});
+```
+
+
+
+> En este caso verificamos obtener un error 400 y que no hayan sido agregados elementos a la base de datos.
+
+  
+
+## Test Helpers
+
+Como podemos ver hay líneas de código que se repiten bastante, es por eso que creamos un archivo dentro de `test` llamado `helpers.js`.
