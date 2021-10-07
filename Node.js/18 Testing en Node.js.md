@@ -604,13 +604,66 @@ test('an empty note should not be added', async () => {
 
 > En este caso verificamos obtener un error 400 y que no hayan sido agregados elementos a la base de datos.
 
-  
+  ## Peticiones `DELETE`
+
+Los tests los agrupamos dentro de este bloque:
+
+```
+describe('DELETE /api/notes', () => {
+
+})
+```
+
+
+
+Por ejemplo para testear el borrado de una nota:
+
+```js
+test('a note should be deleted', async () => {
+		const response = await getAllNotes()
+
+		const { body: notes }c = response;
+
+		const [noteToDelete] = notes;
+
+		await api
+			.delete(`/api/notes/${noteToDelete.id}`)
+			.expect(204)
+
+		const response2 = await api.get('/api/notes');
+		const content = response2.body.map(note => note.content)
+
+		expect(response2.body).toHaveLength(initialNotes.length - 1)
+		expect(contents).not.toContain(noteToDelete.content)
+	})
+```
+
+
+
+> Estamos verificando que la cantidad de notas se reduce en una y que la nota que quisimos borrar no forma parte de las restantes.
+
+
+
+Mientras que para testear que no se realiza el borrado si el ID es incorrecto:
+
+```js
+test('a note should not be deleted', async () => {
+		await api
+			.delete(`/api/notes/123`)
+			.expect(400)
+
+		const response = await api.get('/api/notes');
+
+		expect(response.body).toHaveLength(initialNotes.length)
+	})
+```
+
 
 ## Test Helpers
 
-Como podemos ver hay líneas de código que se repiten bastante, es por eso que creamos un archivo dentro de `test` llamado `helpers.js` donde colocamos esos datos.
+Cuando tenemos líneas de código que se repiten es conveniente crear un archivo dentro de la carpeta `test` llamado `helpers.js` donde colocamos esas funciones o constantes requeridas.
 
-Esto demuestra la importancia de los tests a la hora de refactorizar pues podremos tener certeza si algo se ha roto luego de esos cambios.
+Al implementar esto pondremos de manifiesto la importancia de los tests, ya que al refactorizar podremos tener certeza de que no hemos roto nada si seguimos pasando los tests.
 
 
 
@@ -694,14 +747,14 @@ Tenemos dos alternativas
 beforeEach(async () => {
 	await Note.deleteMany({});
 
-	for(note of initialNotes){
+	for(const note of initialNotes){
 		const noteObject = new Note(note);
 		await noteObject.save();
 	}
 });
 ```
 
-
+Este método trabaja secuencialmente por lo que nos aseguramos que los elementos sean guardados en el mismo orden que están en el array.
 
 * Usando `map` y `Promise().all`
 
@@ -711,35 +764,8 @@ beforeEach(async () => {
 
 	const notesObject = initialNotes.map(note => new Note(note))
 	const promises = notesObject.map(noteObject => noteObject.save());
-    Promise.all(promises);
+    await Promise.all(promises);
 });
 ```
 
-
-
-## Peticiones `DELETE`
-
-```js
-test('a note should be deleted', async () => {
-		const response = await getAllNotes()
-
-		const { body: notes } = response;
-
-		const [noteToDelete] = notes;
-
-		await api
-			.delete(`/api/notes/${noteToDelete.id}`)
-			.expect(204)
-
-		const response2 = await getAllNotes();
-		const contents = getAllContentFromNotes(response2.body);
-
-		expect(response2.body).toHaveLength(initialNotes.length - 1)
-		expect(contents).not.toContain(noteToDelete.content)
-	})
-```
-
-
-
-> Estamos verificando que la cantidad de notas se reduce en una y que la nota que quisimos borrar no forma parte de las restantes.
-
+Este método tiene la ventaja que realiza el trabajo en paralelo y desventaja que puede que no incorpore  los elementos en orden.
