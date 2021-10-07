@@ -663,6 +663,60 @@ const contents = getAllContentFromNotes(response.body);
 
 
 
+### Refactorizar `beforeEach()`
+
+Hasta el momento tenemos 
+
+```js
+beforeEach(async () => {
+	await Note.deleteMany({});
+
+	const note1 = new Note(initialNotes[0]);
+	await note1.save();
+
+	const note2 = new Note(initialNotes[1]);
+	await note2.save();
+
+	const note3 = new Note(initialNotes[2]);
+	await note3.save();
+});
+```
+
+
+
+Esto mismo no podemos efectuarlo utilizando `forEach()` ya que no funciona de manera correcta con `async/await`. 
+
+Tenemos dos alternativas
+
+* Usar `forOf`
+
+```js
+beforeEach(async () => {
+	await Note.deleteMany({});
+
+	for(note of initialNotes){
+		const noteObject = new Note(note);
+		await noteObject.save();
+	}
+});
+```
+
+
+
+* Usando `map` y `Promise().all`
+
+```js
+beforeEach(async () => {
+	await Note.deleteMany({});
+
+	const notesObject = initialNotes.map(note => new Note(note))
+	const promises = notesObject.map(noteObject => noteObject.save());
+    Promise.all(promises);
+});
+```
+
+
+
 ## Peticiones `DELETE`
 
 ```js
@@ -687,4 +741,5 @@ test('a note should be deleted', async () => {
 
 
 
-Estamos verificando que la cantidad de notas se reduce en una y que la nota que quisimos borrar no forma parte de las restantes.
+> Estamos verificando que la cantidad de notas se reduce en una y que la nota que quisimos borrar no forma parte de las restantes.
+
