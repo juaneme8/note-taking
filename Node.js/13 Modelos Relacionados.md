@@ -489,4 +489,3 @@ Notar que guardamos a `course` y no a `author`.
 
 == Buscar alternativa a método remove() porque aparentemente está deprecated ==
 
-
