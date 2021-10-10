@@ -1635,13 +1635,3 @@ describe('Documentos Anidados', () => {
 	});
 });
 ```
-
-## mocha + chai
-Hasta el momento utilizamos la assertion library default:
-```js
-const assert = require('assert');
-```
-Si queremos usar chai: `npm i chai`
-```js
-const assert = require('chai').assert;
-```
