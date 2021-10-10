@@ -297,7 +297,11 @@ Si estamos utilizando Windows tendremos que utilizar el paquete `cross-env`.
 }
 ```
 
+> También podríamos pasarle un puerto especial para que utilice a la hora de correr los tests en lugar del definido en el archivo `.env` así evitamos colisiones por tener abierto el mismo puerto.
 
+```json
+"test": "cross-env NODE_ENV=test PORT=1234 jest --verbose --detectOpenHandles",
+```
 
 
 
@@ -323,6 +327,12 @@ npm install supertest -D
 ```
 
 Creamos un directorio `test` y en el un archivo `notes.test.js` . En esta prueba buscamos verificar que las notas de una api sean devueltas en JSON. 
+
+
+
+## Peticiones `GET`
+
+Cuando devolvemos una nota entregamos un status code `200` que significa **OK**.
 
 Debemos tener presente que se trata de una operación asíncrona por lo que debemos esperar a que esté el resultado disponible. Esto lo hacemos con `async` y `await`.
 
@@ -418,7 +428,7 @@ Luego con `npm run test:watch` ejecutamos los tests y a partir del próximo camb
 
 
 
-## Saltar Tests
+## `skip()`
 
 Si queremos que no ejecuten una serie de tests momentáneamente podemos hacer lo siguiente:
 
@@ -447,6 +457,32 @@ test.skip('...', () => {
  
 
 > Es posible configurar una **regla del linter** que muestre warning en caso de que salteemos tests.
+
+
+
+## `only()`  
+
+Si sólo queremos correr un conjunto de tests podemos poner:
+
+```
+describe.only(()=> {
+	test('...', () => {
+		//...
+	});
+	
+	test('...', () => {
+		//...
+	});
+});
+```
+
+En caso de querer correr sólo un test:
+
+```
+test.only('...', () => {
+		//...
+});
+```
 
 
 
@@ -532,7 +568,7 @@ afterAll(() => {
 
 
 
-## Peticiones `GET`
+## Otras Peticiones `GET`
 
 Si queremos testear que el contenido de un elemento en particular tenga ciertas características:
 
@@ -560,6 +596,8 @@ test('there should be a note about Paco', async () => {
 
 ## Peticiones `POST`
 
+Cuando creamos una nota devolvemos un status code `201` que significa **created**.
+
 ```js
 test('a new note should be added', async () => {
     const newNote = {
@@ -570,7 +608,7 @@ test('a new note should be added', async () => {
     await api
     .post('/api/notes')
     .send(newNote)
-    .expect(200)
+    .expect(201)
     .expect('Content-Type', /application\/json/);
 
     const res = await api.get('/api/notes');
@@ -581,6 +619,8 @@ test('a new note should be added', async () => {
     expect(res.body).toHaveLength(initialNotes.length + 1);
 });
 ```
+
+
 
 Luego de agregar el elemento a la base de datos estamos chequeando tanto que el contenido sea el deseado como que el número de elementos también sea coherente.
 
@@ -605,6 +645,8 @@ test('an empty note should not be added', async () => {
 > En este caso verificamos obtener un error 400 y que no hayan sido agregados elementos a la base de datos.
 
   ## Peticiones `DELETE`
+
+Cuando eliminamos una nota devolvemos un status code `204` que significa **no content**.
 
 Los tests los agrupamos dentro de este bloque:
 
@@ -663,9 +705,9 @@ test('a note should not be deleted', async () => {
 
 Cuando tenemos líneas de código que se repiten es conveniente crear un archivo dentro de la carpeta `test` llamado `helpers.js` donde colocamos esas funciones o constantes requeridas.
 
+Se recomienda **no utilizar helpers para el cuerpo del test** ya que aunque ese código se repita nos ayudará a saber de dónde viene el problema en lugar de tener una abstracción que lo haría más dificil.
+
 Al implementar esto pondremos de manifiesto la importancia de los tests, ya que al refactorizar podremos tener certeza de que no hemos roto nada si seguimos pasando los tests.
-
-
 
 Por ejemplo estas líneas que usamos dos veces las convertimos en:
 
@@ -769,3 +811,127 @@ beforeEach(async () => {
 ```
 
 Este método tiene la ventaja que realiza el trabajo en paralelo y desventaja que puede que no incorpore  los elementos en orden.
+
+
+
+## Tests de Administración de Usuarios
+
+Los modelos y controladores vinculados a la administración de usuarios se ubican en el apartado **Administración de Usuarios** en caso de dudas consultar ese material.
+
+
+
+Creamos el archivo `user.test.js` y nos proponemos testear una ruta `POST` de creación de usuarios . Para ello con `beforeEach` nos aseguramos borrar todos los usuarios y luego creamos uno y lo guardamos en la base de datos. 
+
+En el test en sí lo primero que hacemos es obtener todos los usuarios en un array (sabemos que debería haber sólo uno pero de este modo lo dejamos prepado para si luego creamos más en el `beforeEach`) y después agregamos un nuevo usuario y por último verificamos tener uno mas que al inicio.
+
+Con `afterAll` nos aseguramos cerrar el servidor y la conexión de mongoose.
+
+```js
+const bcrypt = require('bcrypt')
+const User = require('../models/User')
+const { api, getUsers } = require('./helpers')
+const moongose = require('mongoose')
+const { server } = require('../index')
+
+describe('creating a new user', () => {
+    beforeEach(async () => {
+        await User.deleteMany({})
+
+        const passwordHash = await bcrypt.hash('pswd', 10)
+        const user = new User({ username: 'jnmroot', passwordHash })
+
+        await user.save()
+    })
+
+    test('should create a new user with a fresh username', async () => {
+        const usersAtStart = await getUsers()
+
+        const newUser = {
+            username: 'midudev',
+            name: 'Miguel',
+            password: 'tw1tch'
+        }
+
+        await api
+            .post('/api/users')
+            .send(newUser)
+            .expect(201)
+            .expect('Content-Type', /application\/json/)
+
+        const usersAtEnd = await getUsers()
+
+        expect(usersAtEnd).toHaveLength(usersAtStart.length + 1)
+
+        const usernames = usersAtEnd.map(u => u.username)
+        expect(usernames).toContain(newUser.username)
+    })
+
+
+    afterAll(() => {
+        moongose.connection.close()
+        server.close()
+    })
+})
+```
+
+
+
+Inicialmente sabemos que deberíamos tener un único usuario dado que así lo hemos determinado en el `beforeEach`, no obstante verificamos esto con:
+
+```
+const usersAtStart = await getUsers()
+```
+
+
+
+Siendo `getUsers()` un helper con el siguiente contenido:
+
+```
+const getUsers = async () => {
+	const usersDB = await User.find({})
+	return usersDB.map(user => user.toJSON())
+}
+```
+
+Notar que estamos trabajando con el modelo ya que a diferencia de cuando queríamos todas las notas, no tenemos un endpoint para tal fin. Con `User.find({})` obtenemos los datos tal cual están en la DB como un array de objetos que tienen `_id` y `__v` es por eso que con un map los sometemos a un `toJSON()`.
+
+
+
+## TDD
+
+TDD son las siglas de *test driven development* que es una forma de desarrollo en la cual primero se realiza el test y luego se crea el código, esto nos permite desarrollar de manera más fiable.
+
+Existen distintas formas de trabajo: Una forma sería ir paso a paso desde el comienzo creando tests y luego desarrollando las funcionalidades y otra forma es plantear directamente un caso de uso. 
+
+Por ejemplo siguiendo esta última forma de trabajo, puede que queramos testear la condición de borde de qué sucede si intentamos crear un usuario cuyo `username` ya existe. La idea sería crear el test, que nos de rojo, luego desarrollar el código hasta que no de veerde y finalmente refactorizar.
+
+```js
+test('should not create user if username is already taken', async () => {
+    const usersAtStart = await getUsers()
+
+    const newUser = {
+    username: 'miduroot',
+    name: 'Miguel',
+    password: 'midutest'
+    }
+
+    const result = await api
+    .post('/api/users')
+    .send(newUser)
+    .expect(409)
+    .expect('Content-Type', /application\/json/)
+
+    console.log(result.body)
+
+    expect(result.body.error).toContain('expected `username` to be unique')
+
+    const usersAtEnd = await getUsers()
+    expect(usersAtEnd).toHaveLength(usersAtStart.length)
+})
+```
+
+Esperamos un 409 que significa **conflict**. También esperamos un `Content-Type` de `application/json` ya que vamos a querer enviar el error al cliente. A su vez también chequeamos que el JSON devuelto tenga una propiedad `error` con el valor `expected username to be unique`
+
+
+
+Por último con `usersAtEnd` buscamos verificar que no haya sido agregado el usuario a la base de datos a pesar de ya haber constatado todo lo anterior.

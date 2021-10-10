@@ -18,13 +18,13 @@ Luego analizamos nuestras rutas y si hay varias que tienen una url similar por e
 
 > ==Importante:== Como tenemos las rutas /blogs/:id y /blogs/create es importante que /blogs/create esté ubicada arriba, sino 'create' será considerado un id.
 
-Lo que hacemos será colocarlas en un archivo aparte llamado `blogRoutes.js` dentro de la carpeta `routes` y colocamos en ese archivo todos los handlers.
+Lo que hacemos será colocarlas en un archivo aparte llamado `blogs.js` dentro de la carpeta `routes` y colocamos en ese archivo todos los handlers.
 
 > También será necesario utilizar en este nuevo archivo la referencia al modelo Blog en este caso.
 
 Al estar en un archivo independiente los handlers no hacen más uso de `app` sino que deben hacer referencia a `router`.  Este objeto lo creamos con `const router = express.Router()` de manera similar a cuando creamos `const app = express(); ` En la parte inferior debemos exportar `router` para luego importarlo en `app.js`
 
-En `blogRoutes.js` tomando como ejemplo una única ruta:
+En `blogs.js` tomando como ejemplo una única ruta:
 ```js
 const express = require('express');
 const router = express.Router(); 
@@ -43,6 +43,17 @@ router.get('/blogs', (req, res) => {
 module.exports = router;
 
 ```
+
+
+
+Otra opción sería en lugar de poner:
+
+```
+const express = require('express');
+const router = express.Router(); 
+```
+
+Poner directamente `const blogsRouter = require('express').Router()` usando `blogsRouter` en lugar de `router` ya que aunque no hace falta que sea el mismo nos da la pauta del nombre con el que lo importaremos en `app.js`
 
 A continuación en `app.js` en primer lugar importamos el archivo `const blogRoutes = require('./routes/blogRoutes')` y luego donde teníamos definidos los handlers, ponemos `app.use(blogRoutes)` . 
 También es posible establecer el scope o alcance de estas rutas a una url específica: `app.use('/blogs',blogRoutes)`. Una vez realizado este cambio también tendremos que modificar las rutas ya que donde antes teníamos `router.get('/blogs', (req,res))` tenemos que poner `router.get('/', (req,res))`

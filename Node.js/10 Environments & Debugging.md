@@ -11,11 +11,9 @@ Otra opción es usar el paquete dotenv (`npm install dotenv --save-dev` o lo que
 Para ello agregamos variables de entorno cada una en una nueva línea con la forma `NAME=VALUE` por convención en mayúsculas y con guión bajo para separar palabras.
 Notar que al instalarlo lo agregamos como dependencia de development por lo que no lo tendremos en producción. 
 
-Luego al colocar `require('dotenv').config();`automáticamente cargará los valores especificados en el archivo `.env`.   También es posible usar el comando `--require (-r)` para hacer un **preload de dotenv**, por lo que no tendremos que colocar el require mencionado en la aplicación. `node -r  server`
+Luego al colocar `require('dotenv').config();`automáticamente cargará los valores especificados en el archivo `.env`.   
 
-**Nota:** Tener presente que con este método ==no es posible sobrescribir variables de entorno ya definidas==.
-
-**Nota2:** No debemos utilizar archivos `.env` en producción sino setear los valores directamente en el host.
+> No debemos utilizar archivos `.env` en producción sino setear los valores directamente en el host.
 
 Volviendo al ejemplo del puerto en el archivo `.dontenv` ponemos `PORT = 3000` y luego:
 
