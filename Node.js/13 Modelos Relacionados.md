@@ -1,7 +1,123 @@
 # Modelos Relacionados
-Hasta el momento trabajamos con *single self contained documents* pero en la vida real trabajaremos con documentos que están relacionados entre sí como por ejemplo autores y cursos (cada curso tiene un autor) podemos adoptar distintos caminos:
+Hasta el momento trabajamos con *single self contained documents* pero en la vida real trabajaremos con documentos que están relacionados entre sí como por ejemplo autores y cursos (cada curso tiene un autor y un autor puede tener más de un curso). En el manejo de modelos relacionales podemos adoptar distintos caminos:
+
+
+
+## `.populate()`
+
+Cuando tenemos relaciones entre dos colecciones es posible traer datos de una colección a la otra utilizando `populate()`.
+
+Suponemos que tenemos una colección usuarios y una colección notas: 
+
+* En `users` tenemos un campo `notes` que es una array con los ids de las notas de ese usuario.
+* En `notes` tenemos un campo `user` con el id del autor de dicha nota.
+
+
+
+> Debemos tener presente que `populate()` no es una transacción atómica, por lo que la información obtenida puede no estar actualizada.
+>
+> La opción `ref` en el Schema será la encargada de decirle a Mongoose qué modelo debe usar con el `populate()`.
+
+### Guardado de ids
+
+A la hora de crear una nota debemos recibir en `req.body` el id del autor. Luego buscamos ese usuario en la colección `Users`, extraemos su objectId (tenemos el id como string) y lo usamos para guardar la nueva nota. Por último le concatenamos un nuevo elemento al array `notes` con el id de la nota guardada.
+
+```js
+app.post('/api/notes', userExtractor, async (request, response, next) => {
+  const {
+    content,
+    important = false,
+    userId
+  } = request.body;
+
+  const user = await User.findById(userId);
+
+  if (!content) {
+    return response.status(400).json({
+      error: 'required "content" field is missing'
+    })
+  }
+
+  const newNote = new Note({
+    content,
+    date: new Date(),
+    important,
+    user: user._id
+  })
+
+  try {
+    // En Note guardamos la nota junto con el id del usuario en "user"
+    const savedNote = await newNote.save()
+
+    //En User agregamos un nuevo id al array "notes"
+    user.notes = user.notes.concat(savedNote._id)
+    await user.save()
+
+    response.json(savedNote)
+  } catch (error) {
+    next(error)
+  }
+})
+```
+
+Cuando queramos obtener todos los usuarios o notas, demandará un nuevo request para obtener los datos de ambas colecciones. Conceptualmente buscamos una herramienta similar al JOIN de SQL con el cual obtenemos todo en una petición, el método de mongoose `populate()` se encarga de hacer esto basado en las referencias establecidas en el Schema y en los ids especificados en los documentos.
+
+
+
+### Populate de usuarios
+
+Queremos obtener todas las notas con el agregado de los datos de `user` recordando que además del id en el Schema teníamos: 
+
+```js
+user: {
+    type: Schema.Types.ObjectId,
+    ref: 'User'
+ }
+```
+
+Por eso en el controlador hacemos lo siguiente:
+
+```js
+app.get('/api/notes', async (request, response) => {
+  const notes = await Note.find({}).populate('user', {
+    username: 1,
+    name: 1
+  })
+  response.json(notes)
+})
+```
+
+> Notar que sólo estamos interesados en `username` y `name`.
+
+
+
+#### Populate de Notas
+
+Considerando que en el Schema de usuarios tenemos la siguiente referencia:
+
+```js
+notes: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Note'
+  }]
+```
+
+ Luego podremos obtener todas las notas de este modo:
+
+```js
+usersRouter.get('/', async (request, response) => {
+  const users = await User.find({}).populate('notes', {
+    content: 1,
+    date: 1
+  })
+  response.json(users)
+})
+```
+
+
 
 ## Normalización
+
 Esta metodología se caracteriza por el uso de referencias.
 ```js
 let author = {
@@ -372,3 +488,5 @@ Los arrays de documentos cuentan con un método especial `.id()` de mongoose par
 Notar que guardamos a `course` y no a `author`.
 
 == Buscar alternativa a método remove() porque aparentemente está deprecated ==
+
+

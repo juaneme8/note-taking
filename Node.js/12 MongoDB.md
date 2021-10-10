@@ -1095,7 +1095,33 @@ tags: {
 
 Si le pasáramos `tags: null` obtendríamos en cambio `Course validation failed: tags: Cannot read property 'length' of null` es por eso que en lugar de `return v.length > 0;` ponemos `return v&&v.length > 0;` 
 
+### Validación Unique
+
+La librería **mongoose-unique-validator** nos permite validar que un campo del schema sea unique.
+
+**No confundir con la opción `unique` de Mongoose que como indica en su [documentación](https://mongoosejs.com/docs/validation.html) no es para validación**
+
+```
+const { Schema, model } = require('mongoose')
+const uniqueValidator = require('mongoose-unique-validator')
+
+const userSchema = new Schema({
+  username: {
+    type: String,
+    unique: true
+  },
+  name: String,
+})
+
+userSchema.plugin(uniqueValidator)
+
+const User = model('User', userSchema)
+
+module.exports = User
+```
+
 ###  Validaciones Asincrónicas
+
 En ocasiones para generar nuestros *custom validators* tendremos que realizar una operación asincrónica como ser leer algo de una base de datos o de un servicio http remoto, por lo que no vamos a tener una respuesta inmediata es por eso que necesitamos de un validador asincrónico.
 > La técnica explicada por Mosh en video 98 está desactualizada ya que arroja un *DeprecationWarning* que sugiere utilizar lo explicado en: https://mongoosejs.com/docs/validation.html#async-custom-validators
 

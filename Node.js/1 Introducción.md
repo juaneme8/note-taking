@@ -20,7 +20,7 @@ Como contrapartida perdimos acceso al DOM (document object model) por lo que no 
 ## Características Node.js
 * **Multiplataforma** 
 * **Open-source**
-* Permite crear **API REST ** (application programming interface) con la cual vamos a através de endpoints podremos crear información, recuperar, borrar, editar, etc. 
+* Permite crear **API REST ** (application programming interface) con la cual vamos a através de endpoints podremos crear información, recuperar, borrar, editar, etc. Un mismo path puede servir para diferentes funciones dependiendo de la acción que utilicemos.
 * Es un **runtime environment** a diferencia de alternativas como ASP.NET, Ruby on Rails, Django que son frameworks. Otra alternativa es Firebase que es entra dentro de la categoría de backend as a service (BaaS).
 * Node tiene una naturaleza **asincrónica** o no bloqueante. Gracias a esto permite crear aplicaciones **escalables**. En el siguiente ejemplo de "hola mundo", pueden atenderse muchas conexiones simultáneamente sin agregar más hardware. Por cada conexión, se activa la devolución de llamada o _callback_, pero si no hay trabajo que hacer, Node.js se dormirá.
 ```javascript
