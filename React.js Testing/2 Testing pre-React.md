@@ -22,10 +22,10 @@ Como criterio siempre que podamos hacer unit tests por sobre e2e debemos hacerlo
 Para escribir tests necesitamos de un testing framework que nos dará una library con una serie de *utility functions* y un test runner con el cual ejecutamos los tests y obtenemos un reporte de cuántos pasaron la prueba.
 Los frameworks mas conocidos son **Jasmine**, **Mocha** y **Jest** 
 
-## Mocha
+# Mocha
 > Código en `/unit-testing-mocha`
 
- Es el testing framework más popular pero para ciertas tareas require del uso de libraries como ser [Chai](https://www.chaijs.com/) y [Sinon](https://sinonjs.org/). Esto tiene la contra de tener que ver más de una documentación y dependiendo de la evolución de estas bibliotecas en un futuro algo puede dejar de ser compatible con mocha.
+Es el testing framework más popular pero para ciertas tareas require del uso de librerías como [Chai](https://www.chaijs.com/) y [Sinon](https://sinonjs.org/). Esto tiene la contra de tener que ver más de una documentación y dependiendo de la evolución de estas bibliotecas en un futuro algo puede dejar de ser compatible con mocha.
 
 Si queremos usar la assertion library default:
 ```js
@@ -34,7 +34,7 @@ const assert = require('assert');
 
 Nos permite testear la conexión con la db, creación, lectura, actualización y eliminación de documentos en una colección.
 
-`npm i mocha`
+`npm install mocha`
 
 ```js
 const assert = require('assert');
@@ -755,5 +755,3 @@ describe('applyDiscount', () => {
 ```
 Importamos el módulo db `const db = require('../db');` y luego dentro del test remplazamos la función `db.getCustomerSync()` por una versión falsa que no habla a una db.
 Al agregar esta función veremos que deja de aparecer el mensaje `'Reading a customer from MongoDB...'` y en cambio vemos `'Leyendo customer de mock function...'`
-```js
-```
