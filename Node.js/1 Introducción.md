@@ -68,6 +68,8 @@ import http from 'http'
 
 Sin embargo, en la mayor parte de la documentación y foros online encontraremos información basada en CommonJS.
 
+Debemos tener presente que `require()` cachea el resutlado y sólo la primera vez que se require ejecuta el código de inicialización. Dicho en otras palabras si tenemos un `console.log()` en un archivo que importamos y lo importamos en más de un lugar sólo lo veremos una vez.
+
 
 
 ## El Rol de JavaScript
