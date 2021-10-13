@@ -244,3 +244,21 @@ Como sabemos irá ejecutando los middlewares de izquierda a derecha y en caso de
 
 Esto mismo lo repetimos en todas aquellas rutas que queremos proteger y tendremos certeza de que el usuario tiene sesión.
 
+
+
+# Implementación Frontend
+
+En el frontend mostraremos un formulario de usuario y contraseña, luego al enviarlos obtendremos el token que almacenaremos en local storage o cookies y finalmente lo utilizaremos cuando queramos hacer peticiones.
+
+
+
+Suponiendo que estamos trabajando con Create React App en  `src` creamos una carpeta `services` y en ella un archivo `login.js`. Allí crearemos los distintos métodos asociados al login y luego los exportaremos:
+
+```
+import axios from 'axios';
+
+const baseUrl = 'localhost	'
+
+axios.post('/api/login')
+```
+
