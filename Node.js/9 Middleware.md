@@ -65,7 +65,114 @@ app.get('/', (req,res,next) =>{
 })
 ```
 
+## Manejo de Errores
+Hasta ahora hemos manejado los errores en el bloque `catch`, existe otra alternativa que es hacerlo en un middleware personalizado para el manejo de errores, para ello primero en `index.js` creamos ese middleware. Debemos ubicarlo debajo de todos los paths.
+
+```js
+app.use(express.json());
+app.use('/api/genres', genres);
+
+app.use((err, req, res, next) => {
+	//console.error(err);
+    console.log(err.name)
+    if(error.name === 'CastError'){
+        res.status(400).send({error: 'id used is malformed'});
+    }
+    else{//500 internal server error
+    	res.status(500).end();    
+    }	
+});
+```
+
+En lugar de implementar los distintos  tipos de errores con un if anidado podemos hacemos lo siguiente:
+
+```js
+const ERROR_HANDLERS = {
+  CastError: res =>
+    res.status(400).send({ error: 'id used is malformed' }),
+
+  ValidationError: (res, { message }) =>
+    res.status(409).send({ error: message }),
+
+  JsonWebTokenError: (res) =>
+    res.status(401).json({ error: 'token missing or invalid' }),
+
+  TokenExpirerError: res =>
+    res.status(401).json({ error: 'token expired' }),
+
+  defaultError: (res, error) => {
+    console.error(error.name)
+    res.status(500).end()
+  }
+}
+
+module.exports = (error, request, response, next) => {
+  const handler =
+    ERROR_HANDLERS[error.name] || ERROR_HANDLERS.defaultError
+
+  handler(response, error)
+}
+```
+
+
+
+Luego en `catch()` del handler de la ruta en lugar de imprimir el error con `console.error(err)`  lo que hacemos es pasárselo al siguiente middleware que tenga como primer parámetro `err` 
+```js
+try {
+    await genre.save();
+    res.send(genre);
+} catch (err) {
+    next(err);
+}
+```
+
+
+
+### Sentry
+
+Sentry es una herramienta que nos permite conocer qué errores tenemos y  en qué archivo, línea, qué navegador fue utilizado, etc.
+
+En la [página oficial](https://sentry.io/) debemos ir a Product para buscar Node y luego elegir Express y nos aparecerá un código de ejemplo
+
+```
+npm install @sentry/node
+```
+
+
+
+## Middleware 404
+
+Creamos un middleware de 404 para aquellos casos en los que no hemos encontrado ningún controlador con la ruta que matchee con la petición recibida. Debemos colocarlo debajo de todos los controladores (o rutas).
+
+```js
+// 404 page
+app.use((req, res) => {
+	res.status(404).end();
+});
+```
+
+Es una buena práctica tener un directorio `middleware` en el cual por ejemplo tendremos un archivo `notFound.js` con 
+
+
+
+Luego en `index.js`
+
+```js
+const notFound = require(./middleware/notFound.js);
+
+//...
+
+app.use(notFount)
+```
+
+
+
+Lo mismo tendríamos que hacer para el manejo de errores con un archivo `handleErrors.js`
+
+
+
 ### 404 Pages
+
 Vamos a utilizar un **custom middleware** para manejar las páginas 404, la función se disparará para todos los requests  en la medida que no se haya enviado una respuesta anteriormente.
 Debemos ubicarlo debajo de los handlers sino nunca los alcanzará dado que estamos entregando una respuesta al navegador con lo cual no continuará ejecutando los restantes middleware. 
 
@@ -110,7 +217,7 @@ app.use((req, res, next) => {
 });
 ```
 
-### Modularidad:
+### Modularidad
 Cuando trabajemos con nuestras custom middleware functions queremos tenerlas a cada una en un módulo separado dentro de la carpeta `middleware`, por ejemplo creamos el archivo `logger.js`:
 
 ```js
@@ -128,7 +235,7 @@ const logger = require('./middleware/logger');
 app.use(logger)
 ```
 
-## 3rd Party Middleware:
+## 3rd Party Middleware
 Otra de las ventajas de usar Node y Express es hacer uso de las funciones middleware creadas por terceros, debemos utilizar sólo aquellos estrictamente necesarios pues repercutirán en la performance volviendo a la aplicación más lenta.
 Podemos encontrarlos https://expressjs.com/en/resources/middleware.html
 
@@ -226,3 +333,4 @@ app.use(cors());
 
 
 Lógicamente para aportar seguridad deberíamos especificar los orígenes que aceptamos, pero esto no es una medida de seguridad super efectiva ya que puede ser engañado fácilmente. Otra opción es dejarlo así y delegar la seguridad en otros aspectos como tokens, autenticación.
+
