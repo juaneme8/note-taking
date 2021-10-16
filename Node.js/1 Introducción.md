@@ -7,41 +7,27 @@
 ## Introducción
 Antiguamente JavaScript corría únicamente en navegadores en el frontend y lo usábamos para aportar interactividad al sitio (por ejemplo al trabajar con click events). Node.js nos permite ejecutar código de JavaScript en el servidor o en nuestra pc por lo que decimos que es un _runtime environment_.
 
-Las computadoras entienden **machine code**, como es difícil de leer o escribir (es similar al binario). Es por eso que se utiliza **assembly language** el cual es un poco más simple de entender y ensambla el código en machine code. Como es complejo para leer y escribir, por encima del assembly language nos encontramos con lenguajes de programación como **C++** los cuales son abstracciones del assembler. En definitiva el código C++ es compilado en machine code por lo que será entendido por la computadora. **JavaScript** es todavía más abstracto respecto a machine code que C++ para simplificar la programación. Sin embargo las computadoras no entienden de manera directa JavaScript ni pueden compilarlo en machine code. Es por eso que no podemos ejecutar JavaScript de manera directa en una computadora, pero sí podemos hacerlo dentro de un navegador. Esto es posible gracias al motor llamado **V8 engine** que se trata de un programa escrito en C++ por Google y compila el JavaScript a machine code en tiempo real. Sin embargo sólo podremos hacerlo dentro del navegador y acá es donde Node.js entra en escena. Se trata de un **programa escrito en C++** que utiliza el V8 Engine y como sí podemos ejecutar código C++ en la computadora, seremos capaces de correr código JavaScript tanto en nuestra computadora como en el server.
+El motor de Google Chrome llamado **V8 engine** es un programa escrito en C++ que compila el JavaScript a machine code en tiempo real. Esto nos permitiría utilizar JavaScript sólamente dentro del navegador. Node.js es un programa escrito en C++ que utiliza el V8 Engine y como sí podemos ejecutar código C++ en la computadora, seremos capaces de correr código JavaScript tanto en nuestra computadora como en el server.
 Node.js no es simplemente un wrapper del v8 engine, sino que aporta funcionalidades extra a JavaScript como ser:
 
 * Lectura y escritura de archivos en la computadora
 * Conexión a base de datos
-* Actuar como servidor de contenido
+* Funcionalidad de servidor
 
-Como contrapartida perdimos acceso al DOM (document object model) por lo que no podremos interacturar con elementos HTML. 
+> Como contrapartida al utilizar Node.js perdemos al DOM (document object model) por lo que no podremos interacturar con elementos HTML. 
+>
 > Recordar que `document` forma parte del objeto `window` el cual no existe en Node.js, sino que contamos con el objeto `global`.
 
 ## Características Node.js
 * **Multiplataforma** 
 * **Open-source**
-* Permite crear **API REST ** (application programming interface) con la cual vamos a através de endpoints podremos crear información, recuperar, borrar, editar, etc. Un mismo path puede servir para diferentes funciones dependiendo de la acción que utilicemos.
-* Es un **runtime environment** a diferencia de alternativas como ASP.NET, Ruby on Rails, Django que son frameworks. Otra alternativa es Firebase que es entra dentro de la categoría de backend as a service (BaaS).
+* Permite crear **API REST ** (application programming interface) con la cual vamos a a través de endpoints podremos crear información, recuperar, borrar, editar, etc. Un mismo path puede servir para diferentes funciones dependiendo de la acción que utilicemos.
+* Es un **runtime environment**.
 * Node tiene una naturaleza **asincrónica** o no bloqueante. Gracias a esto permite crear aplicaciones **escalables**. En el siguiente ejemplo de "hola mundo", pueden atenderse muchas conexiones simultáneamente sin agregar más hardware. Por cada conexión, se activa la devolución de llamada o _callback_, pero si no hay trabajo que hacer, Node.js se dormirá.
-```javascript
-const http = require('http');
 
-const hostname = '127.0.0.1';
-const port = 3000;
-
-const server = http.createServer((req, res) => {
-  res.statusCode = 200;
-  res.setHeader('Content-Type', 'text/plain');
-  res.end('Hola Mundo');
-});
-
-server.listen(port, hostname, () => {
-  console.log(`El servidor ejecutándose en http://${hostname}:${port}/`);
-});
-```
 * Es utilizado por **PayPal, LinkedIn, Netflix, Trello, Walmart, Ebay, NASA**, etc.
-* Si ya manejamos JavaScript no es necesario el aprendizaje de un nuevo lenguaje para el server y es posible compartir código entre front-end y back-end.
-* Tiene una **comunidad** muy grande
+* Si ya manejamos JavaScript no es necesario el aprendizaje de un nuevo lenguaje para el server y es posible compartir código entre frontend y backend.
+* Tiene una **comunidad** muy grande.
 * Gran ecosistema de **open source libraries** que posibilita no tener que desarrollar de cero los building blocks de nuestra aplicación logrando así concentrarnos en lo más específico de nuestro programa.
 > Podremos buscar paquetes en  [npmjs](https://www.npmjs.com/)
 > Podremos comparar paquetes en [npm trends](https://www.npmtrends.com/) 
