@@ -67,3 +67,9 @@ Luego para utilizar este componente:
 </Togglable>
 ```
 Es decir que el `form` en sí constituirá el `children` en `Togglable` y además tendrá la prop `buttonLabel`.
+
+
+
+## Buenas Prácticas
+
+Debemos evitar crear métodos encargados de renderizar elementos, en ese caso lo aconsejable es recurrir a un nuevo componente. Supongamos que tenemos la siguiente función flecha `const renderForm = () => {}` , ante cada renderizado del componente esta constante volvería a crearse lo cual no será bueno en cuanto a performance y no será reutilizable.
