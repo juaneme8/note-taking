@@ -132,3 +132,11 @@ GitHub tiene un servicio de hosting llamado GitHub Pages. Gracias a esto el cont
 Si queremos crear una página personal debemos crear un repositorio llamado `username.github.io` (cuando esté listo accederemos a la página con esa url). Luego debemos clonar el repositorio vacío, crear un archivo `index.html` y pushear. Como se trata de la página personal no será necesario realizar ninguna configuración adicional en las Settings del proyecto (a diferencia de si se tratara de una página de un proyecto que tendremos que ingresar a la configuración de GitHub Pages).
 
 > En https://pages.github.com/ podremos encontrar la documentación al respecto.
+
+
+
+## Cambiar nombre de `master` a `main`
+
+Cuando trabajemos con repositorios antiguos y queramos cambiar el nombre de la rama principal de `master` a `main` podemos seguir el siguiente tutorial.
+
+https://dev.to/rhymu8354/git-renaming-the-master-branch-137b

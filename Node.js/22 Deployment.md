@@ -31,6 +31,14 @@ Notar que pusheamos tanto a GitHub como a Heroku.
 * Con `heroku logs --tail` visualizamos los logs.
 * Con `heroku open` abrimos la aplicación sin tener que ingresar manualmente la URL.
 
+Si el proyecto ya fue deployado no podremos utilizar `heroku create nombreProyecto` para el remote `heroku` por lo que tendremos que hacerlo con:
+
+```
+heroku git:remote -a nombreProyecto
+```
+
+
+
 ## Archivo `Procfile`
 
 El archivo `Procfile` ubicado en el directorio raíz para especificar explícitamente qué comando debe ser ejecutado cuando iniciemos la aplicación.
