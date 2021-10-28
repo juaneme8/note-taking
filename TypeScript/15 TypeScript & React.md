@@ -15,7 +15,7 @@ Como aspectos negativos exige ingresar mucho más código y estar atentos a los 
 ## Proyecto con TypeScript
 Si queremos utilizar create-react-app podemos crear un template que viene con TypeScript de la siguiente forma:
 
-```
+```bash
 npx create-react-app react-typescript-demo --template typescript
 ```
 
@@ -36,7 +36,7 @@ Algunas observaciones:
 
 Supongamos que tenemos un componente `Greet` que recibe via props un string `name` y lo muestra en pantalla.
 
-```jsx
+```tsx
 export const Greet = (props) => {
     return (
         <div>
@@ -50,7 +50,7 @@ En ese momento obtendremos el mensaje `'props' implicitly has 'any' type`. Esto 
 
 Esto lo hacemos utilizando la palabra reservada `type` con la cual definimos la estructura de las `props` que recibirá el componente. Luego la utilizamos indicando `(props: GreetProps)`.
 
-```jsx
+```tsx
 type GreetProps = {
     name: string
 }
@@ -76,7 +76,7 @@ Luego de hacer esto tendremos dos ventajas:
 
 Si queremos recibir más propiedades via props debemos agregarlas al tipo `GreetProps`
 
-```jsx
+```tsx
 type GreetProps = {
     name: string,
     messageCount: number,
@@ -105,11 +105,11 @@ Apenas modifiquemos `GreetProps` obtendremos un error en el componente que utili
 
 ### Props de tipo Objeto
 
-Supongamos que tenemos un componente `Person` que recibe como props un objeto `name` con una propiedad `firstName` y otra `lastName`.
+Supongamos que tenemos un componente `Person` que recibe como props un objeto `name` con una propiedad `first` y otra `last`.
 
 
 
-```jsx
+```tsx
 type PersonProps = {
     name: {
         first: string,
@@ -127,28 +127,11 @@ export const Person = (props: PersonProps) => {
 
 
 
-Para utilizarlo en `App.tsx`
-
-```
- <Person name={personName} />
-```
-
-Siendo `personName`
-
-```
-const personName = {
-    first: 'Juan',
-    last: 'Ocho'
-}
-```
-
-
-
 ### Props de tipo array de objetos
 
-Supongamos que tenemos un componente `PersonList` que en lugar de un nombre debe mostrar una lista de nombres que recibe via props. 
+Supongamos que tenemos un componente `PersonList` que en lugar de un nombre debe mostrar una lista de nombres que recibe como un array de objetos `names` con una propiedad `first` y una `last` via props. 
 
-```
+```tsx
 type PersonListProps = {
     names: {
         first: string,
@@ -168,34 +151,7 @@ export const PersonList = (props: PersonListProps) => {
 
 
 
-Para utilizarlo en `App.tsx`
-
-```
-<PersonList names={nameList} />
-```
-
-Siendo `nameList`
-
-```
-const nameList = [
-    {
-        first: 'Juan',
-   		last: 'Ocho'
-    },
-    {
-    	first: 'Juan',
-    	last: 'Nueve'
-    },
-    {
-    	first: 'Juan',
-    	last: 'Diez'
-    },
-]
-```
-
-
-
-### Props con unión de strings
+### Props de tipo unión de strings
 
 Supongamos que tenemos un componente `Status` que recibe mediante una prop `status` un string que no puede tomar cualquier valor, sino que debe ser uno de los siguientes:`loading`, `sucess` o `error`.
 
@@ -203,7 +159,7 @@ Supongamos que tenemos un componente `Status` que recibe mediante una prop `stat
 
 
 
-```jsx
+```tsx
 type StatusProps = {
     status: 'loading' | 'success' | 'error'
 }
@@ -219,23 +175,60 @@ export const Status = (props: StatusProps) => {
 
 
 
+### Props  `children`
+
+Supongamos que tengo un componente `Heading` y queremos pasarle un texto entre los tags de apertura y cierre de modo que lo reciba en `props.children` y lo muestre en pantalla.
+
+```tsx
+type HeadingProps = {
+    children: string
+}
+export const Heading = (props: HeadingProps) => {
+    return (
+        <h2>
+            {props.children}
+        </h2>
+    )
+}
+```
 
 
 
+En el componente padre tendremos `<Heading>Mensaje que queremos mostrar</Heading>`
 
 
 
+En el caso anterior hemos utilizado como `children` un string pero también podría haber sido un componente React. Supongamos que tenemos un componente `Oscar` que queremos que reciba como `props.children` a un componente `Heading` con el mensaje a mostrar por el primero.
+
+En `Oscar.tsx`
+
+```tsx
+type OscarProps = {
+	children: React.ReactNode
+}
+```
+
+> Este tipo proviene de @types/react y si estamos utilizando React 17 en adelante no habrá necesidad de importar React.
 
 
 
+## Props opcionales
+
+Si queremos indicar que una prop es opcional lo hacemos colocando un signo de pregunta `?` después del nombre de la prop al definir el `type`. Por ejemplo si `messageCount` es opcional:
+
+```tsx
+type GreetProps = {
+	name: string,
+	messageCount?: number,
+    isLoggedIn: boolean
+}
+```
+
+> Luego podríamos darle un valor por default `const {messageCount = 0}=props;`
 
 
 
-
-
-
-
-
+# Contenido para Revisar
 
 En`App.tsx` debemos especificar que se trata de un componente funcional de React y esto lo hacemos con `React.FC`
 
