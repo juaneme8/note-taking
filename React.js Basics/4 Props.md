@@ -27,13 +27,23 @@ const Greet = (props) => {
 ```
 Notar que `props` puede tener muchas propiedades y sólo hacemos destructuring de aquellas que queremos usar.
 
+
+Si recibimos varios elementos via props y solo queremos hacer destructuring de alguno de ellos:
+
+```
+const Greet = ({name, age, ...props}) => {
+	return <h1>Hello {name} you are {age} and you live in {props.city}!</h1>;
+};
+```
+
+
+
 ### Destructuring y asignación de Alias
 `const {name : nombre} = props;`
 
-> Como queremos que React evalúe la expresión `props.name` y no que nos muestre ese texto, lo ponemos dentro de llaves `{props.name}`
 
-> Cuando el JSX tiene líneas múltiples en lugar de poner: 
-> `return <h1> Hello {props.name} </h1>` debemos poner el valor retornado entre paréntesis y siempre deberá retornar un único elemento contenedor o *wrapper element* es decir:
+
+> Cuando el JSX tiene líneas múltiples en lugar de poner `return <h1> Hello {props.name} </h1>` debemos poner el valor retornado entre paréntesis y siempre deberá retornar un único elemento contenedor o *wrapper element* es decir:
 ```jsx
 return (
 		<div>
@@ -43,11 +53,11 @@ return (
 	);
 ```
 
-## Passing Children
+## Prop `children`
 Existe una prop especial llamada `children` y desde el padre para usarla debemos pasar su contenido entre los tags de apertura y cierre del componente.
 Luego en el componente lo referenciamos usando la propiedad reservada `children`.
 
-Esto es particularmente útil cuando trabajamos con *Dialog Boxes* donde el consumidor del componente entre tags de aquello que quiere renderizar como contenidoen dicho modal.
+Esto es particularmente útil cuando trabajamos con *Dialog Boxes* donde el consumidor del componente entre tags de aquello que quiere renderizar como contenido en dicho modal.
 
 En `App.js`
 ```jsx

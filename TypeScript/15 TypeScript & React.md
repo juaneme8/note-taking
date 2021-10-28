@@ -228,6 +228,28 @@ type GreetProps = {
 
 
 
+(pendiente desde video 6-10)
+
+### Props de eventos
+
+### Props de estilos
+
+### Destructuring de Props
+
+### Exportar tipos
+
+### Reutilizar tipos
+
+### useState Hook
+
+#### Valor inferido
+
+#### Valor inicial y valor futuro de distinto tipo
+
+
+
+
+
 # Contenido para Revisar
 
 En`App.tsx` debemos especificar que se trata de un componente funcional de React y esto lo hacemos con `React.FC`
