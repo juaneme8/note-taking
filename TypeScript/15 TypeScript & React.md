@@ -228,9 +228,84 @@ type GreetProps = {
 
 
 
-(pendiente desde video 6-10)
-
 ### Props de eventos
+
+Trabajaremos con dos de los eventos más usados click event de un `button` y change event de un elemento `input`.
+
+#### Click Event
+
+Trabajamos con un componente `Input` que recibe como props `handleClick`.
+
+En primer lugar consideramos el caso en que no recibimos ningún parámetro y tampoco no retornamos ninguno.
+
+```tsx
+type ButtonProps = {
+    handleClick: () => void
+}
+export const Button = (props: ButtonProps) => {
+    return (
+        <button onClick={props.handleClick}>Button</button>
+    )
+}
+```
+
+> Notar que al poner `handleClick: () => void` indicamos que no recibe ningún parámetro y no retorna nada, por ejemplo consideramos que lo usaremos para hacer un llamado a una API.
+
+Luego en `App.tsx` tendremos ` <Button handleClick={() => console.log('Button clicked')} />`
+
+
+
+En segundo lugar consideramos el caso en el que necesitamos usar el evento en el handler.
+
+```tsx
+type ButtonProps = {
+    handleClick: (event:React.MouseEvent<HTMLButtonElement>) => void
+}
+export const Button = (props: ButtonProps) => {
+    return (
+        <button onClick={props.handleClick}>Button</button>
+    )
+}
+```
+
+Luego en `App.tsx` tendremos `<Button handleClick={(event) => console.log('Button clicked', event)} />`
+
+
+
+Por último consideramos el caso en que queremos utilizar también un id.
+
+```tsx
+type ButtonProps = {
+    handleClick: (event: React.MouseEvent<HTMLButtonElement>, id: number) => void
+}
+export const Button = (props: ButtonProps) => {
+    return (
+        <button onClick={event => props.handleClick(event, 1)}>Button</button>
+    )
+}
+```
+
+En `App.tsx` tendremos `      <Button handleClick={(event, id) => console.log('Button clicked', event, id)} />`
+
+
+
+#### Change Event
+
+Trabajamos con un archivo `Input.tsx` que recibe como props `value` y `handleChange`
+
+```tsx
+type InputProps = {
+    value: string,
+    handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void
+}
+export const Input = (props: InputProps) => {
+    return (
+        <input type="text" value={props.value} onChange={props.handleChange}></input>
+    )
+}
+```
+
+En `App.tsx` lo utilizamos de esta forma `<Input value="test" handleChange={event => console.log(event.target.value)} />`
 
 ### Props de estilos
 
