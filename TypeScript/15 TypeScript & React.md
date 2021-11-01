@@ -309,6 +309,23 @@ En `App.tsx` lo utilizamos de esta forma `<Input value="test" handleChange={even
 
 ### Props de estilos
 
+Trabajamos con un componente `Container.tsx`
+
+```tsx
+type ContainerProps = {
+    styles: React.CSSProperties,
+}
+export const Container = (props: ContainerProps) => {
+    return (
+        <h1 style={props.styles}>Container</h1>
+    )
+}
+```
+
+
+
+En `App.tsx` tendremos `<Container styles={{ color: "red" }} />` en caso de que intentemos utilizar una propiedad CSS inválida nos indicará el error lo mismo si usamos un valor incorrecto.
+
 ### Destructuring de Props
 
 ### Exportar tipos
