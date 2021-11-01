@@ -328,9 +328,124 @@ En `App.tsx` tendremos `<Container styles={{ color: "red" }} />` en caso de que 
 
 ### Destructuring de Props
 
+Es posible hacer el destructuring de las props al definir el componente como podemos ver a continuación, retomando el ejemplo de `Input.tsx`
+
+```tsx
+type InputProps = {
+    value: string,
+    handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void
+}
+export const Input = ({value,handleChange}: InputProps) => {
+    return (
+        <input type="text" value={value} onChange={handleChange}></input>
+    )
+}
+```
+
+
+
 ### Exportar tipos
 
+En componentes simples tiene sentido definir los tipos en la parte superior, sin embargo cuando estos tienen múltiples tipos nos conviene hacerlo en un archivo aparte.
+
+Por ejemplo tenemos `Person.tsx` con el siguiente código:
+
+```tsx
+type PersonProps = {
+    name: {
+        first: string,
+        last: string
+    }
+}
+export const Person = (props: PersonProps) => {
+    return (
+        <div>
+            <h2>My name is {props.name.first} {props.name.last}</h2>
+        </div>
+    )
+}
+```
+
+
+
+Luego copiamos los tipos a un archivo `Person.types.ts`
+
+```tsx
+export types PersonProps = {
+    name: {
+        first: string,
+        last: string
+    }
+}
+```
+
+Y los importamos en `Person.tsx`
+
+```tsx
+import {PersonProps} from './Person.types'
+
+export const Person = (props: PersonProps) => {
+    return (
+        <div>
+            <h2>My name is {props.name.first} {props.name.last}</h2>
+        </div>
+    )
+}
+```
+
+
+
 ### Reutilizar tipos
+
+Para asegurar la reutilización y evitar repeticiones, es importante reutilizar los tipos siempre que sea posible. 
+
+Por ejemplo en `Person.types.ts` hasta ahora tenemos:
+
+```tsx
+export types PersonProps = {
+    name: {
+        first: string,
+        last: string
+    }
+}
+```
+
+ Podríamos definir un tipo `Name` y exportarlo para utilizarlo en otros lados.
+
+```tsx
+export type Name = {
+	{
+        first: string,
+        last: string
+    }
+}
+export types PersonProps = {
+    name: Name
+}
+```
+
+Por ejemplo en `PersonList` donde hasta ahora tenemos:
+
+```tsx
+type PersonListProps = {
+    names: {
+        first: string,
+        last: string
+    }[]
+}
+```
+
+Podemos utilizar el tipo `Name`
+
+```tsx
+import {Name} from './Person.types'
+
+type PersonListProps = {
+    names: Name[]
+}
+```
+
+
 
 ### useState Hook
 
