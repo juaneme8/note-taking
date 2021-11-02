@@ -447,11 +447,111 @@ type PersonListProps = {
 
 
 
-### useState Hook
+### `useState` Hook
 
-#### Valor inferido
+Estudiaremos como establecer los tipos de los hooks, comenzando por el `useState` hook.
 
-#### Valor inicial y valor futuro de distinto tipo
+#### `useState` con tipo inferido de valor inicial
+
+El primer caso que consideramos será aquel en el cual el tipo es inferido en función del valor inicial. Para ello creamos un componente `LoggedIn.tsx`. En él tendremos un botón Login y uno Logout y debemos mostrar un mensaje acorde a ese estado.
+
+```tsx
+import { useState } from "react"
+
+export const LoggedIn = () => {
+    const [isLoggedIn, setIsLoggedIn] = useState(false)
+    const handleLogin = () => {
+        setIsLoggedIn(true)
+    }
+    const handleLogout = () => {
+        setIsLoggedIn(false)
+    }
+    return (
+        <>
+            <button onClick={handleLogin}>Login</button>
+            <button onClick={handleLogout}>Logout</button>
+            <div>the user is {isLoggedIn ? "logged in" : "logged out"}</div>
+        </>
+    )
+}
+```
+
+Si ponemos el cursor sobre `isLoggedIn` veremos que se trata de un `boolean` y por ende sólo nos permitirá asignarle ese tipo de valores con `setIsLoggedIn`.
+
+#### 
+
+#### `useState` con tipo del valor inicial distinto del valor futuro
+
+En ocasiones no conocemos el valor inicial de una variable de estado y la asignaremos luego. 
+
+Supongamos que trabajamos con un componente `User.tsx` que cuenta también con dos botones de Login y Logut y queremos que al loguearnos se almacene en una variable de estado `user` los datos de un usuario de tipo `AuthUser`. 
+
+Como inicialmente no disponemos de estos datos le damos valor `null`
+
+ `const [user, setUser] = useState(null)` 
+
+Sin embargo, debido a la inferencia de tipo, cuando el botón de login sea clickeado no nos dejará setear el usuario con como un objeto de tipo `AuthUser` es decir: `setUser({name:'juaneme8', email:'j8@example.com'})` sino que esperará que le pasemos `null`. 
+
+En este caso no podremos confiar en la inferencia de tipo sino que tendremos que especificarle que el tipo podrá ser `null` o de tipo `AuthUser` y esto lo hacemos con:
+
+`const [user, setUser] = useState<AuthUser|null>(false)`
+
+
+
+```tsx
+import { useState } from "react"
+
+type AuthUser = {
+    name: string,
+    email: string
+}
+
+export const User = () => {
+    const [user, setUser] = useState<AuthUser | null>(null)
+
+    const handleLogin = () => {
+        setUser({
+            name: 'j8',
+            email: 'j8@example.com'
+        })
+    }
+    const handleLogout = () => {
+        setUser(null)
+    }
+    return (
+        <>
+            <button onClick={handleLogin}>Login</button>
+            <button onClick={handleLogout}>Logout</button>
+            <div>User is {user?.name}</div>
+            <div>Email is {user?.email}</div>
+        </>
+    )
+}
+```
+
+
+
+> A la hora de renderizar estos campos veremos que al hacer click en el Intellicense se incluye el *optional chaining operator* automáticamente  ya que `user` puede ser `null` y sólo queremos acceder a las propiedades `name` e `email` si no lo es.
+
+
+
+#### `useState` Type Assertion
+
+Anteriormente vimos que la posibilidad de que el valor sea `null` nos exige chequear siempre que no lo sea antes de acceder a las propiedades, es por eso que si  tenemos absoluta certeza de que `user` nunca será `null` (por ejemplo si se seteará en un efecto `useEffect` y no tenemos el método logout) podemos definir como valor inicial un objeto vacío como si fuera de tipo `AuthUser` y esto lo hacemos con el keyword `as`.
+
+`const [user, setUser] = useState<AuthUser>({} as AuthUser)`
+
+De esta manera podremos acceder a `name` y `email` sin chequear que sea `null` es decir sin el optional chainig operator `{user.name}`
+
+
+
+
+
+
+
+# Video 11 completo
+
+
 
 
 
