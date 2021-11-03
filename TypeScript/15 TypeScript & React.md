@@ -447,7 +447,7 @@ type PersonListProps = {
 
 
 
-### `useState` Hook
+## Tipos en el hook `useState`
 
 Estudiaremos como establecer los tipos de los hooks, comenzando por el `useState` hook.
 
@@ -545,13 +545,228 @@ De esta manera podremos acceder a `name` y `email` sin chequear que sea `null` e
 
 
 
+## Tipos en el hook `useReducer` 
+
+Si bien `useState` es un hook útil cuando manejamos valores simples de estado, mientras que es conveniente utilizar `useReducer` cuando el estado es más complejo y el estado futuro depende del estado anterior.
+
+Trabajaremos con un componente `Counter.tsx` que cuenta con botones para incrementar o decrementar el valor de cuenta. Inicialmente lo haremos sin agregar conceptos de TypeScript:
+
+```tsx
+import { useReducer } from "react";
+
+const initialState = { count: 0 }
+
+function reducer(state, action) {
+    switch (action.type) {
+        case 'increment': {
+            return { count: state.count + action.payload };
+        }
+        case 'decrement': {
+            return { count: state.count - action.payload };
+        }
+        default:
+            return state;
+    }
+}
+
+export const Counter = () => {
+    const [state, dispatch] = useReducer(reducer, initialState);
+    return (
+        <>
+            <div>{state.count}</div>
+            <button onClick={() => dispatch({ type: 'increment', payload: 10 })}>Increment 1 </button>
+            <button onClick={() => dispatch({ type: 'increment', payload: 1 })}>Increment 10 </button>
+            <button onClick={() => dispatch({ type: 'decrement', payload: 1 })}>Decrement 1 </button>
+            <button onClick={() => dispatch({ type: 'decrement', payload: 10 })}>Decrement 10 </button>
+        </>
+    )
+}
+```
+
+Veremos que tenemos líneas rojas indicandonos errores en la línea `function reducer(state, action) {` debido a que debemos especificar el tipo de `state` y `action`. Como sabemos el tipo de datos que van a almacenar estar variables definimos los `type`
 
 
 
+```tsx
+import { useReducer } from "react";
 
-# Video 11 completo
+type CounterState = {
+    count: number
+}
+
+type CounterAction = {
+    type: string,
+    payload: number
+}
+
+const initialState = { count: 0 }
+
+function reducer(state: CounterState, action: CounterAction) {
+    switch (action.type) {
+        case 'increment': {
+            return { count: state.count + action.payload };
+        }
+        case 'decrement': {
+            return { count: state.count - action.payload };
+        }
+        default:
+            return state;
+    }
+}
+
+export const Counter = () => {
+    const [state, dispatch] = useReducer(reducer, initialState);
+    return (
+        <>
+            <div>{state.count}</div>
+            <button onClick={() => dispatch({ type: 'increment', payload: 1 })}>Increment 1 </button>
+            <button onClick={() => dispatch({ type: 'increment', payload: 10 })}>Increment 10 </button>
+            <button onClick={() => dispatch({ type: 'decrement', payload: 1 })}>Decrement 1 </button>
+            <button onClick={() => dispatch({ type: 'decrement', payload: 10 })}>Decrement 10 </button>
+        </>
+    )
+}
+```
+
+Luego debido a la inferencia de tipos veremos que si posicionamos el mouse en `const [state, dispatch] = useReducer(reducer, initialState);` en `state` sabrá que es de tipo `CounterState`, en `dispatch` de tipo `React.Dispatch<CounterAction>` (esto podría ser útil si tenemos que pasar a un componente `state` o `dispatch` como props).
 
 
+
+Hemos definido el `type` como `string`
+
+```
+type CounterAction = {
+    type: string,
+    payload: number
+}
+```
+
+Esto a futuro puede traernos inconvenientes porque en lugar de "increment" y "decrement" podríamos poner "reset" sin que nos marque ningún error (a pesar de que esto lo atajaríamos con el `default` case del switch). Esto lo solucionamos utilizando template literals en lugar de `string`.
+
+```
+type CounterAction = {
+    type: 'increment'|'decrement',
+    payload: number
+}
+```
+
+
+
+Si ahora quisiéramos agregar la funcionalidad `reset` podríamos hacerlo agregando `reset` al `CounterAction` y agregando un botón para tal fin y un caso en el reducer. Sin embargo, al hacerlo obtendríamos un error por no estar usando payload cosa que no necesitamos en este caso. La forma más simple sería pasarle un `payload: 0` que luego no usamos en el reducer.
+
+```tsx
+import { useReducer } from "react";
+
+type CounterState = {
+    count: number
+}
+
+type CounterAction = {
+    type: 'increment' | 'decrement' | 'reset',
+    payload: number
+}
+
+const initialState = { count: 0 }
+
+function reducer(state: CounterState, action: CounterAction) {
+    switch (action.type) {
+        case 'increment': {
+            return { count: state.count + action.payload };
+        }
+        case 'decrement': {
+            return { count: state.count - action.payload };
+        }
+        case 'reset': {
+            return initialState;
+        }
+        default:
+            return state;
+    }
+}
+
+export const Counter = () => {
+    const [state, dispatch] = useReducer(reducer, initialState);
+    return (
+        <>
+            <div>{state.count}</div>
+            <button onClick={() => dispatch({ type: 'increment', payload: 1 })}>Increment 1 </button>
+            <button onClick={() => dispatch({ type: 'increment', payload: 10 })}>Increment 10 </button>
+            <button onClick={() => dispatch({ type: 'decrement', payload: 1 })}>Decrement 1 </button>
+            <button onClick={() => dispatch({ type: 'decrement', payload: 10 })}>Decrement 10 </button>
+            <button onClick={() => dispatch({ type: 'reset', payload: 0 })}>Reset </button>
+        </>
+    )
+}
+```
+
+
+
+Otra opción sería indicar que `payload` es opcional:
+
+```
+type CounterAction = {
+    type: 'increment' | 'decrement' | 'reset',
+    payload?: number
+}
+```
+
+Pero esto traería el incoveniente que de que dentro del case `increment` y `decrement` como esos sí usan `action.payload` nos aparecería "Object is possibly 'undefined'", lo cual podríamos solucionar colocando `(action.payload || 0)`.
+
+Una solución mas conveniente es usar lo que se conoce como **discriminated unions** sería creando dos tipos `UpdateAction` (con `type` y `payload`), `ResetAction` )(sólo con `type `) y declarando `CounterAction` como la unión de los dos.
+
+ 
+
+```tsx
+import { useReducer } from "react";
+
+type CounterState = {
+    count: number
+}
+
+type UpdateAction = {
+    type: 'increment' | 'decrement',
+    payload: number
+}
+
+type ResetAction = {
+    type: 'reset'
+}
+
+
+type CounterAction = UpdateAction | ResetAction
+
+const initialState = { count: 0 }
+
+function reducer(state: CounterState, action: CounterAction) {
+    switch (action.type) {
+        case 'increment': {
+            return { count: state.count + action.payload };
+        }
+        case 'decrement': {
+            return { count: state.count - (action.payload || 0) };
+        }
+        case 'reset': {
+            return initialState;
+        }
+        default:
+            return state;
+    }
+}
+
+export const Counter = () => {
+    const [state, dispatch] = useReducer(reducer, initialState);
+    return (
+        <>
+            <div>{state.count}</div>
+            <button onClick={() => dispatch({ type: 'increment', payload: 1 })}>Increment 1 </button>
+            <button onClick={() => dispatch({ type: 'increment', payload: 10 })}>Increment 10 </button>
+            <button onClick={() => dispatch({ type: 'decrement', payload: 1 })}>Decrement 1 </button>
+            <button onClick={() => dispatch({ type: 'decrement', payload: 10 })}>Decrement 10 </button>
+            <button onClick={() => dispatch({ type: 'reset' })}>Reset </button>
+        </>
+    )
+}
+```
 
 
 
@@ -586,4 +801,6 @@ export default About;
 ```
 
 
+
+## 
 
