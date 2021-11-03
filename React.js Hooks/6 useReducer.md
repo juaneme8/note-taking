@@ -1,6 +1,6 @@
 # useReducer
-`useReducer` es un hook que se utiliza para el manejo de estado como alternativa a `useState` . De hecho, podemos decir que `useReducer` es un hook más primitivo, de hecho `useState` está hecho con `useReducer`.
-Al final del capítulo podremos indicar cuando conviene usar uno por sobre el otro. 
+`useReducer` es un hook que se utiliza para el manejo de estado como alternativa a `useState` . De hecho, podemos decir que `useReducer` es un hook más primitivo puesto que `useState` está hecho con `useReducer`.
+Más adelante veremos cuándo conviene usar uno por sobre el otro. 
 Así como `useState` está relacionado con estado, `useEffect` está relacionado con efectos secundarios, `useContext` está relacionado con Context API, el hook `useReducer` está relacionado con **reducers**.
 
 En JavaScript el método `reduce()` ejecuta una función **reductora** sobre cada elemento de un array, devolviendo como resultado un único valor.
@@ -137,7 +137,7 @@ const initialState = {
 <button onClick={() => dispatch({ type: 'increment' })}>Increment</button>
 ```
 4. En el `reducer()` cambiar `action` por `action.type` en el switch
- y retornar el nuevo objeto `state` en lugar de un valor
+ y retornamos un objeto en lugar de un valor.
 
 El código completo nos queda:
 ```js
@@ -317,6 +317,7 @@ export default CounterTwoii;
 Si bien en la sección anterior trabajamos con un objeto de `state` para trabajar con dos contadores colocando distintos `cases` en el `switch`. Una alternativa más simple sería usar múltiples hooks `useReducer` como veremos a continuación.
 Trabajamos con el componente `CounterThree` y tomamos como punto de partida del código de `CounterOne` que es el contador base con **simple state & action**
 Como el segundo contador tendrá las mismas transiciones de estado (increment, decrement, reset) podemos crear múltiples `useReducer` con el mismo `reducer`.
+
 ```js
 const [count, dispatch] = useReducer(reducer, initialState);
 const [countTwo, dispatchTwo] = useReducer(reducer, initialState);
@@ -639,4 +640,4 @@ De acuerdo a **la relación entre las transiciones de estado**: si no están rel
 
 De acuerdo a **la lógica de negocios de las transiciones de estado**: si no requiere lógica `useState` si requiere lógica compleja `useReducer`. De esta manera la lógica estará en el `reducer` y tendremos una buena separación de intereses, logrando así un código de más fácil lectura y mantenimiento.
 
-De acuerdo a si necesitamos un **estado global o local** si necesitamos un estado local a nivel componente `useState` es una buena opción mientras que si queremos un estado global que pueda ser alterado por componentes anidados en el arbol de componentes `useReducer` es una mejor opción. Usa esto debido a que con `useReducer` tiene la ventaja de que sólo tendremos que pasar al arbol de componentes el `dispatch` mientras que con `useState` tendríamos que pasar múltiples update functions.
+De acuerdo a si necesitamos un **estado global o local** si necesitamos un estado local a nivel componente `useState` es una buena opción mientras que si queremos un estado global que pueda ser alterado por componentes anidados en el árbol de componentes `useReducer` es una mejor opción. Usa esto debido a que con `useReducer` tiene la ventaja de que sólo tendremos que pasar al árbol de componentes el `dispatch` mientras que con `useState` tendríamos que pasar múltiples update functions.
