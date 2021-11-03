@@ -1,5 +1,36 @@
 # TypeScript & React.js
 
+## Contenido para Revisar
+
+En`App.tsx` debemos especificar que se trata de un componente funcional de React y esto lo hacemos con `React.FC`
+
+```jsx
+import React from 'react';
+
+const App: React.FC = () => {
+  return <h1>Hello World!</h1>;
+};
+
+export default App;
+```
+
+Así mismo si se trata de un componente que va a recibir props  podemos crear una interfaz y así nos sugerirá las props al hacer destructuring:
+
+```jsx
+import React from 'react';
+
+interface Props {
+	name: String
+}
+const About: React.FC<Prop> = ({name}) => {
+  return <h1>Hello {name}!</h1>;
+};
+
+export default About;
+```
+
+
+
 ## Introducción
 
 El uso de TypeScript en React nos permite la **detección temprana de bugs** potenciales en la medida que ingresamos el código en lugar de detectarlos en *runtime*. 
@@ -770,37 +801,77 @@ export const Counter = () => {
 
 
 
+## Tipos en el hook `useContext`
+
+A la hora de trabajar con TypeScript y React Context usando hooks trabajaremos con `useContext` para consumir el valor del contexto.
+
+A los fines didácticos consideraremos el uso de React Context para proporcionar un tema a nuestros componentes usando Context API. Para ello asumimos que tenemos los archivos `theme.ts`, `Box.tsx` y `ThemeContext.tsx`
+
+Queremos usar el tema como un contexto y usarlo para estilar el `div` dentro de `Box`
 
 
-# Contenido para Revisar
 
-En`App.tsx` debemos especificar que se trata de un componente funcional de React y esto lo hacemos con `React.FC`
+En primer lugar definimos `theme.ts`
 
-```jsx
-import React from 'react';
-
-const App: React.FC = () => {
-  return <h1>Hello World!</h1>;
-};
-
-export default App;
-```
-
-Así mismo si se trata de un componente que va a recibir props  podemos crear una interfaz y así nos sugerirá las props al hacer destructuring:
-```jsx
-import React from 'react';
-
-interface Props {
-	name: String
+```tsx
+export const theme = {
+    primary: {
+        main: '#3f51b5',
+        text: '#fff',
+    },
+    secondary: {
+        main: '#f50057',
+        text: '#fff',
+    },
 }
-const About: React.FC<Prop> = ({name}) => {
-  return <h1>Hello {name}!</h1>;
-};
-
-export default About;
 ```
 
 
 
-## 
+Luego en `ThemeContext`
+
+```tsx
+import { createContext } from "react"
+import { theme } from './theme'
+
+export const ThemeContext = createContext(theme)
+
+type ThemeContextProviderProps = {
+    children: React.ReactNode
+}
+
+export const ThemeContextProvider = ({ children }: ThemeContextProviderProps) => {
+    return (
+        <ThemeContext.Provider value={theme}>
+            {children}
+        </ThemeContext.Provider>
+    )
+}
+```
+
+
+
+En `App.tsx`
+
+```tsx
+<ThemeContextProvider>
+	<Box />
+</ThemeContextProvider>
+```
+
+
+
+En `Box.tsx`
+
+```tsx
+import { useContext } from "react"
+import { ThemeContext } from "./ThemeContext"
+
+export const Box = () => {
+    const theme = useContext(ThemeContext)
+    return (
+        <div style={{ backgroundColor: theme.primary.main, color: theme.primary.text }}>Box</div>
+    )
+}
+```
 
