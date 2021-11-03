@@ -8,7 +8,7 @@ interface IsPerson {
 	spend(a: number): number;
 }
 ```
-Nuevamente no importa cómo sea llamado luego el parámetro, por simplicidad usamos la letra `a`.
+En los métodos no importa cómo sea llamado luego el parámetro, por simplicidad usamos la letra `a`.
 Si en un futuro tenemos una variable declarada como  `isPerson` tendrá que tener todas esas propiedades y métodos y además no podrá tener ninguna adicional.
 ```ts
 const me: IsPerson = {
