@@ -600,6 +600,20 @@ Es posible que lo tengamos en `package.json` y en ese caso debemos modificar el 
 
 
 
+Si tenemos un archivo `.eslintrc.js` debemos agregar `jest: true` dentro de:
+
+```
+module.exports = {
+	env:{
+		...
+		...,
+		jest: true
+	}
+}
+```
+
+
+
 ## Testing API Rest
 
 [🔴 Testing de Backend con Express usando Jest y Supertest - midudev](https://www.youtube.com/watch?v=_xxVJdGNMrs)
@@ -669,7 +683,7 @@ Debemos tener presente que se trata de una operación asíncrona por lo que debe
 
 ```js
 const supertest = require('supertest');
-const app = require('../index');
+const {app} = require('../index');
 
 const api = supertest(app);
 
@@ -683,7 +697,7 @@ test('the result should be a json', async () => {
 
 
 
-> Notar que debemos exportar `app` en`index.js`
+> Notar que debemos exportar `app` en`index.js` como `module.exports = { app };`
 >
 > Notar que usamos una RegEx porque podemos recibir `application/json; charset=utf-8`
 
@@ -718,7 +732,7 @@ const { app, server } = require('../index');
 // ...
 
 afterAll(() => {
-    moongose.connection.close()
+    mongose.connection.close()
     server.close()
 })
 ```
@@ -995,7 +1009,7 @@ Por ejemplo para testear el borrado de una nota:
 test('a note should be deleted', async () => {
 		const response = await getAllNotes()
 
-		const { body: notes }c = response;
+		const { body: notes } = response;
 
 		const [noteToDelete] = notes;
 
