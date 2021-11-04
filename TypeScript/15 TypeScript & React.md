@@ -811,7 +811,7 @@ Queremos usar el tema como un contexto y usarlo para estilar el `div` dentro de 
 
 
 
-En primer lugar definimos `theme.ts`
+En primer en `theme.ts` exportamos un objeto `theme` que contiene la paleta de colores que queremos usar en nuestros componentes.
 
 ```tsx
 export const theme = {
@@ -828,7 +828,9 @@ export const theme = {
 
 
 
-Luego en `ThemeContext`
+A continuación en `ThemeContext.tsx` (notar que el componente se llama `ThemeContextProvider`) creamos el contexto `ThemeContext` haciendo uso de `createContext` (esto sucede fuera del componente y quizás podamos recordarlo más fácil si vemos que se exporta para ser usado luego en `Box.tsx`).
+
+
 
 ```tsx
 import { createContext } from "react"
@@ -875,3 +877,8 @@ export const Box = () => {
 }
 ```
 
+
+
+Como podremos notar no hemos tenido que escribir ninguna línea específica de TypeScript en este componente.
+
+En este caso simplifica mucho las cosas el hecho de que conocemos el valor del contexto al crearlo y este no cambia de tipo en el futuro, distinto sería si no lo conocemos inicialmente y lo seteamos luego.
