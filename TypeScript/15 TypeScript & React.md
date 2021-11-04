@@ -509,7 +509,7 @@ export const LoggedIn = () => {
 
 Si ponemos el cursor sobre `isLoggedIn` veremos que se trata de un `boolean` y por ende sólo nos permitirá asignarle ese tipo de valores con `setIsLoggedIn`.
 
-#### 
+
 
 #### `useState` con tipo del valor inicial distinto del valor futuro
 
@@ -882,3 +882,4 @@ export const Box = () => {
 Como podremos notar no hemos tenido que escribir ninguna línea específica de TypeScript en este componente.
 
 En este caso simplifica mucho las cosas el hecho de que conocemos el valor del contexto al crearlo y este no cambia de tipo en el futuro, distinto sería si no lo conocemos inicialmente y lo seteamos luego.
+
