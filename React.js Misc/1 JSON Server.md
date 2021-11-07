@@ -1,4 +1,5 @@
 # JSON Server
+
 Una tarea habitual de los desarrolladores frontend consiste en simular un backend con una API REST que nos devuelva datos en formato JSON a nuestra aplicación.
 Si bien podríamos crear el server backend usando Node, Express y MongoDB esto nos insumirá bastante tiempo y con JSON Server podemos crear un *local server* con una *dummy REST API* de manera mucho más rápida. Básicamente se trata de un archivo `.json` al cual accedemos mediante endpoints para obtener (GET) y agregar (POST) información.
 
@@ -14,6 +15,7 @@ Luego en el archivo creamos un objeto en formato JSON con aquellos datos que que
  Notar el uso de comillas dobles tanto para las propiedades como para los valores que son strings y que el último elemento del array no debe tener una `,` después de el.
 
  Las *top level properties* como en este caso `notes` son considerados *resources* y tendrán endpoints asociados para obtener y agregar datos.
+
 ```json
 {
 	"notes": [
@@ -29,6 +31,7 @@ Luego en el archivo creamos un objeto en formato JSON con aquellos datos que que
 ```
 
 Si quisiéramos tener otro recurso `polls` podríamos agregar otra propiedad de nivel superior:
+
 ```json
 {
 	"notes": [
@@ -51,6 +54,7 @@ Si quisiéramos tener otro recurso `polls` podríamos agregar otra propiedad de 
 ```
 
 En un ejemplo completo:
+
 ```json
 {
   "notes": [
@@ -105,6 +109,7 @@ export default function Notes() {
 ```
 
 Si queremos implementar un POST por ejemplo cuando el usuario ingresa datos en un formulario y presiona el *submit button*. Notar el uso de `JSON.stringify({})` para convertir los objetos JavaScript a strings JSON.
+
 ```jsx
 const history = useHistory();
 const handleSubmit = (e) => {
