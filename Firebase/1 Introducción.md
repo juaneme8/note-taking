@@ -5,7 +5,7 @@ Firebase se define como un *backend as a service* y nos permitirá realizar dist
 
 
 # Creación de Proyecto
-Lo primero que tenemos que hacer es crear un proyecto, para eso debemos ir a https://firebase.google.com/ y seguir estos pasos:
+Lo primero que tenemos que hacer es crear un proyecto, para eso debemos ir a https://firebase.google.com/ y hacer click en **Go to console**.
 
 1. Hacemos click en **Create a project**
 2. Le asignamos el nombre deseado, aceptamos los términos y presionamos **Continue**

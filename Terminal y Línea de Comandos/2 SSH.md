@@ -189,7 +189,7 @@ Ir a Preferences y  dentro de la barra de **Ajustes de Usuario** ir a **Claves S
     
 Luego nos aparecerá un mensaje
 The authenticity of host 'gitlab.com (172.65.251.78)' can't be established.
-ED25519 key fingerprint is SHA256:eUXGGm1YGsMAS7vkcx6JOJdOGHPem5gQp4taiCfCLB8.
+ED25519 key fingerprint is SHA256:eUXG(...).
 This key is not known by any other names
 Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
 
