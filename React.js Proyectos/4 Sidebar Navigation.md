@@ -39,4 +39,3 @@ En `App.js` importamos `import { BrowserRouter as Router, Switch, Route } from '
 </Router>
 ```
 
-

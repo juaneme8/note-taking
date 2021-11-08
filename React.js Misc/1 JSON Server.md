@@ -133,5 +133,59 @@ const handleSubmit = (e) => {
 
 
 
-CODEVOLUTION VIDEO 2 COMPLETO
+## Filtering
 
+A la hora de filtrar elementos devueltos por la API de acuerdo al valor de alguna de las propiedades podemos hacerlo utilizando query parameters. 
+
+Si queremos obtener los elementos que tienen la propiedad `category`  con el valor "electronics" podemos hacerlo con:
+
+`http://localhost:8000/products?category=electronics`
+
+
+
+Si ahora queremos filtrar los elementos de la categoría electrónica que además tienen descuento en envío, como por ejemplo el elemento que vemos a continuación:
+
+```
+[
+	{
+		"id":10,
+		"title":"Product 10",
+		"category":"electronics",
+		"price": 3000,
+		"description":"This is the description about product 10",
+		"discount":{
+			"type":"shipping"
+		}
+	}
+]
+```
+
+En ese caso deberíamos hacer un GET a la direccción: `http://localhost:8000/products?category=electronics&discount.type=shipping`
+
+
+
+## Sorting
+
+Cuando trabajemos con tablas o grids es probable que necesitemos contar con un endpoint que nos entregue los datos ordenados con un cierto criterio.
+
+Por ejemplo si queremos obtener los productos ordenados por precio de menor a mayor (asc)
+
+```
+http://localhost:8000/products?_sort=price
+```
+
+Si queremos orden descendente:
+
+```
+http://localhost:8000/products?_sort=price&_order=desc
+```
+
+Si queremos ordenar por más de una categoria, por ejemplo por precio (en descendente) y por categoria (en ascendente):
+
+```
+http://localhost:8000/products?_sort=price,category&_order=desc,asc
+```
+
+
+
+CODEVOLUTION VIDEO 4 COMPLETO
