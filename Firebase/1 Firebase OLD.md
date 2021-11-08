@@ -1,8 +1,303 @@
+# Creación de Proyecto
+
+Lo primero que tenemos que hacer es crear un proyecto, para eso debemos ir a https://firebase.google.com/, iniciar sesión y luego hacer click en **Go to console**.
+
+1. Hacemos click en **Create a project**
+2. Le asignamos el nombre deseado, aceptamos los términos y presionamos **Continue**
+3. Habilitamos Google Analytics para este proyecto.
+4. Donde dice **Analytics location** puse Argentina (dice que debe ser la ubicación de la organización). Luego destilé **use the default settings for sharing Google Analytics data** (y todos los sub-items) y aceptamos los términos.
+5. Luego nos dirá que el proyecto está listo y presionamos **Continue**.
+
+
+# Obtener Objeto de Configuración
+En primer lugar vamos a **Project Overview** (en la barra lateral)
+Hacemos click en el botón de Web `</>` 
+Registramos la aplicación poniéndole un nombre `proyecto-web` e indicamos que no queremos Firebase Hosting en caso de que tengamos en mente deployar en Vercel.
+Luego en **Project Overview** hacemos click en el engranaje y luego en **Project settings**
+En el apartado **Your apps** veremos una parte que dice **SDK setup and configuration** hacer click en **Config** y copiamos el objeto de configuración `const firebaseConfig = {...}`.
+
+> Como este objeto de configuración `firebaseConfig` lo vamos a enviar con JavaScript este podrá ser visto por cualquier persona, por lo que como seguridad debemos indicar en Firebase desde qué dominios se puede utilizar la aplicación.
+
+## Instalación Firebase
+Instalar firebase `npm install firebase`
+
+## Variables de Entorno
+Anteriormente obtuvimos un objeto llamado  `firebaseConfig` en lugar de colocar las credenciales del cliente como un string vamos a utilizar variables de entorno, para ello creamos el archivo `.env.local` y dentro ponemos:
+```jsx
+NEXT_PUBLIC_FIREBASE_API_KEY=
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
+NEXT_PUBLIC_FIREBASE_APP_ID=
+NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=
+```
+Con los secretos que obtuvimos del objeto de configuración.
+
+Luego accederemos a estos valores con `process.env.NEXT_PUBLIC_FIREBASE_...`
+
+> En caso de tener problemas con la creación de archivos (los cuales se solucionan si usamos el string hardcodeado sin variables de entorno) reiniciar al servidor.
+
+## Initialización Firebase
+Crear carpeta `firebase` y dentro de ella un archivo `initFirebase.js`
+
+> En el video de **midudev** importaba `import * as firebase from 'firebase'`pero debemos poner `import firebase from 'firebase/app'` y luego importar los módulos que utilizaremos, por ejemplo si queremos tener autenticación debemos poner `import '@firebase/auth';`, si vamos a trabajar con Firestore Database `import '@firebase/firestore';`, etc.
+
+```jsx
+import firebase from 'firebase/app';
+import '@firebase/auth';
+import '@firebase/firestore';
+
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
+};
+
+export const initFirebase = () => {
+  if(!firebase.apps.length){
+    firebase.initializeApp(firebaseConfig);
+    console.log('Firebase was successfully initialized');
+  } 
+}
+
+```
+
+Luego en `index.js` llamamos a `initFirebase` y veremos en la consola que se inició exitosamente. **Esto es provisorio** ya que luego cuando tengamos Authentication lo haremos en `components/auth/FirebaseAuth.js` porque los usuarios puede que no ingresen directamente a index y en ese caso no tendríamos la inicialización realizada.
+
+```jsx
+...
+import {initFirebase} from '../firebase/initFirebase'
+
+initFirebase();
+
+export default function Home() {
+  return (
+    <>
+      ...
+    </>
+  )
+}
+
+```
+
+
+
+# Cloud Firestore
+Cloud Firestore nos permite trabajar con bases de datos en Firebase.
+
+## Creación DB
+En **Project Overview** dentro de **Build** vamos a **Firestore Database** y luego hacemos click en **Create database**. 
+
+En el modal de creación elegimos **Start in test mode** y presionamos Next. 
+
+Luego dejamos **nam5 (us-central)** como Cloud Firestore location y presionamos **Enable**.
+
+## Agregar al Proyecto
+Haciendo uso de Firestore vamos a escribir en una colección y a leer de ella. Para eso en `components` creamos una carpeta `firestore` y dentro de ella dos archivos `Write.js` y `Read.js`.
+
+## Escritura en DB
+En `Write.js` realizaremos una escritura de cada uno de los tipos de datos que podemos utilizar en Firestore.
+
+```jsx
+import firebase from 'firebase/app'
+import 'firebase/firestore'
+
+const WriteToFirestore = () =>{
+    const sendData = () =>{
+        try{
+            firebase
+                .firestore()
+                .collection('myCollection')
+                .doc('my_document')
+                .set({
+                    string_data: 'Juan Ocho',
+                    number_data: 2,
+                    boolean_data: true,
+                    map_data: { stringInMap: 'Hi', numberInMap: 7 },
+                    array_data: ['text', 4],
+                    null_data: null,
+                    time_stamp: firebase.firestore.Timestamp.fromDate(new Date('December 17, 1995 03:24:00')),
+                    geo_point: new firebase.firestore.GeoPoint(34.714322, -131.468435)
+                })
+                .then(alert('Data was successfully sent to firestore'))
+        }   
+        catch(error){
+            console.log(error)
+        }
+    }
+
+    return (
+        <button onClick={sendData}>Send data to Firestore</button>
+    )
+}
+export default WriteToFirestore;
+```
+Buscará la colección `myCollection` y la creará si no existe.
+Hemos especificado `doc('my_document')`, por lo cual buscará un documento con ese nombre y si no existe lo creará. Si hubiéramos puesto `doc()` le asignaría un *unique name*, pero como queremos leerlo luego es que le ponemos ese nombre.
+
+Si volviéramos a hacer un `.set()` en ese mismo documento sólo con un valor de `string_data` actualizado esto sobrescribiría todos los otros datos dejando sólo ese campo. Para evitar eso debemos utilizar como segundo argumento del set `{ merge: true }` de modo tal que sólo modifique esa propiedad y deje intacta las otras.
+
+Luego en `index.js` importamos este componente `import WriteToFirestore  from '../components/firestore/Write'` y luego lo utilizamos.
+
+## Lectura de DB
+La lectura la efectuamos usando `.onSnapshot()` del siguiente modo  `firebase.firestore().collection('myCollection').doc('myDocument').onSnapshot(doc => console.log(doc.data())`  notar que no retorna una promesa sino que trabajamos con callback.
+
+```jsx
+import firebase from 'firebase/app'
+import 'firebase/firestore'
+
+const ReadFromFirestore = () => {
+    const readData = () => {
+        try {
+            firebase.
+            firestore()
+            .collection('myCollection')
+            .doc('my_document')
+            .onSnapshot(doc => {
+                
+                console.log(doc.data())
+                alert('Data was successfully fetched')
+            });
+            
+        } catch (error) {
+            console.log(error)
+        }
+      
+    }
+    return (
+        <button onClick={readData}>Read data from Firestore</button>
+    )
+}
+
+export default ReadFromFirestore;
+
+```
+
+
+
+# Authentication
+> Basado en [video midudev](https://youtu.be/UlYGGCNFcWo?list=PLV8x_i1fqBw1VR86y4C72xMGJ8ifjBwJ6) con algunos cambios en el modo en que se importa `firebase`.
+> Basado en el [video](https://youtu.be/SYnu6CLKD70)
+
+Para agregar autenticación a nuestros proyectos debemos ir a [firebase.google.com](firebase.google.com), luego **Go to console** y por último hacer click en el proyecto al que queramos agregarle esa característica.
+
+En la barra de la izquierda hacemos click en **Build** y luego en **Authentication**.
+
+Una vez en esa sección hacemos click en **Get started** y en la pestaña **Sign-in method** nos dará a elegir las distintas opciones de autenticación.
+
+> Por más que hayamos definido varios proveedores por default sólo será posible tener una cuenta para cada correo electrónico.
+
+## Habilitar Autenticación con GitHub
+Activamos la llave **Enable** y nos pedirá el Client ID y Client secret.
+
+Para obtener estos datos vamos en GitHub a **Settings**, luego **Developer Settings** y por último **OAuth Apps**. 
+
+A continuación hacemos click en **Register a new application**.
+
+Nos preguntará el nombre de la aplicación, la url (que probablemente no tengamos todavía, ponemos cualquiera) y una descripción y por último el **Authorization callback URL** donde pegamos la información que nos entrega Firebase. En ese momento nos entregará el Client ID y Client secret que ingresamos en Firebase logrando así habilitar la autenticación mediante GitHub.
+
+## Habilitar Autenticación con Email/Password
+Activamos la llave **Enable** (y nos aseguramos que la de abajo esté deshabilitada, que sería permitir un ingreso sin contraseña) y hacemos click en **Save**.
+
+## Agregar Authentication al Proyecto
+En `components` creamos la carpeta `auth` y dentro un archivo `FirebaseAuth.js`
+En ese archivo vamos a llamar a `initFirebase()` cosa que hacíamos provisoriamente en `index.js` pero puede que el usuario no ingrese a través de esa ruta y nos quedaríamos sin inicializarlo.
+
+
+
+
+
+
+
+
+
+
+
+
+```jsx
+export const loginWithGitHub = () => {
+  const githubProvider = new firebase.auth.GithubAuthProvider();
+
+  return firebase
+    .auth()
+    .signInWithPopup(githubProvider)
+    .then((user) => {
+       const { displayName,email, photoURL } = user;
+
+      return ({
+	      avatar: photoURL,
+	      username: displayName,
+	      email
+      })
+    });
+};
+
+```
+
+En este `client.js` exportamos una función para hacer login con GitHub esta luego la pasaremos en el `onClick` del botón que usemos para loguearnos.
+
+> Frecuentemente nos toparemos con un mensaje de error ** FirebaseError: Firebase: Firebase App named '[DEFAULT]' already exists** para evitarlo debemos agregar `!firebase.apps.length && firebase.initializeApp(firebaseConfig);` con lo que sólo inicializará la aplicación si no hay ninguna otra. 
+
+## Cambio de Estado
+Independientemente de la variable de estado `user` queremos tener una forma de saber si el usuario está autenticado o no, sino bastará con refrescar para que user sea `null` y nos considere no autenticados.
+
+Es posible saber en qué momento el usuario cambia de estado entre autenticado y no autenticado con un método llamado `onAuthStateChanged`. Hasta ahora en `loginWithGithub` usamos `firebase.auth().signInWithPopup(githubProvider)` y obteníamos el usuario. Ahora gracias a este método esto no será necesario, ya que accederemos a `onAuthStateChanged` y ahí mapearemos los datos obtenidos para lograr sólo un objeto con `avatar`, `url` y `username`.
+
+Luego `onAuthStateChanged` nos queda de esta forma:
+
+```jsx
+export const onAuthStateChanged = (onChange) => {
+  return firebase
+    .auth()
+    .onAuthStateChanged(user => {
+      const { displayName,email, photoURL } = user;
+
+      const normalizedUser = {
+      avatar: photoURL,
+      username: displayName,
+      email
+  }
+      onChange(normalizedUser);
+    });
+}
+```
+
+Para utilizar `onAuthStateChanged` en `index.js` creamos un nuevo efecto con `useEffect`:
+
+```jsx
+useEffect(()=> {
+	onAuthStateChanged(user => setUser(user)
+},[]);
+```
+
+O lo que es lo mismo cambiando `	onAuthStateChanged(user => setUser(user)` por `	onAuthStateChanged(setUser)`  dado que las funciones son de primera clase y por lo tanto se pueden utilizar como parámetros. Por lo tanto nos queda:
+
+```jsx
+useEffect(()=> {
+	onAuthStateChanged(setUser)
+},[]);
+```
+Con esto cuando montemos el componente nos fijaremos si tiene sesión autentificada y en ese caso la variable de estado dejará de ser null y pasará a ser un objeto con `username`, `avatar` y `email`. 
+
+En `onAuthStateChanged` recibo `null` si el usuario no está logueado mientras que si está logueado recibo un objeto `user`. 
+
+La variable de estado `user` tiene tres estados `undefined` (el valor inicial para cuando refrescamos y no sabemos si está logueado o no, por lo que queremos mostrar un placeholder), `null` (para cuando no está autenticado) y un valor distinto con los datos del usuario para cuando está autenticado.
+
+> Una vez que iniciemos sesión quedarán datos guadados en IndexedDB
+
+
+
 # TODO App
 > Basado en el [stream](https://youtu.be/VqgTr-nd7Cg) de Clever Programmer.
 > Los archivos de este proyecto estarán en `md-todo-app`
 
-# Configuración Firebase
+## Configuración Firebase
 ## Configurar Proyecto
 1. https://firebase.google.com/
 2. Ir a la consola
@@ -25,7 +320,7 @@
 2. En la línea de comandos escribimos `firebase login` y nos pedirá que iniciemos sesión con nuestra cuenta.
 
 
-# Creación App
+## Creación App
 Creamos el template de la aplicación con `npx create-react-app md-todo-app` y luego la iniciamos con `npm start`.
 
 Hacemos la limpieza habitual del del template: 
@@ -71,7 +366,7 @@ export default App;
 
 Contamos con un `input` y un `button` y como queremos ser capaces de agregar el contenido con la tecla `ENTER` los colocamos dentro de un `form` e indicamos que el `button` es de `type="submit"`.
 
-# Material UI
+## Material UI
 `npm install @material-ui/core`
 
 De acuerdo a la documentación https://material-ui.com/components/buttons/ remplazamos el botón que teníamos:
@@ -229,7 +524,7 @@ export default App;
 
 ```
 
-#### Autoimport en VS Code
+## Autoimport en VS Code
 Por ejemplo si queremos importar `ListItem`, lo usamos y nos posicionamos `<ListItem>` justo antes del `>` y presionamos `CTRL + SPACE` y luego nos aparecerá un mensaje indicando el auto import.
 
 ## Estilos en `Todo`
@@ -442,7 +737,7 @@ Ponemos:
 <DeleteIcon onClick={e => db.collection('todos').doc(props.todo.id).delete()}></DeleteIcon>
 ```
 
-# Solucionar Warnings:
+# Solucionar Warnings
 * 1. Warning:
 ```bash
 It looks like you're using the development build of the Firebase JS SDK.
