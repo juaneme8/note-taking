@@ -805,6 +805,8 @@ export const Counter = () => {
 
 A la hora de trabajar con TypeScript y React Context usando hooks trabajaremos con `useContext` para consumir el valor del contexto.
 
+### `useContext` con tipo inferido de valor inicial
+
 A los fines didácticos consideraremos el uso de React Context para proporcionar un tema a nuestros componentes usando Context API. Para ello asumimos que tenemos los archivos `theme.ts`, `Box.tsx` y `ThemeContext.tsx`
 
 Queremos usar el tema como un contexto y usarlo para estilar el `div` dentro de `Box`
@@ -883,3 +885,94 @@ Como podremos notar no hemos tenido que escribir ninguna línea específica de T
 
 En este caso simplifica mucho las cosas el hecho de que conocemos el valor del contexto al crearlo y este no cambia de tipo en el futuro, distinto sería si no lo conocemos inicialmente y lo seteamos luego.
 
+
+
+### `useContext` con tipo del valor inicial distinto del valor futuro
+
+* `UserContext.tsx` que es el encargado de manejar el estado de autenticación de un usuario. Contará con una variable de estado `user` (que valdrá null inicialmente y al loguearse tendrá el nombre de usuario y mail) y una función para loguearse. Recibirá como prop `children` un componente al cual le pasará este contexto.
+
+  > El archivo se llama `UserContext.tsx`
+  >
+  > El contexto se llama `UserContext`
+  >
+  > El componente se llama `UserContextProvider` 
+
+```tsx
+import React, { useState, createContext } from 'react'
+
+type AuthUser = {
+  name: string
+  email: string
+}
+
+type UserContextType = {
+  user: AuthUser | null
+  setUser: React.Dispatch<React.SetStateAction<AuthUser | null>>
+}
+
+type UserContextProviderProps = {
+  children: React.ReactNode
+}
+
+// export const UserContext = createContext<UserContextType | null>(null)
+export const UserContext = createContext({} as UserContextType)
+
+export const UserContextProvider = ({ children }: UserContextProviderProps) => {
+  const [user, setUser] = useState<AuthUser | null>(null)
+  return (
+    <UserContext.Provider value={{ user, setUser }}>
+      {children}
+    </UserContext.Provider>
+  )
+}
+```
+
+
+
+* En `App.tsx` envolvemos al componente `User` con `UserContextProvider`
+
+```tsx
+<UserContextProvider>
+	<User />
+</UserContextProvider>
+```
+
+
+
+* `User.tsx` contiene un botón Login, uno Logout y muestra el nombre y el email de un usuario logueado. Hacemos uso del contexto para setear que el usuario sea `null` o el valor deseado. Es aqui donde seteamos el valor futuro.
+
+```tsx
+import { useContext } from 'react'
+import { UserContext } from './UserContext'
+
+export const User = () => {
+  const userContext = useContext(UserContext)
+  const handleLogin = () => {
+    // if (userContext) {
+    userContext.setUser({
+      name: 'Vishwas',
+      email: 'asd@asd.com'
+    })
+    // }
+  }
+  const handleLogout = () => {
+    // if (userContext) {
+    userContext.setUser(null)
+    // }
+  }
+  return (
+    <div>
+      <button onClick={handleLogin}>Login</button>
+      <button onClick={handleLogout}>Logout</button>
+      <div>User name is {userContext.user?.name}</div>
+      <div>User email is {userContext.user?.email}</div>
+      {/* <div>User name is {userContext?.user?.name}</div>
+      <div>User email is {userContext?.user?.email}</div> */}
+    </div>
+  )
+}
+```
+
+Notar que haciendo uso de **type assertion** `createContext({} as UserContextType)` no tenemos que chequear que sea null ni usar el optional chaining operator, cosa que sí sucedería si le decimos que puede ser `null`: `createContext<UserContextType | null>(null)`
+
+La ventaja del uso del contexto está en que todos los componentes tendrán acceso al estado sin que tengan que recibirlo mediante props.
