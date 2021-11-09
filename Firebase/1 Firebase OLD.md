@@ -1,23 +1,3 @@
-# Creación de Proyecto
-
-Lo primero que tenemos que hacer es crear un proyecto, para eso debemos ir a https://firebase.google.com/, iniciar sesión y luego hacer click en **Go to console**.
-
-1. Hacemos click en **Create a project**
-2. Le asignamos el nombre deseado, aceptamos los términos y presionamos **Continue**
-3. Habilitamos Google Analytics para este proyecto.
-4. Donde dice **Analytics location** puse Argentina (dice que debe ser la ubicación de la organización). Luego destilé **use the default settings for sharing Google Analytics data** (y todos los sub-items) y aceptamos los términos.
-5. Luego nos dirá que el proyecto está listo y presionamos **Continue**.
-
-
-# Obtener Objeto de Configuración
-En primer lugar vamos a **Project Overview** (en la barra lateral)
-Hacemos click en el botón de Web `</>` 
-Registramos la aplicación poniéndole un nombre `proyecto-web` e indicamos que no queremos Firebase Hosting en caso de que tengamos en mente deployar en Vercel.
-Luego en **Project Overview** hacemos click en el engranaje y luego en **Project settings**
-En el apartado **Your apps** veremos una parte que dice **SDK setup and configuration** hacer click en **Config** y copiamos el objeto de configuración `const firebaseConfig = {...}`.
-
-> Como este objeto de configuración `firebaseConfig` lo vamos a enviar con JavaScript este podrá ser visto por cualquier persona, por lo que como seguridad debemos indicar en Firebase desde qué dominios se puede utilizar la aplicación.
-
 ## Instalación Firebase
 Instalar firebase `npm install firebase`
 

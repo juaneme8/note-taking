@@ -3,7 +3,7 @@
 
 Firebase se define como un *backend as a service* y nos permitirá realizar distintas tareas:  Authentication, Firestore Database, Realtime Database, File Storage, Hosting, Cloud Functions, etc y podremos utilizarlos directamente desde el frontend. Gracias a esto no tendremos que concentrarnos la lógica del lado del servidor y Firebase lo hará por nosotros. Podemos pensarlo como una alternativa a crear nuestra propia infraestructura backend por ejemplo con Node.js y MondoDB.
 
-> Repositorio `md-firebase`
+> Repositorio `md-firebase9`
 
 
 
@@ -25,7 +25,11 @@ Los pasos que veremos a continuación serán útiles para proyectos en Vanilla J
 
 ## Instalación Webpack
 
-Tenemos que instalar webpack, para eso eso primero ejecutamso`npm init -y`de manera tal que tengamos un `package.json` y luego `npm init webpack webpack-cli -D`
+Tenemos que instalar webpack, para eso eso primero ejecutamso`npm init -y`de manera tal que tengamos un `package.json` y luego 
+
+```
+npm init webpack webpack-cli --save-dev
+```
 
 
 
@@ -64,7 +68,7 @@ Creamos un script en `package.json`
 
 ```json
 scripts:{
-	"build": "webpack "
+	"build": "webpack"
 }
 ```
 
@@ -76,3 +80,112 @@ Luego en `index.html` tendremos que importar el archivo `bundle.js` (ambos está
 
 
 
+# Firebase
+
+## Configuración Firebase
+
+Lo primero que tenemos que hacer es crear un proyecto, para eso debemos ir a https://firebase.google.com/, iniciar sesión y luego hacer click en **Go to console**.
+
+1. Hacemos click en **Create a project.**
+2. Le asignamos el nombre deseado, aceptamos los términos y presionamos **Continue.**
+3. Deshabilitamos Google Analytics para este proyecto.
+4. Hacemos click en **Create project** y luego en **continue** para ir al Dashboard del proyecto.
+
+Una vez que creamos un proyecto debemos crear una aplicación front-end y esto lo hacemos haciendo click en el botón `</>`, luego debemos darle un nombre y hacemos click en **Register app**. A continuación podemos el código que nos aparece ya que lo copiaremos de otro lado y clickeamos **continue to console**. 
+
+Luego en **Project Overview** hacemos click en el engranaje y luego en **Project settings**
+En el apartado **Your apps** veremos una parte que dice **SDK setup and configuration** hacer click en **Config** y copiamos el objeto de configuración `const firebaseConfig = {...}`.
+
+Este objeto contiene información sobre nuestro proyecto y lo usaremos para conectarnos desde el front-end.
+
+> Como este objeto de configuración `firebaseConfig` lo vamos a enviar con JavaScript este podrá ser visto por cualquier persona, por lo que como seguridad debemos indicar en Firebase desde qué dominios se puede utilizar la aplicación.
+>
+> 
+
+```js
+const firebaseConfig = {
+	apiKey: "",
+	authDomain: "",
+	projectId: "",
+	storageBucket: "",
+	messagingSenderId: "",
+	appId: ""
+}
+```
+
+
+
+## Instalación Firebase
+
+Instalar firebase `npm install firebase`
+
+
+
+## Conexión a Firebase
+
+Lo primero que debemos hacer es inicializar la aplicación Firebase
+
+```js
+import { initializeApp } from 'firebase/app'
+
+const firebaseConfig = {...}
+
+initializeApp(firebaseConfig)
+```
+
+
+
+# Firestore Database
+
+## Configuración Firestore
+
+Lo primero que debemos hacer es crear la base de datos y para eso en **Project Overview** dentro de **Build** vamos a **Firestore Database** y luego hacemos click en **Create database**. 
+
+En el modal de creación elegimos **Start in test mode** y presionamos Next. 
+
+Luego dejamos **nam5 (us-central)** como Cloud Firestore location y presionamos **Enable**.
+
+
+
+Para crear una colección hacemos click en **Start collection** y le damos un nombre donde dice **Collection ID** y luego nos dará la opción de crear documentos manualmente.
+
+
+
+## Conexión a Firestore
+
+En primer lugar debemos inicializar el servicio firestore con `getFirestore()`
+
+```js
+const db = getFirestore();
+```
+
+
+
+Luego debemos obtener una referencia a una colección en particular con `collection()`
+
+```js
+const colRef = collection(db, 'books')
+```
+
+
+
+Por último obtenemos un snapshot de datos de la colección con `getDocs()` y armamos un objeto donde almacenamos los datos junto con el id.
+
+```js
+getDocs(colRef)
+  .then(snapshot => {
+    // snapshot.docs.forEach(doc => console.log(doc.data()))
+    let books = [];
+    snapshot.docs.forEach(doc => {
+      books.push({ ...doc.data(), id: doc.id })
+    })
+    console.log(books)
+  })
+  .catch(err => {
+    console.log(err.message)
+  })
+```
+
+
+
+VIDEO 4 COMPLETO
