@@ -188,4 +188,26 @@ http://localhost:8000/products?_sort=price,category&_order=desc,asc
 
 
 
-CODEVOLUTION VIDEO 4 COMPLETO
+## Paginación
+
+Es posible implementar la paginación de los resultados devueltos por JSON Server. Por defecto las páginas son de 10 elementos.
+
+Si queremos obtener la primera página (de 10 elementos por default) debemos usar la siguiente petición:
+
+```
+http://localhost:8000/products?_page=1
+```
+
+Si queremos obtener la primera página pero que sea de 5 elementos:
+
+```
+http://localhost:8000/products?_page=1&_limit=5
+```
+
+
+
+### Paginación con URLs
+
+Si al ingresar a la URL con las DevTools en **Network** vamos a **Headers**  veremos que dentro de **Link**
+
+tenemos links para la página `first`, `prev`, `next`, y `last`. Podremos acceder a ellos con `response.headers.get("Link")`
