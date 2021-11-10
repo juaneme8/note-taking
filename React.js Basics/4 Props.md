@@ -80,6 +80,41 @@ const Greet = (props) => {
 ```
 Si no le pasamos  nada entre los tags, `props.children` valdrá `undefined` y no mostrará nada.
 
+El concepto de `children` es importante a la hora de reutilizar componentes. Por ejemplo podríamos crear un componente `Togglable` que reciba como `children` el contenido a mostrar u ocultar de acuerdo a una variable de estado que cambiamos con dos botones.
+
+```jsx
+export const Togglable = ({ children,buttonLabel }) => {
+  const [visible, setVisible] = useState(false);
+
+  return (
+    <div>
+      {!visible && 
+       <button onClick={() => setVisible(true)}>{buttonLabel}</button>
+      }
+
+      {visible && (
+        <div>
+          {children}
+          <button onClick={() => setVisible(false)}>Ocultar</button>
+        </div>
+      )}
+    </div>
+  );
+};
+```
+
+
+
+Luego este componente podríamos utilizarlo de la siguiente forma:
+
+```jsx
+<Togglable buttonLabel="Login">secret content</Togglable>
+```
+
+Este principio podría utilizarse a la hora de crear un Modal.
+
+
+
 ## Props en Componentes de Clase
 Al invocar componentes de clase le pasamos las props de la misma manera que a los funcionales mediante atributos y luego para utilizarlos en el componente los tenemos disponibles automáticamente en `this.props`
 
