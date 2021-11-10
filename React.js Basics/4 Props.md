@@ -86,7 +86,7 @@ El concepto de `children` es importante a la hora de reutilizar componentes. Por
 export const Togglable = ({ children,buttonLabel }) => {
   const [visible, setVisible] = useState(false);
 
-  return (
+  return (  
     <div>
       {!visible && 
        <button onClick={() => setVisible(true)}>{buttonLabel}</button>
