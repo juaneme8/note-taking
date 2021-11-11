@@ -169,9 +169,13 @@ const colRef = collection(db, 'books')
 
 
 
-Por último obtenemos un snapshot de datos de la colección con `getDocs()` y armamos un objeto donde almacenamos los datos junto con el id.
+## Obtener Documentos
+
+Con `getDocs()` obtenemos un array con todos los documentos de la colección que le pasamos como parámetro y con cada uno de ellos armamos un objeto donde almacenamos los datos junto con el id.
 
 ```js
+import {getDocs} from 'firebase/firestore'
+
 getDocs(colRef)
   .then(snapshot => {
     // snapshot.docs.forEach(doc => console.log(doc.data()))
@@ -186,6 +190,47 @@ getDocs(colRef)
   })
 ```
 
+> Podemos pensar que con `getDocs` obtenemos un array de documentos y cada uno de ellos tiene un `id` y `data()`.
 
 
-VIDEO 4 COMPLETO
+
+## Agregar Documentos
+
+Con `addDoc()` agregamos un nuevo documento a la colección que recibe como primer parámetro, el objeto que recibe como segundo.
+
+```js
+import {addDoc} from 'firebase/firestore'
+
+addDoc(colRef, {
+  title: 'Learning GIT',
+  author: 'Midu'
+})
+  .then(() => {
+    console.log('Document created')
+  })
+  .catch(err => {
+    console.log(err.message)
+  })
+```
+
+
+
+## Eliminar Documentos
+
+Para eliminar un documento tenemos que usar `deleteDoc()` pasándole como parámetro `docForm` siendo esta una referencia al documento que obtenemos con `doc()`
+
+```js
+import {deleteDoc, doc} from 'firebase/firestore'
+
+
+const docRef = doc(db, 'books', "sRQV7axYdu8umr7VOhTn")
+
+deleteDoc(docRef)
+  .then(() => {
+    console.log('Document deleted')
+  })
+  .catch(err => {
+    console.log(err.message)
+  })
+```
+
