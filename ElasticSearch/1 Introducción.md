@@ -20,7 +20,7 @@ A **nivel lógico** ElasticSearch está conformado por **índices** y **document
 
 A **nivel físico** ElasticSearch está formado por un **cluster** que involucra a todos los **nodos** siendo estos todos las máquinas corriendo ElasticSearch. Los nodos están formados por shards o piezas que componen el índice. Tendremos la pieza primaria y las réplicas. Las réplicas almacenan información como backup de los otros nodos, para permitir restablecer la información en caso de problemas con uno o mas nodos.
 
-![Elasticsearch Shards: Definition, Sizes, and Optimization - Dattell](https://dattell.com/wp-content/uploads/2019/01/elasticsearch-cluster2-1024x770.png)
+
 
 ## Instalación con Docker
 
@@ -61,13 +61,12 @@ networks:
 
 ```
 
-> Le dice a Docker que use la imagen de Elasticsearch con versión 7.6.0.
+> En la configuración establecemos lo siguiente:
 >
-> Le dice que el nombre del contenedor será es01.
->
-> Le indica unas configuraciones para crear el cluster y el nodo por defecto.
->
-> Le indica que el puerto sobre el que corre Elasticsearch es el 9200. A su vez le dice que exponga ese mismo puerto a tu máquina para que puedas usar el servicio bajo el puerto estándar.
+> * Utilizamos la imagen de Elasticsearch con versión 7.6.0.
+> * El nombre del contenedor será es01.
+> * Se establecen configuraciones para crear el cluster y el nodo por defecto.
+> * Se establece que el puerto sobre el que corre Elasticsearch es el 9200. A su vez le dice que exponga ese mismo puerto en nuestra para poder usar el servicio bajo el puerto estándar.
 
 
 
@@ -84,7 +83,7 @@ wsl -d docker-desktop
 sysctl -w vm.max_map_count=262144
 ```
 
-Para comprobar que Elasticsearch ya está corriendo sobre tu máquina, abres Postman y ejecutas un GET sobre la url [http://localhost:9200](http://localhost:9200/) y tenemos que recibid un objeto como el siguiente:
+Para comprobar que Elasticsearch ya está corriendo sobre tu máquina, abrir Postman y ejecutar un GET sobre la url [http://localhost:9200](http://localhost:9200/) y tenemos que recibir un objeto como el siguiente:
 
 ```json
 {
@@ -114,7 +113,7 @@ Para comprobar que Elasticsearch ya está corriendo sobre tu máquina, abres Pos
 
 La creación de un nuevo documento podremos hacerla desde Postman tanto con el verbo `POST` como con `PUT`. 
 
-Vamos a trabajar sobre el índice `users` esto significa que las peticiones serán a `localhost:9200/users` y como éste no existe, ElasticSearch lo creará para nosotros.
+Vamos a trabajar sobre el índice `users` esto significa que las peticiones serán a `localhost:9200/users` y como esta no existe, ElasticSearch la creará para nosotros.
 
 En el caso de utilizar `POST` el id será asignado automáticamente y utilizaremos la URL `localhost:9200/users/_doc`.
 Luego en **Body** elegimos **raw (JSON)** y completamos lo siguiente:
@@ -194,9 +193,9 @@ Creamos un archivo `users.json` con el siguiente contenido:
 
 ```
 
-
-
 > Debemos terminar el archivo con un salto de línea.
+
+
 
 Luego en Postman hacemos un `POST` a `localhost:9200/users/_bulk` y en **Body** no será raw (JSON) sino **binary** y luego elegimos el archivo `users.json`. Por último enviamos la consulta con Send.
 
@@ -330,7 +329,7 @@ Hacemos una petición `GET` a `localhost:9200/users/_mapping`
 
 ## Actualizar un documento
 
-Si queremos actualizar un documento  y lo hacemos con un `PUT` a `localhost:9200/_doc/1` (suponiendo que queremos modificar el documento con id 1)  y colocando en Body raw(JSON) la propiedad que queremos agregar. Perderemos el resto de las propiedades. Lo cual podemos verificar haciendo ahora un `GET`.
+Si queremos actualizar un documento  y lo hacemos con un `PUT` a `localhost:9200/_doc/1` (suponiendo que queremos modificar el documento con id 1)  y en **Body** elegimos **raw(JSON)** la propiedad que queremos agregar. Perderemos el resto de las propiedades. Lo cual podemos verificar haciendo ahora un `GET`.
 
 ```
 {
