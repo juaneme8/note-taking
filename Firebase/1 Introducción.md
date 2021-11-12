@@ -237,3 +237,22 @@ deleteDoc(docRef)
 
 
 ## Real Time Listener
+
+El uso de un real time listener nos permite escuchar permanentemente a cambios en una colección y así obtener un snapshot con los datos actualizados y mostrarlos en pantalla actualizados.
+
+Con `getDocs` obtenemos los documentos una única vez mientras que con con `onSnapshot` si bien vamos a ejecutar la función la primera vez, también vamos a suscribirnos a la colección y cada vez que haya cambios obtener un nuevo `snapshot`. 
+
+```js
+import {onSnapshot} from 'firebase/firestore'
+
+onSnapshot(colRef, snapshot => {
+  let books = [];
+  snapshot.docs.forEach(doc => {
+    books.push({ ...doc.data(), id: doc.id })
+  })
+  console.log('real-time')
+  console.log(books)
+});
+```
+
+> Notar que no usamos un método `then` sino que se ejecutará la función que le pasamos como segundo parámetro.
