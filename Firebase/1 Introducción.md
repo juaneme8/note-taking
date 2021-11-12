@@ -19,7 +19,7 @@ Como dijimos anteriormente para contar con el tree-shaking y así eliminar el c�
 
 Los pasos que veremos a continuación serán útiles para proyectos en Vanilla JavaScript mientras que caso de estar utilizando una herramienta CLI como create-react-app no tendremos que configurarlo manualmente ya que viene con un module bundler como webpack u otro listo para usar.
 
-![image-20211108084540803](C:\Users\juan.lauria\AppData\Roaming\Typora\typora-user-images\image-20211108084540803.png)
+![diagrama webpack](https://blog.pleets.org/img/articles/webpack-process.png)
 
 
 
