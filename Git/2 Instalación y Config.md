@@ -30,6 +30,8 @@ git config --global user.email "juaneme8@gmail.com"
 ```
 
 > Si ya establecimos un nombre de usuario, con `git config --global user.name "Juan Nueve"` podremos sobrescribirlo.
+>
+> Además de los argumentos `--global` (para todos los repositorios del usuario logueado) es posible utilizar `--local` (a nivel repositorio) o `--system` (todos los usuarios y todos los repositorios) según sea la configuración que nos interese realizar o listar. Por ejemplo `git config --system --list`
 
 Muchos comandos de Git lanzarán un editor de texto para solicitar más información. Si queremos procesar esa solicitud con Visual Studio Code:
 
@@ -44,6 +46,8 @@ git config --global core.editor "code --wait"
 > Con `git config user.name` obtenemos el nombre de usuario.
 > Con `git config user.mail` obtenemos el correo electrónico.
 > Con `git config core.editor`obtneemos el editor que tenemos configurado.
+>
+> Con `git config --list --show-scope` podremos ver cada configuración y además de donde proviene.
 
 
 > Notar que si el comando entrega mas de una página podemos ir avanzando con `ENTER` y si nos aparece `(END)` presionamos la `TECLA Q` para salir.

@@ -10,6 +10,13 @@ git init Proyecto1
 
 Luego veremos `(main)` lo cual nos da la pauta de que estamos en el main branch.
 
+>  Si queremos que al crear el repositorio la rama princiapl tenga otro nombre podemos hacerlo con:
+>
+> ```
+> git init Proyecto1 --initial-branch=main
+> ```
+    > Otra opción es cambiar `init.defaultBranch` con cuyo valor podemos obtener con `git config --list | grep branch`
+
 > Con `ls -al` veremos el repositorio `.git`
 
 ## Iniciar Repositorio con directorio existente
