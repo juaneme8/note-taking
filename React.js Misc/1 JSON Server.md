@@ -211,3 +211,166 @@ http://localhost:8000/products?_page=1&_limit=5
 Si al ingresar a la URL con las DevTools en **Network** vamos a **Headers**  veremos que dentro de **Link**
 
 tenemos links para la página `first`, `prev`, `next`, y `last`. Podremos acceder a ellos con `response.headers.get("Link")`
+
+
+
+## Operadores
+
+Contamos con algunos operadores que nos permiten obtener datos de acuerdo a una condición:
+
+* `_gte` (greater than or equal)
+* `_lte` (less than or equal)
+* `_ne` (not equal to)
+* `_like` este operador nos permite especificar RegEx para filtrar datos.
+
+Si queremos obtener los productos cuyo precio está entre 2000 y 6000 debemos hacer la siguiente petición:
+
+```
+localhost:3000/products?price_gte=2000&price_lte=6000
+```
+
+Si queremos obtener todos los productos cuyo `id` no es 1:
+
+```
+localhost:3000/products?id_ne=1
+```
+
+Si queremos filtrar todos los productos que comienzan con la letra f:
+
+`localhost:3000/products?category_like=^f`
+
+
+
+## Full-text Search
+
+Si queremos realizar una búsqueda de un texto en cualquier campo del JSON podemos hacerlo con el parámetro `q`. 
+
+Por ejemplo si queremos buscar el texto "in" podemos hacerlo con:
+
+```
+localhost:3000/products?q=in
+```
+
+
+
+## Relaciones
+
+Las relaciones nos permiten hacer un JOIN entre dos tablas de una base de datos y retornar los datos resultantes.
+
+Con `_embed` obtenemos recursos de los elementos hijos:
+
+En el primer ejemplo veremos como incluir recursos de hijos al hacer un query sobre el padre. Por ejemplo si queremeos obtener los productos con sus correspondientes reviews. En nuestro caso es el parámetro `productId` el que vincula los reviews con el producto.
+
+```
+localhost:3000/products?_embed=reviews
+```
+
+En este caso veremos que a products le agregará la propiedad `reviews` retornando un array de elementos dentro de cada producto.
+
+
+
+Esto también funciona con productos individuales:
+
+```
+localhost:3000/products/1?_embed=reviews
+```
+
+
+
+Con `_expand` obtenemos recursos del padre:
+
+Ahora veremos como incluir el padre al hacer un query de elementos hijos. En nuestro caso incluir información del producto al hacer un query del padre:
+
+```
+localhost:3000/reviews?_expand=product
+```
+
+> Notar que ponemos `product` en singular.
+
+
+
+```
+localhost:3000/reviews/1?_expand=product
+```
+
+
+
+# Petición `POST`
+
+Si queremos realizar una petición `POST` podremos hacerlo utilizando fetch API desde el frontend pero si así lo queremos podemos usar otras herramientas como:
+
+* Postman
+* REST Client (extensión Visual Studio Code)
+* Thunder Client (extensión Visual Studio Code)
+
+
+
+Haremos una petición a `http://localhost:3000/products` luego en **Body** dentro de **JSON Content** colocaremos el elemento que queremos insertar.
+
+```
+{
+	"id":11,
+	"title":"Product 11",
+	"category":"electronics",
+	"price": 4000,
+	"description":"This is description about product 11"
+}
+```
+
+
+
+En ese momento obtendremos un 201 y nos devolverá el objeto creado.
+
+
+
+# Petición `PUT`
+
+Si queremos modificar el contenido de una propiedad debemos hacer una solicitud al id en particular de ese elemento:
+
+```
+http://localhost:3000/products/11
+```
+
+Luego en **Body** dentro de **JSON Content** colocaremos el objeto completo con la propiedad que hemos modificado.
+
+```
+{
+	"id":11,
+	"title":"Product 11",
+	"category":"furniture",
+	"price": 4000,
+	"description":"This is description about product 11"
+}
+```
+
+
+
+# Petición `PATCH`
+
+De manera similar a lo visto anteriormente utilizamos la petición `PATCH` cuando queremos modificar sólo una propiedad.
+
+```
+http://localhost:3000/products/11
+```
+
+Luego en **Body** dentro de **JSON Content** colocaremos la propiedad que hemos modificado.
+
+```
+{
+	"price":"8000"
+}
+```
+
+
+
+# Petición `DELETE`
+
+Cuando queremos eliminar un elemento utilizamos la petición `DELETE` por ejemplo:
+
+```
+http://localhost:3000/products/11
+```
+
+
+
+VIDEO 10 COMPLETO
