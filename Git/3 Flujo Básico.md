@@ -55,6 +55,80 @@ Como queremos agregar también un mensaje en línea agregamos el parámetro `-m`
 ## `git commit --amend`
 Cuando realizo un commit y luego me doy cuenta que me hubiera gustado agregarle más cambios a ese commit, puedo realizar dichos cambios localmente y luego agregar ese archivo al staging area `git add file.txt` y por último ejecutar `git commit --amend`, luego me preguntará si quiero cambiar el mensaje del commit. De esta manera los cambios realizados los pegará en el commit anterior sin realizar uno nuevo.
 
+
+
+## `git restore`
+
+En caso de modificar un archivo que ya fue commiteado podemos restaurar la versión previa de ese fichero con:
+
+```
+git restore index.html
+```
+
+* Si queremos restaurar todo el directorio
+
+```
+git restore .
+```
+
+* Si queremos restaurar todos los archivos terminados en `*.js`
+
+```
+git restore '*.js'
+```
+
+Si bien la forma recomendada actualmente es con `git restore`, históricamente esto mismo era realizado utilizando `git checkout` pero como es un comando que sirve también para otras cosas por lo que puede resultar confuso.
+
+* Si queremos restaurar un archivo `index.html`
+
+```
+git checkout -- index.html
+```
+
+* Si queremos restaurar todo el directorio
+
+```
+git checkout .
+```
+
+* Si queremos restaurar todos los archivos terminados en `*.js`
+
+```
+git checkout -- '*.js'
+```
+
+
+
+## `git clean`
+
+Si hemos realizado una serie de cambios en un archivo que todavía no fue commiteado y queremos deshacer, podemos eliminarlo manualmente o bien usar el comando 
+
+* Si queremos ejecutar un *dry-run* indicándonos qué archivos borraría pero sin hacerlo
+
+```bash
+git clean -n
+```
+
+* Si queremos efectuar el borrado de esos archivos
+
+```bash
+git clean -f
+```
+
+* Si queremos borrar también los directorios que no existían antes
+
+```bash
+git clean -d
+```
+
+* Si queremos que nos pregunte antes de borrar cada archivo
+
+```bash
+git clean -i
+```
+
+
+
 # `git status`
 
 El comando `git status` compara el directorio de trabajo con el repositorio buscando archivos que hayamos agregado (_untracked files_) o cambios en archivos que ya tiene el repositorio (_changes not staged_).
