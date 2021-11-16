@@ -167,7 +167,7 @@ Luego debemos obtener una referencia a una colección en particular con `collect
 const colRef = collection(db, 'books')
 ```
 
-
+> Podríamos haberlo llamado `booksRef` lo cual hubiera sido mas semántico.
 
 ## Obtener Documentos
 
@@ -256,3 +256,40 @@ onSnapshot(colRef, snapshot => {
 ```
 
 > Notar que no usamos un método `then` sino que se ejecutará la función que le pasamos como segundo parámetro.
+
+
+
+## Firestore Queries
+
+Firestore ofrece la posibilidad de realizar consultas (queries) para recuperar elementos específicos de la colección.
+
+Anteriormente creamos un real-time listener para obtener todos los documentos y ahora queremos hacer lo mismo pero obtener sólo aquelloos que cumplen con un cierto criterio.
+
+> A la hora de utilizar `onSnapshot` en lugar de pasarle `colRef` le pasamos `q` como primer parámetro.
+
+```js
+import {query, where} from 'firebase/firestore'
+
+const q = query(colRef, where('author', '==', 'patrick rothfuss'))
+
+onSnapshot(q, snapshot => {
+  let books = [];
+  snapshot.docs.forEach(doc => {
+    books.push({ ...doc.data(), id: doc.id })
+  })
+  console.log('real-time patrick book')
+  console.log(books)
+});
+```
+
+Obtendremos un mensaje en pantalla cada vez que agreguemos o eliminemos un documento de ese autor.
+
+
+
+VIDEO 7 COMPLETO
+
+
+
+## Ordenando Datos 
+
+Cuando utilizamos `getDocs` o `onSnapshot` obtenemos documentos ordenados por id
