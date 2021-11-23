@@ -1,9 +1,15 @@
 # useImperativeHandle
 > Basado en el video de [midudev](https://youtu.be/a7_S6ZeydeU)
 
-`useImperativeHandle` nos permite personalizar el valor de `ref` que será expuesto al padre en la mayoría de los casos debemos evitar su uso pero en ocasiones puede que no tengamos otra opción. 
+`useImperativeHandle` como su nombre lo indica nos permite realizar trabajos imperativos. 
 
-Un posible uso sería para ejecutar desde el padre un método del hijo.
+Un ejemplo de estos trabajos imperativos sería si queremos ejecutar desde el componente padre un método del hijo. Nos permitirá personalizar el valor de `ref` que será expuesto al padre. 
+
+> La mayoría de las veces debemos evitar su uso y buscar otra solución pero en ocasiones puede que no tengamos otra opción (por ejemplo si estamos trabajando con librerías de terceros).
+>
+> React normalmente trabaja de modo declarativo, en el modo imperativo en cambio vamos a forzar, es decir llamaremos al método directamente sin decirle qué es lo que tiene que hacer.
+
+
 
 En primer lugar creamos un componente `Parent` y uno `Child` lo más simples posibles.
 
@@ -31,7 +37,27 @@ const Child = () => {
 export default Child;
 ```
 
-En el `Parent` creamos una referencia con `const childRef = useRef(null)` 
+En el `Parent` creamos una referencia con `const childRef = useRef(null)` . Recordemos que `useRef()` nos permite guardar en un objeto una referencia que no va a cambiar entre renderizados.
+
+Normalmente lo usaremos asociado a elementos del DOM:
+
+```jsx
+const elementRef= useRef();
+
+console.log(elementRef);
+
+return (
+	<h1 ref={elementRef}>Titulo</h1>
+)
+```
+
+`ref` es una prop especial que guarda el valor del elemento del DOM en la referencia de React `elementRef`.
+
+Veremos en la consola que `elementRef` primero vale `undefined` dado que todavía el heading no se ha renderizado y luego vale `h1` es decir el DOM element. Una vez con este dato podríamos usar para obtener su ancho con `clientWidth` o bien agregar un listener a este evento (no es la forma correcta de hacerlo pero puede que por algún motivo nos veamos obligados a hacerlo).
+
+
+
+En nuestro caso la referencia no será de un elemento del DOM sino de un componente y si implementamos lo mismo que antes:
 
 ```jsx
 import { useRef } from "react";
@@ -40,6 +66,8 @@ import Child from "./Child";
 const Parent = () => {
   const childRef = useRef(null);
 
+  console.log(childRef);
+    
   return (
     <div>
       <h1>Parent</h1>
@@ -51,7 +79,7 @@ const Parent = () => {
 export default Parent;
 
 ```
-En ese momento nos aparecerá el mensaje: *Warning: Function components cannot be given refs. Attempts to access this ref will fail. Did you mean to use React.forwardRef()?* Por lo tanto esto nos da la pauta de que debemos incorporar `forwardRef()` en `Child` y este método será el encargado cuando le llega una prop con el valor `ref` de llevarlo hacia arriba.
+Veremos que en la consola nos aparecerá el mensaje: *Warning: Function components cannot be given refs. Attempts to access this ref will fail. Did you mean to use React.forwardRef()?* Por lo tanto esto nos da la pauta de que debemos incorporar `forwardRef()` en `Child` y este método será el encargado cuando le llega una prop con el valor `ref` de llevarlo hacia arriba.
 
 Su utilización tendrá la siguiente forma:
 ```jsx
