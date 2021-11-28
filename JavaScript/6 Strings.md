@@ -9,7 +9,7 @@ Si bien el string es un tipo primitivo, si escribimos `message.` veremos que tie
 La segunda forma es utilizando el **String Object**, se trata de un *built-in* object:
 `const another = new String('Hello')`.
 
-Estos dos tipos de strings podemos chequearlo utilizando `typeof(message)` que obtendremos `"string"` y `typeof(another)` con el que obtenemos `"object"`.
+Se trata de dos tipos de strings y podemos chequear que con `typeof(message)` obtendremos `"string"` y con `typeof(another)` obtenemos `"object"`.
 
 ## Inmutabilidad
  **Los tipos primitivos son inmutables**
@@ -83,24 +83,58 @@ const result = message.includes('yours'); //false
 
 ## `slice()`
 El método `slice()` nos permite extraer una sección de un string y retornar un nuevo string sin afectar el original. Le pasamos como argumentos la posición inicial y la posición final (que no será incluida).  **Este método no modifica el string original.**
+
+Es posible utilizar como inicio o como fin un valor negativo siendo -1 el último caracter.
+
 ```jsx
 const message = 'This is my first message';
 const result = message.slice(2,5); //'is '
+const result0 = message.slice(5,2); //''
+const result1 = message.slice(0); //'This is my first message';
+const result2 = message.slice(0,1); //'T';
+const result3 = message.slice(-1); //'e';
+const result4 = message.slice(-9,-5); //'t me';
+const result5 = message.slice(1,-1); //'his is my first messag';
 ```
 
-## `substr()`
-El método `substr()` es similar a `slice()` pero le pasamos la posición inicial y la cantidad de caracteres. **Este método no modifica el string original.**
+## `substring()`
+El método `substr()` es prácticamente igual a `slice()` 
 ```jsx
 const message = 'This is my first message';
-const result = message.substr(2,5); //'is is'
+const result = message.substring(2,5); //'is '
+const result1 = message.substring(0); //'This is my first message';
+const result2 = message.substring(0,1); //'T';
+const result3 = message.substring(-1); //
+const result4 = message.substring(-9,-5); //
+const result5 = message.substring(1,-1); //
 ```
 
+
+
+### `substring()` vs `slice()`
+
+Existen dos diferencias entre `substring` y `slice`:
+
+* La primera es que si el `indexStart` > `indexEnd` `slice` retorna un string vacío mienras que `substring` los swapea.
+* Si uno o ambos argumentos son negativos o `NaN` `substring` los trata como si fueran cero. `slice` también trata los `NaN` como si fueran `0` pero con los negativos cuenta desde atrás como vimos anteriormente.
+
+
+
+### `substring()` vs `substr()`
+
+No debemos confundir a `substring()` con `substr()`  que es un método deprecado que no se recomienda seguir utilizando cuyo comportamiento es muy similar al de `substring` pero que como segundo argumento recibía la cantidad de caracteres a retornar.
+
+
+
 ## `replace()`
-El método `replace()` busca el string que le pasamos (o RegEx) y retorna un nuevo string con los cambios que hayamos indicado como segundo argumento. En caso de utilizar un string nos permite cambiar sólo la **primera ocurrencia**. **Este método no modifica el string original.**
+
+El método `replace()` busca el string  (o RegEx) que le pasamos como primer argumento y lo reemplaza por el string o la función que le pasemos como segundo y retorna un nuevo string. En caso de utilizar un string nos permite cambiar sólo la **primera ocurrencia** mientras que si usamos una regex que termine con `/../g` modificará todas las ocurrencias. **Este método no modifica el string original.**
 
 ```jsx
 const message = 'This is my first message';
 const result = message.replace('m','w'); //"This is wy first message"
+const result1 = message.replace(/m/,'w'); //"This is wy first message"
+const result2 = message.replace(/m/g,'w'); //"This is wy first wessage"
 ```
 
 ## `trim()`
