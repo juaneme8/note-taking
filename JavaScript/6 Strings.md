@@ -156,7 +156,7 @@ No debemos confundir a `substring()` con `substr()`  que es un método deprecado
 
 ## `replace()`
 
-El método `replace()` busca el string  (o RegEx) que le pasamos como primer argumento y lo reemplaza por el string o la función que le pasemos como segundo y retorna un nuevo string. En caso de utilizar un string nos permite cambiar sólo la **primera ocurrencia** mientras que si usamos una regex que termine con `/../g` modificará todas las ocurrencias. **Este método no modifica el string original.**
+El método `replace()` busca el string  (o RegEx) que le pasamos como primer argumento y lo reemplaza por el string o la **función** que le pasemos como segundo y retorna un nuevo string. En caso de utilizar un string nos permite cambiar sólo la **primera ocurrencia** mientras que si usamos una regex que termine con `/../g` modificará todas las ocurrencias. **Este método no modifica el string original.**
 
 ```javascript
 const message = 'This is my first message';
@@ -166,6 +166,18 @@ const result2 = message.replace(/m/g,'w'); //"This is wy first wessage"
 ```
 
 
+
+Supongamos que como segundo parámetro le pasamos una función:
+
+```javascript
+function pigIt(str) {
+  return str.replace(/\w+/g, (w) => {
+    return w.slice(1) + w[0] + 'ay';
+  });
+}
+```
+
+En este caso para cada ocurrencia de la expresión regular que le pasamos como primer argumento ejecutará la función que le pasamos como segundo y lo que retornemos en esa función será lo que reemplazará las ocurrencias.
 
 ## `trim()`
 
