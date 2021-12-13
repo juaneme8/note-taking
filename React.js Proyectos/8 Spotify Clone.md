@@ -126,5 +126,9 @@ Creamos en ese directorio un archivo `spotify.js` importamos este paquete e indi
 
 
 
+Con `new URLSearchParams(params).toString()` obtenemos:
 
+```js
+'scope=user-read-email%2Cplaylist-read-private%2Cplaylist-read-collaborative%2Cstreaming%2Cuser-read-private%2Cuser-library-read%2Cuser-top-read%2Cuser-read-playback-state%2Cuser-modify-playback-state%2Cuser-read-currently-playing%2Cuser-read-recently-played%2Cuser-follow-read'
+```
 
