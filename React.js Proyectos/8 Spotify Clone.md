@@ -10,6 +10,8 @@ Al loguearnos nos entregan un access token cuyo tiempo de duración es de una ho
 
 Para interactuar con la API de Spotify utilizaremos el paquete `spotify-web-api-node`
 
+Debemos dirigirnos a https://developer.spotify.com/dashboard/ y presionar Log In. A continuación debemos hacer click en Create an App. Luego de esto le asignamos un nombre y una descripción y obtendremos el 
+
 ### Primeros pasos
 
 * Crear proyecto de Next.js con Tailwind CSS
@@ -126,9 +128,37 @@ Creamos en ese directorio un archivo `spotify.js` importamos este paquete e indi
 
 
 
-Con `new URLSearchParams(params).toString()` obtenemos:
+```jsx
+import SpotifyWebApi from 'spotify-web-api-node';
 
-```js
+const scopes = [
+  'user-read-email',
+  'playlist-read-private',
+  'playlist-read-collaborative',
+  'streaming',
+  'user-read-private',
+  'user-library-read',
+  'user-top-read',
+  // 'user-library-modify',
+  'user-read-playback-state',
+  'user-modify-playback-state',
+  'user-read-currently-playing',
+  'user-read-recently-played',
+  'user-follow-read',
+].join(",");
+
+const params = {
+  scope: scopes,
+};
+
+const queryStringParams = new URLSearchParams(params).toString();
+
+const LOGIN_URL = `https://accounts.spotify.com/authorize?${queryStringParams}`;
+
+```
+
+> En primer lugar creamos un array con el scope y lo convertimos a un string separado por comas. Luego con `const queryStringParams= new URLSearchParams(params).toString()` convertimos el string en:
+> ```js
 'scope=user-read-email%2Cplaylist-read-private%2Cplaylist-read-collaborative%2Cstreaming%2Cuser-read-private%2Cuser-library-read%2Cuser-top-read%2Cuser-read-playback-state%2Cuser-modify-playback-state%2Cuser-read-currently-playing%2Cuser-read-recently-played%2Cuser-follow-read'
 ```
 
