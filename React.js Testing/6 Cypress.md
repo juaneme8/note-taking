@@ -71,6 +71,12 @@ Notar que ahora en la ventana de Cypress nos aparecerá dentro de los Integratio
 
 
 
+> **Hover en comandos**
+>
+> Pasando el mouse por encima de cada comando podremos ver en qué estado estaba la aplicación cuando ese comando se ejecuctó.
+
+
+
 Si queremos ir mas lejos y también hacer click en un botón cuyo id es `add` podemos hacerlo con:
 
 ```js
@@ -83,3 +89,116 @@ describe("Add", () => {
 ```
 
 Veremos que en caso de poder hacerlo también superaremos el test.
+
+
+
+## `whithin`
+
+`whithin` nos permite establecer el scope de los comandos `cy` subsiguientes.
+
+Por ejemplo si tenemos un formulario y queremos referenciar elementos que este tenga dentro (esto sería útil si por ejemplo tenemos dos inputs con el mismo nombre), podríamos hacerlo de este modo:
+
+```js
+cy.get("#form1").whithin((form)=> {
+	cy.get("[name='gift']").type("Medias")
+	cy.get("[name='owner']").type("Goncy")
+	cy.get("[name='image']").type("//placehold.it/64x64")
+	cy.get("[name='count']").type("4")
+
+	//Para enviar el formulario tenemos dos opciones:
+    
+    //1) Con submit (notar que uso el form devuelto por whitin())
+	cy.get(form).submit();
+    
+    //2) Click botón:
+    cy.get("button").click();
+})
+```
+
+
+
+Como estamos trabajando con un formulario tenemos la opción de hacer click en el botón Guardar o hacer el Submit del form.
+
+
+
+> `data-testid`
+>
+> Cuando queremos referenciar un elemento para propósitos de tests es posible utilizar como atributo `data-testid`
+>
+> `cy.get("[data-testid='gift']")`
+
+
+
+## `should`
+
+`should` nos permite verificar determinada condición. 
+
+Por ejemplo si hemos agregado un elemento a una lista y queremos verificar que sólo haya uno:
+
+```js
+cy.get("[data-testid='gift']").should("have length",1)
+```
+
+
+
+De la misma manera si tenemos un mensaje de error y queremos verificar que aparezca en pantalla:
+
+```js
+cy.get("[data-testid]='error'").should("be.visible")
+```
+
+> Esto mismo podríamos utilizar cuando presionamos un botón y esperamos que aparezca un modal: `cy.get("#add").should("be.visible")`
+
+> **Funciones**
+>
+> Cuando tenemos funcionalidades que se repiten en nuestros tests, es posible extraerlas a funciones utilitarias. Por ejemplo como en varios tests vamos a llenar el formulario podemos hacerlo mediante una función. 
+>
+> ```js
+> function fillForm({gift,owner,image,count}){
+> 	gift && cy.get("[name='gift']").type(gift)
+> 	owner && cy.get("[name='owner']").type(owner)
+> 	image && cy.get("[name='image']").type(image)
+> 	count && cy.get("[name='count']").type(count)
+> 
+>  cy.get(form).submit();
+> }
+> ```
+> Como no es posible tipear en Cypress un string vacío utilizamos la operación booleana AND para ejecutar el comando sólo si recibimos dicho parámetro. No podríamos utilizar simplemente un valor default `""` ya que estaría ejecutando el `type("")` y arrojaría error.
+> Luego llamaremos a esta función por ejemplo con 
+>
+>```js
+> fillForm({gift:"Medias",owner:"Goncy",image:"//placehold.it/64x64",count:4})
+>```
+
+
+
+Como tenemos ciertas líneas de código que se ejecutan antes de cada test, podemos hacer uso de `beforeEach()` e indicarlas allí dentro. Por ejemplo los comandos encargados de visitar la página y hacer click en el botón para agregar un elemento a la lista.
+
+```
+beforeEach(()=>{
+	cy.visit("http://localhost:3000");
+	cy.get("#add").click();
+})
+```
+
+
+
+## `contains`
+
+Utilizando`contains` obtenemos el elemento del DOM que tiene el texto indicado.
+
+Por ejemplo si queremos hacer click en un botón que cierra el modal y tiene el texto Cerrar podemos hacerlo con:
+
+```
+cv.contains("Cerrar").Click()
+```
+
+
+
+Luego podríamos verificar que el modal ha desaparecido
+
+```
+cv.get("form").should("not.exist")
+```
+
+> Notar que no utilizamos `should("not.be.visible")` dado que eso sería válido si estuviéramos ocultando el elemento pero estuviera en el DOM, en nuestro caso no estará directamente.
