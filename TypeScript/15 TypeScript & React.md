@@ -976,3 +976,7 @@ export const User = () => {
 Notar que haciendo uso de **type assertion** `createContext({} as UserContextType)` no tenemos que chequear que sea null ni usar el optional chaining operator, cosa que sí sucedería si le decimos que puede ser `null`: `createContext<UserContextType | null>(null)`
 
 La ventaja del uso del contexto está en que todos los componentes tendrán acceso al estado sin que tengan que recibirlo mediante props.
+
+
+
+TUTORIAL CODEVOLUTION INCOMPLETO
