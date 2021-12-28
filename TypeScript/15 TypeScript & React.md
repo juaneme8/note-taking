@@ -980,3 +980,118 @@ La ventaja del uso del contexto está en que todos los componentes tendrán acce
 
 
 TUTORIAL CODEVOLUTION INCOMPLETO
+
+
+
+# TypeScript y Next.js
+
+```
+npx create-next-app@latest --ts
+```
+
+
+
+# TypeScript y Vite.js
+
+```
+npm init vite@latest
+```
+
+Luego el menu nos preguntará el nombre del proyecto, la librería a utilizar (react) y luego elegiremos que queremos utilizar TypeScript (react-ts). A continuación `npm install` y `npm run dev`
+
+
+
+> Si queremos hacerlo en un sólo paso: 
+>
+> ```
+> npx @vitejs/app mi-app --template react-ts
+> ```
+
+
+
+## Consumo API
+
+A continuación crearemos un ejemplo con TypeScript del consumo de una API con la estructura de archivos que tendría una aplicación real.
+
+Utilizaremos en el ejemplo Punk API (https://punkapi.com/) que devuelve un listado de cervezas cuando le pegamos al endpoint https://api.punkapi.com/v2/beers.
+
+En `src` creamos los archivos `types.ts` y `api.ts` 
+
+
+
+En `types.ts`
+
+```typescript
+export interface Gift {
+  text: string;
+  owner: string;
+  image: string;
+  count: number;
+}
+```
+
+En `api.ts` suponemos que queremos retornar los primeros tres elementos:
+
+```typescript
+import { Gift } from "./types";
+
+export default {
+  gifts: {
+    list: async() => {
+      const beers = await fetch("https://api.punkapi.com/v2/beers").then(res => res.json());
+      
+      return beers.slice(0,3).map((beer:any) => ({
+        id: beer.id,
+          text: beer.name,
+          image: beer.image_url,
+          count: beer.abv,
+          owner: "Juancho",
+      }));
+    }
+    
+  }
+}
+```
+
+
+
+> En caso de utilizar LocalStorage para guardar los elementos evaluar la posibilidad de usar un Set para evitar duplicados
+
+
+
+En `App.tsx`
+
+```typescript
+import './App.css'
+import api from './api'
+import { useEffect, useState } from 'react'
+import { Gift } from "./types";
+
+function App() {
+  const [gifts, setGifts] = useState<Gift[]>([])
+  
+  useEffect(() => {
+    api.gifts.list().then(gifts=> setGifts(gifts))
+  }, [])
+
+
+  console.log(gifts)
+
+  return (
+    <>
+      {gifts.length && gifts.map(gift => (
+        <div key={gift.id}>
+          <img src={gift.image} alt={gift.text} />
+          <p>{gift.text}</p>
+          <p>{gift.owner}</p>
+          <p>{gift.count}</p>
+        </div>
+      ))}
+    </>
+  );
+}
+
+export default App
+
+```
+
