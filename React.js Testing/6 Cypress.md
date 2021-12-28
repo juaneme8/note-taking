@@ -136,15 +136,28 @@ Como estamos trabajando con un formulario tenemos la opción de hacer click en e
 Por ejemplo si hemos agregado un elemento a una lista y queremos verificar que sólo haya uno:
 
 ```js
-cy.get("[data-testid='gift']").should("have length",1)
+cy.get("[data-testid='gift']").should("have.length",1)
 ```
 
+Si tenemos una imagen y queremos verificar que tenga determinado atributo `src` podemos hacerlo con:
+
+```js
+cy.get("img").should("have.attr","src","//placehold.it/48x48")
+```
+
+
+
+Si tenemos un texto y queremos verificar el contenido:
+
+```js
+cy.get("[data-testid='title']").should("have.text","Buzz");
+```
 
 
 De la misma manera si tenemos un mensaje de error y queremos verificar que aparezca en pantalla:
 
 ```js
-cy.get("[data-testid]='error'").should("be.visible")
+cy.get("[data-testid='error']").should("be.visible")
 ```
 
 > Esto mismo podríamos utilizar cuando presionamos un botón y esperamos que aparezca un modal: `cy.get("#add").should("be.visible")`
@@ -202,3 +215,26 @@ cv.get("form").should("not.exist")
 ```
 
 > Notar que no utilizamos `should("not.be.visible")` dado que eso sería válido si estuviéramos ocultando el elemento pero estuviera en el DOM, en nuestro caso no estará directamente.
+
+
+
+# End to End
+
+Supongamos por un momento que la TODO List la cargo con elementos de Punk API (https://punkapi.com/) que devuelve un listado de cervezas cuando le pegamos al endpoint https://api.punkapi.com/v2/beers. 
+
+Luego creo un test en un archivo `gift.spec.js` para verificar que el agregado de los elementos haya sido correcto:
+
+```js
+describe("gift list, () => {
+	beforeEach(()=> {
+		cv.visit("http://localhost:3000");
+	})
+    
+    it("should render the gift properly", ()=> {
+        cy.get("[data-testid='gift']").should("have.attr","src", "https://images.punkapi.com/v2/keg.png")
+        cy.get("[data-testid='title']").should("have.text", "Buzz");
+        cy.get("[data-testid='owner']").should("have.text", "goncy");
+    })
+});
+```
+
