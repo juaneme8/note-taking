@@ -41,6 +41,10 @@ Veremos que se nos creo una carpeta `cypress` con una carpeta `integration` que 
 
 Suponemos que queremos testear una TODO List. Lo primero que queremos hacer es testear la funcionalidad de agregado de elementos. Para ello en la carpeta `cypress/integration` creamos un un archivo `add.spec.js` (veremos que los tests tienen la terminación en `spec.js`).
 
+
+
+**Importante**
+
 En la parte superior agregamos:
 
 ```
@@ -218,9 +222,9 @@ cv.get("form").should("not.exist")
 
 
 
-# End to End
+## Fetch de API
 
-Supongamos por un momento que la TODO List la cargo con elementos de Punk API (https://punkapi.com/) que devuelve un listado de cervezas cuando le pegamos al endpoint https://api.punkapi.com/v2/beers. 
+Supongamos por un momento que la TODO List la cargo con elementos de Punk API (https://punkapi.com/) que devuelve un listado de cervezas cuando le pegamos al endpoint https://api.punkapi.com/v2/beers. Como estamos dependiendo de un servicio externo, podemos decir que **estamos realizando un test end-to-end**.
 
 Luego creo un test en un archivo `gift.spec.js` para verificar que el agregado de los elementos haya sido correcto:
 
@@ -231,9 +235,43 @@ describe("gift list, () => {
 	})
     
     it("should render the gift properly", ()=> {
-        cy.get("[data-testid='gift']").should("have.attr","src", "https://images.punkapi.com/v2/keg.png")
+        cy.get("[data-testid='gift']").first().whithin( () => {
+        	cy.get("img").should("have.attr","src", "https://images.punkapi.com/v2/keg.png")
         cy.get("[data-testid='title']").should("have.text", "Buzz");
-        cy.get("[data-testid='owner']").should("have.text", "goncy");
+        cy.get("[data-testid='owner']").should("have.text", "goncy");  
+        })  
+    })
+});
+```
+
+
+
+Sin embargo si lo que queremos es testear nuestra aplicación mediante un **test de integración** con la confianza de que si cambia algo en la respuesta de la API el test seguirá funcionando, lo que tenemos que hacer es interceptar el request a la URL de esa API y entregar una respuesta personalizada.
+
+```js
+describe("gift list, () => {
+	beforeEach(()=> {
+		cv.visit("http://localhost:3000");
+	})
+    
+    it("should render the gift properly", ()=> {
+    	cy.intercept("GET", "/v2/beers", {
+            statusCode: 200,
+            body: [
+                {
+                    name: 'beer test', 
+                    abv: 2,
+                    beer_url: '//placehold.it/48x48'
+                }
+            ]
+        })
+        
+        
+        cy.get("[data-testid='gift']").first().whithin( () => {
+        	cy.get("img").should("have.attr","src", "https://images.punkapi.com/v2/keg.png")
+        cy.get("[data-testid='title']").should("have.text", "Buzz");
+        cy.get("[data-testid='owner']").should("have.text", "goncy");  
+        })  
     })
 });
 ```
