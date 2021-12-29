@@ -66,3 +66,17 @@ Si utilizamos prefix el valor retornado será posterior al incremento.
 #### Recursividad
 
 A la hora de pensar usar recursividad es conveniente que en la función recibamos dos parámetros, por ejemplo `function countSheep(array,count)` de modo tal que podríamos volver a llamar a `countSheep` con el array sin el elemento que acabamos de procesar y con el contador actualizado.
+
+
+
+#### Crear array a partir de string
+
+Si tenemos un string `"hola"` y queremos obtener un array con cada uno de los caracteres como elemento `["h","o","l","a"]` tenemos distintas formas de lograrlo:
+
+```javascript
+str.split("")
+Array.from(str)
+[...str]
+Object.assign([], string);
+```
+
