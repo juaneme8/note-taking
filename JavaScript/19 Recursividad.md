@@ -1,5 +1,7 @@
 # Recursividad
 
+> Basado en video [Recursion in Programming](https://youtu.be/IJDJ0kBx2LM) de freecodecamp. 
+
 Un método recursivo es aquel que se llama a si mismo hasta alcanzar una condición que detiene la recursividad.
 
 La recursividad consiste en tomar un problema grande y partirlo en un montón de subproblemas más pequeños.
@@ -158,3 +160,67 @@ isPalindrome('aba')
 
 
 En el ejemplo de `isPalindrome('abcxcba')` en el call stack abajo de todo tendremos: `isPalindrome('bcxcb')`, luego `isPalindrome('cxc')`, luego `isPalindrome('x')` que retornará `true` y se propagará como valor retornado de todas las llamadas.
+
+
+
+## Conversión a Binario
+
+Como sabemos la conversión a binario se efectúa realizando sucesivas divisiones por cero hasta que el resultado de la división sea menor a 2.
+
+```js
+function toBinary(num){
+  if(num<2)
+    return num;
+  
+  return toBinary(Math.floor(num/2))+(num%2).toString()
+}
+
+toBinary(17) //10001
+```
+
+
+
+Otra forma de hacerlo que nos evita la conversión a string es recibiendo un string `bin` que inicialmente será un string vacío.
+
+```js
+function toBinary(dec, bin){
+  if(dec===0)
+    return bin;
+  
+  bin = bin + (dec%2)
+  
+  return toBinary(Math.floor(dec/2),bin)
+}
+
+toBinary(17,"")
+```
+
+> En este último ejemplo vemos que una vez alcanzado el caso base el resultado se propagará por todos los stack frames y todos retornarán lo mismo.
+
+
+
+## Suma de Números Naturales
+
+Suponemos que tenemos el número `10` como entrada y queremos entregar una salida que sea `1+2+3+4+5+6+7+8+9+10``=55`
+
+
+
+```
+function sumOfNaturals(num){
+  if(num<=1){
+    return num
+  }
+  
+  return num+sumOfNaturals(num-1);
+}
+
+sumOfNaturals(10)
+```
+
+> Notar que no pregunto por `1` sino por `<=1` ya que si me pasan `sumOfNaturals(0)` crashearía la aplicación ya que obtendría un **RangeError: Maximum call stack size exceeded**.
+
+
+
+## Búsqueda Binaria
+
+HASTA MINUTO 38
