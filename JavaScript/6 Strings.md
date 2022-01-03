@@ -156,7 +156,7 @@ No debemos confundir a `substring()` con `substr()`  que es un método deprecado
 
 ## `replace()`
 
-El método `replace()` busca el string  (o RegEx) que le pasamos como primer argumento y lo reemplaza por el string o la **función** que le pasemos como segundo y retorna un nuevo string. En caso de utilizar un string nos permite cambiar sólo la **primera ocurrencia** mientras que si usamos una regex que termine con `/../g` modificará todas las ocurrencias. **Este método no modifica el string original.**
+El método `replace()` busca el string  (o RegEx) que le pasamos como primer argumento y lo reemplaza por el string o la **función** que le pasemos como segundo y **retorna un nuevo string**. En caso de utilizar un string nos permite cambiar sólo la **primera ocurrencia** mientras que si usamos una regex que termine con `/../g` modificará todas las ocurrencias. **Este método no modifica el string original.**
 
 ```javascript
 const message = 'This is my first message';
@@ -166,6 +166,8 @@ const result2 = message.replace(/m/g,'w'); //"This is wy first wessage"
 ```
 
 
+
+### `replace()` con función
 
 Supongamos que como segundo parámetro le pasamos una función:
 
@@ -178,6 +180,19 @@ function pigIt(str) {
 ```
 
 En este caso para cada ocurrencia de la expresión regular que le pasamos como primer argumento ejecutará la función que le pasamos como segundo y lo que retornemos en esa función será lo que reemplazará las ocurrencias.
+
+
+
+### `replace()` con grupos de captura
+
+Supongamos que queremos reemplazar `"1234567890"` por `(123) 456-7890` trabajando con RegEx y grupos de captura.
+
+```js
+const str = "1234567890";
+const number = str.replace(/(\d{3})(\d{3})(\d{3})/,"($1) $2-$3")
+```
+
+
 
 ## `trim()`
 
@@ -214,7 +229,7 @@ name.trimRight(); //'    Juan Ocho'
 El método `split()` nos permite dividir un string en una lista de substrings organizados en un array y retorna este array. Esta división se realiza buscando el patrón que le pasemos como primer argumento.
 ```javascript
 const msg = "Mensaje de Prueba 1";
-const words = msg.split(' ');
+const words = msg.split(' '); // ['Mensaje', 'de', 'Prueba', '1']
 ```
 
 
