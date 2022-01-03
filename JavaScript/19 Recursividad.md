@@ -223,4 +223,4 @@ sumOfNaturals(10)
 
 ## Búsqueda Binaria
 
-HASTA MINUTO 38
+Completado hasta el minuto 38.
