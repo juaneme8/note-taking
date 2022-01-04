@@ -174,6 +174,8 @@ const third = first.concat(second); //[ 1, 2, 3, 4, 5, 6 ] y first y second sigu
 ### `slice()`
 El método `slice()` retorna una *shallow copy* de una porción de un array en un nuevo array basado en los valores que le pasemos de `start` y `end` (este último no está incluído). **El array original no será modificado**. 
 
+Tiene el mismo comportamiento que `slice` al utilizarlo con strings.
+
 Es muy similar a `splice` en su comportamiento salvo que este no modifica el array original sino que retorna una copy (`splice` retorna los elementos eliminados)
 
 Ejemplos:
