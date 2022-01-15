@@ -1,14 +1,16 @@
 # Svelte
 
 > Basado en el [Crash Course](https://youtu.be/3TVy6GdtNuQ) de Traversy Media (COMPLETO).
+>
+> Basado en el curso [Introducción a Svelte](https://www.youtube.com/playlist?list=PLV8x_i1fqBw2QScggh0pw2ATSJg_WHqUN) de midudev
 
 
 
 ## Introducción
 
-Svelte es un **compilador** que genera código JavaScript mínimo y optimizado. 
+Svelte es un **frontend framework** creado por Rich Harris que nos permite construir interfaces de usuario de la misma manera que React, Vue o Angular. En realidad Svelte es un **compilador** que genera código JavaScript mínimo y optimizado. 
 
-Muchas veces nos referiremos a Svelte como un **frontend framework** ya que hace muchas de las cosas que hacen estos. Nos permite crear SPA (*single page application*) con componentes reutilizables de la misma manera que en React, Vue o Angular.
+Nos permite crear SPA (*single page application*) con componentes reutilizables de la misma manera que en React, Vue o Angular.
 
 El funcionamiento de Svelte es bastante simple de entender (por ejemplo si lo comparamos con React con el Virtual DOM y esas conceptos). Simplemente escribiremos el código con la sintaxis de Svelte y este luego será compilado en JavaScript puro optimizado que será leido por el navegador.
 
@@ -16,6 +18,8 @@ El funcionamiento de Svelte es bastante simple de entender (por ejemplo si lo co
 
 ## Características
 
+* Nos permite [escribir menos código](https://svelte.dev/blog/write-less-code) que el que necesitaríamos en una aplicación de React por ejemplo.
+* Como el código es compilado, nos permite detectar errores que de otra forma veríamos en run-time (aunque antes el linter nos ayudaría con alguno de ellos).
 * Nos permite crear frontend UIs dinámicos
 * Produce JavaScript optimizado
 * 30% más rápido que otros frameworks.
@@ -27,9 +31,9 @@ El funcionamiento de Svelte es bastante simple de entender (por ejemplo si lo co
 
 
 
-## Instalación
+## Creación Proyecto
 
-Existen distintas formas de instalar Svelte (podríamos utilizar por ejemplo SvelteKit) pero la más simple es utilizar la herramienta de scafolding llamada **degit** que clonará el repositorio de svelte.
+Existen distintas formas de crear un proyecto con Svelte (podríamos utilizar por ejemplo SvelteKit) pero utilizaremos la indicada en al documentación usando la herramienta de scafolding llamada **degit** (también creada por Rich Harris) que realizará una copia del último commit de un repositorio (en este caso del de svelte) sin descargar el historial completo de git.
 
 ```bash
 npx degit sveltejs/template md-svelte
@@ -37,6 +41,8 @@ cd md-svelte
 npm install
 npm run dev
 ```
+
+> Recordemos que `npx` es un comando de`npm` que nos permite ejecuctar un paquete, en este caso `degit` que de otra forma tendríamos que instalar como global. Mientras que en este caso lo instalará en una carpeta temporal y lo ejecutará al vuelo.
 
 Obtendremos un servidor de desarrollo y utilizaremos rollup como module bundler (pero podríamos utilizar por ejemplo Vite). 
 
@@ -47,6 +53,51 @@ Obtendremos un servidor de desarrollo y utilizaremos rollup como module bundler 
 Se aconseja instalar la extensión Svelte for VS Code la cual nos aportará de formateado, autocompletado, nos permitirá el uso de emmet
 
 
+
+### Scripts
+
+En `package.json` podremos ver que tenemos los siguientes scripts:
+
+```json
+"scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "start": "sirv public --no-clear"
+},
+```
+
+* Con `npm start` con `sirv`serviremos la carpeta `public` para producción.
+
+* Con `npm run dev` iniciamos un servidor de desarrollo con live reload.
+
+* Con `npm run build`para compilar el código Svelte en código JavaScript optimizado para producción.
+
+
+
+### Estructura de Carpetas
+
+* `scripts` contiene el archivo `setupTypescript.js` y si ejecutamos `node scripts/setupTypescript.js` podremos utilizar TypeScript como vemos en la [documentación](https://svelte.dev/blog/svelte-and-typescript). 
+
+* `public` en ella el archivo `index.html` que será la única página de la SPA que será cargada por el navegador. Veremos que en el `<body>` no tenemos nada y que importamos un archivo `/build/bundle.js` (archivo y carpeta que serán creados cuando ejecutamos `npm run build`).
+
+  En `global.css` podremos colocar los estilos globales y en `/build/bundle.css` los estilos de los componentes.
+
+* `src` tenemos dos archivos `main.js` que es el entrypoint o punto de entrada en el cual hacemos el binding del componente principal `App` con `document.body` . Si en cambio en `index.html` tenemos por ejemplo un div donde queremos renderizar los componentes podemos poner `target: document.getElementById("root")`.
+
+```js
+import App from './App.svelte';
+
+const app = new App({
+	target: document.body,
+	props: {
+		name: 'world'
+	}
+});
+
+export default app;
+```
+
+> Notar además que le podemos pasar props (en este caso le pasamos una llamada `name`) y luego en `App.svelte` la recibimos haciendo `export let name;` dentro de `<script></script>` y luego podremos mostrarla en pantalla como `{name}`. Obviamente si no lo necesitamos, podremos quitar esto.
 
 ## Componentes
 
@@ -61,6 +112,7 @@ El modo de importar un componente en otro (por ejemplo en `App.svelte`) es idén
 * Lógica escrita en JavaScript dentro de tags `<script>` allí podremos setear variables, crear funciones o valores reactivos.
 * Salida de html en el medio donde podremos emplear llaves `{}` cuando queramos mostrar una variable o evaluar una expresión. También podremos utilizar condicionales o each loops.
 * Estilos en CSS dentro de tags `<style>`
+* Notar que no es necesario exportar el componente como sí sucede en React.
 
 
 
@@ -99,7 +151,59 @@ Luego en el componente `FeedbackList` accederemos a esa prop de la siguiente for
 
 
 
-## Life Cycle Methods
+### Manejo de Estado
+
+Queremos que nuestros componentes estén dotados de **reactividad** lo que significa que manejan un cierto estado interno y cuando este cambie veamos reflejados esos cambios en la interfaz. 
+
+Svelte automáticamente detecta aquello que es estado y que al cambiar debe volver a renderizarse el componente. En cambio en React necesitamos una gestión del estado particular mediante el uso del hook `useState`.
+
+Si tenemos`let firstName = 'Juan'` y luego queremos modificarlo podemos hacerlo directamente con `firstName='Jota'`.
+
+Esto justifica un poco lo anunciado respecto a que con Svelte escribimos menos código.
+
+
+
+```vue
+<script>
+	let greeting='frontender';
+	let prefix='Hola'
+	setTimeout(function(){
+		greeting='mundo'
+	},2000);
+</script>
+
+<h1>{prefix} {greeting}</h1>
+```
+
+Cuando cambiamos el valor a la variable Svelte detecta el cambio y vuelve a renderizar el componente.
+
+
+
+Svelte gracias a la compilación es capaz de diferenciar lo que es una variable `prefix` de lo que es el estado `greeting`. En las devtools en `bundle.js` es decir en el output JavaScript veremos que esa variable de estado aparece asociada a un método `$$invalidate `.
+
+
+
+### Estado Inicial
+
+Es posible recibir por props el estado inicial de un componente y luego modificarlo internamente.
+
+```vue
+<script>
+	export let initialCounter = 0;
+	
+    let counter = initialCounter;
+    
+    const handleClick = () => {
+        counter++;
+    }
+</script>
+
+<button on:click={handleClick}>Increment</button>
+```
+
+> Cuando invocamos este componente le pasamos el valor inicial con `<Counter initialCounter={9}/>` y en caso de no recibir ninguno valdrá 0 que es su valor default.
+
+### Life Cycle Methods
 
 De manera similar a los componentes de clases en React tenemos métodos del ciclo de vida de los componentes en Svelte.
 
@@ -118,77 +222,66 @@ onDestroy(()=> {
 
 
 
-## Scripts
+### Estilos
 
-En `package.json` podremos ver que tenemos los siguientes scripts:
+Si tenemos un componente con estilos.
 
-```json
-"scripts": {
-    "build": "rollup -c",
-    "dev": "rollup -c -w",
-    "start": "sirv public --no-clear"
-},
 ```
-
-* Con `npm start` con `sirv`serviremos la carpeta `public` para producción.
-
-* Con `npm run dev` iniciamos un servidor de desarrollo con live reload.
-
-* Con `npm run build`para compilar el código Svelte en código JavaScript optimizado para producción.
-
-
-
-## Estructura de Carpetas
-
-* `scripts` contiene el archivo `setupTypescript.js` y si ejecutamos `node scripts/setupTypescript.js` podremos utilizar TypeScript como vemos en la [documentación](https://svelte.dev/blog/svelte-and-typescript). 
-
-* `public` en ella el archivo `index.html` que será la única página de la SPA que será cargada por el navegador. Veremos que en el `<body>` no tenemos nada y que importamos un archivo `/build/bundle.js` (archivo y carpeta que serán creados cuando ejecutamos `npm run build`).
-
-  En `global.css` podremos colocar los estilos globales y en `/build/bundle.css` los estilos de los componentes.
-
-* `src` tenemos dos archivos `main.js` que es el entrypoint en el cual hacemos el binding del componente principal `App` con `document.body` 
-
-```js
-import App from './App.svelte';
-
-const app = new App({
-	target: document.body,
-	props: {
-		name: 'world'
+<style>
+	h1{
+		color: #09f;
 	}
-});
-
-export default app;
+</style>
 ```
 
-> Notar además que le estamos pasando una prop `name` y luego en `App.svelte` la recibimos con `export let name;` dentro de `<script></script>` y luego podremos mostrarla en pantalla como `{name}`. Obviamente si no lo necesitamos, podremos quitar esto.
+Al visualizar el CSS output o al analizarlo con las DevTools veremos que se le ha asignado una clase especial con un hash único para evitar colisiones. Esto significa que los `h1` que tengamos en otros componentes de la aplicación no se verán afectados por estos estilos.
 
 
 
-## Valores Reactivos
-
-Los valores reactivos los definimos con `$:` seguido del nombre de la variable y el valor que queremos que tenga. `$: name = firstName + ' ' + lastName;` luego lo utilizamos y veremos que si modificamos alguna de esas dos variables `name` reaccionará a esos cambios y mostrará el valor actualizado.
-
-```vue
-let firstName = 'Juan';
-let lastName = 'Ocho';
-
-$: name = firstName + ' ' + lastName;
-```
-
-
-
-## Manejo de Estados
-
-Comparativamente con React donde si queremos emplear variables de estado debemos utilizar el hook `useState`, con Svelte podremos tener:
-
-`let firstName = 'Juan'` y luego modificarlo directamente a `firstName='Jota'` sin la necesidad de usar un set.
-
-
-
-## Estilos con variables
+#### Estilos Variables
 
 Si tenemos una variable `let color='blue';` y queremos asignarlo a un elemento podemos hacerlo con `<h1 style="color: {color}">Título</h1>`
+
+
+
+### Bind
+
+Supongamos que queremos tener un componente con dos inputs asociados a los valores `a` y `b`. Esto lo hacemos colocando `bind:value={a}` de esta manera cuando cambiamos el valor de uno de los inputs será cambiado el valor de dicha variable.
+
+```
+<script>
+	let a = 1;
+	let b = 2;
+</script>
+
+<input type="number" bind:value={a}>
+<input type="number" bind:value={b}>
+
+<p>{a} + {b} = {a + b}</p>
+```
+
+
+
+## Declaraciones Reactivas
+
+Svelte actualiza automáticamente el DOM cuando el estado del componente cambia. En ocasiones algunas partes del estado deben ser calculadas de otras partes. Un ejemplo de esto sería `fullName` calculado a partir de `firstName` y `lastName`. Para esos casos debemos usar declaraciones reactivas.
+
+Los valores reactivos los definimos con `$:` seguido del nombre de la variable y el valor que queremos que tenga. `$: fullName= firstName + ' ' + lastName;` 
+
+```vue
+<script>
+	let firstName = 'Juan';
+	let lastName = 'Ocho';
+
+	$: fullName = firstName + ' ' + lastName;
+</script>
+
+<p>{fullName}</p>
+```
+
+Veremos que si modificamos alguna de esas dos variables `fullName` reaccionará a esos cambios y mostrará el valor actualizado. Está claro que podríamos haber puesto (en lugar de `<p>{fullName}</p>`) directamente `<p>{firstName} {lastName}</p>`
+
+
 
 
 
@@ -207,6 +300,10 @@ Una forma es hacerlo usando una expresión en línea:
 ```vue
 <button on:click={()=> color='red'}>Click</button>
 ```
+
+> El `on:click` es una directiva.
+
+
 
 También podemos hacerlo mediante una función aparte:
 
@@ -570,7 +667,7 @@ const handleDelete = (itemId) => {
 
 
 
-## Agregar Items a Store
+### Agregar Items a Store
 
 Una forma de hacerlo es con eventos custom y pasando las props hacia arriba hasta llegar a `App` que tiene el array de elementos. Sin embargo, utilizando stores esto es mucho mas simple y podemos hacerlo desde el formulario en el cual tengamos el elemento a agregar.
 
