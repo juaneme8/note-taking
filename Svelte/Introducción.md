@@ -137,7 +137,7 @@ El modo de importar un componente en otro (por ejemplo en `App.svelte`) es idén
 
 ### Pasaje de Props
 
-Si queremos pasarle ciertos datos a un componente podemos hacerlo via props `<FeedbackList feedback={feedback}/>`. Además en este caso como tenemos el mismo nombre de la prop que el de la variable que almacena el dato, podemos poner `<FeedbackList {feedback}/>`
+Si queremos pasarle ciertos datos a un componente podemos hacerlo via props por ejemplo `<FeedbackList feedback={feedback}/>`. 
 
 Luego en el componente `FeedbackList` accederemos a esa prop de la siguiente forma:
 
@@ -148,6 +148,22 @@ Luego en el componente `FeedbackList` accederemos a esa prop de la siguiente for
 ```
 
 > Si bien lo recibiremos desde el componente padre le damos un **valor default** de un array vacío por si por algún motivo no lo recibimos.
+
+
+
+* Con `<FeedbackList feedback={feedback}/>` como tenemos el mismo nombre de la prop que el de la variable que almacena el dato, podemos poner `<FeedbackList {feedback}/>`
+
+* En ocasiones nos convendrá almacenar las props en un objeto y pasárselas todas al componente utilizando el spead operator.
+
+  ```
+  <script>
+  	const commonProps = { maxCounter: 5}
+  </script>
+  
+  <Counter {...commonProps}/>
+  ```
+
+  
 
 
 
@@ -175,7 +191,7 @@ Esto justifica un poco lo anunciado respecto a que con Svelte escribimos menos c
 <h1>{prefix} {greeting}</h1>
 ```
 
-Cuando cambiamos el valor a la variable Svelte detecta el cambio y vuelve a renderizar el componente.
+Cuando cambiamos el valor a la variable Svelte detecta el cambio y vuelve a renderizar el componente. Esto se conoce como **asignación reactiva**, veremos luego lo que son las **declaraciones reactivas**.
 
 
 
@@ -183,7 +199,7 @@ Svelte gracias a la compilación es capaz de diferenciar lo que es una variable 
 
 
 
-### Estado Inicial
+#### Estado Inicial
 
 Es posible recibir por props el estado inicial de un componente y luego modificarlo internamente.
 
@@ -202,6 +218,14 @@ Es posible recibir por props el estado inicial de un componente y luego modifica
 ```
 
 > Cuando invocamos este componente le pasamos el valor inicial con `<Counter initialCounter={9}/>` y en caso de no recibir ninguno valdrá 0 que es su valor default.
+
+
+
+#### Modificar Estado
+
+Si tenemos que modificar el estado agregando por ejemplo un elemento a un array de `users` no podemos hacerlo con `users.push()` sino que debemos reasignarlo a otro array, lo cual hacemos con `users = [..users, {id:'4',name:'Jen'}]`
+
+
 
 ### Life Cycle Methods
 
@@ -244,7 +268,38 @@ Si tenemos una variable `let color='blue';` y queremos asignarlo a un elemento p
 
 
 
-### Bind
+## Fetching de Datos
+
+Para el fetching de datos utilizaremos [OMDb API  - The Open Movie Database](http://www.omdbapi.com/) que debe usarse de la siguiente forma `http://www.omdbapi.com/?apikey=[yourkey]&s=` seguido del título de la película que queremos buscar.
+
+
+
+Queremos que cada vez que se ingresa un caracter en el input se actualice el valro del estado `input` y esto lo hacemos mediante el evento `on:input`. Además queremos que la solicitud a la API sólo se realice cuando la cantidad de caracteres ingresados sea mayor a 2.
+
+```vue
+
+<script>
+  let value = ''
+  let response = []
+  
+  const handleInput = (event) => value = event.target.value
+  
+  $: if (value.length > 2) {
+    fetch(`https://www.omdbapi.com/?s=${value}&apikey=422350ff`)
+      .then(res => res.json())
+      .then(apiResponse => {
+        response = apiResponse.Search
+      })
+  }
+    
+</script>
+
+<input value={value} on:input={handleInput} />
+```
+
+
+
+## Bind
 
 Supongamos que queremos tener un componente con dos inputs asociados a los valores `a` y `b`. Esto lo hacemos colocando `bind:value={a}` de esta manera cuando cambiamos el valor de uno de los inputs será cambiado el valor de dicha variable.
 
@@ -264,9 +319,81 @@ Supongamos que queremos tener un componente con dos inputs asociados a los valor
 
 ## Declaraciones Reactivas
 
-Svelte actualiza automáticamente el DOM cuando el estado del componente cambia. En ocasiones algunas partes del estado deben ser calculadas de otras partes. Un ejemplo de esto sería `fullName` calculado a partir de `firstName` y `lastName`. Para esos casos debemos usar declaraciones reactivas.
+Como dijimos anteriormente Svelte actualiza automáticamente el DOM cuando el estado del componente cambia.
 
-Los valores reactivos los definimos con `$:` seguido del nombre de la variable y el valor que queremos que tenga. `$: fullName= firstName + ' ' + lastName;` 
+Supongamos que tenemos un componente `Counter` que consiste en un contador que se incrementa al presionar un botón. En este caso el valor de `{count}` se verá actualizado en pantalla cada vez que lo presionemos.
+
+```vue
+<script>
+	export let initialCounter = 0;
+
+	let count = initialCounter
+	function handleClick () {
+		count++
+	}
+</script>
+
+<button on:click={handleClick}>Incrementar</button>
+<span>{count}</span>
+```
+
+Las declaraciones reactivas son necesarias cuando algunas partes del estado deben ser calculadas a partir de otras partes.
+
+Por ejemplo si en nuestro componente `Counter` queremos tener ahora un indicador `isEvenOrOdd`. Si tuviéramos `let isEvenOrOdd = contador % 2 === 0 ? 'Is Even' : 'Is Odd'` y luego mostramos `{isEvenOrOdd}` veríamos que el valor en pantalla no se actualiza cuando el contador es incrementado. 
+
+Queremos que esa declaración se ejecute cada vez que cambie `count`. Los valores reactivos los definimos con `$:` seguido del nombre de la variable y el valor que queremos que tenga.
+
+```vue
+<script>
+	export let initialCounter = 0;
+	export let maxCounter = 9;
+	let count = initialCounter
+	function handleClick () {
+		count++
+	}
+	// let isEvenOrOdd = count % 2 === 0 ? 'Is Even' : 'Is Odd'
+	$: isEvenOrOdd = count % 2 === 0 ? 'Is Even' : 'Is Odd'
+	$: if (count > maxCounter ) {
+		console.log('limit contador')
+		count = maxCounter
+	}
+</script>
+
+<style>
+	span {
+		color: red;
+	}
+</style>
+
+<button on:click={handleClick}>Incrementar</button>
+<span>{count}</span>
+<span>{isEvenOrOdd}</span>
+```
+
+Otra opción hubiera sido colocar en el renderizado `{count % 2 === 0 ? 'Is Even' : 'Is Odd'}` y el mensaje se hubiera actualizado sin la necesidad de la declaración reactiva.
+
+
+
+En cuanto a la limitación que hemos hecho del contador mediante una declaración reactiva, podemos ver que tiene un comportamiento similar al de un efecto en React y en ese caso `count` sería la dependencia (lo cual es detectado automáticamente por Svelte). En tanto que se ejecutará el código siempre que cambie el valor de `count` (y también la primera vez cuando se monta el componente).
+
+```
+$: if (count > maxCounter ) {
+	console.log('limit contador')
+	count = maxCounter
+}
+```
+
+En el caso anterior vimos una declaración reactiva con un condicional, pero también es posible hacerla sin el directamente con `{}`. Por ejemplo queremos hacer un `console.log()` de una variable de estado cada vez que esta se actualiza podríamos hacerlo de este modo:
+
+```
+$:{
+	console.log(value);
+}
+```
+
+
+
+Otro ejemplo sería si queremos conformar un `fullName` calculado a partir de `firstName` y `lastName`. Para esos casos debemos usar declaraciones reactivas pues de lo contrario si tuviéramos `let fullName= firstName + ' ' + lastName` cuando cambia `firstName` o `lastName`, `fullName` no cambiaría.
 
 ```vue
 <script>
@@ -279,7 +406,7 @@ Los valores reactivos los definimos con `$:` seguido del nombre de la variable y
 <p>{fullName}</p>
 ```
 
-Veremos que si modificamos alguna de esas dos variables `fullName` reaccionará a esos cambios y mostrará el valor actualizado. Está claro que podríamos haber puesto (en lugar de `<p>{fullName}</p>`) directamente `<p>{firstName} {lastName}</p>`
+Veremos que si modificamos alguna de esas dos variables `fullName` reaccionará a esos cambios y mostrará el valor actualizado. Nuevamente podríamos haber puesto (en lugar de `<p>{fullName}</p>`) directamente `<p>{firstName} {lastName}</p>` y no hubiera hecho falta una declaración reactiva.
 
 
 
@@ -471,13 +598,7 @@ También es posible trabajar con `{:else}`, por ejemplo supongamos que queremos 
 
 Con `(user.id)` estamos estableciendo una clave única para cada iteración (de manera similar a lo que hacemos en React con la prop `key`).
 
-
-
-### Agregar elementos a lista
-
-Si queremos agregar un elemento a la lista de `users` no podemos hacerlo con `users.push()` sino que debemos reasignarlo a otro array, lo cual hacemos con `users = [..users, {id:'4',name:'Jen'}]`
-
-
+#### 
 
 ## `<slot>`
 
