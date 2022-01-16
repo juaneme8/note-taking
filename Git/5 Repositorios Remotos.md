@@ -29,6 +29,10 @@ Luego efectúo los cambios que considero con el flujo habitual `git add .`, `git
 # `git fetch`
 El comando `git fetch` me permite traerme las actualizaciones del código que hubieran sido realizadas por otros desarrolladores luego de que cloné el repositorio. Esto me lo traerá al repositorio local pero no veré los cambios en el directorio de trabajo, para ellos debemos realizar un `git merge`.Los comandos `git fetch` y `git merge` pueden ser reemplazados por `git pull` que se encarga de ambas tareas.
 
+Recordemos que con `git fetch --all` obtenemos todas las las ramas remotas.
+
+
+
 # `git push`
 El comando `git push` nos permite enviar el código a un repositorio remoto. Esto nos permitiría que sea accesible por otras personas si así lo deseamos.
 

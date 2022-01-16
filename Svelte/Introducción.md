@@ -288,7 +288,7 @@ Queremos que cada vez que se ingresa un caracter en el input se actualice el val
     fetch(`https://www.omdbapi.com/?s=${value}&apikey=422350ff`)
       .then(res => res.json())
       .then(apiResponse => {
-        response = apiResponse.Search
+        response = apiResponse.Search || []
       })
   }
     
@@ -297,7 +297,7 @@ Queremos que cada vez que se ingresa un caracter en el input se actualice el val
 <input value={value} on:input={handleInput} />
 ```
 
-
+> Hemos colocado `apiResponse.Search || []` debido a que en ocasiones la API no devuelve el campo `Search` por ejemplos si no encontró ninguna película.
 
 ## Bind
 
@@ -525,45 +525,47 @@ const handleSubmit = () => {
 
 
 
-## Condicionales
+## Renderizado Condicional
 
-A la hora de escribir condicionales lo hacemos con `{#if condicion}` y finalizamos con `{/if}` . 
+En Svelte es posible realizar un renderizado condicional, es decir que mostrar o no el contenido de acuerdo a una condición.
 
-Por ejemplo si queremos mostrar y ocultar un texto conforme apretamos un botón:
+Supongamos que queremos mostrar la cantidad de resultados obtenidos luego de una llamada a una API o en su defecto un cartel que indique que no encontramos ningún resultado. La forma mas sencilla de hacerlo es con el operador ternario:
 
-```vue
-<script>
-	let showText = false;
-	
-	const toggleText = () => {
-		showText = !showText;
-	}
-</script>
-
-{#if showText}
-	<p>Paragraph hidden by default</p>
-{/if}
-
-<button on:click={toggleText}>Click</button>
+```
+{response.length>0?`${response.length} movies found`:`No movies found`}
 ```
 
+Sin embargo, si en lugar de texto queremos mostrar condicionalmente elementos HTML de marcado, como por ejemplo si quisiéramos mostrar:
 
+```
+<strong>`${response.length} movies found`</strong>
+```
 
-También es posible trabajar con `{:else}`, por ejemplo supongamos que queremos que cuando no se muestre el texto anterior se muestre otra cosa:
+Debemos hacerlo con `{#if condicion}` y finalizamos con `{/if}`  y también es posible trabajar con `{:else}`
 
-```vue
-<script>
-	let showText = false;
-	
-	const toggleText = () => {
-		showText = !showText;
-	}
-</script>
-
-{#if showText}
-	<p>Paragraph hidden by default</p>
+```
+{# if response.length>0}
+<strong>{response.length} movies found</strong>
 {:else}
-	<p>Another paragraph</p>
+No movies found
+{/if}
+```
+
+
+
+Otro ejemplo es si queremos mostrar y ocultar un texto conforme apretamos un botón:
+
+```vue
+<script>
+	let showText = false;
+	
+	const toggleText = () => {
+		showText = !showText;
+	}
+</script>
+
+{#if showText}
+	<p>Paragraph hidden by default</p>
 {/if}
 
 <button on:click={toggleText}>Click</button>
@@ -571,7 +573,25 @@ También es posible trabajar con `{:else}`, por ejemplo supongamos que queremos 
 
 
 
-## Loops
+### Condicionales Anidados
+
+Supongamos ahora que tenemos un estado `loading` que ponemos en `true` justo antes de hacer el fetch a una API y en `false` cuando obtuvimos el resultado. Como queremos evitar estar viendo información de películas encontradas no actualizada, la ocultamos mientras estemos cargando y para ello utilizamos condicionales anidados.
+
+```
+{#if loading}
+	<strong>Loading...</strong>
+{:else}
+	{#if response.length>0}
+		<strong>{response.length} movies</strong>
+	{:else}
+		<strong>No movies<strong>
+	{/if}
+{/if}
+```
+
+
+
+## Renderizado de Listas
 
 ```vue
 <script>
@@ -592,13 +612,33 @@ También es posible trabajar con `{:else}`, por ejemplo supongamos que queremos 
 </script>
 
 {#each users as user (user.id)}
-	<h3>{user.name}: {user.name}</h3>
+	<h3>{user.id}: {user.name}</h3>
 {/each}
 ```
 
 Con `(user.id)` estamos estableciendo una clave única para cada iteración (de manera similar a lo que hacemos en React con la prop `key`).
 
-#### 
+
+
+> Es posible trabajar también con un segundo parámetro `index`
+
+```
+{#each users as user,index (user.id)}
+	<h3>{user.id}: {user.name}</h3>
+{/each}
+```
+
+
+
+> Si así lo quisiéramos podríamos utilizar **object destructuring**:
+
+```
+{#each users as {id,name} (id)}
+	<h3>{id}: {name}</h3>
+{/each}
+```
+
+
 
 ## `<slot>`
 
