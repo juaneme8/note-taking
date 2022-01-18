@@ -2,17 +2,19 @@
 
 > Basado en el [Crash Course](https://youtu.be/3TVy6GdtNuQ) de Traversy Media (COMPLETO).
 >
-> Basado en el curso [Introducción a Svelte](https://www.youtube.com/playlist?list=PLV8x_i1fqBw2QScggh0pw2ATSJg_WHqUN) de midudev
-
-
+> Basado en el curso [Introducción a Svelte](https://www.youtube.com/playlist?list=PLV8x_i1fqBw2QScggh0pw2ATSJg_WHqUN) de midudev de 7 videos (COMPLETO).
+>
+> Basado en el curso [Svelte Tutorial for Beginners](https://www.youtube.com/playlist?list=PL4cUxeGkcC9hlbrVO_2QFVqVPhlZmz7tO) de The Net Ninja de 35 videos.
 
 ## Introducción
 
-Svelte es un **frontend framework** creado por Rich Harris que nos permite construir interfaces de usuario de la misma manera que React, Vue o Angular. En realidad Svelte es un **compilador** que genera código JavaScript mínimo y optimizado. 
+Svelte fue creado por Rich Harris y nos permite construir interfaces de usuario **reactivas** de la misma manera que React, Vue o Angular. Svelte es un **compilador** que genera un bundle de vanilla JavaScript optimizado. Es frecuente que se lo llame framework pero en realidad no lo es.
 
-Nos permite crear SPA (*single page application*) con componentes reutilizables de la misma manera que en React, Vue o Angular.
+Nos permite crear una SPA (*single page application*) o bien controlar una porción pequeña de un sitio con componentes reutilizables de la misma manera que en React, Vue o Angular.
 
 El funcionamiento de Svelte es bastante simple de entender (por ejemplo si lo comparamos con React con el Virtual DOM y esas conceptos). Simplemente escribiremos el código con la sintaxis de Svelte y este luego será compilado en JavaScript puro optimizado que será leido por el navegador.
+
+Hablamos de **aplicaciones reactivas** ya que queremos que si tenemos un cierto dato en pantalla y este cambia de valor reflejarlo de manera inmediata.
 
 
 
@@ -148,6 +150,8 @@ Luego en el componente `FeedbackList` accederemos a esa prop de la siguiente for
 ```
 
 > Si bien lo recibiremos desde el componente padre le damos un **valor default** de un array vacío por si por algún motivo no lo recibimos.
+>
+> Si recibe más de una props podríamos poner `export let prop1, prop2, prop3`
 
 
 
@@ -272,9 +276,7 @@ Si tenemos una variable `let color='blue';` y queremos asignarlo a un elemento p
 
 Para el fetching de datos utilizaremos [OMDb API  - The Open Movie Database](http://www.omdbapi.com/) que debe usarse de la siguiente forma `http://www.omdbapi.com/?apikey=[yourkey]&s=` seguido del título de la película que queremos buscar.
 
-
-
-Queremos que cada vez que se ingresa un caracter en el input se actualice el valro del estado `input` y esto lo hacemos mediante el evento `on:input`. Además queremos que la solicitud a la API sólo se realice cuando la cantidad de caracteres ingresados sea mayor a 2.
+Queremos que cada vez que se ingresa un caracter en el input se actualice el valor del estado `input` y esto lo hacemos mediante el evento `on:input`. Además queremos que la solicitud a la API sólo se realice cuando la cantidad de caracteres ingresados sea mayor a 2.
 
 ```vue
 
@@ -298,6 +300,48 @@ Queremos que cada vez que se ingresa un caracter en el input se actualice el val
 ```
 
 > Hemos colocado `apiResponse.Search || []` debido a que en ocasiones la API no devuelve el campo `Search` por ejemplos si no encontró ninguna película.
+
+
+
+### `{#await}`
+
+Lo implementado anteriormente usando promesas puede reemplazarse haciendo uso del `{#await}`.
+
+```vue
+</script>
+$: if (value.length > 2) {
+	response = fetch(`https://www.omdbapi.com/?s=${value}&apikey=422350ff`)
+	.then(res => !res.ok() && new Error('Something bad happened with the fetching of movies'))
+	.then(res => res.json())
+	.then(apiResponse => {
+		return apiResponse.Search || []
+	})
+}
+</script>
+
+{#await response}
+  <strong>Loading...</strong>
+{:then movies}
+  {#each movies as {Title, Poster, Year}, index}
+    <Movie
+      index={index}
+      title={Title}
+      poster={Poster}
+      year={Year}
+    />
+  {:else}
+    <strong>No hay resultados</strong>
+  {/each}
+{:catch error}
+  <p>❌ There has been an error</p>
+{/await}
+```
+
+> Notar que en este caso en `response` en lugar de asignarle el resltado, guardamos la promesa (notar el agregado del `return`) y con `await` esperamos a que se complete y mientras tanto mostramos el **Loading...** sin la necesidad de manejar un estado para tal fin.
+>
+> En caso de que hubiera un error en la API o en la API Key, con `!res.ok()` revisamos que el status code devuelto no sea de 200 o similar y en ese caso tiramos un error que luego con el bloque `{:catch}` mostraremos en pantalla.
+
+
 
 ## Bind
 
@@ -636,6 +680,25 @@ Con `(user.id)` estamos estableciendo una clave única para cada iteración (de 
 {#each users as {id,name} (id)}
 	<h3>{id}: {name}</h3>
 {/each}
+```
+
+
+
+###  `{#each}` con`{:else}`
+
+En ocasiones vamos a querer iterar todos los elementos de una lista y mostrarlos en pantalla pero en caso de que no tenga ningún elemento mostrar algún contenido en particular. En ese caso podremos recurrir al uso en conjunto de `each` y `else`.
+
+```
+{#each response as {Title, Poster, Year}, index}
+    <Movie
+      index={index}
+      title={Title}
+      poster={Poster}
+      year={Year}
+    />
+  {:else}
+    <strong>No hay resultados</strong>
+  {/each}
 ```
 
 
