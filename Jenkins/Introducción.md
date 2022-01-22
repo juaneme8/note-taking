@@ -122,4 +122,10 @@ La forma predefinida de hacerlo es mediante Jenkins (también puede hacerse usan
 
 ## Arquitectura de Jenkins
 
+### Configuración master
+
+Se trata de una configuración centralizada en la cual tenemos una única máquina encargada de ejecutar todos los jobs
+
 ### Configuración master slave
+
+Se trata de una configuración distribuida en la cual tenemos una máquina maestro y otras máquinas que actúan como esclavos. La motivación de este esquema surge cuando no es posible ejecutar todos los jobs simultáneamente con una única máquina. Es probable que algunos jobs deban correr en Linux, otros en Windows, etc.
