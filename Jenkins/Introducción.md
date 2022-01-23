@@ -61,7 +61,7 @@ A la hora de hablar de los procesos de DevOps es habitual encontrarnos con una i
 
 En la documentación vemos la instalación de Windows tiene dos formas de hacerlo:
 
-1. Mediante la descarga de un archivo `.war` dentro del apartado *Generic Java package* y para ello es necesario tener instalado Java 8. https://www.jenkins.io/doc/book/installing/war-file/
+1. Mediante la descarga de un archivo `.war` dentro del apartado *Generic Java package* y para ello es necesario tener instalado Java 8 o Java 11. https://www.jenkins.io/doc/book/installing/war-file/
 
 ​	
 
@@ -124,8 +124,219 @@ La forma predefinida de hacerlo es mediante Jenkins (también puede hacerse usan
 
 ### Configuración master
 
-Se trata de una configuración centralizada en la cual tenemos una única máquina encargada de ejecutar todos los jobs
+Se trata de una **configuración centralizada** en la cual tenemos una única máquina encargada de ejecutar todos los jobs
 
 ### Configuración master slave
 
-Se trata de una configuración distribuida en la cual tenemos una máquina maestro y otras máquinas que actúan como esclavos. La motivación de este esquema surge cuando no es posible ejecutar todos los jobs simultáneamente con una única máquina. Es probable que algunos jobs deban correr en Linux, otros en Windows, etc.
+Se trata de una **configuración distribuida** en la cual tenemos un maestro y uno o mas esclavos. La motivación de este esquema surge cuando no es posible ejecutar todos los jobs simultáneamente con una única máquina. Esto podrá deberse a que tengamos muchas tareas o que algunos jobs deban correr en Linux, otros en Windows, etc.
+
+El dispositivo maestro será el encargado de planificar las tareas, monitorear a los esclavos y darles instrucciones.También podría ejecutar tareas pero normalmente de esto se encargan los esclavos. Los esclavos se encargan de ejecutar las tareas y reciben comandos del maestro.
+
+Vamos a Manage Jenkins y Manage Nodes and Slave.
+
+Veremos el Built-in Node o master node.
+Podemos hacer click en New Node, elegimos el nomber por ejemplo windows y seleccionamos Permanent Agent y luego guardamos.
+
+En ese momento podremos elegir configurar el elemento creado:
+
+* Labels (por ejemplo windows). Esta etiqueta nos permitirá que al crear jobs  solo se ejecuten aquellos nodos que tienen determinada etiqueta.
+* Remote root directory (por ejemplo c:/temp).
+* Usage
+  * Only build jobs with label expressions matching this node. Si elegimos esta opción sólo queremos que se use con jobs que tengan esta etiqueta.
+  * Use this nodeo as much as possible. Si elegimos esta opción cuando creamos un job el nodo maestro se fijará qué nodo esclavo está disponible y distribuirá la tarea.
+
+Una vez guardados los cambios nos aaprecerá una cruz roja que indica que el Agente no está conectado y al entrar un cartel que dice **JNMP agent port is disabled and agents cannot connect this way**, tendremos que ir al link provisto y elegir en Agents **Random** o Fixed.
+
+> Thetips4you tiene una [playlist](https://youtube.com/playlist?list=PLVx1qovxj-amO4WeEfpfrvcm2pg9NB5i9) detallada cómo continuar configurando esta topología.
+
+
+
+## Freestyle Job
+
+El primer paso es hacer click en Create a job en la pantalla de bienvenida o en New Item en la barra lateral.
+
+Elegimos Freestyle project e ingresamos el nombre del job que creamos samplefirstjob
+
+En la parte de Build elegimos Execute shell (si estamos trabajando en Linux) y luego `echo "this is my first project"`.
+
+Veremos la nueva tarea presentada como en el listado y podremos seleccionarla y poner Build Now. Luego en el apartado Build History podremos ver `#1` y seleccionando este elemento elegir Console Output y ver la salida que produjo esta tarea.
+
+
+
+En `/var/lib/jenkins` veremos una carpeta `nodes`, `plugns`, `users`, `jobs`, `workspace` (creará una carpeta automáticamente con el nombre del proyecto)
+
+
+
+# Build Triggers
+
+## Build periodically
+
+Si queremos que una tarea se ejecute de manera periódica podemos hacerlo ingresando una *cron expression*.
+
+Elegimos la tarea que queremos programar, vamos a **Configure** y en la parte de **Build Triggers** elegimos **Build periodically** y en ese campo ponemos la expresión. Por ejemplo si queremos que se ejecute cada dos minutos: `*/2 * * * *`
+
+### Cron Expressions
+
+Las *cron expressions*  tienen la siguiente estructura:
+
+```
+<minute> <hour> <day-of-month> <month> <day-of-week> <command>
+```
+
+* minute (0-59)
+* hour (0-23)
+* day of month (1-31)
+* month (1-12) (también podemos poner `JAN` - `DEC`)
+* day of the week (0 - 6) (también podemos poner `SUN` - `SAT`)
+
+
+
+> En la página https://crontab.guru/ podemos simular las distintas expresiones y ver cuando se ejecutarán.
+
+
+
+* Si queremos que algo se ejecute en todos los minutos, todas las horas, todos los días del mes, todos los meses y todos los días de la semana tendremos: `* * * * *`
+* Si queremos que algo se ejecute cada 5 minutos: `5 * * * *`
+
+* Si queremos ejecutar algo a las 12 del mediodía: `0 12 * * *`
+* Si queremos ejecutar algo de 13hs a 13:05hs una vez por minuto todos los días: `0-5 13 * * * `
+* Si queremos que algo se ejecute de 13:15 y a las 13:45 todos los jueves de junio: `15,45 13 * 6 Tue (notar que podemos poner `TUE` con cualquier capitalización)
+* Si queremos que algo se ejecute el día 15 de todos los meses a las 9:30hs: `30 9 15 * *`
+* Si queremos que algo se ejecute cada 2 minutos `*/2 * * * *`
+
+
+
+## Trigger builds remotely
+
+Es posible disparar la ejecución de una tarea de manera remota. En el campo donde dice Authentication Token podemos poner por ejemplo `sampleproject` y de esta manera incresando a `JENKINS_URL/job/samplefirstjob/build?token=TOKEN_NAME` generaremos la ejecución de esa tarea. Esto podemos hacerlo desde otra máquina o incluso en un script. 
+
+
+
+## Parametrized Job
+
+En la parte de configuración **General** nos encontramos la opción **This project is parametrized** al tildarlo podremos luego elegir **Add Parameter** y elegir entre los distintos tipos (Boolean, Choice, Credentials, File, Multi-line string, Password, Run, String). Luego le daremos un **Name** y **Default Value**. Al guardar veremos que donde decía **Build** ahora dice **Build with Parameters**. Luego podríamos referenciar este valor en la parte del shell command que ejecutamos.
+
+
+
+> En caso de elegir el tipo de parámetro Choise a la hora de hacer el **Build with Parameters** tendremos un select entre las opciones ingresadas.
+
+
+
+## Webhook and Poll SCM
+
+El propósito de estos dos triggers es que cada vez que haya un commit nuevo en el repositorio dispare la ejecución de un job. 
+
+Para configurarlo nuevamente vamos al job y hacemos click en **Configure**.
+
+En el apartado **Source Code Management** elegimos **Git** y debemos colocar el link al repositorio. 
+
+> Debemos tener git instalado en esa máquina pues de lo contrario obtendremos un mensaje de error.
+>
+> El repositorio por el momento puede ser un `README.md` y un `project.sh` con un `echo 'Hola Mundo'`
+>
+> Si el repositorio es privado tendremos que proporcionar credenciales.
+
+
+
+En el apartado **Branches to build** por defecto dice `*/master` pero tendremos que poner `*/main` o el que corresponda.
+
+
+
+Finalmente en **Build Triggers** podemos elegir si queremos **Poll SCM** o **GitHub hook trigger for GITScm polling**.
+
+
+
+### Poll SCM
+
+Poll SCM es un modo de trabajo que cada cierto tiempo chequea en el repositorio si se realizaron cambios (nuevos commits) y en caso afirmativo ejecuta la tarea. 
+
+Debemos ingresar la cron expression por ejemplo si queremos chequearlo cada dos minutos `*/2 * * * *`
+
+Para ejecutar el archivo `project.sh` disponible en el repositorio debemos en el apartado **Build ** hacer click en **Add build step** y elegir **Execute shell** para luego ingresar el siguiente comando:
+
+```
+chmod 774 ./project.sh
+./project.sh
+```
+
+> Con el primer comando `chmod` nos aseguramos no obtener un error de acceso al intentar ejecutar el script.
+>
+> 774 significa:
+>
+>  (U)ser / owner can read, can write and can execute. (G)roup can read, can write and can execute. (O)thers can read, can't write and can't execute.
+
+Veremos en `/var/lib/jenkins/workspace/samplefirstjob` que pasados dos minutos clonará el repositorio en esa ubicación.
+
+
+
+### GitHub hook trigger for GITScm polling
+
+Como tenemos la instalación standard de plugins veremos esta opción, pero si quisieramos hacer lo mismo con GitLab deberíamos instalar dicho plugin.
+
+Elegimos la opción **GitHub hook trigger for GITScm polling** y queremos que cada vez que creemos un nuevo commit se produzca un disparo de esa tarea. Debemos configurar esto en el proyecto de GitHub, yendo a **Settings** (del proyecto), **Webhooks** y en **Payload URL** poner por ejemplo `http://localhost:8080//github-webhook/`. 
+
+Luego podremos especificar qué evento queremos que dispare pro defecto tendremos **Just the push event** pero puede ser personalizado para otros eventos si así lo deseáramos. 
+
+Finalmente hacemos click en **Add webhook**. Sin embargo, como la IP ingresada es interna no nos funcionará y obtendremos un error de *failed to connect to the host*. Es por eso que si tenemos una ip interna debemos utilizar alguna herramienta como ngrok que nos entrega una URL que actúa como tunel a neustro servidor en localhost.
+
+
+
+### Ngrok
+
+Debemos ir a ngrok.com y descargar el instalador (o copiar el comando de instalación en el caso de que estemos utilizando Linux).
+
+Es necesario tener una cuenta y obtendremos un token que nos permitirá autenticarnos desde la terminal.
+
+```
+cd /usr/local/bin
+./ngrok http 8080
+```
+
+A partir de ese momento obtendremos una URL que nos permitirá cargarlo en GitHub para lograr trabajar con webhooks que nos quedará algo así `http://...ngrok.io/github-webhook` y ahora veremos que nos aparece con un tilde verde indicando que la conexión fue exitosa.
+
+
+
+## Jenkins Maven Integration
+
+Maven es una heramienta utilizada para cuando queremos realizar proyectos en Java.
+
+
+
+## Creación de Usuarios
+
+## Acceso basado en roles
+
+## Notificaciones por Email
+
+Las notificaciones por email nos permiten obtener información acerca de cuando falla la ejecución de una tarea (*build failure*).
+
+
+
+## Pipeline
+
+> Notas de CodeWithNana
+
+Se conoce como Pipeline a un conjunto de plugins
+
+
+
+El `Jenkinsfile` es un archivo que nos permite que en lugar de tener que crear Jobs utilizando la interfaz de usuario (Jenkins GUI) podamos hacerlo utilizando un archivo en lo que se conoce como **Pipeline as Code**. Esto forma parte del concepto *infrastructure as a code*.
+
+En cuanto a la sintaxis del Pipeline, a continuación veremos el `Jenkinsfile` más básico que aún sin hacer nada tiene los siguientes elementos requeridos.
+
+```
+pipeline {
+    agent any
+    stages {
+        stage('build') {
+            steps {
+                
+            }
+        }
+    }
+}
+```
+
+La sintaxis que vimos se conoce como **sintaxis declarativa**. 
+
+Otra forma de escribir el pipeline es utilizando una sintaxis de Scripts (groovy) de hecho antes era la única forma disponible. Este método no tiene una estructura definida y es muy flexible y poderoso pero tiene una curva de aprendizaje mas difícil.
