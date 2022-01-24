@@ -322,7 +322,7 @@ Se conoce como Pipeline a un conjunto de plugins
 
 El `Jenkinsfile` es un archivo que nos permite que en lugar de tener que crear Jobs utilizando la interfaz de usuario (Jenkins GUI) podamos hacerlo utilizando un archivo en lo que se conoce como **Pipeline as Code**. Esto forma parte del concepto *infrastructure as a code*.
 
-En cuanto a la sintaxis del Pipeline, a continuación veremos el `Jenkinsfile` más básico que aún sin hacer nada tiene los siguientes elementos requeridos.
+A continuación motraremos la sintaxis declarativa del Pipeline presentando el `Jenkinsfile` más básico que aún sin hacer nada tiene los siguientes elementos requeridos.
 
 ```
 pipeline {
@@ -337,6 +337,145 @@ pipeline {
 }
 ```
 
-La sintaxis que vimos se conoce como **sintaxis declarativa**. 
+> Otra forma de escribir el pipeline es utilizando una sintaxis de Scripts (groovy) de hecho antes era la única forma disponible. Este método no tiene una estructura definida y es muy flexible y poderoso pero tiene una curva de aprendizaje mas difícil.
 
-Otra forma de escribir el pipeline es utilizando una sintaxis de Scripts (groovy) de hecho antes era la única forma disponible. Este método no tiene una estructura definida y es muy flexible y poderoso pero tiene una curva de aprendizaje mas difícil.
+
+
+Veremos que el `Jenkinsfile` tiene los siguientes campos requeridos:
+
+* `pipeline` debe ser el nivel superior.
+* `agent` indicamos dónde queremos ejecutar. Con `any` indicamos que este build debe ejecutarse en cualquier agente disponible de Jenkins. Podría ser por ejemplo `node`. 
+* `stages` es donde sucede el trabajo tiene dentro los distintos `stage`.  
+* `stage` normalmente tendremos uno de `stage('build')`, `stage('test')` y `stage('deploy')`. Aunque también podríamos tener uno de `checkout` al inicio y uno de `cleanup` al final. Cada `stage` tiene dentro los `steps`.
+* `steps` contiene el script que ejecuta algún comando, por ejemplo `sh 'npm install'`.
+
+
+
+Creamos el siguiente `Jenkinsfile` en la rama `dev` de nuestro proyecto.
+
+```
+pipeline {
+    agent any
+    stages {
+        stage('build') {
+            steps {
+                echo 'building the application'
+            }
+        }
+         stage('testing') {
+            steps {
+                echo 'testing the application'
+            }
+        }
+         stage('deploying') {
+            steps {
+                echo 'deploying the application'
+            }
+        }
+    }
+}
+```
+
+
+
+Para utilizar este `Jenkinsfile` en un Jenkins Pipeline debemos ir a **create new Jobs**, elegimos la opción **Multibranch pipeline** y le damos el nombre **my-app-pipeline**. 
+
+Luego en **Branch Sources** clickeamos **Add source**, indicamos el repositorio y las credenciales.  Si bien podría filtrar las ramas por una expresión regular, si dejamos la opción por defecto **Discover branches**  veremos que analizará todas las ramas y sólo se produce el build solo en aquellos branches que tengan un `Jenkinsfile`. 
+
+Este comportamiento se debe a que en **Build Configuration** por defecto tenemos la opción **by Jenkinsfile** en el apartado **Mode** y en **Script Path** indicamos que el archivo se llamará `Jenkisfile` (en el root directory).
+
+
+
+Podremos ver para cada `stage` el log de salida que produjo.
+
+
+
+## Atributo `post`
+
+Luego de los `stages` (después de la llave de cierre) podemos tener un atributo `post` que indica la lógica o scripts a ejecutar luego de los stages, bajo distintas condiciones `always` (se ejecutará bajo cualquier condición por ejemplo un mail al equipo informando el resultado), `success`, `failure`
+
+```
+pipeline {
+    agent any
+    stages {
+        stage('build') {
+            steps {
+                echo 'building the application'
+            }
+        }
+         stage('testing') {
+            steps {
+                echo 'testing the application'
+            }
+        }
+         stage('deploying') {
+            steps {
+                echo 'deploying the application'
+            }
+        }
+    }
+    post{
+    	always:{
+    	
+    	}
+    	sucess:{
+    	
+    	}
+    	failure:{
+    	
+    	}
+    }
+}
+```
+
+
+
+## Condicionales en el `stage`
+
+En ocasiones vamos a querer que el `stage` ejecute en caso de que se reúnan ciertas condiciones, por ejemplo si sólo queremos ejecutar el stage de test si estamos haciendo el build del branch `dev` (y no queremos que esto suceda para `feature` o `build`).
+
+```
+pipeline {
+    agent any
+    stages {
+        stage('build') {
+            steps {
+                echo 'building the application'
+            }
+        }
+         stage('testing') {
+         	when{
+         		expression{
+         			BRANCH_NAME == 'dev'
+         		}
+         	}
+            steps {
+                echo 'testing the application'
+            }
+        }
+         stage('deploying') {
+            steps {
+                echo 'deploying the application'
+            }
+        }
+    }
+}
+```
+
+> La variable de entorno `BRANCH_NAME` (también podemos obtenerla como `env.BRANCH_NAME`) es provista por Jenkins.
+>
+> Los `steps` sólo se ejecutarán si la expresión booleana provista es verdadera.
+>
+> Es posible colocar expresiones mas complejas como por ejemplo con OR `BRANCH_NAME == 'dev' || BRANCH_NAME=='master'` y AND `&&`.
+
+
+
+## Variables de Entorno
+
+Jenkins proporciona una serie de variables de entorno que podemos utilizar en nuestro `Jenkinsfile`. De la misma manera que usamos `BRANCH_NAME` podemos utilizar muchas otras. Por ejemplo el número de build para utilizar en el versionado.
+
+En `localhost:8080/env-vars.html` podemos ver el listado completo y su explicación.
+
+
+
+Además de las variables de entorno provistas por Jenkins podemos definir las nuestras propias.
