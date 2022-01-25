@@ -270,15 +270,19 @@ En el apartado **Branches to build** por defecto dice `*/master` pero tendremos 
 
 
 
-Finalmente en **Build Triggers** podemos elegir si queremos **Poll SCM** o **GitHub hook trigger for GITScm polling**.
+Finalmente en **Build Triggers** podemos elegir si queremos **Poll SCM** que preguntará por cambios cada cierto tiempo o **GitHub hook trigger for GITScm polling** con el que el sistema de control notifica a Jenkins al tener cambios.
+
+Se trata de **métodos complementarios** y podemos pensar que uno actúa como backup del otro. En caso de que GitHub emita una notificación y Jenkins esté caído no se verá notificado de los cambios y en ese caso el tener un chequeo periódico (cada 1 hora por ejemplo para no sobrecargar a Jenkins) nos haría no perder esos cambios y generar el build.
 
 
 
 ### Poll SCM
 
-Poll SCM es un modo de trabajo que cada cierto tiempo chequea en el repositorio si se realizaron cambios (nuevos commits) y en caso afirmativo ejecuta la tarea. 
+Poll SCM es un modo de trabajo que cada intervalos de tiempo regulares chequea en el repositorio si se realizaron cambios (nuevos commits) y en caso afirmativo ejecuta la tarea. 
 
 Debemos ingresar la cron expression por ejemplo si queremos chequearlo cada dos minutos `*/2 * * * *`
+
+>También podemos hacerlo en **Scan Multibranch Pipeline Triggers** eligiendo allí el intervalo.
 
 Para ejecutar el archivo `project.sh` disponible en el repositorio debemos en el apartado **Build ** hacer click en **Add build step** y elegir **Execute shell** para luego ingresar el siguiente comando:
 
@@ -299,6 +303,8 @@ Veremos en `/var/lib/jenkins/workspace/samplefirstjob` que pasados dos minutos c
 
 ### GitHub hook trigger for GITScm polling
 
+Esta opción es **más eficiente** y consiste en que el sistema de control de versiones notifique a Jenkins ante un nuevo commit.
+
 Como tenemos la instalación standard de plugins veremos esta opción, pero si quisieramos hacer lo mismo con GitLab deberíamos instalar dicho plugin.
 
 Elegimos la opción **GitHub hook trigger for GITScm polling** y queremos que cada vez que creemos un nuevo commit se produzca un disparo de esa tarea. Debemos configurar esto en el proyecto de GitHub, yendo a **Settings** (del proyecto), **Webhooks** y en **Payload URL** poner por ejemplo `http://localhost:8080//github-webhook/`. 
@@ -309,7 +315,7 @@ Finalmente hacemos click en **Add webhook**. Sin embargo, como la IP ingresada e
 
 
 
-### Ngrok
+#### Ngrok
 
 Debemos ir a ngrok.com y descargar el instalador (o copiar el comando de instalación en el caso de que estemos utilizando Linux).
 
@@ -350,7 +356,7 @@ Se conoce como Pipeline a un conjunto de plugins
 
 El `Jenkinsfile` es un archivo que nos permite que en lugar de tener que crear Jobs utilizando la interfaz de usuario (Jenkins GUI) podamos hacerlo utilizando un archivo en lo que se conoce como **Pipeline as Code**. Esto forma parte del concepto *infrastructure as a code*.
 
-A continuación motraremos la sintaxis declarativa del Pipeline presentando el `Jenkinsfile` más básico que aún sin hacer nada tiene los siguientes elementos requeridos.
+A continuación motraremos la **sintaxis declarativa** del `Jenkinsfile` que tiene una estructura predefinida y algunos elementos requeridos.
 
 ```
 pipeline {
@@ -365,7 +371,15 @@ pipeline {
 }
 ```
 
-> Otra forma de escribir el pipeline es utilizando una sintaxis de Scripts (groovy) de hecho antes era la única forma disponible. Este método no tiene una estructura definida y es muy flexible y poderoso pero tiene una curva de aprendizaje mas difícil.
+> Otra forma de escribir el pipeline es utilizando una sintaxis de Scripts (groovy) de hecho antes era la única forma disponible. Este método no tiene una estructura definida y es muy flexible y poderoso pero tiene una curva de aprendizaje mas difícil. 
+>
+> ```
+> node{
+> 	//groovy script
+> }
+> ```
+>
+> 
 
 
 
@@ -412,11 +426,21 @@ Para utilizar este `Jenkinsfile` en un Jenkins Pipeline debemos ir a **create ne
 
 
 
+## Branch Sources
+
 Luego en **Branch Sources** clickeamos **Add source**, indicamos el repositorio (con la dirección https con la que lo clonaríamos) y las credenciales.  
 
-Es posible filtrar las ramas por una expresión regular, mientras si dejamos la opción por defecto **Discover branches**  analizará todas las ramas y sólo producirá el build en los branches que tengan un `Jenkinsfile`. 
+Es posible filtrar las ramas por una expresión regular, mientras si dejamos la opción por defecto **Discover branches**  cuando guardemos analizará todas las ramas y sólo producirá el build en los branches que tengan un `Jenkinsfile`. 
 
 Esto es así dado que  en **Build Configuration** por defecto tenemos la opción **by Jenkinsfile** en el apartado **Mode** y en **Script Path** indicamos que el archivo se llamará `Jenkisfile` (en el root directory).
+
+
+
+> Filter by Name
+
+Es posible filtrar por nombre de la rama por defecto la expresión regular será `.*` que matcheará con todas las ramas y si queremos `dev`, `master` o `feature` ponemos `^dev|master|feature.*$` 
+
+> Notar que vamos a matchear con`feature-one` pero `bug-one` será ignorada.
 
 
 
@@ -430,9 +454,29 @@ Cuando hagamos un commit debemos hacer click en **Scan Multibranch Pipeline Now*
 
 Luego en el panel **Build History** podremos acceder a cada uno de los builds y es posible hacer un **Replay** cambiando el `Jenkinsfile` de modo de correr esos cambios sin la necesidad de hacer un nuevo commit.
 
+Por ejemplo podríamos practicar una groovy expression:
+
+```groovy
+stage("build"){
+    steps{
+        echo 'building the application'
+        script{
+            def test = 2 + 2 > 3 ? 'cool' : 'not cool'
+            echo test
+        }
+    }
+}
+```
 
 
-Podremos ver para cada `stage` el log de salida que produjo.
+
+> Restart from Stage
+
+Es posible reiniciar desde un stage en particular. Si en el build history elegimos un build en particular podremos iniciar en un stage en particular a partir de un selector tipo drop-down.
+
+
+
+Podremos ver para cada `stage` el log de salida que produjo y que nos ha agregado automáticamente un stage llamado Checkout SCM.
 
 
 
@@ -812,7 +856,12 @@ Nos dirigimos a DockerHub y si buscamos la imagen oficial de Jenkins veremos que
 La [documentación](https://github.com/jenkinsci/docker/blob/master/README.md) nos explica cómo debemos ejecutar esta imagen:
 
 ```
-docker run -p 8080:8080 -p 50000:50000 -d -v jenkins_home:/var/jenkins_home jenkins/jenkins:lts
+docker run 
+-p 8080:8080 
+-p 50000:50000 
+-v jenkins_home:/var/jenkins_home 
+-d 
+jenkins/jenkins:lts
 ```
 
 > `-p 8080:8080` Exponemos el puerto 8080 ya que Jenkins por defecto corre en ese puerto.
@@ -831,7 +880,58 @@ Los pasos siguientes son idénticos a los explicados con la instalación en Wind
 
 
 
+En red corporativa (probar cuando se solucionen problemas de red)
+
+```
+docker run 
+-p 8080:8080 
+-p 50000:50000 
+-v jenkins_home:/var/jenkins_home 
+-d 
+--env HTTP_PROXY="http://172.30.221.240:8080"
+--env HTTPS_PROXY="https://172.30.221.240:8080"
+jenkins/jenkins:lts
+```
+
+
+
 # Credenciales
+
+Las credenciales nos permitirán entre otras cosas conectarnos a un repositorio privado y acceder al código.
+
+En el menú lateral vemos la opción **Credentials** (incorporada gracias a un plugin) que nos permite manejar las credenciales de manera central y luego referenciarlas en distintas partes.
+
+
+
+### Credential Type
+
+* **Username with password** es el más común.
+* SSH Username with private key
+* etc
+
+Dependiendo de los plugins instalados puede que veamos otros tipos de credenciales.
+
+### Credential Scopes
+
+* System: solo disponibles para Jenkins server (no serán accesibles por Jenkins los jobs pipelines)
+
+* Global: accesible en todas partes.
+
+* Project: limitado al proyecto. Accedemos a ellas si entramos al proyecto y luego al menu lateral credenciales (a diferencia de antes que lo hacíamos desde la pantalla principal o **Manage Jenkins** y **Manage Credentials**). Solo disponible en multibranch pipeline.
+
+  
+
+> Si entramos al proyecto luego de crear estos tres tipos de credenciales comprobaremos que las credenciales de tipo system no son accesibles en el.
+
+
+
+Por defecto veremos que tenemos un store `Jenkins` y un domain `(global)`. Jacemos click en Global y **Add Credentials**.
+
+Luego completamos el username, password, id (que usaremos para referenciar las credenciales en el Jenkinsfile) y descripción.
+
+
+
+
 
 2 min de parte 2/4 https://youtu.be/tuxO7ZXplRE?t=163
 
