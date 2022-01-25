@@ -1,8 +1,12 @@
 # Jenkins
 
-> Basado en Curso de Platzi Automatización y Jenkins
+> Curso de Platzi Automatización y Jenkins (primeros videos).
 >
-> Basado en [Jenkins Tutorial for Beginners](https://youtu.be/MTm3cb7qiEo) de Thetips4you.
+> [Jenkins Tutorial for Beginners](https://youtu.be/MTm3cb7qiEo) de Thetips4you.
+>
+> [Complete Jenkins Pipeline Tutorial](https://youtu.be/7KCS70sCoK0) by TechWorld with Nana
+>
+> [Run Jenkins in Docker Container](https://youtu.be/pMO26j2OUME) by TechWorld with Nana
 
 ## Introducción
 
@@ -151,19 +155,43 @@ Una vez guardados los cambios nos aaprecerá una cruz roja que indica que el Age
 
 
 
-## Freestyle Job
+# Tipos de Proyectos en Jenkins
 
-El primer paso es hacer click en Create a job en la pantalla de bienvenida o en New Item en la barra lateral.
+* Freestyle 
+* Pipeline
+* Multibranch Pipeline
 
-Elegimos Freestyle project e ingresamos el nombre del job que creamos samplefirstjob
+
+
+## Freestyle Project
+
+Es para tareas simples y únicas por ejemplo si queremos ejecutar tests.
+
+El primer paso es hacer click en **Create a job** en la pantalla de bienvenida o en **New Item** en la barra lateral.
+
+Elegimos **Freestyle project** e ingresamos el nombre del job que creamos samplefirstjob.
 
 En la parte de Build elegimos Execute shell (si estamos trabajando en Linux) y luego `echo "this is my first project"`.
 
-Veremos la nueva tarea presentada como en el listado y podremos seleccionarla y poner Build Now. Luego en el apartado Build History podremos ver `#1` y seleccionando este elemento elegir Console Output y ver la salida que produjo esta tarea.
+Veremos la nueva tarea presentada como en el listado y podremos seleccionarla y poner Build Now. Luego en el apartado **Build History** podremos ver `#1` y seleccionando este elemento elegir Console Output y ver la salida que produjo esta tarea.
 
 
 
-En `/var/lib/jenkins` veremos una carpeta `nodes`, `plugns`, `users`, `jobs`, `workspace` (creará una carpeta automáticamente con el nombre del proyecto)
+> En `/var/lib/jenkins` veremos una carpeta `nodes`, `plugns`, `users`, `jobs`, `workspace` (creará una carpeta automáticamente con el nombre del proyecto)
+
+
+
+## Pipeline Project
+
+Nos permite realizar con ellos el flujo de trabajo completo test, build, package, deploy.
+
+Antes de la existencia de este tipo de proyectos debíamos encadenar distintos freestyle projects para obtener el mismo resultado. Es para cuando trabajamos con un único branch.
+
+
+
+## Mutibranch Pipeline
+
+Como su nombre lo indica es para cuando trabajamos con múltiples ramas.
 
 
 
@@ -302,23 +330,23 @@ Maven es una heramienta utilizada para cuando queremos realizar proyectos en Jav
 
 
 
-## Creación de Usuarios
+# Creación de Usuarios
 
-## Acceso basado en roles
+# Acceso basado en roles
 
-## Notificaciones por Email
+# Notificaciones por Email
 
 Las notificaciones por email nos permiten obtener información acerca de cuando falla la ejecución de una tarea (*build failure*).
 
-
-
-## Pipeline
-
-> Notas de CodeWithNana
+# Pipeline
 
 Se conoce como Pipeline a un conjunto de plugins
 
+> AMPLIAR ESTOS 4 TITULOS CON VIDEO [Jenkins Tutorial for Beginners](https://youtu.be/MTm3cb7qiEo) de Thetips4you.
 
+
+
+## Jenkinsfile
 
 El `Jenkinsfile` es un archivo que nos permite que en lugar de tener que crear Jobs utilizando la interfaz de usuario (Jenkins GUI) podamos hacerlo utilizando un archivo en lo que se conoce como **Pipeline as Code**. Esto forma parte del concepto *infrastructure as a code*.
 
@@ -378,11 +406,29 @@ pipeline {
 
 
 
+# Multibranch Pipeline
+
 Para utilizar este `Jenkinsfile` en un Jenkins Pipeline debemos ir a **create new Jobs**, elegimos la opción **Multibranch pipeline** y le damos el nombre **my-app-pipeline**. 
 
-Luego en **Branch Sources** clickeamos **Add source**, indicamos el repositorio y las credenciales.  Si bien podría filtrar las ramas por una expresión regular, si dejamos la opción por defecto **Discover branches**  veremos que analizará todas las ramas y sólo se produce el build solo en aquellos branches que tengan un `Jenkinsfile`. 
 
-Este comportamiento se debe a que en **Build Configuration** por defecto tenemos la opción **by Jenkinsfile** en el apartado **Mode** y en **Script Path** indicamos que el archivo se llamará `Jenkisfile` (en el root directory).
+
+Luego en **Branch Sources** clickeamos **Add source**, indicamos el repositorio (con la dirección https con la que lo clonaríamos) y las credenciales.  
+
+Es posible filtrar las ramas por una expresión regular, mientras si dejamos la opción por defecto **Discover branches**  analizará todas las ramas y sólo producirá el build en los branches que tengan un `Jenkinsfile`. 
+
+Esto es así dado que  en **Build Configuration** por defecto tenemos la opción **by Jenkinsfile** en el apartado **Mode** y en **Script Path** indicamos que el archivo se llamará `Jenkisfile` (en el root directory).
+
+
+
+> Scan Multibranch Pipeline
+
+Cuando hagamos un commit debemos hacer click en **Scan Multibranch Pipeline Now** para hacer Build con el `Jenkinsfile` actualizado con esos últimos cambios.
+
+
+
+> Replay
+
+Luego en el panel **Build History** podremos acceder a cada uno de los builds y es posible hacer un **Replay** cambiando el `Jenkinsfile` de modo de correr esos cambios sin la necesidad de hacer un nuevo commit.
 
 
 
@@ -478,4 +524,314 @@ En `localhost:8080/env-vars.html` podemos ver el listado completo y su explicaci
 
 
 
-Además de las variables de entorno provistas por Jenkins podemos definir las nuestras propias.
+## Atributo `environment`
+
+Además de las provistas por Jenkins podemos definir nuestras propias  variables de entorno. Lo hacemos dentro del atributo `environment` y luego las variables definidas las accedemos con `${VARIABLE}`
+
+```
+pipeline {
+    agent any
+    environment{
+    	NEW_VERSION = '1.3.0'
+    }
+    stages {
+        stage('build') {
+            steps {
+                echo 'building the application'
+                echo "building version ${NEW_VERSION}"
+            }
+        }
+         stage('testing') {
+            steps {
+                echo 'testing the application'
+            }
+        }
+         stage('deploying') {
+            steps {
+                echo 'deploying the application'
+            }
+        }
+    }
+}
+```
+
+
+
+> Notar que debemos utilizar comillas dobles para trabajar con variables de entorno, esto tiene que ver con la sintaxis de Groovy. Sin embargo, si trabajamos con strings podemos utilizar tanto comillas simpels como dobles.
+>
+> Normalmente el número de versión lo extraeríamos del código pero a los fines prácticos lo definimos manualmente.
+
+
+
+## Credenciales en Jenkinsfile
+
+Otro ejemplo habitual del uso de variables de entorno es cuando tenemos que proporcionar credenciales, por ejemplo a la hora de deployar la nueva aplicación.
+
+Las credenciales las vamos a definir en Jenkins GUI gracias al plugin **Credentials** y luego podremos accederlas de la siguiente forma:
+
+```
+environment{
+    	SERVER_CREDENTIALS = credentials(credentialId)
+}
+```
+
+Tendremos que tener instalado un segundo plugin llamado **Credentials Binding**.
+
+
+
+A la hora de agregar nuevas credenciales por ejemplo con scope global, del tipo **Username with password** nos preguntará username, password, id ( siendo este el `credentialId` que le pasamos a `credentials()`).
+
+
+
+Luego utilizaremos la variable de entorno de la forma vista anteriormente `${SERVER_CREDENTIALS}`
+
+
+
+Si sólo necesitamos las credenciales en un único stage en lugar de definir las variables en un bloque `environment` podemos hacerlo dentro de ese stage:
+
+
+
+```
+stage("deploy"){
+	steps{
+		echo 'deploying the application'
+		withCredentials([
+			usernamePassword(credentials:credentialId, usernameVariable: USER, passwordVariable: PWD)
+		]){
+			sh 'some script ${USER} ${PWD}'
+		}
+	}
+}
+```
+
+> Notar que usamos la sintaxis de objetos en Groovy. Con `usernamePassword()` obtenemos username y password de esas credenciales. Esto se debe a que las credenciales son de tipo **Username with password**.
+>
+> Esto nos permite guardar en variables el usuario y la contraseña,  en `USER` y `PWD` respectivamente para luego utilizarlos dentro del bloque. 
+
+
+
+## Atributo `tools`
+
+El atributo `tools` proporciona herramientas para hacer el build de nuestros proyectos.
+
+```
+tools{
+	maven Maven
+}
+```
+
+También podríamos poner `gradle` o `jdk` mientras que si queremos utilizar npm o yarn debemos hacerlo de otra manera como se ve en [este video](https://www.youtube.com/watch?v=L9Ite-1pEU8).
+
+
+
+Debemos tener la herramienta instalada en Jenkins para ello debemos ir a **Manage Jenkins** luego **Global Tool Configuration** veremos que por ejemplo Maven ya viene pre-instalado y pre-configurado. También veremos apartados para NodeJS, Gradle, Maven, Docker, etc. 
+
+
+
+> `maven Maven` el segundo `Maven` hace referencia al nombre que tenemos en esa instalación.
+
+
+
+Esto nos permitirá tener disponibles comandos Maven como `sh 'mvn install'` como podemos ver a continuación.
+
+```
+pipeline {
+    agent any
+    tools{
+    	maven Maven
+    }
+    stages {
+        stage('build') {
+            steps {
+                echo 'building the application'
+               	sh 'mvn install'
+            }
+        }
+         stage('testing') {
+            steps {
+                echo 'testing the application'
+            }
+        }
+         stage('deploying') {
+            steps {
+                echo 'deploying the application'
+            }
+        }
+    }
+}
+```
+
+
+
+## Directiva `parameters`
+
+Los parámetros son configuraciones externas que nos permiten cambiar el comportamiento. Un posible uso sería para seleccionar la versión que queremos deployar.
+
+```
+parameters{
+	string(name:'VERSION', defaultValue:'', description: 'version to deploy on prod')
+}
+```
+
+También podríamos tener otros tipos de parámetros:
+
+* ```
+  choice(name:'VERSION', choices:['1.1.0','1.2.0','1.3.0'], description:'')
+  ```
+
+* ```
+  booleanParam(name:'executeTests', defaultValue:true, description:'')
+  ```
+
+> Podremos escribirlos en caps o camelcase.
+
+
+
+Estos parámetros podrán ser utilizados en cualquier `stage`, accedemos a ellos como `params.parameterName` y podremos utilizarlos en expresiones como vemos a continuación:
+
+```
+stage("test"){
+	when{
+		expression{
+			params.executeTests
+		}
+		step{
+			echo 'deploying the application ${params.VERSION}'
+		}
+	}
+}
+```
+
+> También podríamos haber puesto `params.executeTests == true`
+
+A partir de ahora veremos que en lugar de **Build** tenemos **Build with Parameters** y nos dará a elegir los valores de estos parámetros antes de hacer click en Build.
+
+
+
+## Groovy Script Externo
+
+En ocasiones puede que el Jenkinsfile tenga muchos stages (como build del frontend, correr tests, build del backend, build docker image, push al registry) tareas que hagan que crezca bastante en cantidad de lógica que maneja. Podemos crear groovy scripts con la lógica en archivos independientes que luego importamos al `Jenkinsfile`.
+
+Hasta ahora en los steps hicimos cosas muy simples con `echo ''` pero es posible utilizar groovy scripts para crear variables, funciones, etc.
+
+```
+stage("build"){
+	steps{
+		script{
+			def var =
+		}
+		echo 'building the application'
+	}
+}
+```
+
+Creamos un archivo `script.groovy` en el cual definimos tres métodos que llamaremos desde el `Jenkinsfile`
+
+```
+def buildApp() {
+    echo 'building the application...'
+} 
+
+def testApp() {
+    echo 'testing the application...'
+} 
+
+def deployApp() {
+    echo 'deplying the application...'
+    echo "deploying version ${params.VERSION}"
+} 
+
+return this
+```
+
+> Es importante que termine con `return this`
+>
+> Podemos acceder a todas las variables de entorno (las provistas por Jenkins y las definidas por nosotros) y también a los parámetros.
+
+
+
+Luego el `Jenkinsfile` nos queda de esta manera
+
+```
+def gv
+
+pipeline {
+    agent any
+    parameters {
+        choice(name: 'VERSION', choices: ['1.1.0', '1.2.0', '1.3.0'], description: '')
+        booleanParam(name: 'executeTests', defaultValue: true, description: '')
+    }
+    stages {
+        stage("init") {
+            steps {
+                script {
+                   gv = load "script.groovy" 
+                }
+            }
+        }
+        stage("build") {
+            steps {
+                script {
+                    gv.buildApp()
+                }
+            }
+        }
+        stage("test") {
+            when {
+                expression {
+                    params.executeTests
+                }
+            }
+            steps {
+                script {
+                    gv.testApp()
+                }
+            }
+        }
+        stage("deploy") {
+            steps {
+                script {
+                    gv.deployApp()
+                }
+            }
+        }
+    }   
+}
+```
+
+Con `def gv` definimos a `gv` como global para poder utilizarlo en todas partes.
+
+Con `gv = load "script.groovy" ` importamos el script.
+
+
+
+# Jenkins en Contenedor Docker
+
+Nos dirigimos a DockerHub y si buscamos la imagen oficial de Jenkins veremos que esta está deprecada y nos indican que debemos usar `jenkins/jenkins`.
+
+La [documentación](https://github.com/jenkinsci/docker/blob/master/README.md) nos explica cómo debemos ejecutar esta imagen:
+
+```
+docker run -p 8080:8080 -p 50000:50000 -d -v jenkins_home:/var/jenkins_home jenkins/jenkins:lts
+```
+
+> `-p 8080:8080` Exponemos el puerto 8080 ya que Jenkins por defecto corre en ese puerto.
+>
+> `-p 50000:50000` Exponemos el puerto 50000 para posibilitar la comunicación master/slave. Nuestro Jenkins será capaz de encontrar slaves en caso de que los haya.
+>
+> `-d` dettached mode, para ejecutar el contenedor en el background.
+>
+> `-v jenkins_home:/var/jenkins_home` para la persistencia de datos creamos un named volume. Si la carpeta `jenkins_home` no existe en el host la creará. Mientras que `/var/jenkins_home` existe en el contenedor. Esto es importante dado que toda la información de Jenkins sobre los builds, users, plugins, estará almacenada allí.
+
+
+
+Una vez ejecutado el contenedor obtendremos su id con `docker ps | grep jenkins` y suponiendo que es `1df` con `docker logs 1df` vemos la password inicial.
+
+Los pasos siguientes son idénticos a los explicados con la instalación en Windows. 
+
+
+
+# Credenciales
+
+2 min de parte 2/4 https://youtu.be/tuxO7ZXplRE?t=163
+
