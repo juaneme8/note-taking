@@ -931,7 +931,23 @@ Luego completamos el username, password, id (que usaremos para referenciar las c
 
 
 
-
-
 2 min de parte 2/4 https://youtu.be/tuxO7ZXplRE?t=163
 
+
+
+# Telegram Bot
+
+El plugin Telegram Bot nos permitirá enviar mensajes desde el `Jenkinsfile`. Para instalarlo debemos ir a **Manage Jenkins**, **Manage Plugin** y en **Available** buscar **Telegram Bot** seleccionarl.
+
+
+
+> Analizar qué conviene hacer a futuro
+
+**Click en Install without restart**. 
+Comenzará la instalación y luego tildamos *Restart Jenkins when installation is complete and no jobs are running*.
+
+
+
+## Configuración
+
+En Dashboard vamos a **Manage Jenkins** y luego a **Configure System**
