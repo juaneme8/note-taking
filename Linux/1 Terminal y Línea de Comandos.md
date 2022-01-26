@@ -214,6 +214,15 @@ Esto lo hace gracias a un archivo llamado `.bash_history` en el directorio home 
 
 > Si sabemos que utilizamos un comando que tenía la cadena "hola" podemos hacer uso del comando `grep` y de un pipe: `history | grep hola`. Esto mismo podemos hacerlo también ingresando `CONTROL+R` y escribiendo por ejemplo "hola" y nos mostrará el último comando que ingresamos que tenía esa cadena y si presionamos `CONTROL+R` nuevamente iremos hacia atrás. Si queremos ejecutarlo tal cual presionamos `ENTER` y sino la flecha hacia el costado para editarlo.
 
+> Si ingresamos `!!` ejecutamos nuevamente el último comando por lo que será equivalente a presionar la tecla hacia arriba y presionar ENTER. Un caso de uso interesante es el siguiente:
+>
+> ```
+> # /app/tomcat/apacheTomcat/
+> -bash: /app/tomcat/apacheTomcat/: Is a directory
+> # cd !!
+> cd /app/tomcat/apacheTomcat/
+> ```
+
 
 
 ### Comando `file`
