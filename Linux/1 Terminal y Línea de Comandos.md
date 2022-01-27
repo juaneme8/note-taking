@@ -208,19 +208,55 @@ Si queremos obtener un listado de todos los comandos ingresados podemos escribir
 15  git push origin master
 16  clear
 ```
+
+
+#### Timestamp de Historial
+
+Si queremos obtener el timestamp de cuándo fue ingresado cada comando debemos cargar la variable `HISTTIMEFORMAT` con el formato del timestamp que deseamos:
+
+```
+HISTTIMEFORMAT="%Y-%m-%d %T "
+```
+
+Luego cuando ingresemos `history` veremos el comando acompañado de la hora de cuando fue ingresado. En algunas distribuciones no nos mostrará la fecha correcta de los pasados pero sí trackeará la fecha a partir de ahora.
+
+Esta variable estará almacenada sólo en la sesión, por lo que **si cerramos la ventana se perderán esos cambios**. Para hacerlo permanente editamos el archivo `~/.bashrc` por ejemplo con `nano ./.bashrc` colocando `HISTTIMEFORMAT="%Y-%m-%d %T "` .
+
+
+
+> Veremos `HISTCONTROL=ignoreboth` esto hace referencia a que no queremos guardar en el historial líneas duplicadas ni tampoco aquellas líneas que comienzan con un espacio. Esto puede ser **útil a la hora ocultar un comando con información sensible** (antecediendo un espacio.)
+
+
+
+#### Repetir Comando !`
+
 Si quisiéramos ejecutar el comando `clear` podríamos poner `!16`
 
 Esto lo hace gracias a un archivo llamado `.bash_history` en el directorio home del usuario.
 
-> Si sabemos que utilizamos un comando que tenía la cadena "hola" podemos hacer uso del comando `grep` y de un pipe: `history | grep hola`. Esto mismo podemos hacerlo también ingresando `CONTROL+R` y escribiendo por ejemplo "hola" y nos mostrará el último comando que ingresamos que tenía esa cadena y si presionamos `CONTROL+R` nuevamente iremos hacia atrás. Si queremos ejecutarlo tal cual presionamos `ENTER` y sino la flecha hacia el costado para editarlo.
 
-> Si ingresamos `!!` ejecutamos nuevamente el último comando por lo que será equivalente a presionar la tecla hacia arriba y presionar ENTER. Un caso de uso interesante es el siguiente:
+
+> En Linux normalmente al signo de exclamación se lo conoce como **bang**.
+
+
+
+#### **Reverse Search** (`Ctrl+R` )
+
+> Si sabemos que utilizamos un comando que tenía la cadena "hola" podemos hacer uso del comando `grep` y de un pipe: `history | grep hola`. Esto mismo podemos hacerlo también ingresando `CONTROL+R` y escribiendo por ejemplo "hola" y nos mostrará el último comando que ingresamos que tenía esa cadena y si presionamos `CONTROL+R` nuevamente iremos hacia atrás en el historial donde se reúne esa condición. 
 >
+> Si queremos ejecutarlo tal cual presionamos `ENTER` y sino la flecha hacia el costado para editarlo. Si queremos salir presionamos `CONTROL+C`
+
+
+
+#### Último Comando (`!!`) 
+
+> Con `!!` referenciamos el último comando ejecutado. Esto puede tener un caso interesante de uso cuando ingresamos un comando y nos olvidamos de poner `sudo`, poniendo `sudo !!` evitamos tener que escribir el comando nuevamente.
+>
+> Por ejemplo si queremos actualizar el índice del repositorio de paquetes 
+> 
 > ```
-> # /app/tomcat/apacheTomcat/
-> -bash: /app/tomcat/apacheTomcat/: Is a directory
-> # cd !!
-> cd /app/tomcat/apacheTomcat/
+> apt update
+> sudo !!
 > ```
 
 
@@ -1408,3 +1444,8 @@ netstat -f
 neststat -nr
 ```
 
+
+
+## Comando `cmatrix`
+
+Si ejecutamos `cmatrix` veremos un fondo de pantalla con caracteres estilo Matrix.
