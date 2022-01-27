@@ -92,25 +92,33 @@ En el File System de Linux tenemos la siguiente jerarquía:
 
 
 
-## Teclas Rápida
+## Teclas Rápidas
 
-Limpiar Pantalla: `Ctrl+L`
+Limpiar Pantalla: `CONTROL+L`
 
-Cancelar Comando: `Ctrl+C`
+Cancelar Comando: `CONTROL+C`
 
-Búsqueda Inversa de Comandos: `Ctrl+R`
+Búsqueda Inversa de Comandos: `CONTROL+R`
 
-Ir al final de comando: `Ctrl+E`
+Borrar comando entero: `CONTROL+U`
 
-Ir al principio de comando: `Ctrl+A`
+Ir al final de comando: `CONTROL+E`
 
-Eliminar la palabra donde tengo el cursor `Ctrl+W`
+Ir al principio de comando: `CONTROL+A`
 
-Intercambiar el caracter donde tengo el cursor por el anterior `Ctrl+T`
+Eliminar la palabra donde tengo el cursor `CONTROL+W`
+
+Intercambiar el caracter donde tengo el cursor por el anterior `CONTROL+T`
 
 Intercambiar palabras (tengo que tener el cursor al terminar la palabra) `ESC+T`
 
-Salir de un servidor `Ctrl+D` (es equivalente a escribir `exit`)
+Salir de un servidor `CONTROL+D` (es equivalente a escribir `exit`)
+
+Maximizar terminal `F11` (no funciona en Ubuntu en Windows 10).
+
+Aumentar fuente: `CONTROL+SHIFT++` (no funciona en Ubuntu en Windows 10)
+
+Disminuir fuente: `CONTROL+-` (no funciona en Ubuntu en Windows 10)
 
 
 
@@ -258,7 +266,7 @@ Esto lo hace gracias a un archivo llamado `.bash_history` en el directorio home 
 
 
 
-#### **Reverse Search** (`Ctrl+R` )
+#### **Reverse Search** (`CONTROL+R` )
 
 > Si sabemos que utilizamos un comando que tenía la cadena "hola" podemos hacer uso del comando `grep` y de un pipe: `history | grep hola`. Esto mismo podemos hacerlo también ingresando `CONTROL+R` y escribiendo por ejemplo "hola" y nos mostrará el último comando que ingresamos que tenía esa cadena y si presionamos `CONTROL+R` nuevamente iremos hacia atrás en el historial donde se reúne esa condición. 
 >
@@ -422,6 +430,17 @@ El comando `wget` nos permite descargar un archivo de internet:
 
 ```
 wget fredrikson.com.ar/resume.pdf
+```
+
+
+
+### Comando `column`
+
+El comando `column` nos permitirá mostrar en columnas y un poco mas ordenada,  la información de ciertos comandos.
+
+```
+mount | column -t
+ip link | column -t
 ```
 
 
@@ -612,7 +631,9 @@ El comando `tail` nos permite mostrar las últimas líneas de un archivo.
 tail /etc/adduser.conf
 ```
 
-Si queremos especificar la cantidad de líneas que queremos mostrar: `tail-n 10 /etc/adduser.conf`
+> Si queremos especificar la cantidad de líneas que queremos mostrar: `tail -n 10 /etc/adduser.conf` o `tail -2 /etc/adduser.conf`
+
+> Si queremos ver un archivo en tiempo real `tail -f /var/log/syslog`
 
 ### Comando `rm`
 
@@ -645,6 +666,18 @@ rm file*
 Para eliminar un directorio debemos hacerlo con `rm -r test` con lo cual eliminaremos la carpeta y todo su contenido recursivamente.
 
 > En ocasiones también tendremos que forzar el borrado lo cual hacemos con `rm -rf test` (recursivo y forzado, es decir sin preguntarnos)
+
+
+
+### Comando `truncate`
+
+El comando `truncate` nos permitirá truncar un archivo. Esto puede ser útil por ejemplo si tenemos un log muy largo y queremos limpiarlo. Si bien podríamos eliminarlo y confiar en que el servicio vuelva a crearlo en ocasiones puede que sea más seguro hacer esto para evitar pérdida de logs.
+
+```
+truncate -s 0 hello.txt
+```
+
+> Con `-s 0` hacemos referencia al tamaño del archivo resultante.
 
 
 
@@ -870,8 +903,6 @@ En este caso suponiendo que ya tenemos un directorio `test`  como va a fallar el
 mkdir test && cd test && echo hello
 ```
 
-
-
 ### Operador OR `||`
 
 El **operador OR** nos permite que si el comando de la izquierda falla se ejecute el de la derecha y en caso de que el de la izquierda no falle el de la derecha no se ejecute.
@@ -1057,17 +1088,28 @@ Por otra parte `bash` es el programa con el cual interactuamos, que toma nuestro
 
 En la columna **TIME** vemos la cantidad de tiempo de CPU consumido por el proceso, que en nuestro caso al ser muy livianos es prácticamente 0. En ocasiones notaremos que el sistema se vuelve lento a causa de un proceso y debemos proceder a matarlo.
 
-Por ejemplo si ejecutamos `sleep 100` durante 100 segundos estará el prompt durmiendo y luego de ese tiempo volverá a estar activo. Si queremos en cambio enviar ese proceso al *background* para poder ejecutar otros comandos mientras tanto, ejecutamos `sleep 100 &`. Si ejecutamos `ps` veremos ese proceso ya que bajo la columna `CMD` dirá `sleep`.
-
-Otra forma de hacer esto es ingresar `sleep 1m`, luego `Ctrl+Z` para enviarlo al *background*. Sin embargo esto hará que el proceso se frene y luego `bg` podremos hacer que siga corriendo allí, luego con `fg` lo traemos al *foreground*.
 
 
-
-Si queremos mostrar los procesos padres e hijos vinculados en forma de árbol podemos utilizar el comando `ps` con estos tres argumentos:
+> Si queremos mostrar los procesos padres e hijos vinculados en forma de árbol podemos utilizar el comando `ps` con estos tres argumentos:
 
 ```
 ps fax
 ```
+
+
+
+### Comandos `bg` y `fg`
+
+Por ejemplo si ejecutamos `sleep 100` durante 100 segundos estará el prompt durmiendo y luego de ese tiempo volverá a estar activo. 
+
+Si queremos lanzar la ejecución del proceso en segundo plano para poder ejecutar otros comandos mientras tanto, ejecutamos `sleep 100 &`. Si ejecutamos `ps` veremos ese proceso ya que en la columna `CMD` dirá `sleep`.
+
+Otra forma de hacer esto es ingresar `sleep 1m`, luego `CONTROL+Z` pausamos la ejecución del proceso. 
+
+* Con el comando `bg` enviaremos el proceso pausado a segundo plano (similar a ejectarlo con `&` al final, dejando el terminal libre.
+* Con el comando `fg` lanzamos el proceso pausado a primer plano (monopolizando el terminal).
+
+> Un caso útil de aplicación es cuando estamos editando un archivo por ejemplo con vim y generamos unos cambios pero no estamos listos para guardarlo todavía. En ese caso podemos presionar `CONTROL+Z` hacer lo que tengamos que hacer y luego volver a la edición con `fg` (lo queremos lanzar a primer plano)
 
 
 
@@ -1114,7 +1156,7 @@ El comando `top` nos permite ver una lista de procesos que están corriendo en e
 
 El comando `htop` es un visor de procesos similar al comando `top` pero más visual.
 
-> Si queremos "minimizar" este programa o cualquier otro que esté en el frente (como por ejemplo vim) podemos hacerlo con `CONTROL+Z` y luego con `fg` lo traemos al frente nuevamente.
+> Si queremos pausar este programa o cualquier otro que esté en el frente (como por ejemplo vim cuando estamos editando un archivo y no queremos guararlo ni descartar los cambios) podemos hacerlo con `CONTROL+Z` y luego con `fg` lo traemos al frente nuevamente.
 
 
 
