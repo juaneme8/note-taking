@@ -187,11 +187,29 @@ Podemos utilizarlos con  **rutas relativas** (por ejemplo con `cd boot`) o **rut
 >
 > El **autocompletado** me permite si quiero navegar a una carpeta llamada `Users` puedo poner `cd U` y presionar `TAB` y me mostrará todas las que comienzan con esa letra, si sólo hubiera una con los caracteres ingresados la autocompletará.
 
+* Si queremos navegar al directorio en el que estuvimos anteriormente podemos hacer `cd -`
+
 
 
 ### Comando `clear`
 
-El comando `clear` nos permite limpiar la pantalla y esto también podemos hacerlo con `CTRL+L`
+El comando `clear` nos permite limpiar la pantalla y esto también podemos hacerlo con `CONTROL+L`. 
+
+
+
+### Comando `reset`
+
+Cuando usamos el comando `clear` o `CONTROL+L` si scrolleamos para arriba veremos los comandos ingresados anteriormente. En caso de no querer ver esto podemos ingresar el comando  `reset` y se borrará todo por completo.
+
+
+
+#### Comandos `pushd` y `popd`
+
+Mediante la utilización del comando "**pushd**" podemos decirle a nuestro shell que guarde temporalmente la ubicación actual de mi directorio y acto seguido posicionarnos en una nueva carpeta, luego con el comando "**popd**" volveremos a la carpeta original sin necesidad de andar escribiendo toda la ruta original.
+
+
+
+Si estamos en la carpeta `/home/juaneme8/trabajos` y luego hacemos `pushd /etc` nos dirigiremos a `/etc`, podremos navegar y hacer lo que necesitemos pero si ingresamos `popd` volveremos automáticamente a `/home/juaneme8/trabajos`
 
 
 
@@ -1089,6 +1107,14 @@ El comando `top` nos permite ver una lista de procesos que están corriendo en e
 > Con la tecla  `?` accederemos a una pantalla que nos muestra todos los atajos de teclado.
 >
 > Con la tecla `q` salimos
+
+
+
+### Comando `htop`
+
+El comando `htop` es un visor de procesos similar al comando `top` pero más visual.
+
+> Si queremos "minimizar" este programa o cualquier otro que esté en el frente (como por ejemplo vim) podemos hacerlo con `CONTROL+Z` y luego con `fg` lo traemos al frente nuevamente.
 
 
 
