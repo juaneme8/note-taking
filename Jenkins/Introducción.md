@@ -950,4 +950,7 @@ Comenzará la instalación y luego tildamos *Restart Jenkins when installation i
 
 ## Configuración
 
-En Dashboard vamos a **Manage Jenkins** y luego a **Configure System**
+En Dashboard vamos a **Manage Jenkins** y luego a **Configure System** y ahi agregamos los datos.
+
+> CONTENIDO EN DESARROLLO.
+

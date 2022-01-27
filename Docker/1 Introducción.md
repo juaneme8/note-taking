@@ -329,7 +329,7 @@ Pero como Alpine Linux no viene con Bash obtendremos un error. Usaremos en cambi
 docker run -it react-app sh
 ```
 
-Con `sh` indicamos que queremos ejecutar shell cuando iniciemos el contenedor.
+Con `sh` indicamos que queremos ejecutar **shell** cuando iniciemos el contenedor.
 
 Luego podremos ejecutar `ls` y veremos todos los directorios de Linux o `node --version` para conocer la versión de Node que tenemos instalada.
 
@@ -387,6 +387,12 @@ COPY . .
 ```dockerfile
 COPY ["hello world.txt", "."]
 ```
+
+
+
+## Comando `WORKDIR`
+
+El comando `WORKDIR` establece el directorio de trabajo para las instrucciones `RUN`, `CMD`, `ENTRYPOINT`, `COPY`, `ADD` que sigan en el `Dockerfile`. Si no existe será creado incluso si luego no es utilizado por ninguna instrucción.
 
 
 
@@ -906,7 +912,7 @@ docker image tag f4b react-app:1
 
 ### Etiqueta `latest` desactualizada
 
-Si tenemos una imagen con la etiqueta latest y luego creamos una nueva imagen con una etiqueta en particular puede que ejecutemos `docker images` y pensemos que la más actual es una distinta de la que realmente es. En ese caso debemos actualizarla manualmente añadiendole a la nueva la etiqueta `latest` del modo visto. Suponiendo que su ID comienza con `b06`:
+Si tenemos una imagen con la etiqueta latest y luego creamos una nueva imagen con una etiqueta en particular puede que ejecutemos `docker images` y pensemos que la más actual es una distinta de la que realmente es. En ese caso debemos actualizarla manualmente añadiéndole a la nueva la etiqueta `latest` del modo visto. Suponiendo que su ID comienza con `b06`:
 
 ```bash
 docker image tag b06 react-app:latest
