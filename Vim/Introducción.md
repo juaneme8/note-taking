@@ -66,6 +66,10 @@ Si  presionamos la letra `i` pasaremos al *insert mode*.
 
 #### Comandos básicos
 
+* `i` para pasar a *insert mode* en la posición actual.
+
+* `A` para pasar a *insert mode* al final de la línea.
+
 * `:q` para salir
 
 * `:w` para guardar los cambios
