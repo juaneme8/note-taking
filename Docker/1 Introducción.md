@@ -83,6 +83,16 @@ En la [página oficial](https://docs.docker.com/docker-for-windows/install/) nos
 
 
 
+#### Verificar instalación en Linux
+
+Si queremos verificar si tenemos Docker instalado en Linux podemos hacerlo con:
+
+```
+systemctl status docker
+```
+
+
+
 # Flujo de Trabajo
 
 A partir de una aplicación debemos agregar un archivo `Dockerfile` (con esta capitalización y sin extensión) que es un archivo de texto plano con instrucciones que usa Docker para empaquetarla en una **imagen** con todo lo que nuestra aplicación necesita para correr (un OS, un runtime environment como ser Node o Python, archivos de la aplicación, third-party libraries, variables de entorno). Una vez que tenemos la imagen le diremos a **Docker que inicie un contenedor usando esa imagen**. El contenedor es un tipo de proceso especial que tiene su propio filesystem provisto por la image. En lugar de ejecutar la aplicación dentro de un proceso normal le decimos a docker que la ejecute dentro de un contenedor.

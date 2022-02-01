@@ -18,26 +18,53 @@ apt-get install nginx
 
 Una vez instalado en Ubuntu se inicia automáticamente. Si navegamos a la IP veremos una página de bienvenida de nginx que nos hará dar cuenta que la instalación fue exitosa.
 
-Para configurarlo para que muestre nuestro sitio `/etc/nginx` (recordemos que en la mayoría de programas tenemos los archivos de configuración en `/etc`)
 
-Veremos los directorios `sites-available` y `sites-enabled`
 
-En la carpeta `sites-available` donde almacenamos todos los sitios que vamos a correr en este servidor nginx (podrán ser de distinto tipo HTML puro, php, python, etc). Estos sitios van a estar diferenciados por lo que se llama **virtual host**. Si bien todo apunta al mismo servidor, nginx es capaz de diferenciarlo.
+Podemos verificar la versión instalada con:
 
-Por ejemplo podemos tener `hola.juaneme8.com` y `chau.juaneme8.com` ambo estarán apuntando al mismo servidor pero mostrando distinto contenido.
+```
+nginx -v
+```
 
-En `sites-available` tenemos un archivo `default` que viene por defecto configurado para mostrar la página de bienvenida.
 
-Creamos un nuevo archivo y si bien puede tener cualquier nombre, es práctica común ponerle el mismo nombre del subdominio por ejemplo `hola.domain.com` de modo que sea más fácil saber sus funciones. 
 
-Creamos estos dos archivos sobre la base de `default`.
+Podremos obtener la ruta al archivo de configuración de nginx con:
+
+```
+nginx -t
+```
+
+
+
+## Configuración 
+
+La configuración de nginx la veremos en `/etc/nginx`:
+
+* `sites-available` los sitios disponibles.
+* `sites-enabled` los sitios habilitados.
+
+
+
+## Reverse Proxy
+
+Queremos contar con un proxy inverso que nos permita tener dos **server blocks** o **virtual hosts**. Tendremos por ejemplo `hola.juaneme8.com` y `chau.juaneme8.com` ambos apuntando al mismo servidor pero nginx es capaz de diferenciarlos y mostrar el contenido correspondiente para cada uno.
+
+
+
+#### Modificamos `sites-available` 
+
+En la carpeta `sites-available` donde almacenamos todos los sitios que vamos a correr en este servidor. 
+
+Tenemos un archivo `default` que viene por defecto configurado para mostrar la página de bienvenida. 
+
+Creamos un nuevo archivo para cada virtual host (sobre la base de `default` y la práctica común es ponerle el mismo nombre del subdominio por ejemplo `hola.domain.com` de modo que sea más fácil identificarlo. 
 
 ```
 cp default hola.juaneme8.com
 cp default chau.juaneme8.com
 ```
 
-
+Luego en ambos archivos hacemos los siguientes cambios:
 
 1. Donde dice `listen 80 default_server;` como sólo podemos tener un default server dejamos `listen 80;` 
 
@@ -45,11 +72,11 @@ cp default chau.juaneme8.com
 
 2. Donde tenemos`server name _;` debemos poner `hola.domain.com`
 
-2. Donde tenemos `root /var/www/html` debemos indicar donde estarán los archivos por ejemplo `/var/www/hola`
-
-> Modificamos los dos archivos con este criterio.
+2. Donde tenemos `root /var/www/html` debemos indicar donde estarán los archivos de ese virtual host por ejemplo `/var/www/hola`.
 
 
+
+#### Modificamos `sites-enabled`
 
 Si ahora vamos a `sites-enabled` veremos un **link simbólico**, es decir un puntero a un archivo. La idea es crear links simbólicos de aquellos sitios habilitados para no tener que borrar el archivo cada vez que los deshabilitemos.
 
@@ -67,7 +94,9 @@ Desde `sites-enabled`:
 ln -s ../sites-available/hola.juaneme8.com .
 ```
 
-> Repetimos lo mismo para `chau.domain.com`
+```
+ln -s ../sites-available/chau.juaneme8.com .
+```
 
 
 
@@ -93,3 +122,11 @@ Esto lo podemos simular en nuestra PC para que piense que resuelve esta IP, modi
 Si visitamos `hola.juaneme8.com` pero no tenemos creada la carpeta `/var/www/hola` nos aparecerá un 404. Si en cambio tenemos la carpeta creada pero no tenemos un archivo `index.html` veremos un **403 Forbidden** y esto se debe a que encontró el directorio pero al no haber encontrado el archivo `index.html` quiso listar los archivos de ese directorio y por defecto Nginx no hace esto a menos que lo configuremos.
 
 Si luego agrego estos archivos no tendré que recargar Nginx porque no estoy cambiando el archivo de configuración.
+
+
+
+## Reverse Proxy con Docker
+
+De manera similar a uso de un proxy inverso nos permitirá mostrar el contenido de varios contenedores con un único servidor. 
+
+Utilizaremos las 
