@@ -2,9 +2,13 @@
 
 > [Instalando y configurando Nginx - Parte 1](https://youtu.be/_LQv96MdtCk?list=PLqRCtm0kbeHD7A5f8Yft-5qFg-sgXvGzR) x Pelado Nerd.
 
-Es un servidor web, entendiendo como tal un servicio que corre y expone un puerto (generalmente el 80 y el 443) y nos permite poner código html en un directorio y mostrarlo como página cuando navegamos a esa dirección.
+Nginx es una herramienta open-source capaz de actuar como servidor web, proxy inverso, balanceador de cargas y cache HTTP.
 
-Los servidores web por defecto interpretan HTML, para trabajar con php, rails o python serán necesarios plugins para que funcionen.
+En su función de servidor web expone un puerto (generalmente el 80 y el 443) y nos permite poner código html en un directorio y mostrarlo como página cuando navegamos a esa dirección.
+
+
+
+> Los servidores web por defecto interpretan HTML, para trabajar con PSP, Rails o Python serán necesarios plugins.
 
 
 
@@ -125,8 +129,44 @@ Si luego agrego estos archivos no tendré que recargar Nginx porque no estoy cam
 
 
 
+### Instalación Ngnix como Contenedor
+
+```
+docker run -d
+--name nginx
+-p 8080:80
+nginx
+```
+
+ 
+
+> En algunos casos como en el [tutorial de Liv4IT](https://www.youtube.com/watch?v=sGKSfFlKuEI) se usa `-P` para publicar todos los puertos expuestos por el contenedor en el host.
+
+
+
 ## Reverse Proxy con Docker
 
-De manera similar a uso de un proxy inverso nos permitirá mostrar el contenido de varios contenedores con un único servidor. 
+De manera similar a lo visto anteriormente queremos implementar un proxy inverso con nginx nos permitirá mostrar el contenido de varios contenedores con un único servidor. 
 
-Utilizaremos las 
+Para los contenedores utilizaremos la imagen `httpd` para contar con un servidor apache.
+
+```
+docker run -dit 
+-p 8080:80
+--name docker1
+httpd:2.4
+```
+
+> Notar el uso de `-dit` es decir de `-it` a pesar de estar usando también `-d`. Esto es necesario, según [una respuesta en StackOverflow](https://stackoverflow.com/a/41918607/11384318) si ENTRYPOINT es `bash` o `sh` o si queremos usar `nano` o `vim` con un contenedor en el futuro.
+
+
+
+Ingresando a `http://localhost:8080/` veremos la página de bienvenida. Ahora editamos el contenido a vuelo el `index.html` para que en lugar de decir "It Works" diga "Docker1"
+
+```
+docker exec 900b... sed -i "s/It works!/Docker1/" /usr/local/apache2/htdocs/index.html
+```
+
+
+
+Ahora hacemos repetimos todo lo mismo para Docker2 (correr imagen pero usando el `8081` del host y editar el `index.html`). Verificamos que todo está bien ingresando a `http://localhost:8081/`

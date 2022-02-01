@@ -90,6 +90,21 @@ Si queremos verificar si tenemos Docker instalado en Linux podemos hacerlo con:
 ```
 systemctl status docker
 ```
+```
+service docker status
+```
+
+
+
+Si queremos obtener información sobre la versión de Docker que estamos ejecutando:
+
+```
+docker info
+```
+```
+docker -v
+```
+
 
 
 
