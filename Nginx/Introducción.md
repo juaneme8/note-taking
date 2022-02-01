@@ -1,6 +1,12 @@
 # Nginx
 
 > [Instalando y configurando Nginx - Parte 1](https://youtu.be/_LQv96MdtCk?list=PLqRCtm0kbeHD7A5f8Yft-5qFg-sgXvGzR) x Pelado Nerd.
+>
+> [Nginx en Docker](https://youtu.be/sGKSfFlKuEI)
+>
+> https://www.docker.com/blog/how-to-use-the-official-nginx-docker-image/
+>
+> 
 
 Nginx es una herramienta open-source capaz de actuar como servidor web, proxy inverso, balanceador de cargas y cache HTTP.
 
@@ -14,13 +20,13 @@ En su función de servidor web expone un puerto (generalmente el 80 y el 443) y 
 
 ## Instalación en Linux
 
-Si estamos utilizando una distribución Ubuntu por ejemplo lo instalamos con el siguiente comando:
+A la hora de trabajar con Nginx una de las alterrnativas es instalarlo en el host, para ello si estamos utilizando una distribución Ubuntu podemos instalarlo con el siguiente comando:
 
 ```
 apt-get install nginx
 ```
 
-Una vez instalado en Ubuntu se inicia automáticamente. Si navegamos a la IP veremos una página de bienvenida de nginx que nos hará dar cuenta que la instalación fue exitosa.
+Una vez instalado en Ubuntu se inicia automáticamente. Si navegamos a la `http://localhost:8080` veremos una página de bienvenida de nginx que nos hará dar cuenta que la instalación fue exitosa.
 
 
 
@@ -36,6 +42,29 @@ Podremos obtener la ruta al archivo de configuración de nginx con:
 
 ```
 nginx -t
+```
+
+
+
+## Instalación en Windows
+
+Debemos dirigirnos a la página de descarga de nginx para windows: http://nginx.org/en/docs/windows.html
+
+Descargar el zip, renombrarlo a `nginx`, copiarlo en Archivos de Programa, dirigirnos ahi con la terminal y ejecutar `nginx.exe`.
+
+Luego nos dirigimos a `localhost` y veremos la página de bienvenida.
+
+
+
+### Posibles Problemas
+
+El puerto 80 entra en conflicto con algún servicio y esto hace que no sea posible iniciar nginx.
+
+En [StackOverflow](https://stackoverflow.com/questions/1430141/port-80-is-being-used-by-system-pid-4-what-is-that) nos encontramos con esta solución para detener y deshabilitar W3SVC.
+
+```
+sc stop w3svc
+sc config w3svc start= disabled
 ```
 
 
@@ -129,7 +158,9 @@ Si luego agrego estos archivos no tendré que recargar Nginx porque no estoy cam
 
 
 
-### Instalación Ngnix como Contenedor
+## Ngnix en Contenedor
+
+Anteriormente analizamos la instalación de Nginx en el host, otra opción es ejecutarlo en un contenedor.
 
 ```
 docker run -d
@@ -140,19 +171,89 @@ nginx
 
  
 
-> En algunos casos como en el [tutorial de Liv4IT](https://www.youtube.com/watch?v=sGKSfFlKuEI) se usa `-P` para publicar todos los puertos expuestos por el contenedor en el host.
+> En algunos casos como en el [tutorial de Liv4IT](https://www.youtube.com/watch?v=sGKSfFlKuEI) se usa `-P` para publicar todos los puertos expuestos en el contenedor en puertos random del host. Esto puede ser útil si vamos a ir ejecutando `docker run ...` varias veces cambiando el nombre y queremos obtener un puerto distinto para evitar tener que estar deteniendo y eliminado los contenedores (o asignándole un nuevo puerto).
+
+
+
+En ese momento si visitamos `http://localhost:8080` veremos la página de bienvenida. Esto también podemos verificarlo desde la terminal:
+
+```
+curl http://localhost:8080
+```
+
+
+
+## Contenido personalizado
+
+Por defecto Nginx se fija en `/usr/share/nginx/html` los archivos que va a servir.
+
+Si queremos mostrar  con contenido personalizado podemos hacerlo de diferentes formas.
+
+1. Una forma es con `docker exec` y el **stream editor** `sed` para editarlo al vuelo con el siguiente patrón `"s/regexp/replacement/flags"`:
+
+```
+docker exec 2e8 sed -i "s/Welcome to nginx!/Nuevo contenido/" /usr/share/nginx/html/index.html
+```
+
+> [Más información sobre sed stream editor](https://stackoverflow.com/questions/12696125/sed-edit-file-in-place)
+
+
+
+2. Otra forma es con un **volumen**, suponemos que tenemos nuestro archivo `index.html` en `C:\Users\JuaNeMe\Documents\Code\ngnix-example`
+
+```
+docker run -d 
+--name nginx 
+-p 8080:80 
+-v C:\Users\JuaNeMe\Documents\Code\ngnix-example:/usr/share/nginx/html 
+nginx
+```
+
+
+
+### Imagen Custom de Nginx
+
+Lo que hicimos anteriormente con un volumen es válido para trabajar localmente y compartir archivos con el contenedor, pero es probable que queramos enviar la imagen con los archivos html incluidos.
+
+Vamos a crear un imagen personalizada a partir de la imagen base de `nginx` creamos un `Dockerfile` .
+
+```
+FROM nginx:latest
+COPY ./index.html /usr/share/nginx/html/index.html
+```
+
+> Este `Dockerfile` suponemos que lo tenemos en una carpeta del proyecto y que a su vez tiene en la raíz el `index.html` personalizado.
+
+
+
+Luego creamos la imagen de acuerdo al `Dockerfile`
+
+```
+docker build -t nginx .
+```
+
+
+
+Por último ejecutamos la imagen pero sin necesitar el volumen.
+
+```
+docker run -d 
+--name nginx 
+-p 8080:80 
+nginx
+```
 
 
 
 ## Reverse Proxy con Docker
 
-De manera similar a lo visto anteriormente queremos implementar un proxy inverso con nginx nos permitirá mostrar el contenido de varios contenedores con un único servidor. 
+Queremos implementar un proxy inverso con nginx nos permitirá mostrar el contenido de varios contenedores con un único servidor. 
 
-Para los contenedores utilizaremos la imagen `httpd` para contar con un servidor apache.
+Para los contenedores utilizaremos la imagen `httpd` para contar con un servidor Apache.
 
 ```
 docker run -dit 
--p 8080:80
+-p 8081:80
 --name docker1
 httpd:2.4
 ```
@@ -169,4 +270,8 @@ docker exec 900b... sed -i "s/It works!/Docker1/" /usr/local/apache2/htdocs/inde
 
 
 
-Ahora hacemos repetimos todo lo mismo para Docker2 (correr imagen pero usando el `8081` del host y editar el `index.html`). Verificamos que todo está bien ingresando a `http://localhost:8081/`
+Ahora hacemos repetimos todo lo mismo para Docker2 (correr imagen pero usando el `8082` del host y editar el `index.html`). Verificamos que todo está bien ingresando a `http://localhost:8082/`
+
+
+
+/etc/nginx/docker.config
