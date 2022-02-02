@@ -17,3 +17,24 @@ docker exec 900b... sed -i "s/It works!/Docker1/" /usr/local/apache2/htdocs/inde
 ```
 
 > En Windows este comando utilizando comillas simples no funcionó.
+
+
+
+## Cambiar nombre de host
+
+The procedure to change the computer name on Ubuntu Linux:
+
+1. Type the following command to edit /etc/hostname using nano or vi text editor:
+   `sudo nano /etc/hostname`
+   Delete the old name and setup new name.
+
+   
+
+2. Next Edit the /etc/hosts file:
+   `sudo nano /etc/hosts`
+   Replace any occurrence of the existing computer name with your new one.
+
+   
+
+3. Reboot the system to changes take effect:
+   `sudo reboot`
