@@ -1,12 +1,24 @@
 # Nginx
 
-> [Instalando y configurando Nginx - Parte 1](https://youtu.be/_LQv96MdtCk?list=PLqRCtm0kbeHD7A5f8Yft-5qFg-sgXvGzR) x Pelado Nerd.
->
-> [Nginx en Docker](https://youtu.be/sGKSfFlKuEI)
->
-> https://www.docker.com/blog/how-to-use-the-official-nginx-docker-image/
->
-> 
+* Video introductorio a nginx:
+  [Instalando y configurando Nginx - Parte 1](https://youtu.be/_LQv96MdtCk?list=PLqRCtm0kbeHD7A5f8Yft-5qFg-sgXvGzR) x Pelado Nerd.
+
+* Instalación de Nginx como contenedor Docker:
+  [How To Deploy NGINX With Docker On Ubuntu Linux](https://youtu.be/sGKSfFlKuEI)
+
+* Blog post sobre Nginx en Docker y flujo habitual de proxy inverso:
+  https://www.docker.com/blog/how-to-use-the-official-nginx-docker-image/
+
+* Video de Traversy Media origentado en deployar una app Node.js:
+  [Full Node.js Deployment - NGINX, SSL With Lets Encrypt](https://youtu.be/oykl1Ih9pMg)
+
+* Video Similar al anterior pero usando Docker instalable en Ubuntu:
+
+  [Deploy Web App with Docker, Nginx and SSL](https://www.youtube.com/watch?v=zJPlyjfV4C0)
+
+
+
+## Introducción
 
 Nginx es una herramienta open-source capaz de actuar como servidor web, proxy inverso, balanceador de cargas y cache HTTP.
 
@@ -50,7 +62,12 @@ nginx -t
 
 Debemos dirigirnos a la página de descarga de nginx para windows: http://nginx.org/en/docs/windows.html
 
-Descargar el zip, renombrarlo a `nginx`, copiarlo en Archivos de Programa, dirigirnos ahi con la terminal y ejecutar `nginx.exe`.
+```
+cd c:\
+unzip nginx-1.21.6.zip
+cd nginx-1.21.6
+start nginx
+```
 
 Luego nos dirigimos a `localhost` y veremos la página de bienvenida.
 
@@ -66,7 +83,6 @@ En [StackOverflow](https://stackoverflow.com/questions/1430141/port-80-is-being-
 sc stop w3svc
 sc config w3svc start= disabled
 ```
-
 
 
 ## Configuración 
@@ -274,4 +290,41 @@ Ahora hacemos repetimos todo lo mismo para Docker2 (correr imagen pero usando el
 
 
 
-/etc/nginx/docker.config
+#### Chequear flujo de trabajo en Windows Reverse Proxy
+
+En lugar de manejarnos con `sites-enabled` y `sites-available`, por practicidad para no hacer una estrucutura espcial para Windows editamos en principio el archivo `nginx.conf` ubicado en el directorio `conf`, agregando lo siguiente:
+
+```
+ server{
+        listen      80;
+        server_name docker1.jnm.com;
+
+        location /{
+            proxy_pass http://localhost:8081;
+        }
+    }
+    server{
+        listen 80;
+        server_name docker2.jnm.com;
+
+        location /{
+            proxy_pass http://localhost:8082;
+        }
+    }
+```
+
+Luego de modificarlo tendremos qeu volver a cargar nginx, lo cual hacemos con:
+
+```
+.\nginx.exe -s reload
+```
+
+Debemos recargarlo en el mismo usuario que lo inició.
+
+
+
+En el `C:\Windows\System32\drivers\etc` buscamos el archivo `hosts` y con privilegios de root agregamos lo siguiente:
+
+```
+181... docker1.jnm.com docker2.jnm.com
+```
