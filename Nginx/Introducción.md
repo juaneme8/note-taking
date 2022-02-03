@@ -95,10 +95,10 @@ nginx -v
 
 
 
-Podremos obtener la ruta al archivo de configuración de nginx con:
+Podremos obtener la ruta al archivo de configuración de nginx y testear la sintaxis:
 
 ```
-nginx -t
+sudo nginx -t
 ```
 
 
