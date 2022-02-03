@@ -16,13 +16,58 @@
 
   [Deploy Web App with Docker, Nginx and SSL](https://www.youtube.com/watch?v=zJPlyjfV4C0)
 
+* Nginx beginner's guide
 
+  http://nginx.org/en/docs/beginners_guide.html
+
+* Información sobre el achivo de configuración
+
+  https://docs.nginx.com/nginx/admin-guide/basic-functionality/managing-configuration-files/
 
 ## Introducción
 
 Nginx es una herramienta open-source capaz de actuar como servidor web, proxy inverso, balanceador de cargas y cache HTTP.
 
-En su función de servidor web expone un puerto (generalmente el 80 y el 443) y nos permite poner código html en un directorio y mostrarlo como página cuando navegamos a esa dirección.
+
+
+> *master procesess* y *worker processes*
+
+Nginx tiene un *master process* y varios *worker processes*. El *master process* se encargar de leer y evaluar la configuración y de mantener a los *worker processes* siendo estos quienes se encargan de procesar los requests. Nginx tiene un mecanismo que le permite distribuir eficientemente los requets entre los *worker processes*. El número de *worker processes* está definido en el archivo de configuración y puede ser fijo o variable según la cantidad de CPU cores disponibles.
+
+
+
+> Archivo de configuración
+
+El modo en que nginx funciona está determinado en su archivo de configuración. Por defecto recibe el nombre de `nginx.conf`.
+
+
+
+> Señales de control
+
+Para iniciarlo ejecutamos el ejecutable `nginx` y una vez iniciado podemos controlarlo con señales.
+
+```
+nginx -s signal
+```
+
+Las señales pueden ser las siguientes:
+
+* `stop` — fast shutdown
+
+* `quit` — para detener los procesos esperando a que los *worker processes* terminen de servir los requets actuales.
+
+* `reload` — para recargar el archivo de configuración. Los cambios realizados en el archivo de configuración no se aplicarán hasta que no enviemos el comando de recargar. 
+
+  > Once the master process receives the signal to reload configuration, it checks the syntax validity of the new configuration file and tries to apply the configuration provided in it. If this is a success, the master process starts new worker processes and sends messages to old worker processes, requesting them to shut down. Otherwise, the master process rolls back the changes and continues to work with the old configuration. Old worker processes, receiving a command to shut down, stop accepting new connections and continue to service current requests until all such requests are serviced. After that, the old worker processes exit.
+
+
+* `reopen` — reopening the log files
+
+
+
+> Servidor Web
+
+Funcionando como **servidor web** expone un puerto (generalmente el 80 y el 443) y nos permite poner código html en un directorio y mostrarlo como página cuando navegamos a esa dirección.
 
 
 
@@ -83,6 +128,92 @@ En [StackOverflow](https://stackoverflow.com/questions/1430141/port-80-is-being-
 sc stop w3svc
 sc config w3svc start= disabled
 ```
+
+
+
+## Archivo de Configuración
+
+Como dijimos anteriormente el modo en que nginx funciona está determinado en su archivo de configuración `nginx.conf` y dependiendo del sistema de paquetes usado para instalar nginx podrá estar en:
+
+* `/etc/nginx`
+* `/usr/local/nginx/conf`
+* `/usr/local/etc/nginx`
+
+Los comentarios se hacen con `#`.
+
+Para simplificar el mantenimiento se recomienda dividir en distintos archivos la configuración y ubicarlos en `/etc/nginx/conf.d` y usar la directiva `include` en `nginx.conf`. 
+
+```
+include conf.d/http
+```
+
+Nginx consiste en módulos que son controlados las **directivas** ubicadas en este archivo. Las directivas se dividen en **directivas simples** y **directivas de bloque**. 
+
+* Las simples son de una línea, consisten en nombre y parámetro separadas por espacios y que terminan en punto y coma `;`. 
+
+* Las directivas de bloque tienen la misma estructura que las simples pero en lugar del punto y coma, terminan con un set adicional de instrucciones rodeadas por llaves `{}`. Si una directiva de bloque puede tener otras directivas dentro de las llaves se llama **contexto** (por ejemplo `http`, `events`, `server`, `location`). Las directivas ubicadas fuera de todo contexto se considera que estan en el contexto principal (main context). Las directivas `events` y `http` reciden en el main context, `server` en `http` y `location` en `server`.
+
+  ```
+  http {
+      server {
+      	location / {
+      	
+      	}
+      }
+  }
+  ```
+
+
+
+
+#### Configuración Server
+
+An important web server task is serving out files (such as images or static HTML pages). You will implement an example where, depending on the request, files will be served from different local directories: `/data/www` (which may contain HTML files) and `/data/images` (containing images). This will require editing of the configuration file and setting up of a [server](http://nginx.org/en/docs/http/ngx_http_core_module.html#server) block inside the [http](http://nginx.org/en/docs/http/ngx_http_core_module.html#http) block with two [location](http://nginx.org/en/docs/http/ngx_http_core_module.html#location) blocks.
+
+```
+http{
+    server {
+        location / {
+        	root /data/www;
+        }
+
+        location /images/ {
+        	root /data;
+        }
+	}
+}
+```
+
+This is already a working configuration of a server that **listens on the standard port 80** (that's why the `listen` directive is not specified) and is accessible on the local machine at `http://localhost/`. In response to requests with URIs starting with `/images/`, the server will send files from the `/data/images` directory. For example, in response to the `http://localhost/images/example.png` request nginx will send the `/data/images/example.png` file. If such file does not exist, nginx will send a response indicating the 404 error. Requests with URIs not starting with `/images/` will be mapped onto the `/data/www` directory. For example, in response to the `http://localhost/some/example.html` request nginx will send the `/data/www/some/example.html` file.
+
+> 
+
+In case something does not work as expected, you may try to find out the reason in `access.log` and `error.log` files in the directory `/usr/local/nginx/logs` or `/var/log/nginx`.
+
+
+
+#### Configuración Proxy Server
+
+One of the frequent uses of nginx is setting it up as a proxy server, which means a server that receives requests, passes them to the proxied servers, retrieves responses from them, and sends them to the clients.
+
+We will configure a basic proxy server, which serves requests of images with files from the local directory and sends all other requests to a proxied server. In this example, both servers will be defined on a single nginx instance.
+
+```
+http{
+    server {
+    	location / {
+    		proxy_pass http://localhost:8080;
+    	}
+
+        location ~ \.(gif|jpg|png)$ {
+        	root /data/images;
+        }
+	}
+}
+```
+
+This server will filter requests ending with `.gif`, `.jpg`, or `.png` and map them to the `/data/images` directory (by adding URI to the `root` directive’s parameter) and pass all other requests to the proxied server configured above.
+
 
 
 ## Configuración 
