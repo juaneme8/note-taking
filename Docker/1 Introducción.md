@@ -2750,9 +2750,25 @@ CMD ["npm","start"]
 
 En el `Dockerfile` que teníamos hasta el momento comenzábamos a partir de una imagen de node `FROM node:14.16.0-alpine3.13` para luego poder ejecutar npm y así instalar las dependencias con `npm install` pero si ya las tenemos simplemente debemos copiar los archivos en el web-server. Es por eso que debemos
 
-Dentro del `Dockerfile` podremos tener múltiples *stages* o etapas (por ejemplo build-stage y production-stage) y agregamos la keyword `AS` para darle a cada *stage* esa etiqueta. El uso de etiquetas tiene sentido si luego queremos referenciar ese stage.
 
-También podemos agregar comentarios con `#`
+
+## Multi Stage Builds
+
+Cuando creamos imagenes lo hacemos con la premisa de que sean livianas, es por eso que existen imagenes base mínimas como Alpine o BusyBox que son distribuciones Linux que pesan muy poco y tienen sólo lo indispensable para funcionar, de manera que se puedan subir y bajar a servidores rápidamente. En ocasiones necesitamos otras librerías por ejemplo para compilar o instalar dependencias, lo que nos lleva a utilizar imágenes base mucho mas pesadas. Para lograr realizar estas tareas y a su vez tener imagenes livianas podemos utilizar **multi stage builds**. 
+
+
+
+Dentro del `Dockerfile` podremos tener múltiples *stages* o etapas (por ejemplo build-stage y production-stage) y agregamos la keyword `AS` para darle a cada *stage* esa etiqueta (sólo tiene sentido hacerlo con los stages que luego vamos a querer referenciar).
+
+Para referenciar a un stage en particular lo hacemos con `--from=0` o bien mediante el uso de etiquetas `--from=build-stage`. 
+
+
+
+También podríamos usar este recurso para copiarnos archivos de otra imagen:
+
+```
+COPY --from=nginx:latest /etc/nginx/nginx.conf /nginx.conf
+```
 
 
 
