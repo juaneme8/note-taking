@@ -20,3 +20,7 @@ Esto se traducirá en:
 ```
 Podemos encontrar información completa sobre la sintaxis de las abreviaciones:
 [https://docs.emmet.io/abbreviations/syntax/](https://docs.emmet.io/abbreviations/syntax/)
+
+
+
+> Notar que el signo `$` en `{Elemento $}` luego es reempalzado por un número.
