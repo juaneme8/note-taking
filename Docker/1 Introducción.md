@@ -427,9 +427,28 @@ COPY ["hello world.txt", "."]
 
 
 
+Con el agregado del comando `COPY` en el `Dockerfile` tenemos:
+
+```dockerfile
+FROM node:14.16.0-alpine3.13
+COPY . /app
+```
+
+
+
 ## Comando `WORKDIR`
 
 El comando `WORKDIR` establece el directorio de trabajo para las instrucciones `RUN`, `CMD`, `ENTRYPOINT`, `COPY`, `ADD` que sigan en el `Dockerfile`. Si no existe será creado incluso si luego no es utilizado por ninguna instrucción.
+
+
+
+Con el agregado del comando `WORKDIR` en el `Dockerfile` tenemos:
+
+```dockerfile
+FROM node:14.16.0-alpine3.13
+WORKDIR /app
+COPY . .
+```
 
 
 
@@ -459,9 +478,9 @@ Por último creamos la imagen e iniciamos un contenedor con esta imagen y veremo
 
 ## `.dockerignore` 
 
-En el procedimiento anterior hemos copiado `node_modules` lo cual ocasiona que el *build context* sea bastante pesado (cercano a los 150 MB, cosa que vemos en el output del build donde dice *transferring context*) aún en un proyecto que casi no tiene funcionalidades. A la hora del deployment **veremos que el Docker Client debe hablar con un Docker Engine en otra máquina** y transferir el contenido del build context por medio de la red. No es necesario transferir este directorio ya que en `package.json` tenemos definidas todas las dependencias y podremos reinstalarlas en la imagen de destino.
+En el procedimiento anterior hemos copiado `node_modules` lo cual ocasiona que el *build context* sea bastante pesado (cercano a los 150 MB, cosa que vemos en el output del build donde dice *transferring context*) aún en un proyecto que casi no tiene funcionalidades. A la hora del deployment **veremos que el Docker Client debe hablar con un Docker Engine en otra máquina** y transferir el contenido del *build context* por medio de la red. No es necesario transferir este directorio `node_modules` ya que en `package.json` tenemos definidas todas las dependencias y podremos reinstalarlas en la imagen de destino ejecutando `npm install`.
 
-El build context es menor por lo que debemos transfererir **menos datos por la red**, lo que ocasionará que el build será más **rápido**.
+Si logramos que el *build context* sea menor esto hará que debamos transfererir **menos datos por la red**, lo que ocasionará que el build será más **rápido**.
 
 De la misma manera que tenemos el archivo `.gitignore`, podemos crear en la raíz un archivo `.dockerignore` y listar allí los archivos y directorios a excluir.
 
@@ -501,6 +520,17 @@ Luego creamos la imagen (y como parte del build se descargarán  e instalarán l
 
 
 
+Con estos cambios en el `Dockerfile` tenemos:
+
+```dockerfile
+FROM node:14.16.0-alpine3.13
+WORKDIR /app
+COPY . .
+RUN npm install
+```
+
+
+
 ## Comando `ENV`
 
 El comando `ENV` nos permite setear variables de entorno.
@@ -527,13 +557,25 @@ Luego reconstruimos la imagen e iniciamos un nuevo contenedor.
 
 
 
+Con estos agregados el `Dockerfile` nos queda:
+
+```dockerfile
+FROM node:14.16.0-alpine3.13
+WORKDIR /app
+COPY . .
+RUN npm install
+ENV API_URL=http://api.myapp.com/
+```
+
+
+
 ## Comando `EXPOSE`
 
 Cuando trabajamos con React.js de manera tradicional, ejecutamos `npm start` y luego vamos a `localhost:3000` para acceder a la aplicación. Cuando ejecutemos esta aplicación en un contenedor **el puerto estará abierto en el contenedor** pero no en el host. En la misma máquina podremos tener múltiples contenedores corriendo la misma imagen y todos ellos estarán escuchando en el puerto 3000. Veremos luego cómo mapear un puerto del host con un puerto del contenedor.
 
 
 
-El comando `EXPOSE` nos permite **documentar** en qué puerto estará escuchando eventualmente este contenedor, pero no tiene nada que ver con publicar puertos del host por lo que tendremos luego que mapear un puerto del host con el 3000 del contenedor.
+El comando `EXPOSE` nos permite **documentar en qué puerto estará escuchando este contenedor**, pero no tiene nada que ver con publicar puertos del host por lo que tendremos luego que mapear un puerto del host con el 3000 del contenedor.
 
 ```
 EXPOSE 3000
@@ -541,9 +583,22 @@ EXPOSE 3000
 
 
 
+Con estos agregados el `Dockerfile` nos queda:
+
+```dockerfile
+FROM node:14.16.0-alpine3.13
+WORKDIR /app
+COPY . .
+RUN npm install
+ENV API_URL=http://api.myapp.com/
+EXPOSE 3000
+```
+
+
+
 ## Comando `USER`
 
- Por default Docker ejecuta las aplicaciones con el usuario `root` que es el que tienen el nivel de privilegios más alto lo cual podría ocasionar agujeros de seguridad en nuestra aplicación. Debemos crear un usuario regular con privilegios limitados.
+Por default Docker ejecuta las aplicaciones con el usuario `root` que es el que tienen el nivel de privilegios más alto lo cual podría ocasionar agujeros de seguridad en nuestra aplicación. Debemos crear un usuario regular con privilegios limitados.
 
 Antes de hacerlo en el `Dockerfile` lo haremos en una sesión de shell en Alpine Linux:
 
@@ -561,7 +616,7 @@ addgroup app
 
 
 
-A continuación creamos un usuario con el comando `adduser` (el comando `useradd` no está disponible en Alpine Linux). Lo hacemos con las opciones `-G` para crear un grupo primario y `-S` para crear un *system user* (no es un usuario normal sino que es un usuario para ejecutar la aplicación).
+A continuación creamos un usuario con el comando `adduser` (el comando `useradd` no está disponible en Alpine Linux, **como regla mnemotécnica podemos recordar "A"lpine "A"dduser**). Lo hacemos con las opciones `-G` para crear un grupo primario y `-S` para crear un *system user* (no es un usuario normal sino que es un usuario para ejecutar la aplicación).
 
 ```bash
 adduser -S -G app app
@@ -638,6 +693,8 @@ RUN addgroup app && adduser -S -G app app
 USER app
 ```
 
+
+
 Como podemos ver estamos ejecutando todos los comandos como `root` y a lo último estamos cambiando `app` que es un usuario con privilegios limitados, por lo que colocamos los últimos dos comandos al comienzo:
 
 ```dockerfile
@@ -708,11 +765,19 @@ El comando `CMD` podemos utilizarlo de dos formas:
 
 * **Shell form**: Docker lo ejecutará dentro de una shell separada (`/bin/sh` en Linux o `cmd` en Windows)
 
+```
+<instruction> <command>
+```
+
 ```dockerfile
 CMD npm start
 ```
 
 * **Execute form**: nos permite ejecutarlo directamente sin abrir otro proceso de shell. **Es una buena práctica utilizar esta opción**. Además es más simple y rápido hacer la limpieza de recursos al detener contenedores.
+
+```bash
+<instruction> ["executable", "param1", "param2", ...]
+```
 
 ```dockerfile
 CMD ["npm", "start"]
@@ -726,13 +791,15 @@ Este comando puede ser sobrescrito fácilmente si le otro comando como argumento
 docker run -it react-app sh
 ```
 
-En este caso no ejecutará `npm start`sino que ejecutará `sh`.
+En este caso no ejecutará `npm start` sino que ejecutará `sh`.
 
-Como veremos a continuación con `CMD` más simple sobrescribir el comando default de hecho esto es lo que hacemos por ejemplo cuando ejecutamos `docker run -it react-app sh`. Debemos utilizar `CMD` cuando queremos tener flexibilidad de que podremos sobrescribir el comando.
+Debemos utilizar `CMD` cuando queremos tener flexibilidad de que podremos sobrescribir el comando.
+
+
 
 ## Comando `ENTRYPOINT`
 
-El comando `ENTRYPOINT` es similar a `CMD` , **también se ejecuta cuando inicia el contenedor** y tiene también la **shell form** y **execute form**. 
+El comando `ENTRYPOINT` es similar a `CMD` , **también se ejecuta cuando inicia el contenedor** (*at run-time*) y tiene también la **shell form** y **execute form**. 
 
 
 
@@ -744,7 +811,7 @@ ENTRYPOINT npm start
 ENTRYPOINT ["npm", "start"]
 ```
 
-La diferencia está en que `ENTRYPOINT` está pensado para no sobrescribir el comando sino que nos permitirá pasarle argumentos a dicho comando.
+La diferencia está en que `ENTRYPOINT` **está pensado para no sobrescribir el comando sino que nos permitirá pasarle argumentos** a dicho comando.
 
 `ENTRYPOINT` nos permite dejar abierto un comando para después pasarle argumentos. Podríamos tener `ENTRYPOINT ["node"]` y luego al hacer `docker run` deberíamos pasarle como argumento el archivo que queremos que ejecute. Esto es útil en caso de que tengamos varios binarios.
 
@@ -759,6 +826,84 @@ docker run react-app index.js
 ```
 
 En caso de que qusiéramos sobrescribir el `ENTRYPOINT` sería necesario utilizar la opción`--entrypoint` . 
+
+
+
+#### Información Complementaria: 
+
+A continuación un resumen del contenido del siguiente sitio: 
+
+https://programacionymas.com/blog/docker-diferencia-entrypoint-cmd
+
+
+
+Cuando tenemos los siguientes comandos:
+
+```bash
+FROM ubuntu:16.04
+CMD ["/bin/date"]
+```
+
+Estamos usando el ENTRYPOINT o punto de entrada del contenedor por defecto (que es `/bin/sh -c`), y ejecutando `/bin/date` sobre dicho punto de entrada.
+
+
+
+Al ejecutar esta imagen, el contenedor imprimirá por defecto la fecha actual:
+
+```bash
+$ docker build -t test .
+$ docker run test
+Tue Dec 19 10:37:43 UTC 2016
+```
+
+
+
+Sin embargo es posible sobreescribir el comando `CMD` a usar por defecto, desde la misma línea de comandos (en tal caso se ejecutará el comando indicado):
+
+```bash
+$ docker run test /bin/hostname
+bf0274ec8820
+```
+
+
+
+Si usas la instrucción `ENTRYPOINT`, entonces Docker usará el ejecutable que le indiques, y la instrucción `CMD` te permitirá definir un parámetro por defecto.
+
+Por ejemplo, si tu Dockerfile contiene:
+
+```bash
+FROM ubuntu:16.04
+ENTRYPOINT ["/bin/echo"]
+CMD ["Hello"]
+```
+
+Entonces producirá como resultado:
+
+```bash
+$ docker build -t test .
+$ docker run test
+Hello
+```
+
+También puedes especificar un valor diferente para `CMD` al iniciar un contenedor, y se considerará como parámetro para el ejecutable `/bin/echo` (en vez del que viene por defecto):
+
+```bash
+$ docker run test Hi
+Hi
+```
+
+Si lo deseas, también puedes sobreescribir el valor del `ENTRYPOINT` definido en el Dockerfile.
+
+Esto es menos común, pero también es posible.
+
+Por ejemplo, en este caso, te permitiría usar un ejecutable distinto a `/bin/echo` como punto de entrada:
+
+```bash
+$ docker run --entrypoint=/bin/hostname test
+b2c70e74df18
+```
+
+
 
 ## Optimizar Builds
 
