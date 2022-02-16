@@ -913,7 +913,7 @@ Una imagen es una colección de **layers**, pudiendo pensar a los layers como un
 
 Para la primera instrucción `FROM node:14.16.0-alpine3.13` Docker toma la imagen de Node y la coloca en un layer (en verdad la imagen de Node son varios layers pero a los fines prácticos suponemos que es uno sólo con todos los archivos de Linux y Node). Luego ejecuta la segunda instrucción `RUN addgroup app && adduser -S -G app app` y crea un nuevo layer con los archivos que se modifican luego de ejecutarlo (crea un nuevo layer ya que al crear un usuario o un grupo algo se escribe en el filesystem). De manera similar continúa ejecutando los siguientes comandos y creando layers.
 
-El comando `docker history` nos permite conocer los layers asociados a cada imagen. Podremos visualizar el comando que creo ese layer y el tamaño de esta capa. Debemos leer la tabla de abajo hacia arriba. Primero veremos una serie de layers de Linux y Node.js. Luego veremos un layer de poco tamaño correspondiente al comando para crear un grupo y crear un usuario y añadirlo a dicho grupo. Sobre este comando veremos `RUN /bin/sh -c addgroup app && adduser -S -G app` y el hecho de que sea ejecutado dentro de `/bin/sh` es por haber utilizado la forma "shell" en lugar de la forma "execute" de RUN. Cuando ejecutamos `npm install` (veremos también que es ejecutado en `/bin/sh` por haber usado la forma "shell") todas las dependencias son instaladas y almacenadas en esta capa (veremos que tiene un peso significativo).
+El comando `docker history` nos permite conocer los layers asociados a cada imagen. Podremos visualizar el comando que creo ese layer y el tamaño de esta capa. Debemos leer la tabla de abajo hacia arriba. Primero veremos una serie de layers de Linux y Node.js. Luego veremos un layer de poco tamaño correspondiente al comando para crear un grupo y crear un usuario y añadirlo a dicho grupo. Sobre este comando veremos `RUN /bin/sh -c addgroup app && adduser -S -G app` y el hecho de que sea ejecutado dentro de `/bin/sh` es por haber utilizado la forma "shell" en lugar de la forma "execute" de `RUN`. Cuando ejecutamos `npm install` (veremos también que es ejecutado en `/bin/sh` por haber usado la forma "shell") todas las dependencias son instaladas y almacenadas en esta capa (veremos que tiene un peso significativo).
 
 ```bash
 docker history react-app
@@ -921,7 +921,7 @@ docker history react-app
 
 
 
-Docker cuenta con un **mecanismo de optimización** por el que cada vez que construye una imagen y llega a una instrucción, supongamos `FROM node:14.16.0-alpine3.13` se fijará si esta no ha cambiando respecto de la última vez y en ese caso no reconstruirá dicho layer sino que lo reutilizará de caché. Repitiendo lo mismo para las restantes instrucciones. Cuando llegamos a `COPY . .` bastará con haber cambiado una línea de código para que no pueda reutilizar ese layer y deberá reconstruirlo. Además como consecuencia de esto todos los layers subsiguientes deberán recontruirse también. Entre esas instrucciones tenemos `npm install` y es el cuello de botellas por el cual debemos esperar cerca de medio minuto para que se instalen todas las dependencias.
+Docker cuenta con un **mecanismo de optimización** por el que cada vez que construye una imagen y llega a una instrucción, supongamos `FROM node:14.16.0-alpine3.13` se fijará si esta no ha cambiando respecto de la última vez y en ese caso no reconstruirá dicho layer sino que lo reutilizará de caché. Repitiendo lo mismo para las restantes instrucciones. Cuando llegamos a `COPY . .` bastará con haber cambiado una línea de código para que no pueda reutilizar ese layer y deberá reconstruirlo. Además como consecuencia de esto todos **los layers subsiguientes deberán recontruirse también**. Entre esas instrucciones tenemos `npm install` y es el cuello de botellas por el cual debemos esperar cerca de medio minuto para que se instalen todas las dependencias.
 
 Hasta ahora tenemos:
 
@@ -952,9 +952,9 @@ La organización del `Dockerfile` para lograr la máxima optimización tiene que
 
 ## Eliminar Imágenes
 
-### Eliminar Imagenes Colgadas
+### Eliminar Imágenes Colgadas
 
-Cuando ejecutamos `docker images` vemos algunas que tienen como nombre y como tag la palabra  `<none>` las cuales se originan en la medida que hacemos rebuilds de las imagenes. 
+Cuando ejecutamos `docker images` vemos algunas que tienen como nombre y como tag la palabra  `<none>` las cuales se originan en la medida que hacemos rebuilds de las imágenes. 
 
 
 
@@ -968,7 +968,6 @@ docker image prune
 
 > Para obtener ayuda sobre cualquiera de estos comandos `docker image prune --help`, `docker image save --help`, etc.
 >
-> 
 
 
 
@@ -988,13 +987,15 @@ docker ps -a
 
 
 
+### Limpiar Contenedores Detenidos
+
 Si queremos eliminar los contenedores detenidos que acabamos de visualizar:
 
 ```bash
 docker container prune
 ```
 
-Y Luego volvemos a ejecutar
+Y luego volvemos a ejecutar
 
 ```
 docker image prune
@@ -1015,6 +1016,8 @@ docker image rm df3
 ```
 
 > En lugar de `rm` también podemos utilizar la palabra `remove`.
+
+
 
 ## Etiquetar Imágenes
 
@@ -1042,31 +1045,31 @@ docker images
 
 Para etiquetar una imagen podemos hacerlo a la hora de crear la imagen:
 
-Hay equipos que optan por darles nombres en forma de código
+Hay equipos que optan por darles **nombres en forma de código**
 
 ```bash
 docker build -t react-app:buster .
 ```
 
-Otra opción es versionar semánticamente. Esta metodología es común en equipos que no sacan *releases* muy seguido:
+Otra opción es versionar **semánticamente**. Esta metodología es común en equipos que no sacan *releases* muy seguido:
 
 ```bash
 docker build -t react-app:3.1.5 .
 ```
 
-Los equipos que sacan *releases* seguido suelen preferir números de *build*
+Los equipos que sacan *releases* seguido suelen preferir **números de build**
 
 ```bash
 docker build -t react-app:76
 ```
 
-> Este último método puede ser llevado a cabo por herramientas CI/CD que verificarán el código más reciente del repositorio y construirán una imagen y la etiquetarán automáticamente con el número de build.
+> **Este último método puede ser llevado a cabo por herramientas CI/CD** que verificarán el código más reciente del repositorio y construirán una imagen y la etiquetarán automáticamente con el número de build.
 
 
 
 > Una misma imagen puede tener múltiples tags.
 
-Si queremos eliminar una etiqueta
+Si queremos eliminar una etiqueta (o la imagen en caso de ser la única)
 
 ```bash
 docker image rm react-app:1
@@ -1094,7 +1097,7 @@ docker image tag f4b react-app:1
 
 ### Etiqueta `latest` desactualizada
 
-Si tenemos una imagen con la etiqueta latest y luego creamos una nueva imagen con una etiqueta en particular puede que ejecutemos `docker images` y pensemos que la más actual es una distinta de la que realmente es. En ese caso debemos actualizarla manualmente añadiéndole a la nueva la etiqueta `latest` del modo visto. Suponiendo que su ID comienza con `b06`:
+Si tenemos una imagen con la etiqueta `latest` y luego creamos una nueva imagen con una etiqueta en particular puede que ejecutemos `docker images` y pensemos que la más actual es una distinta de la que realmente es. En ese caso debemos actualizarla manualmente añadiéndole a la nueva la etiqueta `latest` del modo visto. Suponiendo que su ID comienza con `b06`:
 
 ```bash
 docker image tag b06 react-app:latest
@@ -1104,9 +1107,21 @@ docker image tag b06 react-app:latest
 
 ## Compartir Imágenes
 
-Si queremos compartir las imagenes podemos hacerlo en un registro de Docker, el registro de Docker oficial como dijimos es DockerHub. Para trabajar con eso debemos tener una cuenta en [hub.docker.com](hub.docker.com) y luego debemos crear un repositorio que puede alojar múltiples imágenes.
+Si queremos compartir las imágenes podemos hacerlo en un registro de Docker, el registro de Docker oficial como dijimos es DockerHub. Para trabajar con eso debemos tener una cuenta en [hub.docker.com](hub.docker.com) y luego debemos crear un repositorio que puede alojar múltiples imágenes.
 
-> Con una cuenta gratuita sólo es posible tener un repositorio privado. En la versión paga también es posible vincular con una cuenta GitHub para que cada vez que hagamos un push, DockerHub haga un pull y genere automáticamente una imagen.
+> Con una cuenta gratuita sólo es posible tener sólamente un repositorio privado (en el podemos almacenar distintos tags de una misma imagen).
+>
+> Una opción para tener distintos servicios podría ser darle distintos tags a imágenes distintas pero referenciando a ese mismo repositorio:
+>
+> ```
+> # Push to dockerhub repo
+> docker push amjibaly/stuff:image1
+> 
+> # Push to same dockerhub repo with different tag
+> docker push amjibaly/stuff:image2
+> ```
+>
+>  En la versión paga también es posible vincular con una cuenta GitHub para que cada vez que hagamos un push, DockerHub haga un pull y genere automáticamente una imagen.
 
 Suponiendo que creamos un repositorio `react-app` debemos renombrar la imagen a `juaneme8/react-app` lo cual hacemos con:
 
@@ -1198,7 +1213,7 @@ docker image load --input react-app.tar
 
 ## Iniciar Contenedores
 
-Repamos a continuación algunos de los comandos usados hasta ahora. 
+Repasamos a continuación algunos de los comandos usados hasta ahora. 
 
 Para listar las imagenes disponibles
 
@@ -1304,7 +1319,7 @@ docker logs -t 655
 
 ## Publicar Puertos
 
-A pesar de tener dos contenedores corriendo si vamos a `localhost:3000` no podremos acceder a la aplicación. Esto como ya explicamos se debe a que el puerto 3000 está escuchando en el contenedor pero no en el host. Necesitamos publicar este puerto para poder enviar tráfico a través de él.
+A pesar de tener el contenedor corriendo si vamos a `localhost:3000` no podremos acceder a la aplicación. Esto como ya explicamos se debe a que el puerto 3000 está escuchando en el contenedor pero no en el host. Necesitamos publicar este puerto para poder enviar tráfico a través de él.
 
 Recordar que en el `Dockerfile` el comando `EXPOSE` nos sirve sólo a los fines de documentación.
 
@@ -1366,7 +1381,7 @@ Sin embargo, si queremos ejecutar un comando tiempo después en un contenedor qu
 docker exec c1 ls
 ```
 
-> Siendo `c1` el nombre del contenedor y `ls` el comando que deseamos ejecutar en el, tener presente que el contenedor continuará corirendo.
+> Siendo `c1` el nombre del contenedor y `ls` el comando que deseamos ejecutar en el, tener presente que el contenedor continuará corriendo.
 
 
 
@@ -1438,7 +1453,7 @@ docker rm -f c1
 
 > Una vez eliminado lógicamente no lo veremos en los contenedores corriendo `docker ps`, ni en todos los contenedores (incluyendo detenidos) `docker ps -a`. Si queremos chequearlo mediante un comando podríamos hacerlo utilizando pipes con `docker ps -a | grep c1`
 >
-> Como ya explicamos, el comando `docker container prune` nos permite borrar todas los contenedores detenidos.
+> Como ya explicamos, el comando `docker container prune` nos permite borrar todas los contenedores detenidos y luego podemos ejecutar `docker image prune`.
 
 
 
@@ -1475,15 +1490,13 @@ ls | grep data
 
 
 
-Si eliminamos el contenedor estaremos eliminando también el file-system por lo que se irán los archivos que tengamos allí. Nunca debemos colocar 
-
-alli nuestra data, en cambio debemos utilizar **volúmenes**.
+Si eliminamos el contenedor estaremos eliminando también el file-system por lo que se irán los archivos que tengamos allí. Nunca debemos colocar allí nuestra data, en cambio debemos utilizar **volúmenes**.
 
 
 
 # Volúmenes
 
-Los volúmenes proporcionan un método de **almacenamiento por fuera de los contenedores**, puede ser en un directorio del host o en algún lugar de la nube.
+Los volúmenes proporcionan un método de persistencia de datos por fuera de los contenedores, pudiendo ser en un directorio del host o en algún lugar de la nube.
 
 Podemos ver los subcomandos ingresando:
 
@@ -1673,11 +1686,11 @@ ls
 
 
 
-Actualizar código en contenedor
+#### Actualizar código en contenedor
 
 El uso de volúmenes también nos permite en desarrollo  modificar el código de la aplicación al vuelo es decir que no tendremos que reconstruir la imagen, ni reiniciar el contenedor.
 
-Supongamos que tenemos corriendo una aplicación React que visitamos en localhost:3000 y modificamos uno de sus archivos. Estos cambios no los veremos reflejados inmediatamente en el navegador. Para visualizar estos cambios debemos operar distinto segun estemos en producción o en desarrollo.
+Supongamos que tenemos corriendo una aplicación React que visitamos en `localhost:3000` y modificamos uno de sus archivos. Estos cambios no los veremos reflejados inmediatamente en el navegador. Para visualizar estos cambios debemos operar distinto según estemos en producción o en desarrollo.
 
 Para **producción** deberíamos crear una nueva imagen, asignarle un tag apropiado y luego hacer el deploy.
 
@@ -1829,7 +1842,7 @@ docker container rm -f $(docker container ls -aq)
 
 > Notar que a la hora de borrar estamos usando la opción `-f` para eliminar de manera forzada a los contenedores que están corriendo.
 >
-> También a la hroa de listar agregamos la opción `-a` para también eliminar los contenedores detenidos.
+> También a la hora de listar agregamos la opción `-a` para también eliminar los contenedores detenidos.
 
 
 
