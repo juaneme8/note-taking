@@ -588,7 +588,7 @@ Sin embargo, si en lugar de texto queremos mostrar condicionalmente elementos HT
 Debemos hacerlo con `{#if condicion}` y finalizamos con `{/if}`  y también es posible trabajar con `{:else}`
 
 ```
-{# if response.length>0}
+{#if response.length>0}
 <strong>{response.length} movies found</strong>
 {:else}
 No movies found
