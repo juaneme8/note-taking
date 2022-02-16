@@ -83,6 +83,8 @@ En la [página oficial](https://docs.docker.com/docker-for-windows/install/) nos
 
 Desde la terminal con el comando `docker version` obtenemos la versión instalada tanto del cliente como del server.
 
+Con `docker -v` o `docker --version` vemos información más reducida.
+
 
 
 #### Verificar Instalación en Linux
@@ -1874,9 +1876,13 @@ Cuando tenemos servicios relacionados vamos a trabajar con más de un contenedor
 
 Esto lo implementaremos de dos formas la primera de ellas es creando una network y la segunda utilizando docker compose que se encarga de hacerlo por nosotros.
 
-Como dijimos lo primero que hacemos es crear una red de modo tal que ambos contenedores sean capaces de conectarse uno al otro.
 
 
+Con `docker network ls` podremos ver las tres redes incluidas por default con la instalación de Docker Engine. Tenemos una llamada `bridge` que a menos que digamos lo contrario será la utilizada por defecto cuando corramos los contenedores.
+
+
+
+Vamos crear una red de modo tal que ambos contenedores sean capaces de conectarse uno al otro.
 
 ```bash
 docker network create stock-app
@@ -1887,7 +1893,13 @@ docker network create stock-app
 En primer lugar creamos el contenedor basado en la imagen de mongo:
 
 ```
-docker run -dp 27018:27017 --network stock-app --network-alias db -v stock:/data/db mongo:4.0-xenial
+docker run 
+-d
+-p 27018:27017
+--network stock-app
+--network-alias db
+-v stock:/data/db
+mongo:4.0-xenial
 ```
 > En Compass debemos conectarnos especificando `localhost:27018`
 
@@ -1898,7 +1910,13 @@ docker build -t api:v1 .
 ```
 
 ```
-docker run -dp 3001:3001 --network stock-app -e MONGO_DB_URI=mongodb://db/stock -e PORT=3001 api:v1
+docker run 
+-d
+-p 3001:3001
+--network stock-app
+-e MONGO_DB_URI=mongodb://db/stock
+-e PORT=3001
+api:v1
 ```
 Por último hacemos lo mismo desde la carpeta `frontend`
 ```
@@ -1906,20 +1924,25 @@ docker build -t web:v1 .
 ```
 
 ```
-docker run -dp 3000:3000 --network stock-app --network-alias web web:v1
+docker run
+-d
+-p 3000:3000
+--network stock-app
+--network-alias web
+web:v1
 ```
 
 
 
 De esta manera los distintos contenedores podrán comunicarse entre sí. 
 
-Para no tener que ingresar estos comandos manualmente a la hora ejecutar los tres contenedores y lograr un mantenimiento más simple podemos recurrir a una herramienta llamada Docker Compose.
+Para no tener que ingresar estos comandos manualmente a la hora ejecutar los tres contenedores y lograr un mantenimiento más simple podemos recurrir a una herramienta llamada **Docker Compose**.
 
 
 
 ## Docker Compose
 
-Docker Compose nos permite ejecutar de manera simple aplicaciones con múltiples contenedores usando un sólo archivo y automáticamente los colocará en la misma red. 
+Docker Compose nos permite ejecutar de manera simple aplicaciones con múltiples contenedores usando un sólo archivo y **automáticamente los colocará en la misma red**. 
 
 Docker Compose es una herramienta construida sobre la base de Docker Engine y en la actualidad para Windows y Mac viene incluida en Docker Desktop, lo cual podemos verificar con `docker-compose --version`. 
 
@@ -1980,7 +2003,7 @@ El formato `YML` (es posible utilizar la extensión `.yml` o`.yaml`) también no
 
 > Utilizamos `---` en la parte superior
 >
-> Utilizamos indentación para indicar jerarquía
+> Utilizamos indentación (mediante espacios) para indicar jerarquía
 >
 > No utilizamos comillas
 >
@@ -2019,7 +2042,7 @@ version: "3.8"
 
 
 
-A continuación debemos definir los distintos bloques o servicios con los cuales le diremos a Docker como hacer cada una de las imágenes y cómo iniciar luego los contenedores. A todos estos contenedores los colocará dentro de la misma red
+A continuación debemos definir los distintos bloques o servicios con los cuales le diremos a Docker como hacer cada una de las imágenes y cómo iniciar luego los contenedores. A todos estos contenedores los colocará dentro de la misma red.
 
 Debemos utilizar espacios y no tabulaciones pues de lo contrario no funcionará.
 
@@ -2033,9 +2056,9 @@ services:
 
 > Les hemos dado a los servicios el nombre `frontend`, `backend`, `database` pero podríamos haberles dado cualquier nombre por ejemplo `web`, `api`, `db`. 
 
-Así como anteriormente para iniciar el contenedor ingresabamos manualmente el comando `docker run -p ... -v ... react-app` la idea es ingresar aca propiedades que nos permitan luego correr el contenedor con esas opciones.
+Así como anteriormente para iniciar el contenedor ingresábamos manualmente el comando `docker run -p ... -v ... react-app` la idea es ingresar acá propiedades que nos permitan luego correr el contenedor con esas opciones.
 
-Para cada servicio podemos crear las imagenes o descargarlas de DockerHub. Para el caso del servicio `web` y `api` queremos crearlas por lo que utilizamos la propiedad `build` y hacemos referencia a la ubicación del `Dockerfile`. Para el servicio `db` en cambio queremos descargar la imagen de DockerHub y usamos la propiedad `image`.
+Para cada servicio podemos crear las imágenes o descargarlas de DockerHub. Para el caso del servicio `web` y `api` queremos crearlas por lo que utilizamos la propiedad `build` y hacemos referencia a la ubicación del `Dockerfile`. Para el servicio `db` en cambio queremos descargar la imagen de DockerHub y usamos la propiedad `image`.
 
 ```yaml
 version: "3.8"
@@ -2170,7 +2193,17 @@ Como Docker Compose está hecho sobre Docker Engine, todo lo que hicimos anterio
 
 
 
-Si ejecutamos `docker-compose` podremos ver todos los subcomandos que podemos ejecuctar, estos impactarán sobre la aplicación como un todo es decir en múltiples contenedores.
+#### Subcomandos Disponibles
+
+Si ejecutamos `docker-compose` podremos ver todos los subcomandos que podemos ejecutar, estos impactarán sobre la aplicación como un todo es decir en múltiples contenedores.
+
+
+
+Para conocer los subcomandos disponibles
+
+```
+docker-compose
+```
 
 
 
@@ -2180,7 +2213,7 @@ Para obtener información sobre un subcomando en particular:
 docker-compose build --help
 ```
 
-* `--no-cache` sirve para evitar el uso de caché al crear la imagen y esto puede ser útil cuando tenemos algun inconveniente y queremos forzar un *full rebuild*
+* `--no-cache` sirve para evitar el uso de caché al crear la imagen y esto puede ser útil cuando tenemos algún inconveniente y queremos forzar un *full rebuild*
 
 * `--pull` sirva para intentar hacer un pull de una nueva versión de la imagen.
 
@@ -2196,37 +2229,9 @@ Docker utilizará lo que pueda del caché y es por esto que si queremos forzar u
 
 
 
-Luego podremos ver que tenemos tres imagenes con:
+Luego para iniciar los contenedores ejecutamos `docker-compose up`. 
 
-```
-docker images
-```
-
-> El nombre del directorio en el cual tenemos el `docker-compose.yaml` como prefijo del nombre de las imágenes `vidly_api`, `vidly_web`, etc.  
-
-
-
-## Iniciar Aplicación
-
-A la hora de iniciar una aplicación con Docker Compose debemos hacerlo con el comando:
-
-```
-docker-compose up
-```
-
-Si las imagenes están disponibles Docker las correrá dentro de contenedores, en caso contrario creará dichas imágenes previamente.
-
-
-
-Para conocer los subcomandos disponibles
-
-```
-docker-compose
-```
-
-
-
-* `--build` para forzar un rebuild cada vez que queremos iniciar la aplicación, no tendremos que poner `docker-compose build` y `docker-compose up` sino que directamente `docker-compose up --build`
+Si queremos forzar un rebuild cada vez que queremos iniciar la aplicación, no tendremos que poner `docker-compose build` y `docker-compose up` sino que directamente `docker-compose up --build`
 
 ```
 docker-compose up --build
@@ -2249,6 +2254,28 @@ docker-compose ps
 ```
 
 > Este comando se diferencia de `docker ps` con el cual vemos todos los contenedores corriendo en todas las aplicaciones.
+
+
+
+Luego podremos ver que tenemos tres imágenes con:
+
+```
+docker images
+```
+
+> El nombre del directorio en el cual tenemos el `docker-compose.yaml` como prefijo del nombre de las imágenes `vidly_api`, `vidly_web`, etc.  
+
+
+
+## Iniciar Aplicación
+
+A la hora de iniciar una aplicación con Docker Compose debemos hacerlo con el comando:
+
+```
+docker-compose up
+```
+
+Si las imágenes están disponibles Docker las correrá dentro de contenedores, en caso contrario creará dichas imágenes previamente.
 
 
 
@@ -2476,7 +2503,7 @@ Podemos aplicar la misma técnica para el frontend.
 
 ## Migrando la Base de Datos
 
-Se conoce como *Database Migration* al hecho de tener la base de datos con algunos datos. Existen varias alternativas pero en nuestro caso hemos utilizado la heramienta __Migrate Mongo__.
+Se conoce como *Database Migration* al hecho de tener la base de datos con algunos datos. Existen varias alternativas pero en nuestro caso hemos utilizado la herramienta __Migrate Mongo__.
 
 Instalamos este paquete como dependencia de desarrollo:
 
@@ -2590,9 +2617,9 @@ volumes:
 
 Sin embargo hay un problema con esta implementación ya que puede que el servidor de la base de datos no esté disponible al momento de ejecutar este comando (a pesar de que el contenedor esté corriendo puede que el motor de la base datos aún no esté disponible ya que suele tardar varios segundos). 
 
-En estos casos debemos utilizar un *waiting script*. Para ello googleamos "docker wait for container" para acceder a un artículo titulado *Control startup and shutdown order in Compose* podremos encontrar las herramientas que nos permiten tener esta capacidad. Dentro de ellas utilizaremos **wait-for-it**, ingresando al repositorio podremos descargar el script `wait-for-it.sh`. Gracias a este script podremos esperar a que el motor de la db esté disponible antes de hacer algún trabajo.
+En estos casos debemos utilizar un *waiting script*. Para ello googleamos "docker wait for container" para acceder a un artículo titulado *Control startup and shutdown order in Compose* podremos encontrar las herramientas que nos permiten tener esta capacidad. Dentro de ellas utilizaremos **wait-for-it**, ingresando al repositorio podremos descargar el script `wait-for.sh`. Gracias a este script podremos esperar a que el motor de la db esté disponible antes de hacer algún trabajo.
 
-Incorporamos el archivo `wait-for` (no confundir con wait-for-it que no funciona con sh y en alpine nos dirá que debemos instalar bash) dentro de la raíz del proyecto y colocamos:
+Incorporamos el archivo `wait-for` (no confundir con wait-for-it que no funciona con sh y en Alpine nos dirá que debemos instalar bash) dentro de la raíz del proyecto y colocamos:
 
 ```
 command:  sh -c './wait-for db:27017 && npm run db:up && npm start'
@@ -2706,7 +2733,7 @@ web-tests:
 
 > Estamos reutilizando la imagen creada por el servicio `web` por eso ponemos `image: vidly_web`
 >
-> No necesitamos puertos y dejamos los volumenes igual que en `web` ya que queremos que los cambios que hagamos en el código se vean reflejados en el contenedor de manera inmediata.
+> No necesitamos puertos y dejamos los volúmenes igual que en `web` ya que queremos que los cambios que hagamos en el código se vean reflejados en el contenedor de manera inmediata.
 
 
 
@@ -2768,7 +2795,7 @@ El propósito de esta sección es tomar la aplicación con la que venimos trabaj
 A la hora de hacer un deployment podremos elegir entre hacerlo en un:
 
 * **host único**. Esta implementación tiene la desventaja de que si el servidor está offline la aplicación no será accesible. Además en caso de crecer rápidamente y tener cientos de miles de usuarios un sólo servidor no sería capaz de manejarlos.
-* **cluster** o grupo de servidores o cluster. Tienen como ventaja la alta disponibilidad y la escalabilidad. Para trabajar con clusters necesitamos herramientas de orquestación como Docker Swarm o Kubernetes
+* **cluster** o grupo de servidores o cluster. Tienen como ventaja la alta disponibilidad y la escalabilidad. Para trabajar con clusters necesitamos herramientas de orquestación como Docker Swarm o Kubernetes.
 
 Lo aconsejable es comenzar de manera simple con un host único y luego transicionar hacia un cluster en caso de que sea necesario.
 
@@ -2778,10 +2805,10 @@ Lo aconsejable es comenzar de manera simple con un host único y luego transicio
 
 Para deployar la aplicación necesitamos un VPS (*virtual private server*), existen distintas alternativas, que tomando algunas de ellas ordenadas de las mas simples a las mas complejas:
 
-* Digital Ocean
-* Google Cloud Platform (GCP)
-* Microsoft Azure
-* Amazon Web Services (AWS)
+* Digital Ocean.
+* Google Cloud Platform (GCP).
+* Microsoft Azure.
+* Amazon Web Services (AWS).
 
 > Para utilizar todos estos servicios es necesario una tarjeta de crédito o de débito.
 
@@ -2789,7 +2816,7 @@ Para deployar la aplicación necesitamos un VPS (*virtual private server*), exis
 
 ## Instalar Docker Machine
 
-Una vez que tenemos el servidor debemos contar con **Docker Machine** para comunicarnos con Docker Engine de ese servidor desde el entorno de desarrollo. De esta manera podremos ejecutar comandos Docker en la terminal y serán enviados al Docker Engine del servidor.
+Una vez que tenemos el servidor debemos contar con **Docker Machine para comunicarnos con Docker Engine de ese servidor desde el entorno de desarrollo**. De esta manera podremos ejecutar comandos Docker en la terminal y serán enviados al Docker Engine del servidor.
 
 En [github.com/docker/machine/releases](http://github.com/docker/machine/releases) podremos descargar la versión actual.
 
@@ -2822,7 +2849,7 @@ vidly
 >
 > En último lugar le damos al servidor un nombre, en este caso `vidly`
 
-Docker Machine creará una máquina virtual con Ubuntu (esto lo veremos en el output del comando y también en la documentación asociada a DigitalOcean) y en ella instalará Docker. Luego podremos comnicarnos remotamente con Docker Engine desde nuestra máquina.
+Docker Machine creará una máquina virtual con Ubuntu (esto lo veremos en el output del comando y también en la documentación asociada a DigitalOcean) y en ella instalará Docker. Luego podremos comunicarnos remotamente con Docker Engine desde nuestra máquina.
 
 
 
@@ -2834,9 +2861,9 @@ Para ver todas las Docker Machines debemos ejecutar:
 docker-machine ls
 ```
 
-En la columna SWARM vemos un `-` ya que no forma parte de un cluster sino que se trata de un host único.
+* En la columna **SWARM** vemos un `-` ya que no forma parte de un cluster sino que se trata de un host único.
 
-En la columna DOCKER veremos la versión de Docker Engine que tenemos en esa máquina.
+* En la columna **DOCKER** veremos la versión de Docker Engine que tenemos en esa máquina.
 
 
 
@@ -2853,7 +2880,7 @@ docker-machine ssh vidly
 El archivo `docker-compose.yml` que hemos creado hasta el momento está pensado para desarrollo, mientras que para producción tendremos que modificarlo bastante:
 
 * El volumen que nos perrmite compartir el código fuente con el contenedor para desarrollar rápidamente no debemos incluirlo.
-* Los servicios para los tests automatizados  `web-tests` y `api-tests` no debemos incluirlos ya que no queremos ejecutar tests en producción pues esto alentaría nuestro servidor.
+* Los servicios para los tests automatizados  `web-tests` y `api-tests` no debemos incluirlos ya que no queremos ejecutar tests en producción pues esto haría más lento nuestro servidor.
 
 Creamos un archivo `docker-compose.prod.yml` (podríamos darle cualquier nombre pero es la convención)
 
@@ -2892,9 +2919,9 @@ De manera similar debemos crear un archivo Docker Compose para los entornos de t
 
 
 
-## Reducir tamaño imagenes
+## Reducir tamaño Imágenes
 
-Con el comando `docker images` podremos listar las imagenes y en la columna `SIZE` vemos su tamaño. En particular `vidly_web` que es el frontend realizado con React pesa 300MB y queremos reducir este tamaño. En `package.json` tenemos el script `build` que nos permite crear una optimización para producción. Luego de ejecutar `npm run build` tendremos una carpeta `build` con todos estos recursos. 
+Con el comando `docker images` podremos listar las imágenes y en la columna `SIZE` vemos su tamaño. En particular `vidly_web` que es el frontend realizado con React pesa 300MB y queremos reducir este tamaño. En `package.json` tenemos el script `build` que nos permite crear una optimización para producción. Luego de ejecutar `npm run build` tendremos una carpeta `build` con todos estos recursos. 
 
 Una vez que tenemos la carpeta `build` debemos colocar estos recursos dentro del web server y servirlos. Para ello debemos crear una imagen optimizada.
 
@@ -2918,13 +2945,13 @@ EXPOSE 3000
 CMD ["npm","start"]
 ```
 
-En el `Dockerfile` que teníamos hasta el momento comenzábamos a partir de una imagen de node `FROM node:14.16.0-alpine3.13` para luego poder ejecutar npm y así instalar las dependencias con `npm install` pero si ya las tenemos simplemente debemos copiar los archivos en el web-server. Es por eso que debemos
+En el `Dockerfile` que teníamos hasta el momento comenzábamos a partir de una imagen de node `FROM node:14.16.0-alpine3.13` para luego poder ejecutar npm y así instalar las dependencias con `npm install` pero si ya las tenemos simplemente debemos copiar los archivos en el web-server. Es por eso que debemos utilizar lo que se conoce como multi stage build.
 
 
 
 ## Multi Stage Builds
 
-Cuando creamos imagenes lo hacemos con la premisa de que sean livianas, es por eso que existen imagenes base mínimas como Alpine o BusyBox que son distribuciones Linux que pesan muy poco y tienen sólo lo indispensable para funcionar, de manera que se puedan subir y bajar a servidores rápidamente. En ocasiones necesitamos otras librerías por ejemplo para compilar o instalar dependencias, lo que nos lleva a utilizar imágenes base mucho mas pesadas. Para lograr realizar estas tareas y a su vez tener imagenes livianas podemos utilizar **multi stage builds**. 
+Cuando creamos imágenes lo hacemos con la premisa de que sean livianas, es por eso que existen imágenes base mínimas como Alpine o BusyBox que son distribuciones Linux que pesan muy poco y tienen sólo lo indispensable para funcionar, de manera que se puedan subir y bajar a servidores rápidamente. En ocasiones necesitamos otras librerías por ejemplo para compilar o instalar dependencias, lo que nos lleva a utilizar imágenes base mucho mas pesadas. Para lograr realizar estas tareas y a su vez tener imágenes livianas podemos utilizar **multi stage builds**. 
 
 
 
@@ -3160,7 +3187,7 @@ Suponiendo que la IP es 104.131.24.150 e ingresamos en esa dirección desde el n
 
 Si no podemos acceder al frontend podemos comenzar a buscar el error.
 
-Con `docker ps` debemos fijarnos en la colmna STATUS que no esté reiniciandose permanentemente el contenedor asociado a la iamgen `vidly_web` (veríamos algo como **Restarting (1) 33 seconds ago**) esto tiene que ver con la política de reinicio que establecimos.
+Con `docker ps` debemos fijarnos en la columna STATUS que no esté reiniciándose permanentemente el contenedor asociado a la imagen `vidly_web` (veríamos algo como **Restarting (1) 33 seconds ago**).
 
 Ahora debemos analizar los logs para ello primero obtenemos el id del contenedor
 
@@ -3234,7 +3261,7 @@ ENTRYPOINT ["nginx","-g","daemon off;"]
 
 ## Publicar Cambios
 
-Es importante etiquetar de manera correcta las imagenes antes de deployarlas pues esto nos ayudará en caso de que por ejemplo tengamos un error en producción que no tenemos en staging. Queremos saber qué versión tenemos corriendo en cada entorno.
+Es importante etiquetar de manera correcta las imágenes antes de deployarlas pues esto nos ayudará en caso de que por ejemplo tengamos un error en producción que no tenemos en staging. Queremos saber qué versión tenemos corriendo en cada entorno.
 
 En el `docker-compose.prod.yml` podemos darle este nombre a la imagen, por ejemplo para la primera versión podemos ponerle `image: vidly_web:1`
 
