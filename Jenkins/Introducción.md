@@ -870,13 +870,19 @@ jenkins/jenkins:lts
 >
 > `-d` dettached mode, para ejecutar el contenedor en el background.
 >
-> `-v jenkins_home:/var/jenkins_home` para la persistencia de datos creamos un named volume. Si la carpeta `jenkins_home` no existe en el host la creará. Mientras que `/var/jenkins_home` existe en el contenedor. Esto es importante dado que toda la información de Jenkins sobre los builds, users, plugins, estará almacenada allí.
+> `-v jenkins_home:/var/jenkins_home` para la persistencia de datos creamos un **named volume**. Si la carpeta `jenkins_home` no existe en el host la creará. Mientras que `/var/jenkins_home` existe en el contenedor. Esto es importante dado que toda la información de Jenkins sobre los builds, users, plugins, estará almacenada allí.
 
 
 
 Una vez ejecutado el contenedor obtendremos su id con `docker ps | grep jenkins` y suponiendo que es `1df` con `docker logs 1df` vemos la password inicial.
 
 Los pasos siguientes son idénticos a los explicados con la instalación en Windows. 
+
+
+
+> Advertencia Proxy
+
+Desde la red corporativa puede aparecer un cartel indicando que no logra conectarse a internet y sugerir la configuración del proxy. Esto en particular me pasó con la imagen Docker de Blue Ocean.
 
 
 
@@ -892,6 +898,25 @@ docker run
 --env HTTPS_PROXY="https://172.30.221.240:8080"
 jenkins/jenkins:lts
 ```
+
+
+
+### Jenkins Blue Ocean
+
+Blue Ocean es un proyecto encargado de mejorar la UX al trabajar con Jenkins mediante el desarrollo de una nueva UI. Además proporciona una vista interactiva al pipeline.
+
+Si bien podríamos instalar Blue Ocean como plugin en la medida que tengamos una versión superior a la 2.7 lo que haremos será trabajar con la imagen `jenkinsci/blueocean` disponible en DockerHub.
+
+```
+docker run 
+-p 8080:8080 
+-p 50000:50000 
+-v jenkins_home:/var/jenkins_home 
+-d 
+jenkinsci/blueocean
+```
+
+
 
 
 
