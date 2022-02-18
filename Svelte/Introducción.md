@@ -116,11 +116,13 @@ export default app;
 
 ## Componentes
 
-Los componentes son piezas reutilizables de UI que tienen la extensión `.svelte` y encapsulan la salida (HTML), la lógica (JavaScript) y los estilos (CSS).
+Los componentes son piezas reutilizables de UI que tienen la extensión `.svelte` y encapsulan la salida (HTML), la lógica (JavaScript) y los estilos (CSS). Además nos permiten tener un código más legible que si tuviésemos todo en `App.svelte`.
 
-En `src` creamos una carpeta `components` donde almacenamos todos los componentes.
+Tenemos distintas formas de organizar los componentes. Podremos ubicarlos sueltos en `src` o bien dentro de una carpeta `components`.
 
-El modo de importar un componente en otro (por ejemplo en `App.svelte`) es idéntico al de React `import FeedbackList from './components/FeedbackList.svelte'` y luego lo usamos con `<FeedbackList/>`.
+
+
+El modo de importar un componente en otro (por ejemplo en `App.svelte`) es idéntico al de React dentro de los tags `<script>` colocamos `import FeedbackList from './components/FeedbackList.svelte'` y luego lo usamos con `<FeedbackList/>`.
 
 ### Estructura de un componente
 
@@ -562,7 +564,7 @@ $: if (value.length > 2) {
 
 
 
-## Bind
+## Binding de Datos
 
 Supongamos que queremos tener un componente con dos inputs asociados a los valores `a` y `b`. Esto lo hacemos colocando `bind:value={a}` de esta manera cuando cambiamos el valor de uno de los inputs será cambiado el valor de dicha variable.
 
@@ -582,7 +584,11 @@ Supongamos que queremos tener un componente con dos inputs asociados a los valor
 
 ## Declaraciones Reactivas
 
-Como dijimos anteriormente Svelte actualiza automáticamente el DOM cuando el estado del componente cambia.
+Los valores reactivos son aquellos que se actualizan automáticamente cuando cambian los datos de los cuales dependen.
+
+
+
+Svelte actualiza automáticamente el DOM cuando el estado del componente cambia.
 
 Supongamos que tenemos un componente `Counter` que consiste en un contador que se incrementa al presionar un botón. En este caso el valor de `{count}` se verá actualizado en pantalla cada vez que lo presionemos.
 
@@ -590,17 +596,19 @@ Supongamos que tenemos un componente `Counter` que consiste en un contador que s
 <script>
 	export let initialCounter = 0;
 
-	let count = initialCounter
+	let count = initialCounter;
 	function handleClick () {
 		count++
 	}
 </script>
 
-<button on:click={handleClick}>Incrementar</button>
 <span>{count}</span>
+<button on:click={handleClick}>Incrementar</button>
 ```
 
-Las declaraciones reactivas son necesarias cuando algunas partes del estado deben ser calculadas a partir de otras partes.
+En este caso no fue necesario usar una declaración reactiva para ver el valor actualizado en pantalla.
+
+Sino que las declaraciones reactivas son necesarias cuando algunas partes del estado deben ser calculadas a partir de otras partes.
 
 Por ejemplo si en nuestro componente `Counter` queremos tener ahora un indicador `isEvenOrOdd`. Si tuviéramos `let isEvenOrOdd = count % 2 === 0 ? 'Is Even' : 'Is Odd'` y luego mostramos `{isEvenOrOdd}` veríamos que el valor en pantalla no se actualiza cuando el contador es incrementado. 
 
@@ -637,26 +645,39 @@ Otra opción hubiera sido colocar en el renderizado `{count % 2 === 0 ? 'Is Even
 
 
 
-En cuanto a la limitación que hemos hecho del contador mediante una declaración reactiva, podemos ver que tiene un comportamiento similar al de un efecto en React y en ese caso `count` sería la dependencia (lo cual es detectado automáticamente por Svelte). En tanto que se ejecutará el código siempre que cambie el valor de `count` (y también la primera vez cuando se monta el componente).
+> Podemos ver que tiene un comportamiento similar al de un efecto en React y en ese caso `count` sería la dependencia (lo cual es detectado automáticamente por Svelte). En tanto que se ejecutará el código siempre que cambie el valor de `count` (y también la primera vez cuando se monta el componente).
+
+
+
+Precido a los **reactive values** contamos con los **reactive statements** que son ejecutados cuando los datos dentro del statement cambian.
 
 ```
+$: console.log(count)
+```
+
+También podemos tener reactive statements con condicionales:
+
+```vue
 $: if (count > maxCounter ) {
 	console.log('limit contador')
 	count = maxCounter
 }
 ```
 
-En el caso anterior vimos una declaración reactiva con un condicional, pero también es posible hacerla sin el directamente con `{}`. Por ejemplo queremos hacer un `console.log()` de una variable de estado cada vez que esta se actualiza podríamos hacerlo de este modo:
+O directamente poner un bloque de código:
 
-```
+```vue
 $:{
 	console.log(value);
+	console.log(isEvenOrOdd);
 }
 ```
 
+Este bloque de código se ejecutará cuando cambie `value` o `isEvenOrOdd` (que también es un valor reactivo).
 
 
-Otro ejemplo sería si queremos conformar un `fullName` calculado a partir de `firstName` y `lastName`. Para esos casos debemos usar declaraciones reactivas pues de lo contrario si tuviéramos `let fullName= firstName + ' ' + lastName` cuando cambia `firstName` o `lastName`, `fullName` no cambiaría.
+
+Otro ejemplo clásico que se usa a la hora de estudiar **reactive values** es si queremos conformar un `fullName` calculado a partir de `firstName` y `lastName`. Para esos casos debemos usar declaraciones reactivas pues de lo contrario si tuviéramos `let fullName= firstName + ' ' + lastName` cuando cambia `firstName` o `lastName`, `fullName` no cambiaría.
 
 ```vue
 <script>
@@ -667,6 +688,8 @@ Otro ejemplo sería si queremos conformar un `fullName` calculado a partir de `f
 </script>
 
 <p>{fullName}</p>
+<input type="text" bind:value={firstName}/>
+<input type="text" bind:value={lastName}/>
 ```
 
 Veremos que si modificamos alguna de esas dos variables `fullName` reaccionará a esos cambios y mostrará el valor actualizado. Nuevamente podríamos haber puesto (en lugar de `<p>{fullName}</p>`) directamente `<p>{firstName} {lastName}</p>` y no hubiera hecho falta una declaración reactiva.
@@ -675,23 +698,23 @@ Veremos que si modificamos alguna de esas dos variables `fullName` reaccionará 
 
 ## Renderizado Condicional
 
-En Svelte es posible realizar un renderizado condicional, es decir que mostrar o no el contenido de acuerdo a una condición.
+En Svelte es posible realizar un renderizado condicional, es decir que mostrar o no el contenido de acuerdo a una condición. Esto podría ser útil por ejemplo si queremos mostrar un contenido si el usuario está logueado y otro distinto si no lo está. 
 
 Supongamos que queremos mostrar la cantidad de resultados obtenidos luego de una llamada a una API o en su defecto un cartel que indique que no encontramos ningún resultado. La forma mas sencilla de hacerlo es con el operador ternario:
 
-```
+```vue
 {response.length>0?`${response.length} movies found`:`No movies found`}
 ```
 
 Sin embargo, si en lugar de texto queremos mostrar condicionalmente elementos HTML de marcado, como por ejemplo si quisiéramos mostrar:
 
-```
+```vue
 <strong>`${response.length} movies found`</strong>
 ```
 
 Esto no funcionaría y debemos hacerlo en cambio con `{#if condicion}` y finalizamos con `{/if}`  y también es posible trabajar con `{:else}`
 
-```
+```vue
 {#if response.length>0}
 <strong>{response.length} movies found</strong>
 {:else}
@@ -699,7 +722,7 @@ No movies found
 {/if}
 ```
 
-
+>También podemos agregar una condición en el else utilizando `{:else if condicion}`
 
 Otro ejemplo es si queremos mostrar y ocultar un texto conforme apretamos un botón:
 
@@ -739,24 +762,19 @@ Supongamos ahora que tenemos un estado `loading` que ponemos en `true` justo ant
 
 
 
-## Renderizado de Listas
+## Loops
+
+Utilizamos loops cuando queremos recorrer un array y mostrar HTML para cada item que tiene.
+
+### Bloque #each
 
 ```vue
 <script>
 	let users = [
-		{
-			id:'1',
-			name:'John'
-		},
-		{
-			id:'2',
-			name:'Sara'
-		},
-		{
-			id:'3',
-			name:'Bob'
-		}
-	]
+        {id:'1',name:'John'},
+		{id:'2',name:'Sara'},
+		{id:'3',name:'Bob'}
+	];
 </script>
 
 {#each users as user (user.id)}
@@ -764,13 +782,13 @@ Supongamos ahora que tenemos un estado `loading` que ponemos en `true` justo ant
 {/each}
 ```
 
-Con `(user.id)` estamos estableciendo una clave única para cada iteración (de manera similar a lo que hacemos en React con la prop `key`).
+Con `(user.id)` estamos estableciendo una clave única para cada iteración (de manera similar a lo que hacemos en React con la prop `key`) para vincular cada elemento del DOM con cada ítem del array. En es una buena práctica ya que en caso de no hacerlo podríamos tener inconvenientes al manipular luego los elementos de la lista.
 
 
 
 > Es posible trabajar también con un segundo parámetro `index`
 
-```
+```vue
 {#each users as user,index (user.id)}
 	<h3>{user.id}: {user.name}</h3>
 {/each}
@@ -780,7 +798,7 @@ Con `(user.id)` estamos estableciendo una clave única para cada iteración (de 
 
 > Si así lo quisiéramos podríamos utilizar **object destructuring**:
 
-```
+```vue
 {#each users as {id,name} (id)}
 	<h3>{id}: {name}</h3>
 {/each}
@@ -788,11 +806,39 @@ Con `(user.id)` estamos estableciendo una clave única para cada iteración (de 
 
 
 
-###  `{#each}` con`{:else}`
+> Si queremos agregar a esta lista la posibilidad de borrar elementos, es decir queremos pasar argumentos a un handler lo hacemos mediante **inline functions**.
+
+```vue
+<script>
+	let users = [
+        {id:'1',name:'John'},
+		{id:'2',name:'Sara'},
+		{id:'3',name:'Bob'}
+	];
+
+	const handleDelete = (id) =>{
+		users = users.filter(user => user.id!==id)
+	}	
+</script>
+
+
+{#each users as user (user.id)}
+	<h3>{user.id}: {user.name}</h3>
+	<button on:click={() => handleDelete(user.id)}>Delete</button>
+{/each}
+```
+
+
+
+Si quisiéramos además recibir el evento `e` podríamos hacer `	<button on:click={(e) => handleDelete(e,user.id)}>Delete</button>` y luego lo recibimos `const handleDelete = (e, id){}`
+
+
+
+###  Bloque `{#each}` con`{:else}`
 
 En ocasiones vamos a querer iterar todos los elementos de una lista y mostrarlos en pantalla pero en caso de que no tenga ningún elemento mostrar algún contenido en particular. En ese caso podremos recurrir al uso en conjunto de `each` y `else`.
 
-```
+```vue
 {#each response as {Title, Poster, Year}, index}
     <Movie
       index={index}
@@ -800,9 +846,9 @@ En ocasiones vamos a querer iterar todos los elementos de una lista y mostrarlos
       poster={Poster}
       year={Year}
     />
-  {:else}
+{:else}
     <strong>No hay resultados</strong>
-  {/each}
+{/each}
 ```
 
 
@@ -1023,5 +1069,4 @@ Una forma de hacerlo es con eventos custom y pasando las props hacia arriba hast
 
 </form>
 ```
-
 
