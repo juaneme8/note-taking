@@ -8,13 +8,13 @@
 
 ## Introducción
 
-Svelte fue creado por Rich Harris y nos permite construir interfaces de usuario **reactivas** de la misma manera que React, Vue o Angular. Svelte es un **compilador** que genera un bundle de vanilla JavaScript optimizado. Es frecuente que se lo llame framework pero en realidad no lo es.
+Svelte fue creado por Rich Harris y nos permite construir aplicaciones web e interfaces de usuario **reactivas** de la misma manera que React, Vue o Angular. Svelte es un **compilador** que genera un bundle de vanilla JavaScript optimizado. Es frecuente que se lo llame framework pero en realidad no lo es.
 
-Nos permite crear una SPA (*single page application*) o bien controlar una porción pequeña de un sitio con componentes reutilizables de la misma manera que en React, Vue o Angular.
+Nos permite crear una SPA (*single page application*) o bien controlar una porción pequeña de un sitio con componentes reutilizables.
 
-El funcionamiento de Svelte es bastante simple de entender (por ejemplo si lo comparamos con React con el Virtual DOM y esas conceptos). Simplemente escribiremos el código con la sintaxis de Svelte y este luego será compilado en JavaScript puro optimizado que será leido por el navegador.
+El funcionamiento de Svelte es bastante simple de entender (por ejemplo si lo comparamos con React con el Virtual DOM y esas conceptos). Simplemente escribiremos el código con la sintaxis de Svelte y este luego será compilado en un bundle de vanilla JavaScript puro optimizado que será leído por el navegador. Luego deployaremos este único archivo y no hará falta ninguna librería extra como sí sucede con React o Vue que si bien también compilan el código *at build-time* aparte de este bundle requieren de la librería de React o de Vue. 
 
-Hablamos de **aplicaciones reactivas** ya que queremos que si tenemos un cierto dato en pantalla y este cambia de valor reflejarlo de manera inmediata.
+Hablamos de **aplicaciones reactivas** ya que queremos que si tenemos un cierto dato o estado en pantalla y este cambia de valor reflejarlo de manera inmediata.
 
 
 
@@ -22,7 +22,7 @@ Hablamos de **aplicaciones reactivas** ya que queremos que si tenemos un cierto 
 
 * Nos permite [escribir menos código](https://svelte.dev/blog/write-less-code) que el que necesitaríamos en una aplicación de React por ejemplo.
 * Como el código es compilado, nos permite detectar errores que de otra forma veríamos en run-time (aunque antes el linter nos ayudaría con alguno de ellos).
-* Nos permite crear frontend UIs dinámicos
+* Nos permite crear UIs dinámicos
 * Produce JavaScript optimizado
 * 30% más rápido que otros frameworks.
 * Animaciones y transiciones interesantes disponibles por defecto.
@@ -35,7 +35,11 @@ Hablamos de **aplicaciones reactivas** ya que queremos que si tenemos un cierto 
 
 ## Creación Proyecto
 
+Si queremos probar código de Svelte online podemos usar el [Playground](https://svelte.dev/repl).
+
 Existen distintas formas de crear un proyecto con Svelte (podríamos utilizar por ejemplo SvelteKit) pero utilizaremos la indicada en al documentación usando la herramienta de scafolding llamada **degit** (también creada por Rich Harris) que realizará una copia del último commit de un repositorio (en este caso del de svelte) sin descargar el historial completo de git.
+
+Desde el directorio padre de la futura carpeta del proyecto:
 
 ```bash
 npx degit sveltejs/template md-svelte
@@ -44,15 +48,22 @@ npm install
 npm run dev
 ```
 
-> Recordemos que `npx` es un comando de`npm` que nos permite ejecuctar un paquete, en este caso `degit` que de otra forma tendríamos que instalar como global. Mientras que en este caso lo instalará en una carpeta temporal y lo ejecutará al vuelo.
+> Recordemos que `npx` es un comando de`npm` que nos permite ejecuctar un paquete, en este caso `degit` que de otra forma tendríamos que instalar como global. 
+>
+> ```bash
+> npm install -g degit
+> degit sveltejs/template md-svelte
+> ```
+>
+> Mientras que en este caso lo instalará en una carpeta temporal y lo ejecutará al vuelo.
 
-Obtendremos un servidor de desarrollo y utilizaremos rollup como module bundler (pero podríamos utilizar por ejemplo Vite). 
+Obtendremos un servidor de desarrollo y utilizaremos rollup como module bundler.
 
 
 
 ### Extensión VS Code
 
-Se aconseja instalar la extensión Svelte for VS Code la cual nos aportará de formateado, autocompletado, nos permitirá el uso de emmet
+Se aconseja instalar la extensión Svelte for VS Code la cual nos aportará de formateado, autocompletado, nos permitirá el uso de emmet.
 
 
 
@@ -68,11 +79,11 @@ En `package.json` podremos ver que tenemos los siguientes scripts:
 },
 ```
 
-* Con `npm start` con `sirv`serviremos la carpeta `public` para producción.
+
 
 * Con `npm run dev` iniciamos un servidor de desarrollo con live reload.
-
 * Con `npm run build`para compilar el código Svelte en código JavaScript optimizado para producción.
+* Con `npm start` con `sirv`serviremos la carpeta `public` para producción.
 
 
 
@@ -80,11 +91,13 @@ En `package.json` podremos ver que tenemos los siguientes scripts:
 
 * `scripts` contiene el archivo `setupTypescript.js` y si ejecutamos `node scripts/setupTypescript.js` podremos utilizar TypeScript como vemos en la [documentación](https://svelte.dev/blog/svelte-and-typescript). 
 
-* `public` en ella el archivo `index.html` que será la única página de la SPA que será cargada por el navegador. Veremos que en el `<body>` no tenemos nada y que importamos un archivo `/build/bundle.js` (archivo y carpeta que serán creados cuando ejecutamos `npm run build`).
+* `public` en ella el archivo `index.html` que será la página que será cargada por el navegador. Veremos que en el `<body>` no tenemos nada y que importamos un archivo `/build/bundle.js` (archivo y carpeta que serán creados cuando ejecutamos `npm run build`). 
 
   En `global.css` podremos colocar los estilos globales y en `/build/bundle.css` los estilos de los componentes.
 
-* `src` tenemos dos archivos `main.js` que es el entrypoint o punto de entrada en el cual hacemos el binding del componente principal `App` con `document.body` . Si en cambio en `index.html` tenemos por ejemplo un div donde queremos renderizar los componentes podemos poner `target: document.getElementById("root")`.
+* `src` tenemos dos archivos `main.js` que es el entrypoint o punto de entrada en el cual hacemos el binding del componente principal (root o top level component) `App.svelte` con `document.body` . Si en cambio en `index.html` tenemos por ejemplo un div con `id=root` donde queremos renderizar los componentes podemos poner `target: document.getElementById("root")`. El resto de los componentes los iremos anidando dentro de `App`.
+
+* `rollup.config.js` es un archivo de configuración similar al que tenemos en webpack, con el propósito de configurar la compilación y de hacer el bundle de salida.
 
 ```js
 import App from './App.svelte';
@@ -99,7 +112,7 @@ const app = new App({
 export default app;
 ```
 
-> Notar además que le podemos pasar props (en este caso le pasamos una llamada `name`) y luego en `App.svelte` la recibimos haciendo `export let name;` dentro de `<script></script>` y luego podremos mostrarla en pantalla como `{name}`. Obviamente si no lo necesitamos, podremos quitar esto.
+> Notar además que le podemos pasar props (en este caso le pasamos una llamada `name`) y luego en `App.svelte` la recibimos haciendo `export let name;` dentro de `<script></script>` y luego podremos mostrarla en pantalla como `{name}`. Obviamente si no lo necesitamos, podremos quitar esta propiedad.
 
 ## Componentes
 
@@ -111,9 +124,9 @@ El modo de importar un componente en otro (por ejemplo en `App.svelte`) es idén
 
 ### Estructura de un componente
 
-* Lógica escrita en JavaScript dentro de tags `<script>` allí podremos setear variables, crear funciones o valores reactivos.
-* Salida de html en el medio donde podremos emplear llaves `{}` cuando queramos mostrar una variable o evaluar una expresión. También podremos utilizar condicionales o each loops.
-* Estilos en CSS dentro de tags `<style>`
+* Lógica escrita en JavaScript dentro de tags `<script>` allí podremos setear variables, crear funciones o valores reactivos como veremos más adelante.
+* Luego podemos colocar las etiquetas de marcado de html en el medio donde podremos emplear llaves `{}` cuando queramos mostrar una variable o evaluar una expresión. También podremos utilizar condicionales o iteraciones.
+* Estilos de CSS dentro de tags `<style>`
 * Notar que no es necesario exportar el componente como sí sucede en React.
 
 
@@ -235,7 +248,7 @@ Si tenemos que modificar el estado agregando por ejemplo un elemento a un array 
 
 De manera similar a los componentes de clases en React tenemos métodos del ciclo de vida de los componentes en Svelte.
 
-```
+```vue
 import {onMount, onDestroy} from 'svelte'
 
 onMount(()=> {
@@ -250,11 +263,11 @@ onDestroy(()=> {
 
 
 
-### Estilos
+## Estilos
 
 Si tenemos un componente con estilos.
 
-```
+```vue
 <style>
 	h1{
 		color: #09f;
@@ -266,9 +279,215 @@ Al visualizar el CSS output o al analizarlo con las DevTools veremos que se le h
 
 
 
-#### Estilos Variables
+### Estilos Variables
 
 Si tenemos una variable `let color='blue';` y queremos asignarlo a un elemento podemos hacerlo con `<h1 style="color: {color}">Título</h1>`
+
+
+
+## Eventos
+
+La forma de trabajar con eventos en Svelte es colocando `on:` seguido del nombre del evento, por ejemplo `on:click={}`.
+
+
+
+### `on:click`
+
+Si queremos tener un botón que al presionarlo cambie el color de un elemento (modificando el valor de una variable).
+
+Una forma es hacerlo usando una expresión en línea:
+
+```vue
+<script>
+    let color='black'
+</script>
+
+{color}
+<button on:click={()=> color='red'}>Click</button>
+```
+
+> No necesariamente tenemos que trabajar con un `<button>` podríamos haber usado un `<p>` por ejemplo.
+>
+> El `on:click` es una directiva.
+
+
+
+También podemos hacerlo mediante una función aparte:
+
+```vue
+<script>
+let color='red'
+const toggle = () => {
+	color= color==='red'?'purple':'red';
+}
+</script>
+
+{color}
+<button on:click={toggle}>Click</button>
+```
+
+
+
+### `on:input`
+
+```vue
+<script>
+  let text = ''
+     
+  const handleInput = (e) => {
+  	text = e.target.value
+  }
+</script>
+
+<input 
+       type="text" 
+       on:input={handleInput} 
+       placeholder="Tell us something"
+>
+```
+
+Esta técnica se conoce como *one way binding* dado que si cambiamos `text` de otro modo que no sea con el `input` el valor mostrado por ese input quedará desactualizado.
+
+Esto lo podemos comprobar con este ejemplo que al presionar un botón le agrega un "@" al valor de `text` dejando al input desactualizado.
+
+```vue
+<script>
+  let text = ''
+     
+  const handleInput = (e) => {
+  	text = e.target.value
+  }
+</script>
+
+<input 
+       type="text" 
+       on:input={handleInput} 
+       placeholder="Tell us something"
+>
+<button on:click={()=> text+='@'}>Click</button>
+```
+
+
+
+En cambio utilizando *two way binding* como veremos a continuación, agregando `value = {text}` el valor mostrado en el input estará siempre actualizado.
+
+```vue
+<script>
+  let text = ''
+     
+  const handleInput = (e) => {
+  	text = e.target.value
+  }
+</script>
+
+<input 
+       type="text" 
+       on:input={handleInput} 
+       value = {text} 
+       placeholder="Tell us something"
+>
+<button on:click={()=> text+='@'}>Click</button>
+```
+
+> Notar que recibimos el evento `e` de manera automática.
+
+
+
+Existe una forma reducida de actualizar el valor de `text` y de asegurarnos el two way binding. Es decir que estas dos líneas:
+
+```vue
+on:input={handleInput} 
+value = {text} 
+```
+
+y la función `handleInput` pueden ser reemplazadas por
+
+```vue
+bind:value={text}
+```
+
+Como veremos a continuación:
+
+```vue
+<script>
+  let text = ''
+</script>
+
+<input 
+       type="text" 
+       bind:value = {text} 
+       placeholder="Tell us something"
+>
+<button on:click={()=> text+='@'}>Click</button>
+```
+
+
+
+### `on:change`
+
+```vue
+<script>
+	let selected=10
+	
+    const onChange = (e) => {
+   		selected = e.currentTarget.value
+    }
+</script>
+
+<ul class="rating">
+	Opción Elegida: {selected}
+  <li>
+    <input type="radio" id="num1" name="rating" value="1" on:change={onChange} checked={selected===1} />
+    <label for="num1">1</label>
+  </li>
+  <li>
+    <input type="radio" id="num2" name="rating" value="2" on:change={onChange} checked={selected===2} />
+    <label for="num2">2</label>
+  </li>
+  
+	<li>
+    <input type="radio" id="num10" name="rating" value="10" on:change={onChange} checked={selected===10} />
+    <label for="num2">10</label>
+  </li>
+  
+</ul>	
+  
+```
+
+> Notar que en `onChange` recibimos el valor del radio input presionado en `e.currentTarget.value`
+
+
+
+### `on:submit`
+
+```vue
+<script>
+const handleSubmit = () => {
+    if(text.trim().length > min) {
+      const newFeedback = {
+        id: uuidv4(),
+        text,
+        rating: +rating
+      }
+      
+      text = ''
+    }
+  }
+</script>
+
+
+<form on:submit|preventDefault={handleSubmit}>
+
+</form>
+```
+
+> Notar el uso de *event modifiers* para evitar tener que poner `e.preventDefault` (otra opción podría ser `on:submit|once` y sólo podríamos hacer submit una vez).
+>
+> Como queremos que el rating sea un número utilizamos el **unary operator** `+rating`
+>
+> Para generar un id único utilizamos el paquete `uuid` para ello simplemente lo importamos con `  import {v4 as uuidv4} from 'uuid'` y luego lo llamamos donde queremos un id unique `uuidv4()`.
+
+
 
 
 
@@ -383,7 +602,7 @@ Supongamos que tenemos un componente `Counter` que consiste en un contador que s
 
 Las declaraciones reactivas son necesarias cuando algunas partes del estado deben ser calculadas a partir de otras partes.
 
-Por ejemplo si en nuestro componente `Counter` queremos tener ahora un indicador `isEvenOrOdd`. Si tuviéramos `let isEvenOrOdd = contador % 2 === 0 ? 'Is Even' : 'Is Odd'` y luego mostramos `{isEvenOrOdd}` veríamos que el valor en pantalla no se actualiza cuando el contador es incrementado. 
+Por ejemplo si en nuestro componente `Counter` queremos tener ahora un indicador `isEvenOrOdd`. Si tuviéramos `let isEvenOrOdd = count % 2 === 0 ? 'Is Even' : 'Is Odd'` y luego mostramos `{isEvenOrOdd}` veríamos que el valor en pantalla no se actualiza cuando el contador es incrementado. 
 
 Queremos que esa declaración se ejecute cada vez que cambie `count`. Los valores reactivos los definimos con `$:` seguido del nombre de la variable y el valor que queremos que tenga.
 
@@ -454,121 +673,6 @@ Veremos que si modificamos alguna de esas dos variables `fullName` reaccionará 
 
 
 
-
-
-## Eventos
-
-La forma de trabajar con eventos en Svelte es colocando `on:` seguido del nombre del evento, por ejemplo `on:click={}`.
-
-
-
-### `on:click`
-
-Si queremos tener un botón que al presionarlo cambie el color de un elemento (modificando el valor de una variable).
-
-Una forma es hacerlo usando una expresión en línea:
-
-```vue
-<button on:click={()=> color='red'}>Click</button>
-```
-
-> El `on:click` es una directiva.
-
-
-
-También podemos hacerlo mediante una función aparte:
-
-```vue
-<script>
-const toggle = () => {
-	color= color==='red'?'purple':'red';
-}
-</script>
-
-<button on:click={toggle}>Click</button>
-```
-
-
-
-### `on:input`
-
-```vue
-<script>
-  let text = ''
-      
-  const handleInput = () => {
-  
-  }
-</script>
-
-<input type="text" on:input={handleInput} bind:value = {text} placeholder="Tell us something">
-```
-
-
-
-### `on:change`
-
-```vue
-</script>
-	let selected=10
-	
-    const onChange = (e) => {
-   		selected = e.currentTarget.value
-    	dispatch('rating-select', selected)
-    }
-</script>
-
-<ul class="rating">
-  <li>
-    <input type="radio" id="num1" name="rating" value="1" on:change={onChange} checked={selected===1} />
-    <label for="num1">1</label>
-  </li>
-  <li>
-    <input type="radio" id="num2" name="rating" value="2" on:change={onChange} checked={selected===2} />
-    <label for="num2">2</label>
-  </li>
-  .
-  .
-  .
-</ul>	
-  
-```
-
-> Notar que en `onChange` recibimos el valor del radio input presionado en `e.currentTarget.value`
-
-
-
-### `on:submit`
-
-```
-<script>
-const handleSubmit = () => {
-    if(text.trim().length > min) {
-      const newFeedback = {
-        id: uuidv4(),
-        text,
-        rating: +rating
-      }
-      
-      text = ''
-    }
-  }
-</script>
-
-
-<form on:submit|preventDefault={handleSubmit}>
-
-</form>
-```
-
-> Notar el uso de *event modifiers* para evitar tener que poner `e.preventDefault` (otra opción podría ser `on:submit|once` y sólo podríamos hacer submit una vez).
->
-> Como queremos que el rating sea un número utilizamos el **unary operator** `+rating`
->
-> Para generar un id único utilizamos el paquete `uuid` para ello simplemente lo importamos con `  import {v4 as uuidv4} from 'uuid'` y luego lo llamamos donde queremos un id unique `uuidv4()`.
-
-
-
 ## Renderizado Condicional
 
 En Svelte es posible realizar un renderizado condicional, es decir que mostrar o no el contenido de acuerdo a una condición.
@@ -585,7 +689,7 @@ Sin embargo, si en lugar de texto queremos mostrar condicionalmente elementos HT
 <strong>`${response.length} movies found`</strong>
 ```
 
-Debemos hacerlo con `{#if condicion}` y finalizamos con `{/if}`  y también es posible trabajar con `{:else}`
+Esto no funcionaría y debemos hacerlo en cambio con `{#if condicion}` y finalizamos con `{/if}`  y también es posible trabajar con `{:else}`
 
 ```
 {#if response.length>0}
@@ -797,7 +901,9 @@ En `App.svelte`
 
 > En este caso estamos configurando una transición de entrada entrada (in) que será `scale` y una de salida (out) de `fade` a la cual además le establecemos propiedades de duración. 
 >
-> Si quisiéramos que fuera igual para entrada y salida podríamos haber puesto directamente `transition: fade`
+> Si quisiéramos que fuera con un fade igual para entrada y salida podríamos haber puesto directamente `transition: fade`
+
+
 
 ## Stores
 
@@ -837,7 +943,7 @@ En lugar de tener la lista hardcodeada en `App` la tenemos en un store.
 
 Una forma de obtener los datos del Store es suscribirnos y desuscribirnos en el método `onDestroy` del ciclo de vida.
 
-```
+```vue
 let feedback = []
 
 const unsuscribe = FeedbackStore.suscribe(data => feedback=data)
@@ -857,7 +963,7 @@ onDestroy(()=> {
 
 Otra forma más simple (la desuscripción será automática)
 
-```
+```vue
 {#each $FeedbackStore as fb (fb.id)}
 <div in:scale out:fade="{{ duration: 500 }}">
   <FeedbackItem item={fb} />
@@ -867,13 +973,13 @@ Otra forma más simple (la desuscripción será automática)
 
 
 
-### Eliminar Items a Store
+### Eliminar Items de Store
 
 Anteriormente vimos que para eliminar un elemento de la lista debíamos usar custom events para elevar las props.
 
 Ahora esto no será necsario y podremos alterar el store desde el `Item`
 
-```
+```vue
 <script>
 const handleDelete = (itemId) => {
     FeedbackStore.update((currentFeedback) => {
@@ -895,7 +1001,7 @@ const handleDelete = (itemId) => {
 
 Una forma de hacerlo es con eventos custom y pasando las props hacia arriba hasta llegar a `App` que tiene el array de elementos. Sin embargo, utilizando stores esto es mucho mas simple y podemos hacerlo desde el formulario en el cual tengamos el elemento a agregar.
 
-```
+```vue
   const handleSubmit = () => {
     if(text.trim().length > min) {
       const newFeedback = {
@@ -918,5 +1024,4 @@ Una forma de hacerlo es con eventos custom y pasando las props hacia arriba hast
 </form>
 ```
 
- 
 
