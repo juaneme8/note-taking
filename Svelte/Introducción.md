@@ -154,6 +154,8 @@ El modo de importar un componente en otro (por ejemplo en `App.svelte`) es idén
 
 ### Pasaje de Props
 
+El pasaje de props nos permite que los componentes sean reutilizables y que reciban datos dinámicos.
+
 Si queremos pasarle ciertos datos a un componente podemos hacerlo via props por ejemplo `<FeedbackList feedback={feedback}/>`. 
 
 Luego en el componente `FeedbackList` accederemos a esa prop de la siguiente forma:
@@ -164,7 +166,9 @@ Luego en el componente `FeedbackList` accederemos a esa prop de la siguiente for
 </script>
 ```
 
-> Si bien lo recibiremos desde el componente padre le damos un **valor default** de un array vacío por si por algún motivo no lo recibimos.
+> Si bien lo recibiremos desde el componente padre le damos un **valor default** de un array vacío por si invocamos el componente sin esa prop.
+>
+> Con `export` indicamos que se trata de un valor que recibiremos como props es decir que proviene de afuera del componente.
 >
 > Si recibe más de una props podríamos poner `export let prop1, prop2, prop3`
 
@@ -267,7 +271,15 @@ onDestroy(()=> {
 
 ## Estilos
 
-Si tenemos un componente con estilos.
+### Estilos Globales
+
+Es posible aplicar estilos globales en `public/global.css` que será importando en `index.html`.
+
+
+
+### Estilos Locales
+
+Los estilos locales son aquellos específicos de los elementos de un componente. Debemos hacerlo dentro de los tags `<style>` y veremos que Svelte le asigna un nombre de clase especial con un hash único para evitar colisiones. Esto podremos verificarlo en las DevTools o analizando el contenido de `build/bundle.css`.
 
 ```vue
 <style>
@@ -277,7 +289,21 @@ Si tenemos un componente con estilos.
 </style>
 ```
 
-Al visualizar el CSS output o al analizarlo con las DevTools veremos que se le ha asignado una clase especial con un hash único para evitar colisiones. Esto significa que los `h1` que tengamos en otros componentes de la aplicación no se verán afectados por estos estilos.
+> Los `h1` que tengamos en otros componentes de la aplicación no se verán afectados por estos estilos.
+
+
+
+### Estilos Condicionales
+
+Si queremos que un estilo se aplique o no dependiendo de una expresión podemos hacerlo con con esta sintaxis `class:promo={isPromo}` esto significa que la clase `promo` se aplicará si `isPromo` (que también podría ser una expresión) es `true`. En cambio, la clase `backdrop` se aplicará siempre.
+
+```
+<div class="backdrop" class:promo={isPromo}>
+	<div class="modal">
+		<p>Sign up for offers!</p>
+	</div>
+</div>
+```
 
 
 
