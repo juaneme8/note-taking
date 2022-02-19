@@ -174,7 +174,9 @@ Luego en el componente `FeedbackList` accederemos a esa prop de la siguiente for
 
 
 
-* Con `<FeedbackList feedback={feedback}/>` como tenemos el mismo nombre de la prop que el de la variable que almacena el dato, podemos poner `<FeedbackList {feedback}/>`
+* Cuando tenemos el mismo nombre de prop que el de la variable que almacena el dato como en `<FeedbackList feedback={feedback}/>` podemos usar el *shorthand* `<FeedbackList {feedback}/>`
+
+  
 
 * En ocasiones nos convendrá almacenar las props en un objeto y pasárselas todas al componente utilizando el spead operator.
 
@@ -490,6 +492,102 @@ Como veremos a continuación:
 
 ```vue
 <script>
+const handleSubmit = (e) => {
+    e.preventDefault();
+    if(text.trim().length > min) {
+      const newFeedback = {
+        id: uuidv4(),
+        text,
+        rating: +rating
+      }
+      
+      text = ''
+    }
+  }
+</script>
+
+
+<form on:submit={handleSubmit}>
+
+</form>
+```
+
+
+
+> Luego veremos cómo evitar tener que poner `e.preventDefault()` en `handleSubmit` con un event modifier.
+>
+> :information_source: Como queremos que el rating sea un número utilizamos el **unary operator** `+rating`
+>
+> :information_source: Para generar un id único utilizamos el paquete `uuid` para ello simplemente lo importamos con `  import {v4 as uuidv4} from 'uuid'` y luego lo llamamos donde queremos un id unique `uuidv4()`.
+
+## Event Forwading 
+
+Cuando queremos propagar hacia arriba un evento, es decir desde desde el componente hijo hacia el padre debemos hacer uso de lo que se conoce como *event forwading*.
+
+Un ejemplo típico de uso de event forwading es cuando queremos mostrar y ocultar un modal. Por ejemplo si tenemos un componente padre que llama a un componente hijo `Modal`. El padre tiene un botón para mostrar el modal y el hijo debe ocultarlo al presionar en cualquier parte de la pantalla.
+
+Si la directiva `on:` es usada sin un valor, como por ejemplo `on:click` se producirá la propagación de ese evento hacia arriba en el árbol de componentes, lo que se conoce como *event forwading*. Luego será el `Modal` quien emitirá este evento por lo que el consumidor del componente podrá escucharlo `<Modal on:click={toggleModal}/>`
+
+
+
+En `App.svelte`
+
+```vue
+<script>
+	import Modal from './Modal.svelte'
+	let showModal = true;
+
+	const handleClick = () => {
+		showModal = !showModal;
+	}
+	
+</script>
+
+<Modal {showModal} on:click={handleClick}/>
+{#if !showModal}
+	<button on:click={handleClick}>Show Modal</button>
+{/if}
+
+```
+
+En `Modal.svelte`
+
+```vue
+<script>
+	export let showModal = false;
+</script>
+
+
+{#if showModal}
+	I'm a modal
+	<button on:click>Hide Modal (child)</button>
+{/if}
+
+
+```
+
+
+
+## Event Modifiers
+
+Los *event modifiers* como su nombre lo indica son modificadores que agregamos al final de los eventos, por ejemplo donde tenemos `on:click` usando un modificador podríamos pasar a tener `on:click|preventDefault`.
+
+Existen distintos tipos de modificadores y los mas comunes son: `once`, `preventDefault` y `self`. Además es posible encadenar modificadores.
+
+### `once` 
+
+El modificador de eventos `once` nos permite aseguramos que el evento sólo se dispare una vez.
+
+
+
+### `preventDefault`
+
+`preventDefault` nos permite impedir la acción por default de la misma manera que lo hacemos con `e.preventDefault()`.
+
+Cuando trabajamos con formularios en lugar de poner  `<form on:submit={handleSubmit}>` y luego en `handleSubmit` evitar la acción default con `e.preventDefault()` podemos usar un *event modifier*. De esta forma el código nos quedaría `<form on:submit|preventDefault={handleSubmit}>` y no habría que realizar nada en `handleSubmit`.
+
+```
+<script>
 const handleSubmit = () => {
     if(text.trim().length > min) {
       const newFeedback = {
@@ -509,15 +607,112 @@ const handleSubmit = () => {
 </form>
 ```
 
-> Notar el uso de *event modifiers* para evitar tener que poner `e.preventDefault` (otra opción podría ser `on:submit|once` y sólo podríamos hacer submit una vez).
->
-> Como queremos que el rating sea un número utilizamos el **unary operator** `+rating`
->
-> Para generar un id único utilizamos el paquete `uuid` para ello simplemente lo importamos con `  import {v4 as uuidv4} from 'uuid'` y luego lo llamamos donde queremos un id unique `uuidv4()`.
+
+
+### `self`
+
+El modificador `self` hace que el evento sólo se dispare si el elemento clickeado es el target propiamente (y no uno de sus hijos).
+
+Un ejemplo de uso sería si tenemos un modal que consiste en el `backdrop` (la parte de la pantalla que se pone en gris) y por encima de esto tenemos un div con el contenido del modal en sí.
+
+```vue
+<script>
+	function handleClick() {
+		alert('Cierro Modal')
+	}
+</script>
+
+<div class="backdrop" on:click={handleClick}>
+	<div class="modal">
+		
+	</div>
+</div>
+```
+
+Queremos que al hacer click en la parte gris se cierre el modal. Sin embargo, como lo hemos escrito hasta ahora el modal se cerrará aun si hacemos click dentro del contenido del mismo (debido a que aunque hago click en el div interno se propagará el evento hacia afuera).
+
+Para solucionarlo:
+
+```vue
+<script>
+	function handleClick() {
+		alert('Cierro Modal')
+	}
+</script>
+
+<div class="backdrop" on:click|self={handleClick}>
+	<div class="modal">
+		
+	</div>
+</div>
+```
 
 
 
+## Slots
 
+Los componentes son piezas de código reutilizables, en ocasiones nos alcanzará con pasarle como props un string para mostrar cierto contenido personalizado. Sin embargo, cuando queremos que muestre un template HTML más complejo podemos pasarle ese contenido como un slot. Para hacer esto lo colocamos dentro de las etiquetas del componente y luego lo recibimos utilizando la etiqueta `<slot></slot>`
+
+```vue
+<Card>
+	<h4>Título de la tarjeta</h4>
+</Card>
+```
+
+
+
+Luego en el componente en sí podremos mostrar ese contenido de esta forma:
+
+```vue 
+<slot><slot/>
+```
+
+
+
+### Named Slots
+
+Es posible asignarle al contenido un nombre de slot específico y luego lo mostraremos poniendo `<slot name=""/></slot>`
+
+Cuando en el componente hijo usamos los tags `<slot></slot>` mostraremos todo el contenido que no tiene un nombre de slot específico.
+
+Por ejemplo usamos un named slot para un párrafo
+
+```vue
+<script>
+	import Card from './Card.svelte'
+</script>
+
+<Card>
+	<h4>This is the title</h4>
+	
+	<p slot="subtitle">
+		This is the subtitle
+	</p>
+	Some text
+</Card>
+```
+
+
+
+Luego en `Card.svelte`
+
+```vue
+<script>
+	
+</script>
+
+
+<div style="color:red">
+	<slot></slot>	
+</div>
+<slot name="subtitle"></slot>
+```
+
+El contenido mostrado será: "This is the title" y "Some text" en rojo y abajo "This is the subtitle".
+
+
+
+Un aspecto interesante de los named slots es que nos permiten cambiar el orden en que mostramos los elementos que recibimos.
 
 ## Fetching de Datos
 
@@ -875,28 +1070,6 @@ En ocasiones vamos a querer iterar todos los elementos de una lista y mostrarlos
 {:else}
     <strong>No hay resultados</strong>
 {/each}
-```
-
-
-
-## `<slot>`
-
-De manera similar a cuando en React utilizamos la prop `prop.children` en Svelte utilizamos el tag `<slot>`
-
-Por ejemplo si en un componente padre tenemos:
-
-```
-<Card>
-	Hello
-</Card>
-```
-
-
-
-Luego en `Card.svelte` podremos mostrarlo de esta forma:
-
-```
-<slot><slot/>
 ```
 
 
