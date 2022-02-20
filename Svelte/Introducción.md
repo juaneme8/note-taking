@@ -248,7 +248,13 @@ Es posible recibir por props el estado inicial de un componente y luego modifica
 
 #### Modificar Estado
 
-Si tenemos que modificar el estado agregando por ejemplo un elemento a un array de `users` no podemos hacerlo con `users.push()` sino que debemos reasignarlo a otro array, lo cual hacemos con `users = [..users, {id:'4',name:'Jen'}]`
+Como la reactividad de Svelte es disparada por asignaciones, si usamos métodos como `push` o `splice` no lograremos actualizaciones automáticas.
+
+Si tenemos que modificar el estado agregando por ejemplo un elemento a un array de `users` no podemos hacerlo con `users.push()` sino que debemos reasignarlo a otro array, lo cual hacemos con `users = [..users, {id:'4',name:'Jen'}]` o bien podríamos utilizar `users = users.concat({id:'4',name:'Jen'})` que también retorna un nuevo array.
+
+
+
+Si queremos que el nuevo elemento sea agregado al comienzo podemos hacer `users = [{id:'4',name:'Jen'},..users]`
 
 
 
@@ -569,6 +575,8 @@ En `Modal.svelte`
 ```
 
 
+
+Esto será útil en la medida que no tengamos que pasar datos del hijo hacia el padre (recordar que tenemos `on:click`  sin pasarle datos), en ese caso podemos recurrir a lo que se conoce como *dispatch custom events*
 
 ## Event Modifiers
 
@@ -1083,7 +1091,7 @@ Además suponemos que ese elemento tiene una cruz con la cual podrá eliminar de
 
 En `Item.svelte`
 
-```
+```vue
 </script>
 import {createEventDispatcher} from 'svelte'
 
@@ -1097,9 +1105,11 @@ const handleDelete = (itemId) => {
 <button class="close" on:click={() => handleDelete(item.id)}>X</button>
 ```
 
+> Con `const dispatch = createEventDispatcher();` creamos una función `dispatch`. Esta función la usaremos para emitir un *custom event*.
+>
+> En lugar de `itemId`  en `dispatch('delete-feedback',itemId)` podríamos utilizar un objeto con múltiples propiedades.
 
-
-En `List.svelte`
+En `List.svelte` veremos que como es `Item` quien emite el custom event `delete-feedback` ponemos un listener para ducho evento y hacemos *event forwading*. 
 
 ```
 <#each feedback as fb (fb.id)>
@@ -1125,7 +1135,7 @@ En `App.svelte`
 <List on:delete-feedback={deleteFeedback} />
 ```
 
-> En la propiedad `detail` recibimos el id del elemento a eliminar de la lista.
+> Por defecto recibimos el evento `e` y en la propiedad `detail` recibimos el id del elemento a eliminar de la lista.
 >
 > Notar que estamos reasignando `feedback`
 
