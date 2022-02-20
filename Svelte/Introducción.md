@@ -124,6 +124,14 @@ Tenemos distintas formas de organizar los componentes. Podremos ubicarlos suelto
 
 El modo de importar un componente en otro (por ejemplo en `App.svelte`) es idéntico al de React dentro de los tags `<script>` colocamos `import FeedbackList from './components/FeedbackList.svelte'` y luego lo usamos con `<FeedbackList/>`.
 
+> Cuando en un componente utilizamos otro componente se dice que lo consumimos.
+
+
+
+> :warning: Es importante planear el **árbol de componentes** con antelación para tener certeza de cómo van a fluir los datos para evitar dolores de cabeza.
+
+
+
 ## Estructura de un componente
 
 * Lógica escrita en JavaScript dentro de tags `<script>` allí podremos setear variables, crear funciones o valores reactivos como veremos más adelante.
