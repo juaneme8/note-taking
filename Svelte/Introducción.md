@@ -114,7 +114,7 @@ export default app;
 
 > Notar además que le podemos pasar props (en este caso le pasamos una llamada `name`) y luego en `App.svelte` la recibimos haciendo `export let name;` dentro de `<script></script>` y luego podremos mostrarla en pantalla como `{name}`. Obviamente si no lo necesitamos, podremos quitar esta propiedad.
 
-## Componentes
+# Componentes
 
 Los componentes son piezas reutilizables de UI que tienen la extensión `.svelte` y encapsulan la salida (HTML), la lógica (JavaScript) y los estilos (CSS). Además nos permiten tener un código más legible que si tuviésemos todo en `App.svelte`.
 
@@ -124,7 +124,7 @@ Tenemos distintas formas de organizar los componentes. Podremos ubicarlos suelto
 
 El modo de importar un componente en otro (por ejemplo en `App.svelte`) es idéntico al de React dentro de los tags `<script>` colocamos `import FeedbackList from './components/FeedbackList.svelte'` y luego lo usamos con `<FeedbackList/>`.
 
-### Estructura de un componente
+## Estructura de un componente
 
 * Lógica escrita en JavaScript dentro de tags `<script>` allí podremos setear variables, crear funciones o valores reactivos como veremos más adelante.
 * Luego podemos colocar las etiquetas de marcado de html en el medio donde podremos emplear llaves `{}` cuando queramos mostrar una variable o evaluar una expresión. También podremos utilizar condicionales o iteraciones.
@@ -152,7 +152,7 @@ El modo de importar un componente en otro (por ejemplo en `App.svelte`) es idén
 
 
 
-### Pasaje de Props
+## Pasaje de Props
 
 El pasaje de props nos permite que los componentes sean reutilizables y que reciban datos dinámicos.
 
@@ -420,6 +420,8 @@ En cambio utilizando *two way binding* como veremos a continuación, agregando `
 ```
 
 > Notar que recibimos el evento `e` de manera automática.
+>
+> Aunque pusimos `let text = ''; ` en realidad no hace falta darle un valor inicial podríamos haber puesto `let name;`
 
 
 
@@ -714,78 +716,11 @@ El contenido mostrado será: "This is the title" y "Some text" en rojo y abajo "
 
 Un aspecto interesante de los named slots es que nos permiten cambiar el orden en que mostramos los elementos que recibimos.
 
-## Fetching de Datos
-
-Para el fetching de datos utilizaremos [OMDb API  - The Open Movie Database](http://www.omdbapi.com/) que debe usarse de la siguiente forma `http://www.omdbapi.com/?apikey=[yourkey]&s=` seguido del título de la película que queremos buscar.
-
-Queremos que cada vez que se ingresa un caracter en el input se actualice el valor del estado `input` y esto lo hacemos mediante el evento `on:input`. Además queremos que la solicitud a la API sólo se realice cuando la cantidad de caracteres ingresados sea mayor a 2.
-
-```vue
-
-<script>
-  let value = ''
-  let response = []
-  
-  const handleInput = (event) => value = event.target.value
-  
-  $: if (value.length > 2) {
-    fetch(`https://www.omdbapi.com/?s=${value}&apikey=422350ff`)
-      .then(res => res.json())
-      .then(apiResponse => {
-        response = apiResponse.Search || []
-      })
-  }
-    
-</script>
-
-<input value={value} on:input={handleInput} />
-```
-
-> Hemos colocado `apiResponse.Search || []` debido a que en ocasiones la API no devuelve el campo `Search` por ejemplos si no encontró ninguna película.
-
-
-
-### `{#await}`
-
-Lo implementado anteriormente usando promesas puede reemplazarse haciendo uso del `{#await}`.
-
-```vue
-</script>
-$: if (value.length > 2) {
-	response = fetch(`https://www.omdbapi.com/?s=${value}&apikey=422350ff`)
-	.then(res => !res.ok() && new Error('Something bad happened with the fetching of movies'))
-	.then(res => res.json())
-	.then(apiResponse => {
-		return apiResponse.Search || []
-	})
-}
-</script>
-
-{#await response}
-  <strong>Loading...</strong>
-{:then movies}
-  {#each movies as {Title, Poster, Year}, index}
-    <Movie
-      index={index}
-      title={Title}
-      poster={Poster}
-      year={Year}
-    />
-  {:else}
-    <strong>No hay resultados</strong>
-  {/each}
-{:catch error}
-  <p>❌ There has been an error</p>
-{/await}
-```
-
-> Notar que en este caso en `response` en lugar de asignarle el resltado, guardamos la promesa (notar el agregado del `return`) y con `await` esperamos a que se complete y mientras tanto mostramos el **Loading...** sin la necesidad de manejar un estado para tal fin.
->
-> En caso de que hubiera un error en la API o en la API Key, con `!res.ok()` revisamos que el status code devuelto no sea de 200 o similar y en ese caso tiramos un error que luego con el bloque `{:catch}` mostraremos en pantalla.
-
 
 
 ## Binding de Datos
+
+### `type="number"` o `type="text"`
 
 Supongamos que queremos tener un componente con dos inputs asociados a los valores `a` y `b`. Esto lo hacemos colocando `bind:value={a}` de esta manera cuando cambiamos el valor de uno de los inputs será cambiado el valor de dicha variable.
 
@@ -799,6 +734,70 @@ Supongamos que queremos tener un componente con dos inputs asociados a los valor
 <input type="number" bind:value={b}>
 
 <p>{a} + {b} = {a + b}</p>
+```
+
+
+
+Notar que hemos podido realizar la suma sin castear como número. Históricamente en HTML un input aunque tenga especificado su `type="number"` será guardado como string y tendremos que usar `parseInt("1")` para obtener `1`. En Svelte cuando hacemos `bind:value` se encarga de hacer esto por nosotros.
+
+
+
+### `type="checkbox"`
+
+A la hora de trabajar con inputs de tipo checkbox podemos hacerlo de dos formas. 
+
+La primera es usando `bind:checked` y creando una variable para cada checkbox que inicia en `false` y  que se pondrá en `true` cuando seleccionemos ese elemento. 
+
+La segunda es usando `bind:group={array}` y al seleccionar cada elemento será añadido a ese array.
+
+#### Atributo`checked`
+
+```vue
+<script>
+	let javascript=false;
+	let react=false;
+	let node=false;
+	$:console.log(javascript,react,node)
+</script>
+
+<input type="checkbox" bind:checked={javascript}/>javascript<br>
+<input type="checkbox" bind:checked={react}/>react<br>
+<input type="checkbox" bind:checked={node}/>node<br>
+```
+
+Esta alternativa puede ser muy confusa si tenemos muchos checkboxes ya que necesitaremos una variable para cada uno de ellos.
+
+#### Atributo`group`
+
+En este caso además del `bind:group={}` es necesario usar el atributo `value` y estos valores serán los añadidos al array.
+
+```vue
+<script>
+	let skils = [];
+	$:console.log(skils)
+</script>
+
+<input type="checkbox" bind:group={skils} value="javascript"/>javascript<br>
+<input type="checkbox" bind:group={skils} value="react"/>react<br>
+<input type="checkbox" bind:group={skils} value="node"/>node<br>
+```
+
+
+
+#### `Select`
+
+A la hora de trabajar con `<select>` hacemos un `bind:value`
+
+```vue
+<script>
+	let gender="";
+</script>
+
+
+<select bind:value={gender}>
+	<option value="male">Male</option>
+	<option value="female">Female</option>
+</select>
 ```
 
 
@@ -870,7 +869,7 @@ Otra opción hubiera sido colocar en el renderizado `{count % 2 === 0 ? 'Is Even
 
 
 
-Precido a los **reactive values** contamos con los **reactive statements** que son ejecutados cuando los datos dentro del statement cambian.
+Parecido a los **reactive values** contamos con los **reactive statements** que son ejecutados cuando los datos dentro del statement cambian.
 
 ```
 $: console.log(count)
@@ -917,7 +916,7 @@ Veremos que si modificamos alguna de esas dos variables `fullName` reaccionará 
 
 
 
-## Renderizado Condicional
+## Condicionales
 
 En Svelte es posible realizar un renderizado condicional, es decir que mostrar o no el contenido de acuerdo a una condición. Esto podría ser útil por ejemplo si queremos mostrar un contenido si el usuario está logueado y otro distinto si no lo está. 
 
@@ -1269,3 +1268,72 @@ Una forma de hacerlo es con eventos custom y pasando las props hacia arriba hast
 </form>
 ```
 
+
+
+## Fetching de Datos
+
+Para el fetching de datos utilizaremos [OMDb API  - The Open Movie Database](http://www.omdbapi.com/) que debe usarse de la siguiente forma `http://www.omdbapi.com/?apikey=[yourkey]&s=` seguido del título de la película que queremos buscar.
+
+Queremos que cada vez que se ingresa un caracter en el input se actualice el valor del estado `input` y esto lo hacemos mediante el evento `on:input`. Además queremos que la solicitud a la API sólo se realice cuando la cantidad de caracteres ingresados sea mayor a 2.
+
+```vue
+<script>
+  let value = ''
+  let response = []
+  
+  const handleInput = (event) => value = event.target.value
+  
+  $: if (value.length > 2) {
+    fetch(`https://www.omdbapi.com/?s=${value}&apikey=422350ff`)
+      .then(res => res.json())
+      .then(apiResponse => {
+        response = apiResponse.Search || []
+      })
+  }
+    
+</script>
+
+<input value={value} on:input={handleInput} />
+```
+
+> Hemos colocado `apiResponse.Search || []` debido a que en ocasiones la API no devuelve el campo `Search` por ejemplos si no encontró ninguna película.
+
+
+
+### `{#await}`
+
+Lo implementado anteriormente usando promesas puede reemplazarse haciendo uso del `{#await}`.
+
+```vue
+</script>
+$: if (value.length > 2) {
+	response = fetch(`https://www.omdbapi.com/?s=${value}&apikey=422350ff`)
+	.then(res => !res.ok() && new Error('Something bad happened with the fetching of movies'))
+	.then(res => res.json())
+	.then(apiResponse => {
+		return apiResponse.Search || []
+	})
+}
+</script>
+
+{#await response}
+  <strong>Loading...</strong>
+{:then movies}
+  {#each movies as {Title, Poster, Year}, index}
+    <Movie
+      index={index}
+      title={Title}
+      poster={Poster}
+      year={Year}
+    />
+  {:else}
+    <strong>No hay resultados</strong>
+  {/each}
+{:catch error}
+  <p>❌ There has been an error</p>
+{/await}
+```
+
+> Notar que en este caso en `response` en lugar de asignarle el resltado, guardamos la promesa (notar el agregado del `return`) y con `await` esperamos a que se complete y mientras tanto mostramos el **Loading...** sin la necesidad de manejar un estado para tal fin.
+>
+> En caso de que hubiera un error en la API o en la API Key, con `!res.ok()` revisamos que el status code devuelto no sea de 200 o similar y en ese caso tiramos un error que luego con el bloque `{:catch}` mostraremos en pantalla.
