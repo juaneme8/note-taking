@@ -118,7 +118,7 @@ export default app;
 
 Los componentes son piezas reutilizables de UI que tienen la extensión `.svelte` y encapsulan la salida (HTML), la lógica (JavaScript) y los estilos (CSS). Además nos permiten tener un código más legible que si tuviésemos todo en `App.svelte`.
 
-Tenemos distintas formas de organizar los componentes. Podremos ubicarlos sueltos en `src` o bien dentro de una carpeta `components`.
+Tenemos distintas formas de organizar los componentes pero la mas frecuente es colocarlos dentro de una carpeta `components` en `src`. También podríamos tener una carpeta dentro para cada feature o sección.
 
 
 
@@ -129,6 +129,8 @@ El modo de importar un componente en otro (por ejemplo en `App.svelte`) es idén
 
 
 > :warning: Es importante planear el **árbol de componentes** con antelación para tener certeza de cómo van a fluir los datos para evitar dolores de cabeza.
+>
+> :warning: Las imágenes debemos colocarlas en una carpeta `img` en `public` y las referenciamos como `"/img/imageName.svg"`
 
 
 
