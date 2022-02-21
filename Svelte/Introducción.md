@@ -118,7 +118,7 @@ export default app;
 
 Los componentes son piezas reutilizables de UI que tienen la extensión `.svelte` y encapsulan la salida (HTML), la lógica (JavaScript) y los estilos (CSS). Además nos permiten tener un código más legible que si tuviésemos todo en `App.svelte`.
 
-Tenemos distintas formas de organizar los componentes pero la mas frecuente es colocarlos dentro de una carpeta `components` en `src`. También podríamos tener una carpeta dentro para cada feature o sección.
+Tenemos distintas formas de organizar los componentes pero la mas frecuente es colocarlos dentro de una carpeta `components` en `src`. Sin embargo, en proyectos de magnitud es habitual una carpeta dentro de `components` para cada feature o sección.
 
 
 
@@ -130,7 +130,9 @@ El modo de importar un componente en otro (por ejemplo en `App.svelte`) es idén
 
 > :warning: Es importante planear el **árbol de componentes** con antelación para tener certeza de cómo van a fluir los datos para evitar dolores de cabeza.
 >
-> :warning: Las imágenes debemos colocarlas en una carpeta `img` en `public` y las referenciamos como `"/img/imageName.svg"`
+> :warning: Las imágenes debemos colocarlas en una carpeta `img` en `public` y las referenciamos como `"/img/imageName.svg"`.
+>
+> :warning: Los componentes que serán reutilizables en distintas partes de la aplicación los colocamos en`/components/shared` por ejemplo `Button.svelte`.
 
 
 
@@ -162,7 +164,7 @@ El modo de importar un componente en otro (por ejemplo en `App.svelte`) es idén
 
 
 
-## Pasaje de Props
+# Props
 
 El pasaje de props nos permite que los componentes sean reutilizables y que reciban datos dinámicos.
 
@@ -202,7 +204,7 @@ Luego en el componente `FeedbackList` accederemos a esa prop de la siguiente for
 
 
 
-### Manejo de Estado
+# Manejo de Estado
 
 Queremos que nuestros componentes estén dotados de **reactividad** lo que significa que manejan un cierto estado interno y cuando este cambie veamos reflejados esos cambios en la interfaz. 
 
@@ -234,7 +236,7 @@ Svelte gracias a la compilación es capaz de diferenciar lo que es una variable 
 
 
 
-#### Estado Inicial
+## Estado Inicial
 
 Es posible recibir por props el estado inicial de un componente y luego modificarlo internamente.
 
@@ -256,7 +258,7 @@ Es posible recibir por props el estado inicial de un componente y luego modifica
 
 
 
-#### Modificar Estado
+## Modificar Estado
 
 Como la reactividad de Svelte es disparada por asignaciones, si usamos métodos como `push` o `splice` no lograremos actualizaciones automáticas.
 
@@ -268,7 +270,7 @@ Si queremos que el nuevo elemento sea agregado al comienzo podemos hacer `users 
 
 
 
-### Life Cycle Methods
+# Life Cycle Methods
 
 De manera similar a los componentes de clases en React tenemos métodos del ciclo de vida de los componentes en Svelte.
 
@@ -287,15 +289,15 @@ onDestroy(()=> {
 
 
 
-## Estilos
+# Estilos
 
-### Estilos Globales
+## Estilos Globales
 
 Es posible aplicar estilos globales en `public/global.css` que será importando en `index.html`.
 
 
 
-### Estilos Locales
+## Estilos Locales
 
 Los estilos locales son aquellos específicos de los elementos de un componente. Debemos hacerlo dentro de los tags `<style>` y veremos que Svelte le asigna un nombre de clase especial con un hash único para evitar colisiones. Esto podremos verificarlo en las DevTools o analizando el contenido de `build/bundle.css`.
 
@@ -311,9 +313,9 @@ Los estilos locales son aquellos específicos de los elementos de un componente.
 
 
 
-### Estilos Condicionales
+## Estilos Condicionales
 
-Si queremos que un estilo se aplique o no dependiendo de una expresión podemos hacerlo con con esta sintaxis `class:promo={isPromo}` esto significa que la clase `promo` se aplicará si `isPromo` (que también podría ser una expresión) es `true`. En cambio, la clase `backdrop` se aplicará siempre.
+Si queremos que un estilo se aplique o no dependiendo de una expresión podemos hacerlo con con esta sintaxis `class:promo={isPromo}` esto significa que la clase `promo` se aplicará si `isPromo` (que también podría ser una expresión, no sólo un booleano) es `true`. En cambio, la clase `backdrop` se aplicará siempre.
 
 ```
 <div class="backdrop" class:promo={isPromo}>
@@ -325,56 +327,13 @@ Si queremos que un estilo se aplique o no dependiendo de una expresión podemos 
 
 
 
-### Estilos Variables
+## Estilos Variables
 
 Si tenemos una variable `let color='blue';` y queremos asignarlo a un elemento podemos hacerlo con `<h1 style="color: {color}">Título</h1>`
 
+# Binding de Datos
 
-
-## Eventos
-
-La forma de trabajar con eventos en Svelte es colocando `on:` seguido del nombre del evento, por ejemplo `on:click={}`.
-
-
-
-### `on:click`
-
-Si queremos tener un botón que al presionarlo cambie el color de un elemento (modificando el valor de una variable).
-
-Una forma es hacerlo usando una expresión en línea:
-
-```vue
-<script>
-    let color='black'
-</script>
-
-{color}
-<button on:click={()=> color='red'}>Click</button>
-```
-
-> No necesariamente tenemos que trabajar con un `<button>` podríamos haber usado un `<p>` por ejemplo.
->
-> El `on:click` es una directiva.
-
-
-
-También podemos hacerlo mediante una función aparte:
-
-```vue
-<script>
-let color='red'
-const toggle = () => {
-	color= color==='red'?'purple':'red';
-}
-</script>
-
-{color}
-<button on:click={toggle}>Click</button>
-```
-
-
-
-### `on:input`
+### One way data binding
 
 ```vue
 <script>
@@ -396,6 +355,8 @@ Esta técnica se conoce como *one way binding* dado que si cambiamos `text` de o
 
 Esto lo podemos comprobar con este ejemplo que al presionar un botón le agrega un "@" al valor de `text` dejando al input desactualizado.
 
+
+
 ```vue
 <script>
   let text = ''
@@ -414,6 +375,8 @@ Esto lo podemos comprobar con este ejemplo que al presionar un botón le agrega 
 ```
 
 
+
+### Two way data binding
 
 En cambio utilizando *two way binding* como veremos a continuación, agregando `value = {text}` el valor mostrado en el input estará siempre actualizado.
 
@@ -440,6 +403,8 @@ En cambio utilizando *two way binding* como veremos a continuación, agregando `
 > Aunque pusimos `let text = ''; ` en realidad no hace falta darle un valor inicial podríamos haber puesto `let name;`
 
 
+
+#### Forma reducida
 
 Existe una forma reducida de actualizar el valor de `text` y de asegurarnos el two way binding. Es decir que estas dos líneas:
 
@@ -471,7 +436,170 @@ Como veremos a continuación:
 
 
 
-### `on:change`
+## `type="number"` o `type="text"`
+
+
+
+Supongamos que queremos tener un componente con dos inputs asociados a los valores `a` y `b`. Esto lo hacemos colocando `bind:value={a}` de esta manera cuando cambiamos el valor de uno de los inputs será cambiado el valor de dicha variable.
+
+```
+<script>
+	let a = 1;
+	let b = 2;
+</script>
+
+<input type="number" bind:value={a}>
+<input type="number" bind:value={b}>
+
+<p>{a} + {b} = {a + b}</p>
+```
+
+
+
+:eyes: Notar que hemos podido realizar la suma sin castear como número. Históricamente en HTML un input aunque tenga especificado su `type="number"` será guardado como string y tendremos que usar `parseInt("1")` para obtener `1`. En Svelte cuando hacemos `bind:value` se encarga de hacer esto por nosotros.
+
+
+
+Otra forma de hacer esto es mediante un bind con un único objeto.
+
+```vue
+<script>
+	let numbers = { a:1 ,b:1};
+</script>
+
+<input type="number" bind:value={numbers.a}>
+<input type="number" bind:value={numbers.b}>
+
+<p>{numbers.a} + {numbers.b} = {numbers.a + numbers.b}</p>
+```
+
+Esto puede resultar particularmente útil cuando tenemos que trabajar con formularios con varios campos.
+
+
+
+## `type="checkbox"`
+
+A la hora de trabajar con inputs de tipo checkbox podemos hacerlo de dos formas. 
+
+La primera es usando `bind:checked` y creando una variable para cada checkbox que inicia en `false` y  que se pondrá en `true` cuando seleccionemos ese elemento. 
+
+La segunda es usando `bind:group={array}` y al seleccionar cada elemento será añadido a ese array.
+
+
+
+### Atributo`checked`
+
+```vue
+<script>
+	let javascript=false;
+	let react=false;
+	let node=false;
+	$:console.log(javascript,react,node)
+</script>
+
+<input type="checkbox" bind:checked={javascript}/>javascript<br>
+<input type="checkbox" bind:checked={react}/>react<br>
+<input type="checkbox" bind:checked={node}/>node<br>
+```
+
+Esta alternativa puede ser muy confusa si tenemos muchos checkboxes ya que necesitaremos una variable para cada uno de ellos.
+
+
+
+#### Atributo`group`
+
+En este caso además del `bind:group={}` es necesario usar el atributo `value` y estos valores serán los añadidos al array.
+
+```vue
+<script>
+	let skils = [];
+	$:console.log(skils)
+</script>
+
+<input type="checkbox" bind:group={skils} value="javascript"/>javascript<br>
+<input type="checkbox" bind:group={skils} value="react"/>react<br>
+<input type="checkbox" bind:group={skils} value="node"/>node<br>
+```
+
+
+
+## `Select`
+
+A la hora de trabajar con `<select>` hacemos un `bind:value`
+
+```vue
+<script>
+	let gender="";
+</script>
+
+
+<select bind:value={gender}>
+	<option value="male">Male</option>
+	<option value="female">Female</option>
+</select>
+```
+
+
+
+# Eventos
+
+La forma de trabajar con eventos en Svelte es colocando `on:` seguido del nombre del evento, por ejemplo `on:click={}`.
+
+
+
+## `on:click`
+
+Si queremos tener un botón que al presionarlo cambie el color de un elemento (modificando el valor de una variable).
+
+Una forma es hacerlo usando una expresión en línea:
+
+```vue
+<script>
+    let color='red';
+</script>
+
+<h1 style="background: {color}">I'm the title</h1>
+<button on:click={()=> color=color==='red'?'purple':'red'}>Toggle Color</button>
+```
+
+> No necesariamente tenemos que trabajar con un `<button>` podríamos haber usado un `<p>` por ejemplo.
+>
+> El `on:click` es una directiva.
+
+
+
+También podemos hacerlo mediante una función aparte:
+
+```vue
+<script>
+	let color='red';
+    const = handleClick = () => {
+        color=color==='red'?'purple':'red'
+    }
+</script>
+
+<h1 style="background: {color}">I'm the title</h1>
+<button on:click={handleClick}>Toggle Color</button>
+```
+
+
+
+## `on:input`
+```vue
+<script>
+  let text = ''
+</script>
+
+<input 
+       type="text" 
+       bind:value = {text} 
+       placeholder="Tell us something"
+>
+```
+
+
+
+## `on:change`
 
 ```vue
 <script>
@@ -506,7 +634,7 @@ Como veremos a continuación:
 
 
 
-### `on:submit`
+## `on:submit`
 
 ```vue
 <script>
@@ -538,7 +666,9 @@ const handleSubmit = (e) => {
 >
 > :information_source: Para generar un id único utilizamos el paquete `uuid` para ello simplemente lo importamos con `  import {v4 as uuidv4} from 'uuid'` y luego lo llamamos donde queremos un id unique `uuidv4()`.
 
-## Event Forwading 
+
+
+# Event Forwading 
 
 Cuando queremos propagar hacia arriba un evento, es decir desde desde el componente hijo hacia el padre debemos hacer uso de lo que se conoce como *event forwading*.
 
@@ -588,19 +718,21 @@ En `Modal.svelte`
 
 Esto será útil en la medida que no tengamos que pasar datos del hijo hacia el padre (recordar que tenemos `on:click`  sin pasarle datos), en ese caso podemos recurrir a lo que se conoce como *dispatch custom events*
 
-## Event Modifiers
+
+
+# Event Modifiers
 
 Los *event modifiers* como su nombre lo indica son modificadores que agregamos al final de los eventos, por ejemplo donde tenemos `on:click` usando un modificador podríamos pasar a tener `on:click|preventDefault`.
 
 Existen distintos tipos de modificadores y los mas comunes son: `once`, `preventDefault` y `self`. Además es posible encadenar modificadores.
 
-### `once` 
+## `once` 
 
 El modificador de eventos `once` nos permite aseguramos que el evento sólo se dispare una vez.
 
 
 
-### `preventDefault`
+## `preventDefault`
 
 `preventDefault` nos permite impedir la acción por default de la misma manera que lo hacemos con `e.preventDefault()`.
 
@@ -629,7 +761,7 @@ const handleSubmit = () => {
 
 
 
-### `self`
+## `self`
 
 El modificador `self` hace que el evento sólo se dispare si el elemento clickeado es el target propiamente (y no uno de sus hijos).
 
@@ -669,7 +801,7 @@ Para solucionarlo:
 
 
 
-## Slots
+# Slots
 
 Los componentes son piezas de código reutilizables, en ocasiones nos alcanzará con pasarle como props un string para mostrar cierto contenido personalizado. Sin embargo, cuando queremos que muestre un template HTML más complejo podemos pasarle ese contenido como un slot. Para hacer esto lo colocamos dentro de las etiquetas del componente y luego lo recibimos utilizando la etiqueta `<slot></slot>`
 
@@ -689,7 +821,7 @@ Luego en el componente en sí podremos mostrar ese contenido de esta forma:
 
 
 
-### Named Slots
+## Named Slots
 
 Es posible asignarle al contenido un nombre de slot específico y luego lo mostraremos poniendo `<slot name=""/></slot>`
 
@@ -736,91 +868,7 @@ Un aspecto interesante de los named slots es que nos permiten cambiar el orden e
 
 
 
-## Binding de Datos
-
-### `type="number"` o `type="text"`
-
-Supongamos que queremos tener un componente con dos inputs asociados a los valores `a` y `b`. Esto lo hacemos colocando `bind:value={a}` de esta manera cuando cambiamos el valor de uno de los inputs será cambiado el valor de dicha variable.
-
-```
-<script>
-	let a = 1;
-	let b = 2;
-</script>
-
-<input type="number" bind:value={a}>
-<input type="number" bind:value={b}>
-
-<p>{a} + {b} = {a + b}</p>
-```
-
-
-
-Notar que hemos podido realizar la suma sin castear como número. Históricamente en HTML un input aunque tenga especificado su `type="number"` será guardado como string y tendremos que usar `parseInt("1")` para obtener `1`. En Svelte cuando hacemos `bind:value` se encarga de hacer esto por nosotros.
-
-
-
-### `type="checkbox"`
-
-A la hora de trabajar con inputs de tipo checkbox podemos hacerlo de dos formas. 
-
-La primera es usando `bind:checked` y creando una variable para cada checkbox que inicia en `false` y  que se pondrá en `true` cuando seleccionemos ese elemento. 
-
-La segunda es usando `bind:group={array}` y al seleccionar cada elemento será añadido a ese array.
-
-#### Atributo`checked`
-
-```vue
-<script>
-	let javascript=false;
-	let react=false;
-	let node=false;
-	$:console.log(javascript,react,node)
-</script>
-
-<input type="checkbox" bind:checked={javascript}/>javascript<br>
-<input type="checkbox" bind:checked={react}/>react<br>
-<input type="checkbox" bind:checked={node}/>node<br>
-```
-
-Esta alternativa puede ser muy confusa si tenemos muchos checkboxes ya que necesitaremos una variable para cada uno de ellos.
-
-#### Atributo`group`
-
-En este caso además del `bind:group={}` es necesario usar el atributo `value` y estos valores serán los añadidos al array.
-
-```vue
-<script>
-	let skils = [];
-	$:console.log(skils)
-</script>
-
-<input type="checkbox" bind:group={skils} value="javascript"/>javascript<br>
-<input type="checkbox" bind:group={skils} value="react"/>react<br>
-<input type="checkbox" bind:group={skils} value="node"/>node<br>
-```
-
-
-
-#### `Select`
-
-A la hora de trabajar con `<select>` hacemos un `bind:value`
-
-```vue
-<script>
-	let gender="";
-</script>
-
-
-<select bind:value={gender}>
-	<option value="male">Male</option>
-	<option value="female">Female</option>
-</select>
-```
-
-
-
-## Declaraciones Reactivas
+# Declaraciones Reactivas
 
 Los valores reactivos son aquellos que se actualizan automáticamente cuando cambian los datos de los cuales dependen.
 
@@ -934,7 +982,7 @@ Veremos que si modificamos alguna de esas dos variables `fullName` reaccionará 
 
 
 
-## Condicionales
+# Condicionales
 
 En Svelte es posible realizar un renderizado condicional, es decir que mostrar o no el contenido de acuerdo a una condición. Esto podría ser útil por ejemplo si queremos mostrar un contenido si el usuario está logueado y otro distinto si no lo está. 
 
@@ -982,7 +1030,7 @@ Otro ejemplo es si queremos mostrar y ocultar un texto conforme apretamos un bot
 
 
 
-### Condicionales Anidados
+## Condicionales Anidados
 
 Supongamos ahora que tenemos un estado `loading` que ponemos en `true` justo antes de hacer el fetch a una API y en `false` cuando obtuvimos el resultado. Como queremos evitar estar viendo información de películas encontradas no actualizada, la ocultamos mientras estemos cargando y para ello utilizamos condicionales anidados.
 
@@ -1000,11 +1048,11 @@ Supongamos ahora que tenemos un estado `loading` que ponemos en `true` justo ant
 
 
 
-## Loops
+# Loops
 
 Utilizamos loops cuando queremos recorrer un array y mostrar HTML para cada item que tiene.
 
-### Bloque #each
+## Bloque #each
 
 ```vue
 <script>
@@ -1072,7 +1120,7 @@ Si quisiéramos además recibir el evento `e` podríamos hacer `	<button on:clic
 
 
 
-###  Bloque `{#each}` con`{:else}`
+##  Bloque `{#each}` con`{:else}`
 
 En ocasiones vamos a querer iterar todos los elementos de una lista y mostrarlos en pantalla pero en caso de que no tenga ningún elemento mostrar algún contenido en particular. En ese caso podremos recurrir al uso en conjunto de `each` y `else`.
 
@@ -1091,7 +1139,7 @@ En ocasiones vamos a querer iterar todos los elementos de una lista y mostrarlos
 
 
 
-## Dispatch Custom Event
+# Dispatch Custom Event
 
 Supongamos que tenemos un componente principal `App` con un array de elementos y se los pasamos como props a un componente `List` que a su vez llama a un componente `Item` por cada uno de ellos.
 
@@ -1118,6 +1166,8 @@ const handleDelete = (itemId) => {
 > Con `const dispatch = createEventDispatcher();` creamos una función `dispatch`. Esta función la usaremos para emitir un *custom event*.
 >
 > En lugar de `itemId`  en `dispatch('delete-feedback',itemId)` podríamos utilizar un objeto con múltiples propiedades.
+>
+> :warning: Aunque aca usamos *kebab-case* en los videos de The Net Ninja utiliza *camelCase* para los nombres de los *custom events*.
 
 En `List.svelte` veremos que como es `Item` quien emite el custom event `delete-feedback` ponemos un listener para ducho evento y hacemos *event forwading*. 
 
@@ -1151,7 +1201,7 @@ En `App.svelte`
 
 
 
-## Transiciones
+# Transiciones
 
 ```
  import { fade, scale } from 'svelte/transition'
@@ -1169,13 +1219,13 @@ En `App.svelte`
 
 
 
-## Stores
+# Stores
 
 El uso de stores nos permite no tener que crear eventos custom para pasar props hacia arriba.
 
 Creamos un archivo `stores.js`
 
-```
+```vue
 import { writable } from 'svelte/store'
 
 export const FeedbackStore = writable([
@@ -1237,7 +1287,7 @@ Otra forma más simple (la desuscripción será automática)
 
 
 
-### Eliminar Items de Store
+## Eliminar Items de Store
 
 Anteriormente vimos que para eliminar un elemento de la lista debíamos usar custom events para elevar las props.
 
@@ -1261,7 +1311,7 @@ const handleDelete = (itemId) => {
 
 
 
-### Agregar Items a Store
+## Agregar Items a Store
 
 Una forma de hacerlo es con eventos custom y pasando las props hacia arriba hasta llegar a `App` que tiene el array de elementos. Sin embargo, utilizando stores esto es mucho mas simple y podemos hacerlo desde el formulario en el cual tengamos el elemento a agregar.
 
@@ -1290,7 +1340,7 @@ Una forma de hacerlo es con eventos custom y pasando las props hacia arriba hast
 
 
 
-## Fetching de Datos
+# Fetching de Datos
 
 Para el fetching de datos utilizaremos [OMDb API  - The Open Movie Database](http://www.omdbapi.com/) que debe usarse de la siguiente forma `http://www.omdbapi.com/?apikey=[yourkey]&s=` seguido del título de la película que queremos buscar.
 
@@ -1320,7 +1370,7 @@ Queremos que cada vez que se ingresa un caracter en el input se actualice el val
 
 
 
-### `{#await}`
+## `{#await}`
 
 Lo implementado anteriormente usando promesas puede reemplazarse haciendo uso del `{#await}`.
 
