@@ -1407,3 +1407,142 @@ $: if (value.length > 2) {
 > Notar que en este caso en `response` en lugar de asignarle el resltado, guardamos la promesa (notar el agregado del `return`) y con `await` esperamos a que se complete y mientras tanto mostramos el **Loading...** sin la necesidad de manejar un estado para tal fin.
 >
 > En caso de que hubiera un error en la API o en la API Key, con `!res.ok()` revisamos que el status code devuelto no sea de 200 o similar y en ese caso tiramos un error que luego con el bloque `{:catch}` mostraremos en pantalla.
+
+
+
+# Componentes UI
+
+A continuación mostramos un ejemplo de un componente `Button.svelte` (que ubicamos en `components/shared`) que recibe como props `type` que podrá ser "primary" o "secondary", un booleano `flat` y otro `inverse`. Además recibe como slot el contenido a mostrar en el botón.
+
+```vue
+<script>
+  export let type = 'primary';
+  export let flat = false;
+  export let inverse = false;
+</script>
+
+<button class:flat={flat} class:inverse={inverse} class={type} on:click>
+  <slot></slot>
+</button>
+
+<style>
+  button{
+    border: 0;
+    cursor: pointer;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-weight: bold;
+    box-shadow: 1px 2px 3px rgba(0,0,0,0.2);
+  }
+  .flat{
+    box-shadow: none;
+  }
+  .primary{
+    background: #d91b42;
+    color: white;
+  }
+  .secondary{
+    background: #45c496;
+    color: white;
+  }
+  .primary.inverse{
+    color: #d91b42;
+    background: white;
+    border: 2px solid #d91b42;
+  }
+  .secondary.inverse{
+    color: #45c496;
+    background: white;
+    border: 2px solid #45c496;
+  }
+</style>
+```
+
+> :red_circle: Atención con el `on:click`
+
+# Validaciones
+
+Implementaremos una validación simple que se efectúa al enviar el formulario.
+
+:red_circle: Ampliar explicando parte por parte.
+
+```vue
+<script>
+  import Button from '../shared/Button.svelte';
+  let fields = { question: '', answerA: '', answerB: '' };
+  let errors = { question: '', answerA: '', answerB: '' };
+  let valid = false;
+  const submitHandler = () => {
+    valid = true;
+    // question
+    if (fields.question.trim().length < 5) {
+      valid = false;
+      errors.question = 'Question must be at least 5 chars long'
+    } else {
+      errors.question = ''
+    }
+    // answer A
+    if (fields.answerA.trim().length < 1) {
+      valid = false;
+      errors.answerA = 'Answer A cannot be empty'
+    } else {
+      errors.answerA = ''
+    }
+    // answer B
+    if (fields.answerB.trim().length < 1) {
+      valid = false;
+      errors.answerB = 'Answer B cannot be empty'
+    } else {
+      errors.answerB = ''
+    }
+    // add new poll
+    if (valid) {
+      console.log('valid', fields);
+    }
+  }
+</script>
+
+<form on:submit|preventDefault={submitHandler}>
+  <div class="form-field">
+    <label for="question">Poll Question:</label>
+    <input type="text" id="question" bind:value={fields.question}>
+    <div class="error">{ errors.question }</div>
+  </div>
+  <div class="form-field">
+    <label for="answer-a">Answer A value:</label>
+    <input type="text" id="answer-a" bind:value={fields.answerA}>
+    <div class="error">{ errors.answerA }</div>
+  </div>
+  <div class="form-field">
+    <label for="answer-b">Answer B value:</label>
+    <input type="text" id="answer-b" bind:value={fields.answerB}>
+    <div class="error">{ errors.answerB }</div>
+  </div>
+  <Button>Add Poll</Button>
+</form>
+
+<style>
+  form{
+    width: 400px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .form-field{
+    margin: 18px auto;
+  }
+  input{
+    width: 100%;
+    border-radius: 6px;
+  }
+  label{
+    margin: 10px auto;
+    text-align: left;
+  }
+  .error{
+    font-weight: bold;
+    font-size: 12px;
+    color: #d91b42;
+  }
+</style>
+```
+
