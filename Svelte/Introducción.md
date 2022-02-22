@@ -1462,9 +1462,13 @@ A continuación mostramos un ejemplo de un componente `Button.svelte` (que ubica
 
 # Validaciones
 
-Implementaremos una validación simple que se efectúa al enviar el formulario.
+Implementaremos una validación muy rudimentaria que se efectúa en el handler asociado al *submit event*, es decir en `submitHandler`. Los valores de los elementos del formulario los almacenamos en el objeto `fields` y hacemos el binding con cada propiedad.
 
-:red_circle: Ampliar explicando parte por parte.
+Comenzamos poniendo una variable `valid` en `true` y ante cualquier validación que falle la pondremos en `false`. Cuando todos los campos son válidos `valid` permanece en `true` y mostramos un `console.log()`
+
+Contamos además con un objeto `errors` que tiene una propiedad para cada campo del formulario y cargaremos en ella el error asociado a dicho campo en caso de tenerlo o la dejaremos vacía. Ese error es mostrado debajo de cada campo.
+
+Tener presente que esta validación no bloquea el botón de submit aunque no se reúnan las validaciones y efectúa una nueva validación al presionarlo.
 
 ```vue
 <script>
@@ -1522,27 +1526,7 @@ Implementaremos una validación simple que se efectúa al enviar el formulario.
 </form>
 
 <style>
-  form{
-    width: 400px;
-    margin: 0 auto;
-    text-align: center;
-  }
-  .form-field{
-    margin: 18px auto;
-  }
-  input{
-    width: 100%;
-    border-radius: 6px;
-  }
-  label{
-    margin: 10px auto;
-    text-align: left;
-  }
-  .error{
-    font-weight: bold;
-    font-size: 12px;
-    color: #d91b42;
-  }
+  
 </style>
 ```
 
