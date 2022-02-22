@@ -1,8 +1,10 @@
 # GraphQL
 
-> Basado en curso The Net Ninja
+> Basado en [curso](https://www.youtube.com/watch?v=Y0lDGjwRYKw&list=PL4cUxeGkcC9iK6Qhn-QLcXCXPQUov1U7f) The Net Ninja
 
 
+
+## Introducción
 
 GraphQL es un *query language* muy poderoso para comunicar datos entre un cliente (el navegador) y el server.
 
@@ -38,7 +40,7 @@ Para obtener estos mismos datos con un enfoque GraphQL haríamos la siguiente qu
             name
             bio
             books{
-
+				title
             }
         }
     }
@@ -75,4 +77,64 @@ Con GraphQL podemos ser **selectivos** en cuanto a los datos que queremos recibi
 
 > **Supercharged Endpoint**
 
-En GraphQL en vez de contar con muchos endpoints contamos con uno sólo recargado 
+En GraphQL en vez de contar con muchos endpoints contamos con uno sólo recargado con el cual mapeamos todos los datos.
+
+Podremos tener distintos puntos de entrada y nos movemos hacia los datos relacionados, como podemos ver en los siguientes dos ejemplos:
+
+```
+{
+	book(id:1){
+		title
+		genre
+		author{
+			name
+			age
+			books{
+				title
+			}
+		}
+	}
+}
+```
+
+
+
+```
+{
+	author(id:2){
+		name
+		books{
+			title
+			similar{
+				title
+			}
+		}
+	}
+}
+```
+
+
+
+## Estructura Proyecto
+
+En este proyecto tendremos un backend (servidor), un frontend y una base de datos.
+
+**El servidor consistirá en una Express App + GraphQL Server** donde describiremos cómo está compuesto el graph, indicando sus relaciones y los distintos tipos de entrada.
+
+GraphQL es *platform agnostic* esto significa que no es necesario usarlo con una tecnología en particular (puede usarse con React, Angular, Vue, etc). En nuestro caso consistirá en una aplicación React y en ella utilizando **Apollo como cliente GraphQL** haremos queries al server GraphQL para obtener datos y mostrarlos en el navegador. 
+
+
+
+> :information_source: **Graphiql** es como una dummy frontend application que nos permite hacer requests al server GraphQL
+
+
+
+### Servidor
+
+```
+mkdir md-graphql-server
+cd md-graphql-server
+npm init -y
+npm i express
+```
+
