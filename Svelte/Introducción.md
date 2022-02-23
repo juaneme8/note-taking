@@ -132,7 +132,7 @@ El modo de importar un componente en otro (por ejemplo en `App.svelte`) es idén
 >
 > :warning: Las imágenes debemos colocarlas en una carpeta `img` en `public` y las referenciamos como `"/img/imageName.svg"`.
 >
-> :warning: Los componentes que serán reutilizables en distintas partes de la aplicación los colocamos en`/components/shared` por ejemplo `Button.svelte`.
+> :warning: Los componentes que serán reutilizables en distintas partes de la aplicación los colocamos en`/src/shared` por ejemplo `Button.svelte` (no dentro de `/src/components`)
 
 
 
@@ -172,7 +172,7 @@ Si queremos pasarle ciertos datos a un componente podemos hacerlo via props por 
 
 Luego en el componente `FeedbackList` accederemos a esa prop de la siguiente forma:
 
-```
+```vue
 <script>
 	export let feedback = [];
 </script>
@@ -192,7 +192,7 @@ Luego en el componente `FeedbackList` accederemos a esa prop de la siguiente for
 
 * En ocasiones nos convendrá almacenar las props en un objeto y pasárselas todas al componente utilizando el spead operator.
 
-  ```
+  ```vue
   <script>
   	const commonProps = { maxCounter: 5}
   </script>
@@ -272,7 +272,13 @@ Si queremos que el nuevo elemento sea agregado al comienzo podemos hacer `users 
 
 # Life Cycle Methods
 
-De manera similar a los componentes de clases en React tenemos métodos del ciclo de vida de los componentes en Svelte.
+En Svelte los componentes tienen métodos del ciclo de vida.
+
+`onMount` sucede cuando el componente es montado en el DOM y es donde haremos peticiones externas a una API o DB.
+
+`onDestroy` sucede cuando el componente es eliminado del DOM y es donde nos desuscribiremos de stores por ejemplo.
+
+ 
 
 ```vue
 import {onMount, onDestroy} from 'svelte'
@@ -286,6 +292,8 @@ onDestroy(()=> {
 	console.log('destroy')
 })
 ```
+
+Cada vez que mostremos u ocultemos el componente aparecerán esos mensajes.
 
 
 
@@ -330,6 +338,8 @@ Si queremos que un estilo se aplique o no dependiendo de una expresión podemos 
 ## Estilos Variables
 
 Si tenemos una variable `let color='blue';` y queremos asignarlo a un elemento podemos hacerlo con `<h1 style="color: {color}">Título</h1>`
+
+Si tenemos almacenado un porcentaje en una variable y queremos asignarlo como ancho de un elemento `style="width={percent}%"`
 
 # Binding de Datos
 
@@ -1169,7 +1179,7 @@ const handleDelete = (itemId) => {
 >
 > :warning: Aunque aca usamos *kebab-case* en los videos de The Net Ninja utiliza *camelCase* para los nombres de los *custom events*.
 
-En `List.svelte` veremos que como es `Item` quien emite el custom event `delete-feedback` ponemos un listener para ducho evento y hacemos *event forwading*. 
+En `List.svelte` veremos que como es `Item` quien emite el custom event `delete-feedback` ponemos un listener para dicho evento y hacemos *event forwading*. 
 
 ```
 <#each feedback as fb (fb.id)>
@@ -1221,14 +1231,18 @@ En `App.svelte`
 
 # Stores
 
-El uso de stores nos permite no tener que crear eventos custom para pasar props hacia arriba.
+El uso de stores nos permite almacenar datos de manera centralizada para no tener que *dispatch custom events* para pasar datos hacia arriba en el árbol de componentes. Esto es particularmente útil en aplicaciones de magnitud.
 
-Creamos un archivo `stores.js`
+Cada vez que modifiquemos un store los componentes que están suscriptos a ella obtendrán los datos actualizados.
 
-```vue
+Creamos una carpeta `stores` en `src` y un archivo archivo `FeedbackStore.js`
+
+
+
+```javascript
 import { writable } from 'svelte/store'
 
-export const FeedbackStore = writable([
+const FeedbackStore = writable([
   {
     id: 1,
     rating: 10,
@@ -1244,10 +1258,18 @@ export const FeedbackStore = writable([
     rating: 8,
     text: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. consequuntur vel vitae commodi alias voluptatem est voluptatum ipsa quae.',
   },
-])
+]);
+
+export default FeedBackStore
 ```
 
-> Los stores pueden ser `readable` o `writable`
+> :warning: Notar que la extensión que estamos utilizando es `.js`
+>
+> El store lo creamos con `const FeedbackStore = writable();` y en nuestro caso además le pasamos datos iniciales.
+>
+> Los stores pueden ser `readable` o `writable` (aquellos casos donde podemos leer y escribir).
+>
+> Exportamos `FeedbackStore` para luego importarlo cuando usemos el store.
 
 
 
@@ -1255,9 +1277,10 @@ En lugar de tener la lista hardcodeada en `App` la tenemos en un store.
 
 
 
-Una forma de obtener los datos del Store es suscribirnos y desuscribirnos en el método `onDestroy` del ciclo de vida.
+Una forma de obtener los datos del store es suscribirnos y desuscribirnos en el método `onDestroy` del ciclo de vida.
 
 ```vue
+import FeedbackStore from '../stores/FeedbackStore.js'
 let feedback = []
 
 const unsuscribe = FeedbackStore.suscribe(data => feedback=data)
@@ -1273,9 +1296,13 @@ onDestroy(()=> {
 {/each}
 ```
 
+Al suscribirnos nos aseguramos que los datos se mantengan actualizados y se producirá un rerender cada vez que haya cambios.
+
+Es importante que nos desuscribamos al store al desmontar el componente pues de lo contrario nos estaremos suscribiendo cada vez que mostremos el componente y esto podría ocasionar *memory leaks*.
 
 
-Otra forma más simple (la desuscripción será automática)
+
+Otra forma más simple (la desuscripción será automática cuando el componente se elimine del DOM) y no nos hará falta una variable local.
 
 ```vue
 {#each $FeedbackStore as fb (fb.id)}
@@ -1528,5 +1555,26 @@ Tener presente que esta validación no bloquea el botón de submit aunque no se 
 <style>
   
 </style>
+```
+
+
+
+# :warning: Concepto Referencias y `find()`
+
+Recordar que `find()` devuelve un valor pero este valor podrá ser un primitivo o una referencia. Si tenemos un array de objetos `copiedPolls` y con `find()` obtenemos un objeto deseado y luego modificamos sus propiedades, estaremos modificando un elemento del al array original.
+
+```javascript
+let copiedPolls = [...polls];
+let upvotedPoll = copiedPolls.find(poll => poll.id==id);
+
+if(option ==='a'){
+	upvotedPoll.votesA++;
+}
+
+if(option ==='a'){
+	upvotedPoll.votesA++;
+}
+
+polls = copiedPolls;
 ```
 
