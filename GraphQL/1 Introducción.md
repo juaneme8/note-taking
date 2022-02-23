@@ -4,11 +4,31 @@
 
 
 
-## Introducción
+## Características
 
-GraphQL es un *query language* muy poderoso para comunicar datos entre un cliente (el navegador) y el server.
+* GraphQL es **lenguaje de consultas**. **Graph** significa grafo y **QL** query language.
 
-En comparación con el enfoque RESTful es más flexible y eficiente.
+* Permite la **comunicación de datos entre servidor y cliente** (navegador).
+
+* **Código abierto**.
+
+* **Creado por Facebook**.
+
+* Es **utilizable en múltiples lenguajes de programación**. 
+
+* Es **flexible y eficiente** comparado con el enfoque RESTful.
+
+  
+
+* Nos permite describir los datos.
+
+* Nos permite pedir sólo los datos que queremos, lo cual genera una **optimización y mejora en el rendimiento** en los datos que viajan.
+
+* Nos permite obtener datos predecibles ya que se corresponderán con la descripción.
+
+* Haremos **una única petición** a un *supercharged endpoint* y será el servidor de GraphQL el encargado de recoger los datos de las distintas fuentes.
+
+  
 
 En una API REST de libros, si queremos obtener información sobre un libro en particular (cuyo `id` conocemos) y su autor deberíamos primero hacer un `GET` a este endpoint:
 
