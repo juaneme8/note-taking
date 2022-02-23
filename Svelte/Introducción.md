@@ -1213,6 +1213,10 @@ En `App.svelte`
 
 # Transiciones
 
+Las transiciones determinan el modo en que los elementos son agregados o eliminados del DOM. 
+
+Sólo es posible agregar transiciones sobre elementos HTML, por lo que en ocasiones convendrá ponerle un `div` rodeando al componente que queremos colocarle dicha transición.
+
 ```
  import { fade, scale } from 'svelte/transition'
  
@@ -1223,9 +1227,60 @@ En `App.svelte`
  {/each}
 ```
 
+> Otra transición disponible es `slide`.
+>
 > En este caso estamos configurando una transición de entrada entrada (in) que será `scale` y una de salida (out) de `fade` a la cual además le establecemos propiedades de duración. 
 >
 > Si quisiéramos que fuera con un fade igual para entrada y salida podríamos haber puesto directamente `transition: fade`
+
+
+
+Si queremos que la transición de salida sólo se produzca cuando afectamos localmente a un elemento (por ejemplo cuando lo eliminamos a ese y no cuando los ocultamos a todos) debemos agregar `out:scale|local`
+
+
+
+# Animaciones
+
+Si queremos que al eliminar un elemento el resto se reorganicen de manera animada, podemos hacerlo utilizando animaciones.
+
+En primer lugar importamos `import {flip} from 'svelte/animate'` y luego agregamos `animate:flip={{duration:500}}`
+
+```
+ import { fade, scale } from 'svelte/transition'
+ import {flip} from 'svelte/animation
+ 
+ {#each feedback as fb (fb.id)}
+ 	<div in:scale out:fade="{{ duration: 500 }} animate:flip={{duration:500}}">
+ 		<FeedbackItem item={fb} />
+ 	</div>
+ {/each}
+```
+
+
+
+# Tweens
+
+Los tweens nos permiten generar frames para los movimientos para evitar tener un salto rápido entre un punto de inicio y uno de fin.
+
+Un tween es similar a un store writable. Tenemos `const value = tweened(0)` y con `tweened(0)` le pasamos el valor inicial y lo almacenamos en `value`. 
+
+Luego con `$value` es como si nos estuviéramos suscribiendo automáticamente a un store. Luego al hacerle click con `value.set(1)` reemplazamos el valor actual por 1, pero esto no lo hará de manera inmediata sino que nos dará una serie de valores intermedios que podremos ver en el texto del botón.
+
+```
+import {tweened} from 'svelte/motion'
+
+const value = tweened(0)
+
+<button on:click={()=> value.set(1)}>{$value}</value>
+```
+
+
+
+Si tenemos un porcenaje que varía y queremos ajustar el ancho de un elemento de acuerdo a ese ancho, podemos hacer un tween `const tweenedA = tweened(0);` que se vea actualizado cada vez que el porcentaje cambia con un valor reactivo `$: tweenedA.set(percentA);`.
+
+Por último luego el ancho luego lo establecemos en función de este tween store con `style="width: {$tweenedA}%"`.
+
+Si queremos mostrar en la consola el valor actualizado con todos los puntos intermedios `$:console.log($tweenedA)`
 
 
 
@@ -1312,32 +1367,6 @@ Otra forma más simple (la desuscripción será automática cuando el componente
 {/each}
 ```
 
-
-
-## Eliminar Items de Store
-
-Anteriormente vimos que para eliminar un elemento de la lista debíamos usar custom events para elevar las props.
-
-Ahora esto no será necsario y podremos alterar el store desde el `Item`
-
-```vue
-<script>
-const handleDelete = (itemId) => {
-    FeedbackStore.update((currentFeedback) => {
-      return currentFeedback.filter(item => item.id != itemId)
-    })
-  }
-</script>
-
-<button class="close" on:click={() => handleDelete(item.id)}>X</button>
-```
-
-
-
-> Veremos que `List.svelte` y `App.svelte` nos quedan ahora mucho mas limpios sin el `on:delete-feedback`
-
-
-
 ## Agregar Items a Store
 
 Una forma de hacerlo es con eventos custom y pasando las props hacia arriba hasta llegar a `App` que tiene el array de elementos. Sin embargo, utilizando stores esto es mucho mas simple y podemos hacerlo desde el formulario en el cual tengamos el elemento a agregar.
@@ -1364,6 +1393,30 @@ Una forma de hacerlo es con eventos custom y pasando las props hacia arriba hast
 
 </form>
 ```
+
+
+
+## Eliminar Items de Store
+
+Anteriormente vimos que para eliminar un elemento de la lista debíamos usar custom events para elevar las props.
+
+Ahora esto no será necsario y podremos alterar el store desde el `Item`
+
+```vue
+<script>
+const handleDelete = (itemId) => {
+    FeedbackStore.update((currentFeedback) => {
+      return currentFeedback.filter(item => item.id != itemId)
+    })
+  }
+</script>
+
+<button class="close" on:click={() => handleDelete(item.id)}>X</button>
+```
+
+
+
+> Veremos que `List.svelte` y `App.svelte` nos quedan ahora mucho mas limpios sin el `on:delete-feedback`
 
 
 
@@ -1485,7 +1538,7 @@ A continuación mostramos un ejemplo de un componente `Button.svelte` (que ubica
 </style>
 ```
 
-> :red_circle: Atención con el `on:click`
+> :warning: Notar que tenemos un `on:click` para hacer *event forwading* pues de lo contrario no nos funcionaría si tenemos  `<Button on:click={handleClick}/>` dado que el button no nos estaría haciendo llegar ese evento.
 
 # Validaciones
 
