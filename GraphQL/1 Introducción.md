@@ -8,13 +8,19 @@
 
 * GraphQL es **lenguaje de consultas**. **Graph** significa grafo y **QL** query language.
 
-* Permite la **comunicación de datos entre servidor y cliente** (navegador).
+* Es un lenguaje utilizado para obtener datos de una API.
+
+* Es considerado una capa entre el frontend y el backend. A diferencia de SQL por ejemplo que es entre el backend y la DB.
+
+* Permite la **comunicación de datos entre servidor y cliente** (navegador). 
 
 * **Código abierto**.
 
 * **Creado por Facebook**.
 
 * Es **utilizable en múltiples lenguajes de programación**. 
+
+* Es *platform agnostic* esto significa que no es necesario usarlo con una tecnología en particular (puede usarse con React, Angular, Vue, etc).
 
 * Es **flexible y eficiente** comparado con el enfoque RESTful.
 
@@ -144,23 +150,23 @@ En este proyecto tendremos un backend (servidor), un frontend y una base de dato
 
 **El servidor consistirá en una Express App + GraphQL Server** donde describiremos cómo está compuesto el graph, indicando sus relaciones y los distintos tipos de entrada.
 
-GraphQL es *platform agnostic* esto significa que no es necesario usarlo con una tecnología en particular (puede usarse con React, Angular, Vue, etc). En nuestro caso consistirá en una aplicación React y en ella utilizando **Apollo como cliente GraphQL** haremos queries al server GraphQL para obtener datos y mostrarlos en el navegador. 
+El proyecto consistirá en una aplicación React y en ella utilizando **Apollo como cliente GraphQL** haremos queries al server GraphQL para obtener datos y mostrarlos en el navegador. 
 
 
 
-> :information_source: **Graphiql** es como una dummy frontend application que nos permite hacer requests al server GraphQL
+> :information_source: **GraphiQL** es como una dummy frontend application que nos permite hacer requests al server GraphQL. Podremos ver un ejemplo de cómo se realizan las consultas con GraphiQL en https://api.spacex.land/graphql/
 
 
 
 # Proyecto
 
-Utilizaremos Apollo por un lado con **Apollo Server** y también Apollo Client (con React).
+Utilizaremos **Apollo** por un lado con **Apollo Server** y también **Apollo Client** (con React).
 
 Desde la aplicación web haremos la petición utilizando GraphQL que llegará a Apollo y será este quien se encargará de buscar la información a una REST API, microservicios o base de datos.
 
 
 
-# Servidor
+# Servidor con Apollo Server
 
 ```
 mkdir md-graphql-server
@@ -169,16 +175,26 @@ npm init -y
 npm i apollo-server graphql 
 ```
 
-
-
-En `package.json` agregamos `"type":"module"` para utilizar ECMAScript Modules.
+> En `package.json` agregamos `"type":"module"` para utilizar ECMAScript Modules, de este modo podremos utilizar `import {gql} from 'apollo-server'`.
 
 
 
-Creamos un archivo `index.js` donde tenemos array de objetos `people` con los datos que luego serán de una API o una DB. `typeDefs` que es la descripción de estos datos y de las peticiones que se pueden hacer. Por último en `resolvers` indicamos cómo serán resueltas estas queries.
+:link: En la documentación encontramos los primeros pasos explicados claramente: https://www.apollographql.com/docs/apollo-server/getting-started/
+
+
+
+Creamos un archivo `index.js` con los siguientes elementos:
+
+* `people`que es un array de objetos con los datos simulando una base de datos en memoria que luego vendrán de una API o una DB. 
+
+* `typeDefs` que es la descripción de estos datos y de las peticiones que se pueden hacer. 
+
+* `resolvers` donde indicamos cómo serán resueltas estas queries.
+
+  Luego creamos el Apollo Server y comenzamos a escuchar peticiones entrantes.
 
 ```javascript
-import {gql} from 'apollo-server'
+import {gql, ApolloServer} from 'apollo-server'
 
 const people = [
 	{
@@ -197,6 +213,8 @@ const people = [
 ]
 
 const typeDefs = gql`
+	# Comentario en un String de GraphQL
+	
 	type Person{
         name: String!
         phone: String
@@ -208,7 +226,6 @@ const typeDefs = gql`
 	type Query{
 		personCount: Int!
 		allPeople: [Person]!
-		findPerson(name:String!):Person
 	}
 `
 
@@ -216,10 +233,6 @@ const resolvers={
     Query:{
         personCount: () => people.length,
         allPeople: () => people
-        findPerson: (root, args) => {
-    		const {name} = args;
-			return people.find(person => peroson.name===name)
-		}
     }
 }
 
@@ -229,7 +242,7 @@ const server= new ApolloServer({
 })
 
 server.listen().then(({ url }) => {
-	console.log(`Server ready at ${url}`)
+	console.log(`🚀 Server ready at ${url}`)
 }); 
 ```
 
@@ -237,19 +250,24 @@ server.listen().then(({ url }) => {
 
 
 
+Para leventar el servidor ejecutamos `node index.js` o bien si queremos correrlo con nodemon `npx nodemon index.js` (atención en las mutaciones si estamos trabajando con nodemon)
+
+A partir de la versión 3 de `apollo-server` cuando vayamos http://localhost:4000/ a nos redireccionará a https://studio.apollographql.com/. Si queremos en cambio trabajar con **GraphQL Playground** podemos instalar las siguientes versiones: 
+
+```
+"apollo-server": "2.24.0",
+"graphql": "15.5.0"
+```
 
 
-Para leventar el servidor ejecutamos `node index.js` y si ingresamos a `localhost:4000` podremos acceder al **GraphQL Playground**. 
-
-> A partir de la versión 3 de `apollo-server` nos redireccionará a https://studio.apollographql.com/.
-
-
-
-## Sandbox
 
 > :memo: Con `CONTROL+SPACE` tendremos un autocompletado del comando que podemos ejecutar. La primera vez nos sugerirá entre query, mutation, luego si ponemos `query {}` y volvemos a presionarlo nos sugerirá las posibles queries a ejecutar.
 
 
+
+## Ejecutar Queries
+
+### :balloon: `personCount`
 
 ```
 query{
@@ -260,6 +278,18 @@ query{
 Obtenemos un objeto con la propiedad `data` que también es un objeto que cuenta con una propiedad `personCount`
 
 
+
+```
+{
+  "data": {
+    "personCount": 2
+  }
+}
+```
+
+
+
+### :balloon: `allPeople`
 
 En cuanto a `allPeople` no podríamos poner directamente 
 
@@ -275,30 +305,65 @@ Cuando retorna un objeto (en este caso un array de objetos) debemos indicarle lo
 query{
 	allPeople{
 		name
+		phone
 	}
 }
 ```
 
 :warning: Cuando un campo no está disponible para uno de los objetos, el valor obtenido es `null`.
 
+```
+{
+  "data": {
+    "allPeople": [
+      {
+        "name": "Midu",
+        "phone": "034-1234567"
+      },
+      {
+        "name": "Youseff",
+        "phone": null
+      }
+    ]
+  }
+}
+```
+
 
 
 ## Query con Parámetros
 
-Es posible tener una query con parámetros por ejemplo un caso en el que recibimos un argumento String que será requerido y retornamos un objeto `Person`. 
+Es posible tener una query con parámetros por ejemplo un caso en el que recibimos un argumento String que será requerido y retornamos un objeto `Person`. Por lo tanto en `typeDefs` dentro de `Query`
 
-```
-findPerson(name:String!):Person
+```javascript
+const typeDefs = gql`
+	type Person{
+	
+	}
+	type Query{
+		findPerson(name:String!):Person
+	}
+`
 ```
 
-En el resolver vemos que recibimos en primer lugar el parámetro `root` y luego `args`. Utilizando `args.name` buscamos en el array el valor deseado.
+> :memo: Notar que ponemos como tipo de dato devuelto `Person` y no `Person!` pues puede darse un caso en el que busquemos a alguien que no exista y nos debería retornar `null`.
 
-```
-findPerson: (root, args) => {
+En el resolver vemos que recibimos en primer lugar el parámetro `parent` y luego `args`. Utilizando `args.name` buscamos en el array el valor deseado.
+
+```javascript
+const resolvers={
+    Query:{
+        findPerson: (parent, args, context, info) => {
     		const {name} = args;
-			return people.find(person => person.name===name)
+			return people.find(person => peroson.name===name)
 		}
+    }
+}
 ```
+
+
+
+### :balloon:`findPerson`
 
 Para probar el funcionamiento de esta query
 
@@ -309,6 +374,10 @@ query{
   }
 }
 ```
+
+> :memo: Notar el uso de comillas dobles a la hora de pasar parámetros.
+
+
 
 En lo que obtendremos 
 
@@ -322,7 +391,7 @@ En lo que obtendremos
 }
 ```
 
-Si buscamos algo que no existe 
+Si buscamos una persona que no existe 
 
 ```
 query{
@@ -342,19 +411,233 @@ Obtendremos en cambio
 }
 ```
 
-> En este caso podremos trabajar con optional chaining `person?.phone` para no tener inconvenientes.
+> En este caso podremos trabajar con optional chaining `person?.phone` para no tener inconvenientes. 
 
 
 
-En cambio si buscamos a alguien que si existe pero que no tiene un teléfono cargado:
+## Resolvers
+
+Apollo utiliza los resolvers para cómo popular cada campo y así poder responder las consultas. 
+
+Un resolver es una función responsable de popular la data de un campo del esquema.
+
+Si no definimos ninguno utilizará el *default resolver* como podemos ver a continuación
+
+
 
 ```
-{
-  "data": {
-    "findPerson": {
-      "phone": null
-    }
-  }
+const resolvers = {
+	Query:{
+	
+	}
+	Person:{
+		name: (parent) => parent.name
+	}
 }
 ```
 
+Vemos `name: (parent) => parent.name` y lo mismo para cada campo es lo que sucede por defecto.
+
+En este caso `parent` hace referencia a la persona que hemos encontrado en la query (ya sea `findPerson` o `allPeople`)
+
+
+
+Esto podría ser útil para incorporar información
+
+```
+const resolvers = {
+	Query:{
+	
+	}
+	Person:{
+		address: (parent) => `${parent.stree} ${parent.city}`,
+		check: () => 'test'
+	}
+}
+```
+
+Por ejemplo `address` es un cálculo sobre información que tengo (con lo que podemos extrar lógica que normalmente haríamos en el cliente) y `check` es un campo que devuelve un valor fijo.
+
+
+
+Esto debemos agregarlo al tipo de Person.
+
+```
+type Person{
+        name: String!
+        phone: String
+        street:String!
+        city:String!
+        id: ID!
+        address: String!
+        check: String!
+}
+```
+
+> Ambos parámetros son required uno porque es basado en otros required y el otro porque sabemos que estará siempre disponible.
+
+
+
+Con GraphQL buscamos que los datos puedan ser consumidos de manera más simple independientemente de cómo están almacenados en la base de datos. Si queremos poder hacer una consulta de este tipo:
+
+
+
+```
+query{
+	findPerson(name:"Itzi"){
+		name
+		phone
+		id
+		address{
+			street
+			city
+		}
+	}
+}
+```
+
+
+
+Debemos modificar la descripción de Person
+
+```
+const typeDefs = gql`
+	type Address {
+		street:String!
+		city: String!
+	}
+	type Person{
+		name:String!
+		phone:String
+		address: Address!
+		id:ID!
+	}
+	
+	type Query{
+		findPerson(name:String!):Person
+	}
+`
+```
+
+
+
+Luego en resolvers:
+
+
+
+```
+const resolvers={
+	Query:{
+		...
+	}
+	Person:{
+		address: (parent) => {
+			return {
+				street: parent.street,
+				city: parent.city
+			}
+		}
+	}
+}
+```
+
+En el ejemplo anterior queda en claro que los datos almacenados en la db y su forma no tiene por qué ser la misma que el modo en que son consultados y devueltos al cliente luego.
+
+
+
+## Mutations
+
+```
+const typeDefs = gql`
+	type Person{
+	
+	}
+	type Query{
+	
+	}
+	type Mutation{
+		addPerson(
+			name: String!
+			phone: String
+			stret: String!
+			city: String!
+		): Person
+			
+		
+	}
+`
+```
+
+> :memo: Notar que `street` y `city` se lo pasamos por parámetro al mismo nivel aunque luego la consulta la manejamos de otro modo (con `address`). 
+>
+> Estamos devolviendo la persona agregada. Esto es importante por el modo en que Apollo maneja la caché, lo guarda en la cache local mientras lo refleja en la base de datos.
+
+
+
+El id lo generamos con la librería uuid
+
+```
+import {v1 as uuid} from 'uuid'
+```
+
+
+
+Luego en el `resolver`
+
+```
+const resolver = {
+	Query:{
+	
+	}
+	Mutation:{
+		addPerson: (parent, args) => {
+			const person = [id: uuid(),...args]
+			people.push(person) //simulamos una actualización de la DB
+			return person
+		}
+	}
+
+}
+```
+
+Con `return person` nos aseguramos devolver la persona como dijimos anteriormente.
+
+
+
+Para probar esta mutación en el Playground.
+
+```
+mutation{
+	addPerson(
+		name: "Juan"
+		phone: "123 123"
+		stret: "Calle 1"
+		city: "CABA"
+		
+	){
+		name
+		address{
+			street
+			city
+		}
+	}
+}
+```
+
+Como hemos puesto que la mutación devuelva una persona debemos indicar también qué campos queremos extraer con `{}`. Notar que podemos obtener `address` pues estamos devolviendo un `Person` 
+
+
+
+:memo: En el Playground podremos notar que tenemos un único endpoint si presionamos en `COPY CURL` sea cual sea la operación realizada query o mutación haremos un POST a ese endpoint.
+
+
+
+## Validaciones
+
+Queremos evitar que una persona con el mismo nombre sea añadida varias veces. Esto lo hacemos en el resolver.
+
+
+
+## Manejo de Errores
+
+https://www.apollographql.com/docs/apollo-server/data/errors/

@@ -78,9 +78,9 @@ El comando `git ls-files` nos permite obtener los archivos que están siendo tra
 
 # `git checkout`
 El comando `git checkout` nos permite traer al *working directory* los cambios que tenemos en un determinado commit.
-Si queremos gitobtener el archivo `historia.txt` que teníamos en el commit cuyo id es `6ab4581...` debemos ingresar `git checkout 6ab4581... historia.txt`. En ese momento si hacemos `git status` nos aparecerá como que lo hemos modificado y si hiciéramos commit volveríamos al valor que tenía anteriormente. Si en cambio una vez que lo vimos queremos volver a `main` hacemos `git checkout main historia.txt`
+Si queremos obtener el archivo `historia.txt` que teníamos en el commit cuyo id es `6ab4581...` debemos ingresar `git checkout 6ab4581... historia.txt`. En ese momento si hacemos `git status` nos aparecerá como que lo hemos modificado y si hiciéramos commit volveríamos al valor que tenía anteriormente. Si en cambio una vez que lo vimos queremos volver a `main` hacemos `git checkout main historia.txt`
 
-> Cuando hacemos `git checkout` veremos un mensaje *dettached HEAD* lo cual nos da la pauta que estamos viendo un commit viejo.
+> Cuando hacemos `git checkout` veremos un mensaje *dettached HEAD* lo cual nos da la pauta que estamos viendo un commit viejo. Cuando terminemos de ver lo que queremos con `git checkout master` podríamos volver al estado inicial.
 
 También `git checkout` es útil si a su vez queremos revertir cambios y llevar al archivo a su último estado presente en el repositorio Git, debemos ingresar `git checkout -- README.md`
 
