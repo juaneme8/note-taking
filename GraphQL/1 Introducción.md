@@ -1,4 +1,4 @@
-# GraphQL
+## GraphQL
 
 > Basado en [curso](https://www.youtube.com/watch?v=Y0lDGjwRYKw&list=PL4cUxeGkcC9iK6Qhn-QLcXCXPQUov1U7f) The Net Ninja
 
@@ -348,7 +348,9 @@ const typeDefs = gql`
 
 > :memo: Notar que ponemos como tipo de dato devuelto `Person` y no `Person!` pues puede darse un caso en el que busquemos a alguien que no exista y nos debería retornar `null`.
 
-En el resolver vemos que recibimos en primer lugar el parámetro `parent` y luego `args`. Utilizando `args.name` buscamos en el array el valor deseado.
+En el resolver vemos que recibimos en primer lugar el parámetro `parent` (es para cuando una consulta está adentro de otra, luego `args`, `context` e `info`.
+
+ Utilizando `args.name` buscamos en el array el valor deseado.
 
 ```javascript
 const resolvers={
@@ -547,6 +549,8 @@ En el ejemplo anterior queda en claro que los datos almacenados en la db y su fo
 
 ## Mutations
 
+### :balloon: `addPerson`
+
 ```
 const typeDefs = gql`
 	type Person{
@@ -641,3 +645,267 @@ Queremos evitar que una persona con el mismo nombre sea añadida varias veces. E
 ## Manejo de Errores
 
 https://www.apollographql.com/docs/apollo-server/data/errors/
+
+
+
+# Servidor con Express y Apollo
+
+> Basado en el [video](https://www.youtube.com/watch?v=fIZxZk_szWw) de Fazt
+
+Si bien podríamos trabajar directamente con Apollo Server, utilizamos Express y Express Apollo Server ya que es útil tener la posibilidad de tener una REST API además de la GraphQL API en el mismo servidor.
+
+```
+npm i express apollo-server-express graphql
+```
+
+
+
+Adicionalmente instalamos
+
+```
+npm i dotenv mongoose
+```
+
+
+
+> En cuanto a la estructura en ocasiones trabajamos sobre una carpeta `src`, pero en este caso lo haremos en la raíz.
+
+* `app.js`
+
+* `db.js`
+* `typeDefs.js`
+* `resolvers.js` 
+
+
+
+> :package: Instalamos la extensión GraphQL de GraphQL Foundation.
+
+
+
+En `app.js`.
+
+* Creamos un servidor de Express.
+
+* En `/` creamos una ruta de la REST API que muestra un mensaje de bienvenida.
+* `ApolloServer` es un wrapper utiliza el servidor que creamos y lo extiende. Creamos un nuevo objeto `ApolloServer` y le pasamos `typeDefs` y `resolvers` `const server = new ApolloServer({ typeDefs, resolvers });`. Luego con el objeto creado utilizamos el método `start` que devuelve una promesa (para usar `await` lo colocamos en una función `async`). `await server.start();` Por último lo asociamos al servidor express para que extienda sus funcionalidades `server.applyMiddleware({ app });`
+* En caso de ingresar a otra dirección distinta de `/` o `/graphql` mostraremos un mensaje de "not found" y entregamos un 404. Lo hacemos después de `  server.applyMiddleware({ app });` para que nos permita ingresar a `/graphql`
+
+```javascript
+const express = require('express');
+
+const { typeDefs } = require('./typeDefs');
+const { resolvers } = require('./resolvers');
+const { ApolloServer } = require('apollo-server-express');
+
+const start = async () => {
+  const app = express();
+
+  app.get('/', (req, res) => {
+    res.send('Hello World');
+  });
+
+
+  const server = new ApolloServer({ typeDefs, resolvers });
+
+  await server.start();
+  server.applyMiddleware({ app });
+
+  app.use((req, res, next) => {
+    res.status(404).send('404: Page not found');
+  });
+
+  app.listen(3000, () => {
+    console.log('Listening on Port 3000');
+  });
+};
+
+start();
+```
+
+
+
+## Integración con MongoDB
+
+> :notebook: En lugar de instalarlo o usar MongoDB Atlas podemos utilizar una imagen Docker de Mongo.
+
+
+
+En `db.js` creamos y exportamos la función asíncrona `connectDB` que utiliza el método `connect` de mongoose.
+
+```javascript
+const { connect } = require('mongoose')
+
+const connectDB = async () => {
+  try {
+    await connect(
+      "mongodb://localhost/tasksdb"
+    );
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+module.exports = { connectDB };
+```
+
+
+
+Luego en `index.js` importamos `connectDb` y lo invocamos.
+
+```
+const app = express();
+connectDB();
+```
+
+> Lo hacemos al principio para darle tiempo a conectar mientras hacemos las otras tareas de Express y Apollo.
+
+
+
+## CRUD
+
+En `models` creamos un archivo `Task.js` con el esquema de datos que almacenaremos en MongoDB y un modelo que luego exportamos ya que lo usaremos en el código para interactuar con la base de datos.
+
+```js
+const { Schema, model } = require('mongoose');
+
+const taskSchema = new Schema({
+  title: {
+    type: String,
+    required: true,
+  },
+  description: String
+});
+
+module.exports = model('Task', taskSchema);
+```
+
+
+
+### :gift: Listado de Tareas
+
+Queremos generar una query `getAllTasks` que devuelva todas las tareas disponibles en la DB. Por lo tanto debemos editar `typeDefs.js` definiendo el tipo de datos `Task` y la query `getAllTasks` que devuelve `[Task]`
+
+```js
+const { gql } = require('apollo-server-express');
+
+const typeDefs = gql`
+  type Task {
+    id: ID!
+    title: String!
+    description: String
+  }
+
+  type Query {
+    hello: String
+    getAllTasks: [Task]
+  }
+`;
+
+module.exports = { typeDefs };
+```
+
+
+
+A continuación editamos `resolvers.js` agregando qué debemos hacer cuando recibamos la query `getAllTasks`. Importamos el modelo, con el buscamos todos los elementos de dicha colección y los retornamos.
+
+
+
+```js
+const Task = require('./models/Task.js');
+
+const resolvers = {
+  Query: {
+    hello: () => 'Hello World',
+    getAllTasks: async () => {
+      return await Task.find({})
+    }
+  }
+}
+
+module.exports = {resolvers}
+```
+
+> Para probar que todo funciona podemos abrir MongoDB Compass y agregar un documento manualmente.
+
+
+
+### :gift: Agregado de Tarea
+
+Queremos crear una mutación `addTask` capaz de agregar una nueva tarea. Para ello primero editamos `typeDefs.js` y luego `resolvers.js`
+
+```
+const { gql } = require('apollo-server-express');
+
+const typeDefs = gql`
+  type Task {
+    id: ID!
+    title: String!
+    description: String
+  }
+
+  type Query {
+    hello: String
+    getAllTasks: [Task]
+  }
+
+  type Mutation {
+    createTask(title:String, description:String):Task
+  }
+`;
+
+module.exports = { typeDefs };
+```
+
+> :scream: A la hora de definir el tipo `Task` hemos dicho que tendrá un `id`. Tener presente que si bien en MongoDB contamos con `_id` gracias a Mongoose podremos usar `_id` o `id` ya que ambos tienen el mismo valor.
+
+> El tipo `ID` nos da la flexibilidad de que puede ser un entero o un string.
+
+
+
+En `resolvers.js`
+
+```javascript
+const Task = require('./models/Task.js');
+
+const resolvers = {
+  Query: {
+    hello: () => 'Hello World',
+    getAllTasks: async () => {
+      return await Task.find({})
+    }
+  },
+  Mutation: {
+    createTask: async (_, args) => {
+      const { title, description } = args;
+      const newTask = new Task({ title, description })
+      await newTask.save();
+      return newTask;
+    }
+  }
+}
+
+module.exports = {resolvers}
+```
+
+> Notar que al parámetro  `parent` como no lo vamos a utilizar lo nombramos como `_`. Además a `context` e `info` tampoco los usaremos.
+
+
+
+Luego en el Sandbox indicamos las características del documento a agregar:
+
+```
+mutation{
+  createTask(
+    title:"My task", 
+    description:"this is my task"
+    )
+    {
+      id
+    }
+}
+```
+
+
+
+### :gift: Listar una Tarea
+
