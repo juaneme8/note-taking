@@ -427,7 +427,7 @@ Si no definimos ninguno utilizará el *default resolver* como podemos ver a cont
 
 
 
-```
+```js
 const resolvers = {
 	Query:{
 	
@@ -446,7 +446,7 @@ En este caso `parent` hace referencia a la persona que hemos encontrado en la qu
 
 Esto podría ser útil para incorporar información
 
-```
+```js
 const resolvers = {
 	Query:{
 	
@@ -464,7 +464,7 @@ Por ejemplo `address` es un cálculo sobre información que tengo (con lo que po
 
 Esto debemos agregarlo al tipo de Person.
 
-```
+```js
 type Person{
         name: String!
         phone: String
@@ -502,7 +502,7 @@ query{
 
 Debemos modificar la descripción de Person
 
-```
+```js
 const typeDefs = gql`
 	type Address {
 		street:String!
@@ -527,7 +527,7 @@ Luego en resolvers:
 
 
 
-```
+```js
 const resolvers={
 	Query:{
 		...
@@ -551,7 +551,7 @@ En el ejemplo anterior queda en claro que los datos almacenados en la db y su fo
 
 ### :balloon: `addPerson`
 
-```
+```js
 const typeDefs = gql`
 	type Person{
 	
@@ -588,7 +588,7 @@ import {v1 as uuid} from 'uuid'
 
 Luego en el `resolver`
 
-```
+```js
 const resolver = {
 	Query:{
 	
@@ -781,7 +781,7 @@ module.exports = model('Task', taskSchema);
 
 
 
-### :gift: Listado de Tareas
+### :rocket: Listado de tareas
 
 Queremos generar una query `getAllTasks` que devuelva todas las tareas disponibles en la DB. Por lo tanto debemos editar `typeDefs.js` definiendo el tipo de datos `Task` y la query `getAllTasks` que devuelve `[Task]`
 
@@ -829,11 +829,11 @@ module.exports = {resolvers}
 
 
 
-### :gift: Agregado de Tarea
+### :rocket: Agregado de tarea
 
 Queremos crear una mutación `addTask` capaz de agregar una nueva tarea. Para ello primero editamos `typeDefs.js` y luego `resolvers.js`
 
-```
+```javascript
 const { gql } = require('apollo-server-express');
 
 const typeDefs = gql`
@@ -888,8 +888,8 @@ module.exports = {resolvers}
 ```
 
 > Notar que al parámetro  `parent` como no lo vamos a utilizar lo nombramos como `_`. Además a `context` e `info` tampoco los usaremos.
-
-
+>
+> En este caso hicimos destructuring de este modo `const { title, description } = args;` pero también podríamos haberlo hecho al recibir `args` es decir ` createTask: async (_, {title, description})`
 
 Luego en el Sandbox indicamos las características del documento a agregar:
 
@@ -905,7 +905,379 @@ mutation{
 }
 ```
 
+ 
+
+### :rocket: Listar una tarea
+
+Queremos agregar la query `getTask` que recibe por parámetro el id de la tarea a listar. 
+
+Lo primero que hacemos es modificar `typeDefs.js` agregando al tipo query a `getTask(id:ID):Task`
+
+```js
+const { gql } = require('apollo-server-express');
+
+const typeDefs = gql`
+  type Task {
+    id: ID!
+    title: String!
+    description: String
+  }
+
+  type Query {
+    hello: String
+    getAllTasks: [Task]
+    getTask(id:ID):Task
+  }
+
+  type Mutation {
+    createTask(title:String, description:String):Task
+  }
+`;
+
+module.exports = { typeDefs };
+
+```
+
+Luego modificamos `resolvers.js` agregando el método `getTask` del objeto `Query`.
+
+```js
+const Task = require('./models/Task.js');
+
+const resolvers = {
+  Query: {
+    hello: () => 'Hello World',
+    getAllTasks: async () => {
+      return await Task.find({})
+    },
+    getTask: async (_, args) => {
+      //console.log({args})
+      const task = await Task.findById(args.id)
+      return task;
+    }
+  },
+  Mutation: {
+    createTask: async (_, args) => {
+      const { title, description } = args;
+      const newTask = new Task({ title, description })
+      await newTask.save();
+      return newTask;
+    }
+  }
+}
+
+module.exports = {resolvers}
+```
+
+> Notar que colocamos `console.log({args})` para chequear que el parámetro esté llegando de manera correcta.
+>
+> En lugar de definir `getTask` como una propiedad, podemos utilizar ES6 method definition:
+
+```
+async getTask(id){
+	return
+}
+```
 
 
-### :gift: Listar una Tarea
+
+Con el sandbox probamos esta query con:
+
+```
+query{
+  getTask(id:"621ae5afa432eb01e861604a") {
+    title
+  }
+}
+```
+
+
+
+### :rocket: Eliminar una tarea
+
+Queremos agregar la query `removeTask` que recibe por parámetro el id de la tarea a eliminar. 
+
+Lo primero que hacemos es modificar `typeDefs.js` agregando al tipo query a `removeTask(id:ID):Task`. Notar que además de eliminarla queremos retornarla. Otra opción sería retornar un mensaje de tipo string.
+
+En `typeDefs.js` agregamos al tipo de mutación `removeTask(id:ID):Task`
+
+```javascript
+const { gql } = require('apollo-server-express');
+
+const typeDefs = gql`
+  type Task {
+    id: ID!
+    title: String!
+    description: String
+  }
+
+  type Query {
+    hello: String
+    getAllTasks: [Task]
+    getTask(id:ID):Task
+  }
+
+  type Mutation {
+    createTask(title:String, description:String):Task
+    removeTask(id:ID!):Task
+  }
+`;
+
+module.exports = { typeDefs };
+
+```
+
+
+
+En `resolvers.js`
+
+```js
+const Task = require('./models/Task.js');
+
+const resolvers = {
+  Query: {
+    hello: () => 'Hello World',
+    getAllTasks: async () => {
+      return await Task.find({})
+    },
+    getTask: async (_, args) => {
+      // console.log({args})
+      const { id } = args;
+      const task = await Task.findById(id)
+      return task;
+    },
+  },
+  Mutation: {
+    createTask: async (_, args) => {
+      const { title, description } = args;
+      const newTask = new Task({ title, description })
+      await newTask.save();
+      return newTask;
+    },
+    removeTask: async (_, args) => {
+      const { id } = args;
+      const task = await Task.findByIdAndDelete(id)
+      return task;
+    }
+  }
+}
+
+module.exports = {resolvers}
+```
+
+
+
+Luego para probar la mutación en el sandbox:
+
+```
+mutation{
+  removeTask(id:"621ae5afa432eb01e861604a") {
+    title
+  }
+}
+```
+
+
+
+#### Uso de type
+
+En `typeDefs` hemos indicado que por ejemplo a la hora de crear una tarea en `createTask` esperamos recibir un `title` y una `description`, podríamos haber utilizado `input` como veremos a continuación.
+
+```js
+const { gql } = require('apollo-server-express');
+
+const typeDefs = gql`
+  type Task {
+    id: ID!
+    title: String!
+    description: String
+  }
+
+  type Query {
+    hello: String
+    getAllTasks: [Task]
+    getTask(id:ID):Task
+  }
+
+  input TaskInput{
+    title: String
+    description: String
+  }
+
+  type Mutation {
+    createTask(task:TaskInput):Task
+    removeTask(id:ID):Task
+  }
+`;
+
+module.exports = { typeDefs };
+
+```
+
+
+
+Será necesario cambiar el modo en que recibimos datos en `resolvers.js` principalmente cambiamos `const { title, description } = args` por `const { title, description } = args.task;`
+
+```js
+const Task = require('./models/Task.js');
+
+const resolvers = {
+  Query: {
+    hello: () => 'Hello World',
+    getAllTasks: async () => {
+      return await Task.find({})
+    },
+    getTask: async (_, args) => {
+      // console.log({args})
+      const { id } = args;
+      const task = await Task.findById(id)
+      return task;
+    },
+  },
+  Mutation: {
+    createTask: async (_, args) => {
+      const { title, description } = args.task;
+      const newTask = new Task({ title, description })
+      await newTask.save();
+      return newTask;
+    },
+    removeTask: async (_, args) => {
+      const { id } = args;
+      const task = await Task.findByIdAndDelete(id)
+      return task;
+    }
+  }
+}
+
+module.exports = {resolvers}
+```
+
+También tendremos que cambiar el modo en que hacemos la mutación en el sandbox:
+
+```
+mutation{
+	createTask(
+        task:{
+            title:"My last task", 
+            description:"this is my task"
+        }
+	)
+    {
+      id
+    }
+}
+```
+
+
+
+### :rocket: Actualizar una tarea
+
+Vamos a crear `updateTask` que recibe por un lado un `id` y además un objeto de tipo `task` como el definido anteriormente.
+
+En `typeDefs.js`
+
+```js
+const { gql } = require('apollo-server-express');
+
+const typeDefs = gql`
+  type Task {
+    id: ID!
+    title: String!
+    description: String
+  }
+
+  type Query {
+    hello: String
+    getAllTasks: [Task]
+    getTask(id:ID):Task
+  }
+
+  input TaskInput{
+    title: String
+    description: String
+  }
+
+  type Mutation {
+    createTask(task:TaskInput):Task
+    removeTask(id:ID!):Task
+    updateTask(id:ID!, task:TaskInput!):Task
+  }
+`;
+
+module.exports = { typeDefs };
+```
+
+> El tipo de dato devuelto no es `Task!` ya que puede que no encuentre la tarea buscada.
+
+En `resolvers.js`
+
+```js
+const Task = require('./models/Task.js');
+
+const resolvers = {
+  Query: {
+    hello: () => 'Hello World',
+    getAllTasks: async () => {
+      return await Task.find({})
+    },
+    getTask: async (_, args) => {
+      // console.log({args})
+      const { id } = args;
+      const task = await Task.findById(id)
+      return task;
+    },
+  },
+  Mutation: {
+    createTask: async (_, args) => {
+      const { title, description } = args.task;
+      const newTask = new Task({ title, description })
+      await newTask.save();
+      return newTask;
+    },
+    removeTask: async (_, args) => {
+      const { id } = args;
+      const task = await Task.findByIdAndDelete(id)
+      return task;
+    },
+    updateTask: async (_, {id, task}) => {
+      const { title, description } = task;
+      console.log(description)
+      const updatedTask = await Task.findByIdAndUpdate(id, { title, description }, { new: true })
+      return updatedTask;
+    }
+  }
+}
+
+module.exports = {resolvers}
+```
+
+Como queremos que nos devuelva la tarea nueva agregamos `{ new: true }` pues de lo contrario nos enviaría la vieja.
+
+Notar que podemos hacer **actualizaciones parciales** ya que de acuerdo a la documentación de Mongoose nos agrega el operador `$set` por defecto.
+
+```
+Model.findByIdAndUpdate(id, { name: 'jason bourne' }, options, callback)
+
+// is sent as
+Model.findByIdAndUpdate(id, { $set: { name: 'jason bourne' }}, options, callback)
+```
+
+>Esto significa que si estamos actualizando una tarea y solo le pasamos la descripción, el título no se verá afectado y seguirá siendo el que era.
+
+
+
+En el sandbox colocamos:
+
+```
+mutation{
+  updateTask(
+    id:"621aece0cfd39446c40096d0",
+    task:{
+      title:"Task updated 2",
+    }
+  ){
+    title
+    description
+  }
+}
+```
 
