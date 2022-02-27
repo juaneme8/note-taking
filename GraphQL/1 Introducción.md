@@ -1281,3 +1281,79 @@ mutation{
 }
 ```
 
+
+
+# Deploy 
+
+## Variables de Entorno
+
+Tenemos instalado el paquete dotenv, por lo que creamos un archivo `.env` con el siguiente contenido:
+
+```
+PORT=3000
+MONGODB_URI=mongodb://localhost/tasksdb
+```
+
+
+
+Luego agregamos a `.gitignore` tanto `.env` como `node_modules` ya que no queremos que formen parte del sistema de control de versiones.
+
+
+
+Luego en `index.js` colocamos al principio `require('dotenv').config();` y por último reemplazamos donde usamos el puerto por `process.env.PORT` y donde usamos la uri de Mongo DB por `process.env.MONGODB_URI`.
+
+
+
+## Sistema de Control de Versiones
+
+```
+git init
+git add .
+git commit -m "My first commit"
+```
+
+
+
+## Migración a MongoDB Atlas
+
+Hasta el momento utilizamos MongoDB instalado localmente pero para utilizar Heroku necesitamos subirlo a un servicio en la nube como MongoDB Atlas.
+
+Obtendremos una URL que usaremos como variable de entorno de Heroku.
+
+
+
+## Deploy en Heroku
+
+En el dashboard le damos un nombre por ejemplo **graphql-api** a la app y presionamos crear.
+
+A continuación debemos instalar heroku cli. Si queremos fijarnos la versión instalada lo hacemos con:
+
+```
+heroku --version
+```
+
+
+
+```
+heroku login
+heroku git remote -a graphql-api
+git push heroku main
+```
+
+> Notar que en la documentación Heroku sugiere `git push heroku master` asumiendo que es la rama `master` la que queremos deployar.
+
+
+
+En la sección Config Vars podremos configurar las variables de entorno (la variable `PORT` es asignada automaticamente por lo que no debemos definirla).
+
+
+
+En caso de que algo no funcione del modo esperado podremos ver los logs:
+
+```
+heroku logs --tail
+```
+
+
+
+Tener presente que al visitar la URL `/` veremos el mensaje de bienvenida pero en `/graphql` no veremos la interfaz, sino que tendremos que interactuar mediante Postman o una aplicación cliente por ejemplo usando Apollo Client.
