@@ -80,3 +80,53 @@ Array.from(str)
 Object.assign([], string);
 ```
 
+
+
+## Coercion
+
+> freecodecamp.org/news/js-type-coercion-explained-27ba3d9a2839
+>
+> https://www.oreilly.com/library/view/you-dont-know/9781491905159/ch04.html
+
+Si restamos dos arrays JavaScript intentará *coerce* ambos lados de la ecuación para que sean números.
+
+Esto aplica tanto si son números
+
+```
+[5]-[3] //2
+```
+
+Como si son string
+
+```
+["5"]-["3"] //2
+```
+
+o una mezcla de ambos
+
+```
+[5]-["3"] //2
+```
+
+
+
+Un uso interesante podría ser para restar lo devuelto por la substracción de la operación `match` (aunque este método devuelve un array con la forma de un objeto)
+
+```
+"5suy".match(/\d/)-"suy3".match(/\d/) //2
+```
+
+:warning: Amplicar con mas información.
+
+
+
+## `BigInt`
+
+Cuando tenemos que lidiar con enteros muy grandes podemos usar `BigInt`. Supongamos que los recibimos como string y queremos sumarlos
+
+```
+function sumStrings(a,b) { 
+  return (BigInt(a) + BigInt(b)).toString();
+}
+```
+

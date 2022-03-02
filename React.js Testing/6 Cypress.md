@@ -1,5 +1,7 @@
 # Cypress
 
+> Basado en el stream de Goncy sobre Adviency
+
 Cypress es un testing framework con el cual podremos crear **tests de integración** y **tests end to end**.
 
 Con ambos vamos a simular que somos un usuario y verificar que la interfaz funcione correctamente. La diferencia es que con los **tests end to end** vamos a asegurar que la aplicación (o una parte de ella) funcione como lo hará en un entorno de producción conectándose a todos los servicios que se conectaría como ser una base de datos (que podrá ser una de testing), pegándole a la API, entre otras cosas permitiéndonos ver cómo responden, en cuanto tiempo lo hacen etc. En los **tests de integración** no utilizamos estos servicios externos y tendremos librerías intermedias que se encargan de interceptar estos requests a APIs o bases de datos.
@@ -23,13 +25,13 @@ Luego de que tenemos Cypress instalado como dependencia tenemos dos formas de co
 
 
 
-Para ejecutar los tests corremos
+Para ejecutar los tests corremos, es importante tener presente que **antes tenemos que tener nuestro servidor corriendo**
 
 ```
 npx cypress open
 ```
 
-También podemos crear un script `"test":"cypress open"` que luego podremos ejecutar con `npm test`
+También podemos crear un script `"test:integration":"cypress open"` que luego podremos ejecutar con `npm test`
 
 
 
@@ -66,6 +68,14 @@ describe("Add", () => {
 
 
 Notar que ahora en la ventana de Cypress nos aparecerá dentro de los Integration Tests uno llamado `add.spec.js` y si hacemos click en el lo ejecutará. A continuación veremos que el test pasará aunque no hemos hecho un expect o una assertion. Como la página devolvió un status code de 200 sabemos que ha cargado correctamente y Cypress interpreta que el test ha sido superado.
+
+
+
+> Si a la hora de escribir el test nos aparece el mensaje `'cy' is not defined.` modificar el archivo `.eslintrc.js` agregando en el array `extends` el siguiente elemento:
+
+```
+'plugin:cypress/recommended'
+```
 
 
 
