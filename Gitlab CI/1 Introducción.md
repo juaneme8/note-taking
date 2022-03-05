@@ -8,6 +8,8 @@ https://youtu.be/mnYbOrj-hLY
 
 GitLab CI es un **motor de automatización** para el proceso de desarrollo de software. Cuenta con herramientas que facilitan la aplicación de prácticas de DevOps (continuous integration y continuous delivery/deployment). Esto nos permitirá realizar proceso de build, test, deploy usando Pipelines de manera similar a como lo haríamos con Jenkins.
 
+**La herramienta se llama GitLab CI y nos permite hacer CI/CD Pipelines**.
+
 # Pipeline
 
 Un Pipeline de GitLab es un archivo YAML llamado `.gitlab-ci.yml` que vive en la raíz del proyecto.
