@@ -28,9 +28,10 @@ Por ejemplo `git log --oneline --graph --decorate --all`
 -   `--graph`: para obtener un gráfico basado en asteríscos denotando la jerarquía de las ramas.
 -   `--decorate`: muestra los ref names de todos los commits que se muestren.
 -   `--all`: para obtener el historial de todos las ramas
-
--   `--stat`: veo los cambios `+` y `-` que se hicieron en cada archivo con cada commit.
+-   `--stat`: veo la cantidad de cambios `+` y `-` que se hicieron en cada archivo con cada commit.
+-   `--patch` similar al anterior pero para mostrar además qué información fue agregada o quitada en cada archivo modificado en cada commit.
 -   `--author="Juan"` me aparecerán todos los commits realizados por un usuario que coincida con la cadena ingresada. No hace falta poner el nombre exacto.
+-   
 
 # `git diff`
 Con `git diff` obtenemos las diferencias entre el contenido que tenemos en staging y lo que tenemos en el **directorio de trabajo** o sino tenemos nada en el staging, entre lo que tenemos en el repositorio (en la posición `HEAD`) y lo que tenemos en el **directorio de trabajo**.
@@ -46,7 +47,11 @@ Con `git diff feature main` utilizamos el nombre de las ramas para comparar en l
 > Debemos poner primero el id de un commit viejo y luego de uno nuevo, de lo contrario los agregados que hayamos hecho (`+`) los tomará como eliminaciones (`-`).
 
 # `git restore`
-El comando `git restore` nos permite quitar del staging area un archivo dejándolo como cambios en el working directory. Por ejemplo si tenemos un archivo `bio.txt`, al cual le generamos cambios y después hicimos `git add .` podremos quitarlo del staging con `git restore --staged bio.txt`. Si en ese momento ejecutamos `git diff bio.txt` veremos las diferencias entre working directory y repositorio local.
+El comando `git restore` nos permite quitar del staging area un archivo dejándolo como cambios en el working directory. Por ejemplo si tenemos un archivo `bio.txt`, al cual le generamos cambios y después hicimos `git add .` podremos quitarlo del staging con `git restore --staged bio.txt`. 
+
+Esto es equivalente a ejecutar `git reset HEAD bio.txt`
+
+> Si en ese momento ejecutamos `git diff bio.txt` veremos las diferencias entre working directory y repositorio local.
 
 
 
@@ -93,7 +98,7 @@ La forma de ejecutar estos comandos sería `git reset ab97... --soft` o `git res
 ## Quitar de cambios staging area
 
 En ocasiones puede que hayamos agregado al *staging area* ciertos cambios que nos dimos cuenta luego que no queremos.
-Supongamos que modificamos el archivo `README.md` luego hicimos `git add .` y luego nos damos cuenta que no nos interesan esos cambios. Para quitarlo del *staging area* (*unstage changes*) para eso debemos poner `git reset HEAD README.md`
+Supongamos que modificamos varios archivos y entre ellos `README.md` luego hicimos `git add .` y luego nos damos cuenta que no queremos que los cambios en la documentación estén en el mismo commit que un feature. Para quitar ese archivo del *staging area* (*unstage changes*) debemos ejecutar `git reset HEAD README.md`. Siendo `HEAD` un apuntador a la versión más reciente del repositorio. Sin embargo, tener presente que los cambios realizados no se habrán ido sino que sólo lo quitamos del staging area.
 
 # Eliminar Repositorio
 ### `rm -rf .git`
@@ -130,7 +135,7 @@ Al igual que a la hora de renombrar archivos, para borrarlos también podemos ha
 
 ## `git rm`
 
-Con el comando `git rm` podremos eliminar un archivo (tanto del repositorio como de la copia local). Si en cambio lo borramos con el sistema operativo con `rm` no estaríamos trackeando esa eliminación.
+Con el comando `git rm` podremos eliminar un archivo (tanto del repositorio como de la copia local). Si en cambio lo borramos con el sistema operativo con `rm` no estaríamos trackeando esa eliminación, por lo que tendríamos que hacer `git add deleted.txt` y luego con `git status` ya veriamos "deleted".
 
 Suponiendo que queremos eliminar `demo.txt` ejecutamos `git rm demo.txt` y al hacer `git status` veremos que la eliminación ya está en la zona de staging y debemos hacer el commit para completarla.
 
@@ -141,7 +146,7 @@ Changes to be committed:
         deleted:    demo.txt
 ```
 
--   `git rm --cached`: Elimina los archivos del área de staging y del próximo commit pero los mantiene en nuestro disco duro. Si sólo queremos eliminar un archivo `git rm --cached index.html`.  Es decir que vamos a conservar los cambios realizados localmente.
+-   `git rm --cached`: Elimina los archivos del área de staging pero los mantiene en nuestro disco duro. Si sólo queremos eliminar un archivo `git rm --cached index.html`.  Es decir que vamos a conservar los cambios realizados localmente.
 -   `git rm --force` o `git rm -f`: Elimina los archivos de Git y del disco duro.
 
 
@@ -153,7 +158,7 @@ Suponiendo que creamos un archivo `biografia.txt` y hacemos `git add biografia.t
 git rm --cached biografia.txt
 ```
 
-Luego de esto el archivo seguirá estando disponible y si hacemos `git status` nos aparecerá como *untracked*.
+Luego de esto el archivo seguirá estando disponible y si hacemos `git status` nos aparecerá como *untracked*. 
 
 
 
@@ -212,6 +217,10 @@ Con `git push origin features` enviamos la rama `features` al repositorio remoto
 
 
 
+**Lo habitual es tener nombres como `feature/new-table` o `bugfix/new-table`.**
+
+
+
 # Merge
 Se conoce como merge al proceso de unir o fusionar los cambios de una rama con otra rama. Por ejemplo si tenemos la `main` y detectamos un bug, creamos un branch `hotfix` luego efectuamos en esa rama los commits que sean necesarios y finalmente cuando estamos satisfechos con el resultado mergeamos esos cambios en `main` donde tenemos el código de producción.
 
@@ -229,7 +238,7 @@ Es el caso más simple y se da cuando no se detecta trabajo adicional en el *par
 Cuando Git detecta cambios no conflictivos en el *parent branch* se preservan los dos *timelines* y se crea un *merge commit* automático para mostrar el merge de los dos branches. Esto sucederá por ejemplo cuando en el nuevo branch modificamos un archivo y en el `main` modificamos otro (o líneas distintas) y luego hacemos el merge. Nos creará un nuevo commit y con Vim nos indicará que ingresemos el mensaje de dicho commit.
 
 ### Merge Manual
-Ocurre cuando Git no es capaz de solucionar los conflictos automáticamente , una vez resueltos son guardados en un *merge commit*. Esto sucede por ejemplo si creamos un branch modificamos una línea, realizamos el commit y luego en el branch `main` también modificamos y commiteamos cambios en la misma línea *o en el mismo selector por ejemplo en caso de CSS*.
+Ocurre cuando Git no es capaz de solucionar los conflictos automáticamente , una vez resueltos son guardados en un *merge commit*. Esto sucede por ejemplo si creamos un branch modificamos una línea, realizamos el commit y luego en el branch `main` también modificamos y commiteamos cambios en la misma línea.
 Cuando hacemos `git merge hotfix` desde `main`, nos aparecerá:
 
 ```bash
@@ -237,9 +246,15 @@ CONFLICT (content): Merge conflict in bio5.txt
 Automatic merge failed; fix conflicts and then commit the result.
 ```
 
+
+
+> En caso de querer abortar el merge podemos hacer `git merge --abort` y será como si no hubiéramos ejecutado `git merge`
+
+
+
 Automáticamente nos abre el editor por defecto y podremos aceptar los cambios entrantes, los de la rama actual, ambos, etc. Una vez hecho esto debemos hacer `git add .` y `git commit` para concluir el merge. Como consecuencia de este merge nos aparecerán también los commits que tenía la rama con la cual mergeamos.
 
-> En el editor veremos `<<<<<<<< HEAD` (posición donde nos encontramos en la rama actual) y `>>>>>>>> hotfix` rama con la que estamos fusionando. De hecho si abrimos el archivo con el block de notas veremos que se han agregado esas marcas en las zonas conflictivas. Visual Studio Code me permite solucionarlas de manera simple haciendo click en sus links pero también podría borrarlas manualmente y quedarme con el cambio que quiera.
+> En el editor veremos `<<<<<<<< HEAD` (**posición donde nos encontramos en la rama actual**) y `>>>>>>>> hotfix` rama con la que estamos fusionando. De hecho si abrimos el archivo con el block de notas veremos que se han agregado esas marcas en las zonas conflictivas. Visual Studio Code me permite solucionarlas de manera simple haciendo click en sus links pero también podría borrarlas manualmente y quedarme con el cambio que quiera. Cuando hablamos de **current change** nos referimos a la rama en la cual estamos. Ante la duda también podemos hacer click en **Compare Changes** y ver ambas versiones una al lado de la otra. Una vez resuelto el conflicto tendremos que hacer el `git add .` y `git commit`.
 
 Luego si hacemos `git log` veremos:-
 
@@ -315,7 +330,7 @@ Este comando es muy peligroso y debemos usarlo solo en caso de emergencia. Recue
 - `git reset --hard`: Borra toda la información de los commits y del área de staging se borra del historial. Los commits posteriores serán eliminados de manera permanente, es por eso que debemos usarlo con cuidado.
 -   `git reset` o `git reset HEAD` ambos comandos sirven para sacar archivos del área de *staging*. Tendremos los archivos en el directorio de trabajo y si queremeos volver a agregarlos a *staging* podremos hacerlo con `git add`. 
 Con `git reset file.txt` o `git reset HEAD file.txt` sólo quitamos el archivo `file.txt` del staging dejando el resto en caso de tener más de uno.
-- `git reset --hard` no sólo quita todo del staging sino que también elimina los archivos modificados (los trackeados).
+- `git reset --hard` no sólo quita todo del staging sino que también elimina los archivos modificados (los trackeados). Si hacemos `git reset --hard origin/master` volveremos al estado que tenemos en el repositorio remoto.
 - Con `git reset --soft HEAD~1` podremos deshacer el último commit preservando los cambios que en él introdujimos en el working directory.
 
 ## `git reset` vs `git rm`
@@ -326,22 +341,28 @@ Con `git reset file.txt` o `git reset HEAD file.txt` sólo quitamos el archivo `
 # `git rebase`
 > https://www.youtube.com/watch?v=f1wnYdLEpgI
 
-Cuando desarrollamos una nueva característica hasta ahora hemos visto la técnica de crear un branch `feature` realizar los commits que hagan falta en esa rama (y también habrán sucedido otros commits en `main` por otros miembros del equipo) y luego realizar el merge que creará un nuevo commit con estrategia recursiva.
+Cuando desarrollamos una nueva característica hasta ahora hemos visto la técnica de crear un branch `feature` realizar los commits que hagan falta en esa rama (y también habrán sucedido otros commits en `main` por otros miembros del equipo) y luego realizar el `merge` que **creará un nuevo commit con estrategia recursiva**.
 
-Sin embargo, en ocasiones puede que queramos que los commits de `feature` se integren a la historia de la rama `main` como si hubieran ocurrido en ella (y la rama nunca hubiera existido). En ese caso debemos utilizar **rebase** que es un comando destructivo que va a alterar el historial, ya que Git está eliminando los commits en el `feature` branch y duplicándolos los commits en la rama `main`. Siempre debemos hacerlo con cosas que no hayan sido pusheadas aún.
+Sin embargo, en ocasiones puede que queramos que los commits de `feature` se integren a la historia de la rama `main` como si hubieran ocurrido en ella (y la rama nunca hubiera existido) o bien simplemente queremos mantener el historial limpio sin esos commits que ocasionaría un merge recursivo.
 
-> La regla de oro respecto al uso de **rebase** es nunca hacerlo en ramas públicas.
-> **rebase** no funciona muy bien en proyectos open-source y pull requests.
+Un ejemplo de uso interesante es si creamos la rama `rama1` y modificamos `file1` y aunque en `main` modifiquemos `file2` ya no nos permitirá realizar un `merge` con fast foward. Entonces tendremos ese commit del merge recursivo que queremos evitar. En ese caso desde la rama hacemos `git rebase main` y los cambios en `file1` aparecerá como que se hicieron a lo último. Una vez hecho esto podremos volver a `main` y hacer `git merge rama1` con la ventaja que será resuelto con **fast forward merge**.
+
+Debemos tener presente que **rebase** que es un comando destructivo que va a alterar el historial, ya que es como si estuviéramos alterando la historia, pero como lo hicimos en una rama que recién creamos no hay ningún problema. La regla de oro respecto al uso de **rebase** es nunca hacerlo en ramas públicas. **rebase** no funciona muy bien en proyectos open-source y pull requests.
+
 > El uso de **rebase** tiene la ventaja por sobre el uso de **merge**, que si hacemos `git log` o con la herramienta gráfica `gitk` veremos todos los commits en línea por lo que sera fácil de seguir el historial aún si tenemos varias personas en el equipo de trabajo.
+>
 > El uso de **merge** en cambio tiene la ventaja de que tendremos trazabilidad pues sabremos de donde provienen los commits (de un merge de tal rama con `main`)
 
-En primer lugar en la rama `feature` ingresamos el comando `git rebase master` y lo que sucederá es que Git actualizará el contenido de mi rama auxiliar respecto de los nuevos cambios que sucedieron en `main` y me notificará en caso de conflictos. Es como si esa rama `feature` la hubiera creado cuando se realizaron los últimos cambios en `main` y no antes. Con `git log` veremos los commits del branch `feature` como si los hubiésemos hecho todos juntos a lo último. Es por eso que decimos que cambia la historia respecto de cuándo arrancó el branch.
 
-Por último desde `main` (donde van a quedar los cambios) ingresamos `git rebase feature` y ya tendremos todos los commits en línea y podremos pushear el código.
 
-Finalmente podremos borrar la rama feature con `git branch -D feature` (usamos `-D` suponiendo que ya lo pusheamos sino localmente bastará con `-d`)
+Es posible que al ejecutar `git rebase` nos encontremos con conflictos por ejemplo si en ambas ramas modificamos el mismo archivo. 
+
+En caso de querer suspender el rebase podríamos ejecutar `git rebase --abort` para volver al estado anterior a ejecutar ese comando. La solución de conflictos es similar a lo explicado al realizar merges. Pero si estamos trabajando en una rama y no hemos hecho rebase en varios días, puede que tengamos múltiples conflictos y no sólo uno. Estos conflictos sucederán en el orden histórico de los commits que se realizaron en la otra rama, aunque estos ya no sean relevantes en "la actualidad". Es por esto que rebasing y hacer que los branches no vivan mucho tiempo, va a reducir significativamente la complejidad de los conflictos.
+
+
 
 ## Aplastar Commits con rebase
+
 rebase también nos permite aplastar commits en uno sólo de modo de limpiar un poco el historial.
 
 # `git stash`
@@ -410,7 +431,7 @@ con `git blame blogpost.html -L35,53 -c` podremos ver quién modificó de la lí
 
 
 # Special Markers
-Podemos pensar en los **markers** como si fueran punteros, uno especial es el llamado HEAD normalmente es el último commit del branch actual. Al cambiar de branch HEAD cambiará de ubicación de modo tal de coincidir con el último commit de dicho branch. Sin embargo es posible mover manualmente `HEAD` para que apunte a otro lado. Por ejemplo si en el master branch tenemos varios commits y nos movemos hacia uno con `git checkout` `HEAD` apuntará a dicho commit.
+Podemos pensar en los **markers** como si fueran punteros, uno especial es el llamado HEAD normalmente es el **último commit del branch actual.** Al cambiar de branch HEAD cambiará de ubicación de modo tal de coincidir con el último commit de dicho branch. Sin embargo es posible mover manualmente `HEAD` para que apunte a otro lado. Por ejemplo si en el master branch tenemos varios commits y nos movemos hacia uno con `git checkout` `HEAD` apuntará a dicho commit.
 
 
 

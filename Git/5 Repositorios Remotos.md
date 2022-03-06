@@ -1,5 +1,5 @@
 # Repositorios Remotos
-Cuando trabajamos de manera colaborativa con otras personas, debemos contar con un servidor o repositorio remoto donde esté almacenada la versión unificada del trabajo de todos ellos. Los ejemplos mas comunes son GitHub, GitLab, BitBucket, o incluso un servidor montado manualmente. Los desarrolladores obtienen los datos de este servidor, luego trabajan localmente y por último mandan datos para que sean visibles por todos.
+Cuando trabajamos de manera colaborativa con otras personas, debemos contar con un servidor o repositorio remoto donde esté almacenada la versión unificada del trabajo de todos ellos. Los ejemplos mas comunes son GitHub, GitLab (GitLab tiene la ventaja de contar con una herramienta llamada GitLab CI que combinada con el uso de ramas nos permite automatizar muchas cosas), BitBucket, o incluso un servidor montado manualmente. Los desarrolladores obtienen los datos de este servidor, luego trabajan localmente y por último mandan datos para que sean visibles por todos.
 
 # GitHub
 GitHub es un servicio de **hosting para almacenar repositorios remotos**. Además cuenta con otros servicios como ser hosting para páginas web estáticas, manejo de issues del código, mecanismos para compartir snippets de código, etc. 
@@ -23,7 +23,10 @@ El comando `git clone url` nos permite traernos datos de un repositorio remoto, 
 Luego efectúo los cambios que considero con el flujo habitual `git add .`, `git commit -m "mensaje"`, etc y cuando termino hago `git push`para que el `HEAD` del `main` branch se envíe al repositorio remoto.
 
 > Lógicamente en caso de que se trate de un repositorio público podremos clonarlo sin la solicitud de credenciales. Sin embargo necesitaremos que el dueño del repositorio nos agregue como **colaboradores** para poder hacer un push a dicho repositorio remoto.
-> Al clonar un repositorio los alias con las direcciones del repositorio remoto se crean automáticamente, lo cual podremos chequear con  `git remote -v` donde veremos que `origin` tiene definida la misma dirección para **fetch** y para **push**.
+> Al clonar un repositorio los alias con las direcciones del repositorio remoto se crean automáticamente, lo cual podremos chequear con  `git remote -v` donde veremos que `origin` tiene definida la misma dirección para **fetch** y para **push**. 
+>
+> > `origin` es un alias que hace referencia a la dirección del repositorio remoto.
+>
 > A la hora de clonar un repositorio si ejecutamos `git clone url` creará una carpeta con el mismo nombre del repositorio remoto mientras que si queremos personalizarlo podremos ponerle `git clone url nombreCarpeta`
 
 # `git fetch`
@@ -53,6 +56,10 @@ El comando `git pull` nos permite traer código de un repositorio remoto.
 >Cuando realizamos cambios localmente y hacemos `git pull origin main` (antes de pasarlos a staging y hacer el commit), si ese pull traería datos nuevos puede que nos aparezca un mensaje indicándonos: **Your local changes to the following files would be overwritten... Please commit your changes or stash them before you merge** e indicando los archivos en los cuales sucedería esta sobrescritura. Si vemos que no va a generar errores, hacemos el commit, luego el pull y por último el push.
 >Si bien hasta ahora hemos visto como traernos datos del mismo repositorio al cual pusheamos, cuando trabajemos con proyectos forkeados obtendremos datos de una fuente y los enviaremos a otra dirección.
 
+Es posible que al realizar `git push` nos encontremos con que tenemos cambios en el repositorio remoto que no tenemos localmente. Al hacer `git pull` puede que nos diga que existe un conflicto, el cual podremos solucionar de manera similar a lo visto al hacer merges. Otra opción es hacer `git pull origin master --rebase` de manera tal que los cambios que tengamos localmente sean colocados a lo último en la línea temporal.
+
+
+
 # `git remote`
 El comando `git remote` nos permite establecer el origen remoto de nuestros archivos. Esto lo hacemos con la dirección que obtenemos por ejemplo en GitHub en *Clone or download* ya eligiendo HTTPS o por SSH: `git remote add origin https://github.com/juaneme8/hyperblog`
 
@@ -62,10 +69,12 @@ Con `git remote -v` obtenemos los repositorios remotos y sus direcciones.
 Con `git remote get-url origin` obtenemos la dirección del repositorio remoto.
 Con `git remote set-url git@github.com:user/repo.git` cambiamos la dirección de un repositorio remoto (por ejemplo si pasamos de HTTPS a SSH).
 
+> Es posible tener múltiples remotes. 
+
 # Trabajo Colaborativo:
 Para poder trabajar en un repositorio de manera colaborativa, asumimos que el dueño del repositorio nos añadió como **Collatorators** del proyecto. También veremos que es posible aportar en un proyecto sin ser un **Collaborator** mediante el **Fork**.
 
-En el mundo profesional la rama `main` es la que se va a subir al **servidor de producción**, es por esto que no suele mergearse la rama en la que estemos trabajando a `main` y luego pushearlo, ya que puede que otros desarrolladores no estén de acuerdo con los cambios introducidos. Debemos en cambio, trabajar con otras ramas, solicitar un pull request y luego será sometido a un *code review* donde el líder del equipo o del administrador del entorno de desarrollo (DevOps) decide si realiza el merge. 
+En el mundo profesional la rama `main` es la que se va a subir al **servidor de producción**, es por esto que no suele mergearse la rama en la que estemos trabajando a `main` y luego pushearlo, ya que puede que otros desarrolladores no estén de acuerdo con los cambios introducidos. Debemos en cambio, trabajar con otras ramas, solicitar un pull request (o merge request en GitLab) y luego será sometido a un *code review* donde el líder del equipo o del administrador del entorno de desarrollo (DevOps) decide si realiza el merge. 
 
 > En algunos grupos de trabajo se envía un tag a producción en lugar de la rama `main`
 
@@ -91,10 +100,18 @@ Finalmente, el hecho de que los cambios hayan sido aprobados no significa que el
 
 En este flujo de trabajo profesional, en caso de que los cambios sean aprobados se logra un merge a `staging`. Luego también se realiza un **pull-request** a `main`.
 
-> Los **pull-request** son una caract erística de GitHub, GitLab, BitBucket y no de Git. 
+> Los **pull-request** son una característica de GitHub, GitLab, BitBucket y no de Git. 
 > Los **pull request** le permite también a personas que no son colaboradores trabajar en una rama. 
 
 Cada vez que haya un mensaje o un cambio de estado en el pull-request recibiremos una notificación.
+
+
+
+Una vez que efectuamos un merge request (como se lo llama en GitLab) los commits que realicemos quedarán asociados a el. 
+
+Cuando hacemos un merge request si tenemos un CI/CD sólo nos permitirá realizar el merge si el pipeline no falla.
+
+En GitLab momento de aceptar los cambios de la rama que solicita el merge, podremos también hacer *squash commits* (para unir todos los commits en uno sólo) y *delete source branch* (para eliminar el branch). También podemos configurar cómo queremos que se comporten los **Merge Requests** pudiendo establecer si queremos generar un merge commit o hacer un merge fast forward (que nos aporta una historia mas limpia).
 
 ## Insights
 En el panel Insights podremos ver mucha información sobre el repositorio. La mayor parte de estos datos están disponibles para repositorios públicos o cuentas GitHub Pro.

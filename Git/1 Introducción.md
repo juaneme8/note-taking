@@ -1,6 +1,8 @@
 # Introducción
 > Platzi - Curso Profesional de Git y GitHub (COMPLETO 43 VIDEOS)
 > [Playlist](https://www.youtube.com/watch?v=3RjQznt-8kE&list=PL4cUxeGkcC9goXbgTDQ0n_4TBzOO0ocPR) the The Net Ninja.
+>
+> https://youtu.be/4lxvVj7wlZw
 
 ## Motivación
 Cuando trabajamos un archivo de texto plano (por ejemplo `archivo.txt`) y decidimos realizar cambios, en lugar de guardar el archivo con nuevo nombre `archivo_v2.txt`, `archivo_final.txt`. etc, utilizando el **sistema de control de versiones Git** podremos guardar sólo los cambios que realizamos en dichos archivos. Gracias a Git también podremos manejar los cambios que realicen otros miembros del equipo sobre esos mismos archivos posibilitando así el trabajo colaborativo sin superponerse.   
@@ -59,12 +61,14 @@ En el **repositorio git local** existen tres estados o áreas en los que pueden 
 
 El **working directory** contiene todos los archivos y carpetas de la aplicación los cuales pueden estar o no manejados por Git (de cualquier modo Git estará al tanto de esos archivos). En el otro extremo tenemos el **repositorio** que contiene todos los cambios que han sido guardados o *committed*. En el medio tenemos el **staging area** (memoria RAM o estado temporal de preparación) que se utiliza para preparar el siguiente commit.
 
-> La existencia del *staging area* proporciona una medida extra de seguridad de cara a poder revisar los cambios antes de hacerles commit y además es posible agregar uno a uno los archivos modificados al staging y luego hacer commit de todos ellos.
+> La existencia del *staging area* proporciona una medida extra de seguridad de cara a poder revisar los cambios antes de hacerles commit y además es posible agregar uno a uno los archivos modificados al staging y luego hacer commit de todos ellos. Otra razón es que nos permite modificar varios archivos a la vez y luego hacer commits individuales con estos cambios.
+
+
 
 ### Commits
 Git almacena el **estado** de todos los archivos que maneja y lo hace a través de **commits**, que son *snapshots* o *safe points* cuando alcanzamos un determinado objetivo (*logical point*) y sobre los cuales podremos rebobinar luego de ser necesario.
 
-> Como **git versiona archivos, no carpetas**. Es por esto que si una cierta tecnología nos obliga a tener carpetas vacías, podemos colocarle dentro *dummy files* vacíos a modo de preservarlas. 
+> Si ejecutamos `mkdir temp` y luego ejecutamos `git status` veremos que nos dirá *nothing to commit*, esto se debe a que **git versiona archivos, no carpetas**. Es por esto que si una cierta tecnología nos obliga a tener carpetas vacías, la convención es crear un archivo vacío adentro llamado `.gitkeep` cosa que hacemos con `touch .gitkeep`. Por tratarse de un archivo cuando lo agreguemos al sistema de control de versiones, tendremos la carpeta también.
 
 ## `.gitignore`
 No todos los archivos con los que trabajamos deben ir al repositorio. Por ejemplo si estamos trabajando con archivos que contienen contraseñas o API keys no queremos que estas vayan al repositorio ya que podrían ser vistos por alguien más (sobre todo en proyectos  open-source donde el repositorio es público).

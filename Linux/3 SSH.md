@@ -202,7 +202,7 @@ Luego podremos clonar con SSH repositorios
 
 # SSH en Linux
 
-> Basado en https://youtu.be/RMS5zBYQIqA
+> Basado en [Video SSH del Pelado Nerd](https://youtu.be/RMS5zBYQIqA)
 
 
 

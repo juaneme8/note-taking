@@ -34,6 +34,8 @@ El comando `git add` nos permite incorporar uno o mas archivos al _staging area_
 
 > Si queremos agregar todos los archivos con cambios de la carpeta en la cual estamos en lugar de `git add biografia.txt` podríamos ejecutar `git add .`
 > Cuando modificamos un archivo lo veremos en rojo y luego de haberlo añadido al *staging area* lo veremos en verde.
+>
+> > `git add -all` es equivalente a `git add .`
 
 # `git commit`
 
