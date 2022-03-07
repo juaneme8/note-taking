@@ -849,77 +849,6 @@ Con `gv = load "script.groovy" ` importamos el script.
 
 
 
-# Jenkins en Contenedor Docker
-
-Nos dirigimos a DockerHub y si buscamos la imagen oficial de Jenkins veremos que esta está deprecada y nos indican que debemos usar `jenkins/jenkins`.
-
-La [documentación](https://github.com/jenkinsci/docker/blob/master/README.md) nos explica cómo debemos ejecutar esta imagen:
-
-```
-docker run 
--p 8080:8080 
--p 50000:50000 
--v jenkins_home:/var/jenkins_home 
--d 
-jenkins/jenkins:lts
-```
-
-> `-p 8080:8080` Exponemos el puerto 8080 ya que Jenkins por defecto corre en ese puerto.
->
-> `-p 50000:50000` Exponemos el puerto 50000 para posibilitar la comunicación master/slave. Nuestro Jenkins será capaz de encontrar slaves en caso de que los haya.
->
-> `-d` dettached mode, para ejecutar el contenedor en el background.
->
-> `-v jenkins_home:/var/jenkins_home` para la persistencia de datos creamos un **named volume**. Si la carpeta `jenkins_home` no existe en el host la creará. Mientras que `/var/jenkins_home` existe en el contenedor. Esto es importante dado que toda la información de Jenkins sobre los builds, users, plugins, estará almacenada allí.
-
-
-
-Una vez ejecutado el contenedor obtendremos su id con `docker ps | grep jenkins` y suponiendo que es `1df` con `docker logs 1df` vemos la password inicial.
-
-Los pasos siguientes son idénticos a los explicados con la instalación en Windows. 
-
-
-
-> Advertencia Proxy
-
-Desde la red corporativa puede aparecer un cartel indicando que no logra conectarse a internet y sugerir la configuración del proxy. Esto en particular me pasó con la imagen Docker de Blue Ocean.
-
-
-
-En red corporativa (probar cuando se solucionen problemas de red)
-
-```
-docker run 
--p 8080:8080 
--p 50000:50000 
--v jenkins_home:/var/jenkins_home 
--d 
---env HTTP_PROXY="http://172.30.221.240:8080"
---env HTTPS_PROXY="https://172.30.221.240:8080"
-jenkins/jenkins:lts
-```
-
-
-
-### Jenkins Blue Ocean
-
-Blue Ocean es un proyecto encargado de mejorar la UX al trabajar con Jenkins mediante el desarrollo de una nueva UI. Además proporciona una vista interactiva al pipeline.
-
-Si bien podríamos instalar Blue Ocean como plugin en la medida que tengamos una versión superior a la 2.7 lo que haremos será trabajar con la imagen `jenkinsci/blueocean` disponible en DockerHub.
-
-```
-docker run 
--p 8080:8080 
--p 50000:50000 
--v jenkins_home:/var/jenkins_home 
--d 
-jenkinsci/blueocean
-```
-
-
-
-
-
 # Credenciales
 
 Las credenciales nos permitirán entre otras cosas conectarnos a un repositorio privado y acceder al código.
@@ -978,4 +907,90 @@ Comenzará la instalación y luego tildamos *Restart Jenkins when installation i
 En Dashboard vamos a **Manage Jenkins** y luego a **Configure System** y ahi agregamos los datos.
 
 > CONTENIDO EN DESARROLLO.
+
+
+
+# Jenkins en Contenedor Docker
+
+Nos dirigimos a DockerHub y si buscamos la imagen oficial de Jenkins veremos que esta está deprecada y nos indican que debemos usar `jenkins/jenkins`.
+
+La [documentación](https://github.com/jenkinsci/docker/blob/master/README.md) nos explica cómo debemos ejecutar esta imagen:
+
+```
+docker run 
+-p 8080:8080 
+-p 50000:50000 
+-v jenkins_home:/var/jenkins_home 
+-d 
+jenkins/jenkins:lts
+```
+
+> `-p 8080:8080` Exponemos el puerto 8080 ya que Jenkins por defecto corre en ese puerto.
+>
+> `-p 50000:50000` Exponemos el puerto 50000 para posibilitar la comunicación master/slave. Nuestro Jenkins será capaz de encontrar slaves en caso de que los haya.
+>
+> `-d` dettached mode, para ejecutar el contenedor en el background.
+>
+> `-v jenkins_home:/var/jenkins_home` para la persistencia de datos creamos un **named volume**. Si la carpeta `jenkins_home` no existe en el host la creará. Mientras que `/var/jenkins_home` existe en el contenedor. Esto es importante dado que toda la información de Jenkins sobre los builds, users, plugins, estará almacenada allí.
+
+
+
+Una vez ejecutado el contenedor obtendremos su id con `docker ps | grep jenkins` y suponiendo que es `1df` con `docker logs 1df` vemos la password inicial.
+
+Los pasos siguientes son idénticos a los explicados con la instalación en Windows. 
+
+
+
+> Advertencia Proxy
+
+Desde la red corporativa puede aparecer un cartel indicando que no logra conectarse a internet y sugerir la configuración del proxy. Esto en particular me pasó con la imagen Docker de Blue Ocean.
+
+
+
+En red corporativa (probar cuando se solucionen problemas de red)
+
+```
+docker run 
+-p 8080:8080 
+-p 50000:50000 
+-v jenkins_home:/var/jenkins_home 
+-d 
+--env HTTP_PROXY="http://172.30.221.240:8080"
+--env HTTPS_PROXY="https://172.30.221.240:8080"
+jenkins/jenkins:lts
+```
+
+
+
+# Jenkins Blue Ocean
+
+Blue Ocean es un proyecto encargado de mejorar la UX al trabajar con Jenkins mediante el desarrollo de una nueva UI. Además proporciona una vista interactiva al pipeline. Además Blue Ocean nos pódrá generar el `Jenkinsfile` automáticamente.
+
+
+
+## Instalación
+
+Para trabajar con Ocean podemos hacerlo de dos formas:
+
+* Como plugin yendo a **Manage Jenkins**, **Manage Plugins**. Luego en la pestaña **Available** buscamos **Blue Ocean** lo seleccionamos y elegimos **Install without restart**. 
+* Con la imagen `jenkinsci/blueocean` disponible en DockerHub.
+
+```
+docker run 
+-p 8080:8080 
+-p 50000:50000 
+-v jenkins_home:/var/jenkins_home 
+-d 
+jenkinsci/blueocean
+```
+
+
+
+## Crear Pipeline
+
+Una vez instalado hacemos click en la barra lateral donde dice Jenkins Blue Ocean.
+
+Si hacemos click en **Create Pipeline** nos preguntará donde guardamos nuestro código elegimos **GitHub** y para generar el access token hacemos click en el enlace. Tendremos todos los permisos que son necesarios pre-cargados y lo generamos. **Pegamos el access token** y por último **elegimos el repositorio**.
+
+A partir de este momento accedemos al **editor visual de pipeline**. En primer lugar vemos la selección de **Agent** (por defecto en **any**) y las variables de entorno. Luego definimos un stage (por ejemplo `Build`) y un Step (por ejemplo `Print Message`). Al terminar presionamos **Save** y luego nos aparece un menú para commitear en main el `Jenkinsfile` generado y para hacerlo presionamos **Save & run**
 
