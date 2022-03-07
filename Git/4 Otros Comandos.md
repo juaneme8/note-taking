@@ -297,7 +297,7 @@ El modo de crear una etiqueta consiste en primer lugar en copiar el hash del com
 
 Con `git tag` listamos los tags disponibles
 Con `git show-ref --tags` vemos el hash asociado a cada tag (no al commit).
-Con `git push origin --tags` enviamos los tags al repositorio remoto (como buena práctica recordar antes hacer un pull).
+Con `git push origin --tags` enviamos los tags al repositorio remoto (como buena práctica recordar antes hacer `git fetch --all --tags`).
 
 Con `git tag -d dormido` podemos para eliminar el tag deseado. Luego tendremos que ejecutar también `git push origin --tags`. Si ejecutamos `git tag` veremos que ya no existe, sin embargo, en GitHub lo seguimos viendo ya que los tags suelen ser usados como *releases* (forma en la que se categoriza que algo está listo). Es por eso que para eliminarlo de GitHub debemos ejecutar `git push origin :refs/tags/dormido`
 
@@ -384,10 +384,10 @@ Con `git stash drop` elimino el stash.
 # `git clean`
 El comando `git clean` nos permite eliminar los archivos no trackeados del directorio de trabajo. Esto es útil cuando tenemos archivos no deseados `.log`, archivos resultado de una compilación, etc. 
 Supongamos que por error duplicamos varios archivos, en vez de eliminarlos manualmente podremos ejecutar `git clean -f` para borrar todos los *untracked files*. 
-Con `git clean -- dry-run` podemos ver una previsualización de los archivos que eliminaremos si ejecutamos `git clean -f`
+Con `git clean --dry-run` podemos ver una previsualización de los archivos que eliminaremos si ejecutamos `git clean -f`.
 
 > Si tenemos carpetas duplicadas tendremos que borrarlas a mano ya que git se concentra en los archivos.
-> `git clean`  sólo borra las cosas que puede indexar. Esto significa que si tengo `.gitignore` de `*.jpg`, lógicamente no podré borrar ese tipo de imágenes duplicadas.
+> `git clean`  **sólo borra las cosas que puede indexar**. Esto significa que si tengo `.gitignore` de `*.jpg`, lógicamente no podré borrar ese tipo de imágenes duplicadas.
 
 # `git cherry-pick`
 El comando `git cherry-pick` se utiliza cuando hemos estado trabajando en una rama y queremos en `main` (o en otra rama) sólo uno de esos avances. 
@@ -417,21 +417,25 @@ Con `git grep -c "<p>"` puedo contar la cantidad de veces que usé la etiqueta `
 
 De manera similar si quiero filtrar de acuerdo a la información brindada por `git log` puedo usar `git log -S "cabecera"` para mostrar los commits relacionados con la palabra cabecera (ya sea que aparece esta palabra en el mensaje o que la rama tiene ese nombre).
 
+
+
 # `git shortlog`
 El comando `git shortlog` entrega un resumen de lo mostrado por `git log`. Nos permite ver cuántos commits ha realizado cada miembro del equipo y los mensajes que estos han tenido.
 Con `git shortlog -sn` vemos la cantidad de commits realizados por cada usuario.
 Con `git shortlog -sn --all` contabilizamos incluso los commits borrados.
 Con `git shortlog -sn --all --no-merges` ídem anterior pero ocultando los merges.  
 
+
+
 # `git blame`
 El comando `git blame` me permite ver línea por línea quién fue el que la modificó, por ejemplo `git blame blogpost.html`
 Con `git blame -c blogpost.html` mejoramos la tabulación de la salida.
-con `git blame blogpost.html -L35,53 -c` podremos ver quién modificó de la línea 35 a la línea 53.# GIT
+con `git blame blogpost.html -L35,53 -c` podremos ver quién modificó de la línea 35 a la línea 53.
 
 
 
 # Special Markers
-Podemos pensar en los **markers** como si fueran punteros, uno especial es el llamado HEAD normalmente es el **último commit del branch actual.** Al cambiar de branch HEAD cambiará de ubicación de modo tal de coincidir con el último commit de dicho branch. Sin embargo es posible mover manualmente `HEAD` para que apunte a otro lado. Por ejemplo si en el master branch tenemos varios commits y nos movemos hacia uno con `git checkout` `HEAD` apuntará a dicho commit.
+Podemos pensar en los **markers** como si fueran punteros, uno especial es el llamado `HEAD` normalmente es el **último commit del branch actual.** Al cambiar de branch `HEAD` cambiará de ubicación de modo tal de coincidir con el último commit de dicho branch. Sin embargo es posible mover manualmente `HEAD` para que apunte a otro lado. Por ejemplo si en el main branch tenemos varios commits y nos movemos hacia uno con `git checkout` , `HEAD` apuntará a dicho commit.
 
 
 
