@@ -307,7 +307,7 @@ Esta opción es **más eficiente** y consiste en que el sistema de control de ve
 
 Como tenemos la instalación standard de plugins veremos esta opción, pero si quisieramos hacer lo mismo con GitLab deberíamos instalar dicho plugin.
 
-Elegimos la opción **GitHub hook trigger for GITScm polling** y queremos que cada vez que creemos un nuevo commit se produzca un disparo de esa tarea. Debemos configurar esto en el proyecto de GitHub, yendo a **Settings** (del proyecto), **Webhooks** y en **Payload URL** poner por ejemplo `http://localhost:8080//github-webhook/`. 
+Elegimos la opción **GitHub hook trigger for GITScm polling** y queremos que cada vez que creemos un nuevo commit se produzca un disparo de esa tarea. Debemos configurar esto en el proyecto de GitHub, yendo a **Settings** (del proyecto), **Webhooks** y en **Payload URL** poner por ejemplo `http://localhost:8080/github-webhook/`. 
 
 Luego podremos especificar qué evento queremos que dispare pro defecto tendremos **Just the push event** pero puede ser personalizado para otros eventos si así lo deseáramos. 
 
@@ -336,11 +336,11 @@ Maven es una heramienta utilizada para cuando queremos realizar proyectos en Jav
 
 
 
-# Creación de Usuarios
+## :construction_worker: Creación de Usuarios
 
-# Acceso basado en roles
+## :construction_worker: Acceso basado en roles
 
-# Notificaciones por Email
+## :construction_worker: Notificaciones por Email
 
 Las notificaciones por email nos permiten obtener información acerca de cuando falla la ejecución de una tarea (*build failure*).
 
@@ -889,27 +889,6 @@ Luego completamos el username, password, id (que usaremos para referenciar las c
 
 
 
-# Telegram Bot
-
-El plugin Telegram Bot nos permitirá enviar mensajes desde el `Jenkinsfile`. Para instalarlo debemos ir a **Manage Jenkins**, **Manage Plugin** y en **Available** buscar **Telegram Bot** seleccionarl.
-
-
-
-> Analizar qué conviene hacer a futuro
-
-**Click en Install without restart**. 
-Comenzará la instalación y luego tildamos *Restart Jenkins when installation is complete and no jobs are running*.
-
-
-
-## Configuración
-
-En Dashboard vamos a **Manage Jenkins** y luego a **Configure System** y ahi agregamos los datos.
-
-> CONTENIDO EN DESARROLLO.
-
-
-
 # Jenkins en Contenedor Docker
 
 Nos dirigimos a DockerHub y si buscamos la imagen oficial de Jenkins veremos que esta está deprecada y nos indican que debemos usar `jenkins/jenkins`.
@@ -938,6 +917,14 @@ jenkins/jenkins:lts
 Una vez ejecutado el contenedor obtendremos su id con `docker ps | grep jenkins` y suponiendo que es `1df` con `docker logs 1df` vemos la password inicial.
 
 Los pasos siguientes son idénticos a los explicados con la instalación en Windows. 
+
+
+
+:warning: lts-jdk11: sino todos los plugins aparece como que no se pueden instalar.
+
+```
+This version of the plugin exists but it is not being offered for installation, so the latest bug fixes or features are not available to you. This is typically the case when plugin requirements, e.g. a recent version of Jenkins, are not satisfied. If you are using the latest version of Jenkins offered to you, newer plugin releases may not be available to your release line yet. See the plugin documentation for information about its requirements.
+```
 
 
 
@@ -993,4 +980,76 @@ Una vez instalado hacemos click en la barra lateral donde dice Jenkins Blue Ocea
 Si hacemos click en **Create Pipeline** nos preguntará donde guardamos nuestro código elegimos **GitHub** y para generar el access token hacemos click en el enlace. Tendremos todos los permisos que son necesarios pre-cargados y lo generamos. **Pegamos el access token** y por último **elegimos el repositorio**.
 
 A partir de este momento accedemos al **editor visual de pipeline**. En primer lugar vemos la selección de **Agent** (por defecto en **any**) y las variables de entorno. Luego definimos un stage (por ejemplo `Build`) y un Step (por ejemplo `Print Message`). Al terminar presionamos **Save** y luego nos aparece un menú para commitear en main el `Jenkinsfile` generado y para hacerlo presionamos **Save & run**
+
+
+
+# Telegram
+
+
+
+## :+1: Push Notification con API via Curl
+
+Para enviar una notificación via Telegram tenemos que seguir los siguientes pasos:
+
+* Crear un bot, lo cual hacemos con **@BotFather** y el comando `/newbot`.
+* Obtener el API token del bot de **@BotFather**.
+* Obtener el id del chat donde queremos que envíe los mensajes. Podemos crear un grupo y agregar tanto al bot como a **@RawDataBot** y cuando pongamos `start` nos entregará el chat id.
+* Creación de credenciales en Jenkins (de tipo text secret y con el id `telegramToken` y `telegramChatId`).
+
+```je
+pipeline {
+  agent any
+  stages {
+    stage('Build') {
+      steps {
+        echo 'Build stage'
+      }
+    }
+
+    stage('Push Notification') {
+        steps {
+            script{
+              
+              withCredentials([string(credentialsId: 'telegramToken', variable: 'TOKEN'),
+              string(credentialsId: 'telegramChatId', variable: 'CHAT_ID')]) {
+                
+                sh 'curl -s -X POST https://api.telegram.org/bot${TOKEN}/sendMessage -d chat_id=${CHAT_ID} -d parse_mode="HTML" -d text="<b>Project</b> : Jenkins Test%0A \
+                <b>🌿 Branch</b>: main%0A \
+                <b>🚀 Build </b> : OK!%0A \
+                <b>🆗 Test suite</b> = Passed!"'
+              }
+            }
+        }
+    }
+
+  }
+}
+```
+
+> Para poder tener un **salto de línea** debemos enviar `%0A`.
+
+## :warning: Plugin Telegram Bot
+
+:warning: No lo pude hacer funcionar.
+
+El plugin Telegram Bot nos permitirá enviar mensajes desde el `Jenkinsfile`. Para instalarlo debemos ir a **Manage Jenkins**, **Manage Plugin** y en **Available** buscar **Telegram Bot** seleccionarl.
+
+
+
+**Click en Install without restart**. 
+Comenzará la instalación y luego tildamos *Restart Jenkins when installation is complete and no jobs are running*.
+
+
+
+### Configuración
+
+En Dashboard vamos a **Manage Jenkins** y luego a **Configure System** y ahi agregamos los datos.
+
+
+
+# Docker en el Pipeline
+
+https://www.jenkins.io/doc/book/pipeline/docker/
+
+Starting with Pipeline versions 2.5 and higher, Pipeline has built-in support for interacting with Docker from within a `Jenkinsfile`.
 
