@@ -1053,3 +1053,54 @@ https://www.jenkins.io/doc/book/pipeline/docker/
 
 Starting with Pipeline versions 2.5 and higher, Pipeline has built-in support for interacting with Docker from within a `Jenkinsfile`.
 
+Cuando instalamos la versión lts-jdk11 estmaos con la 2.319.3 por lo tanto instalar Docker Pipeline.
+
+
+
+obtenemos luego
+
+```
+/var/jenkins_home/workspace/jenkins-test_main@tmp/durable-8993eded/script.sh: 1: docker: not found
+
+```
+
+18
+
+
+
+In your Jenkins interface go to *"Manage Jenkins/Global Tool Configuration"*
+
+Then scroll down to Docker Installations and click *"Add Docker"*. Give it a name like *"myDocker"*
+
+Make sure to check the box which says *"Install automatically"*. Click *"Add Installer"* and select *"Download from docker.com"*. Leave "latest" in the Docker version. Make sure you click Save.
+
+[![enter image description here](https://i.stack.imgur.com/iR3wO.png)](https://i.stack.imgur.com/iR3wO.png)
+
+In your Jenkinsfile add the following stage before you run any docker commands:
+
+```
+ stage('Initialize'){
+        def dockerHome = tool 'myDocker'
+        env.PATH = "${dockerHome}/bin:${env.PATH}"
+    }
+```
+
+
+
+
+
+In order to use your Jenkins host `docker` engine. Remove the below agent statement from the pipeline -
+
+```
+  agent {
+    docker 'circleci/node:9.3-stretch-browsers'
+  }
+```
+
+PS - You can use `agent { label 'master' }` in the stage whenever you want to use the Jenkins host machine.
+
+
+
+:warning: en labels de los nodeo sagregue mnaster
+
+agregue un nueuvo nodo master tb
