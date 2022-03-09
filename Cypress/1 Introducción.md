@@ -1,10 +1,26 @@
 # Cypress
 
 > Basado en el stream de Goncy sobre Adviency
+>
+> [Playlist de Automation Step by Step](https://www.youtube.com/playlist?list=PLhW3qG5bs-L9LTfxZ5LEBiM1WFfvX3dJo)  
 
-Cypress es un testing framework con el cual podremos crear **tests de integración** y **tests end to end**.
+Cypress es un testing framework o una herramienta de automatización con la cual podremos testear cualquier cosa que corra en un navegador.
 
-Con ambos vamos a simular que somos un usuario y verificar que la interfaz funcione correctamente. La diferencia es que con los **tests end to end** vamos a asegurar que la aplicación (o una parte de ella) funcione como lo hará en un entorno de producción conectándose a todos los servicios que se conectaría como ser una base de datos (que podrá ser una de testing), pegándole a la API, entre otras cosas permitiéndonos ver cómo responden, en cuanto tiempo lo hacen etc. En los **tests de integración** no utilizamos estos servicios externos y tendremos librerías intermedias que se encargan de interceptar estos requests a APIs o bases de datos.
+
+
+## Características
+
+* open-source.
+* test runner + herramienta visual.
+* soporte para Chrome, Firefox,  Electron, etc.
+* permite crear capturas y videos de cada comando del test.
+* a diferencia de las herramientas que usan Selenium es muy rápido.
+
+## Tipos de Tests
+
+Cypres nos permite todo tipo de tests unitarios, de integración y end to end. 
+
+En cuanto a los **tests de integración** y **tests end to end**, si bien con ambos vamos a simular que somos un usuario y verificar que la interfaz funcione correctamente. La diferencia es que con los **tests end to end** vamos a asegurar que la aplicación (o una parte de ella) funcione como lo hará en un entorno de producción conectándose a todos los servicios que se conectaría como ser una base de datos (que podrá ser una de testing), pegándole a la API, entre otras cosas permitiéndonos ver cómo responden, en cuanto tiempo lo hacen etc. En los **tests de integración** no utilizamos estos servicios externos y tendremos librerías intermedias que se encargan de interceptar estos requests a APIs o bases de datos.
 
 
 
@@ -15,8 +31,10 @@ npm install cypress
 ```
 
 > La instalación puede llevar varios minutos.
+>
+> Con `npx cypress -v` verificamos la versión instalada.
 
-
+## Modos de uso
 
 Luego de que tenemos Cypress instalado como dependencia tenemos dos formas de correrlo:
 
@@ -24,6 +42,8 @@ Luego de que tenemos Cypress instalado como dependencia tenemos dos formas de co
 * de forma headless (para cuando quiero ejecutar los tests de una manera no visual por ejemplo si  tengo un CI/CD)
 
 
+
+## Ejecución Tests
 
 Para ejecutar los tests corremos, es importante tener presente que **antes tenemos que tener nuestro servidor corriendo**
 
@@ -33,9 +53,14 @@ npx cypress open
 
 También podemos crear un script `"test:integration":"cypress open"` que luego podremos ejecutar con `npm test`
 
+> En la parte superior derecha podemos elegir el navegador, veremos un botón que dice por ejemplo **Chrome 88** y haciendo click ahí veremos el resto de las opciones.
 
+Veremos que se crean automáticamente cuatro carpetas:
 
-Veremos que se nos creo una carpeta `cypress` con una carpeta `integration` que en su interior contiene dos carpetas con tests de ejemplo.
+* `integration` que en su interior contiene dos carpetas con tests de ejemplo. Es allí donde colocaremos los tests.
+*  `fixture` lo usamos para colocar datos por ejemplo un JSON.
+* `plugins` como su nombre lo indica contiene plugins.
+* `support` contiene comandos custom y el `index.js` que será cargado antes que los tests por lo que lo podemos usar para configuraciones globales.
 
 
 
