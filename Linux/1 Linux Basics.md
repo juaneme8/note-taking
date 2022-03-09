@@ -38,3 +38,28 @@ The procedure to change the computer name on Ubuntu Linux:
 
 3. Reboot the system to changes take effect:
    `sudo reboot`
+
+
+
+## Aumentar Tamaño Fuente Terminal
+
+Para aumentar el tamaño de fuente, debemos editar el archivo `/etc/default/console-setup`
+
+```
+sudo nano /etc/default/console-setup
+```
+
+Cambiando los siguientes valores:
+
+```
+FONTFACE="TER"
+FONTSIZE="16x32"
+```
+
+Luego aplicamos los cambios con el siguiente comando:
+
+```
+sudo update-initramfs -u
+```
+
+Luego podemos reiniciar la máquina para ver los cambios `reboot`.
