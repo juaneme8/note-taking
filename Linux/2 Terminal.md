@@ -223,6 +223,8 @@ Si estamos en la carpeta `/home/juaneme8/trabajos` y luego hacemos `pushd /etc` 
 
 ### Comando `history`
 
+> [Video Explicativo](https://www.youtube.com/watch?v=Odo6leOY5Fw&t=385s)
+
 Con la flecha hacia arriba y hacia abajo podremos navegar los últimos comandos ingresados. 
 Si queremos obtener un listado de todos los comandos ingresados podemos escribir el comando `history` y nos aparecerán todos los comandos asociados a un número, por ejemplo:
 
@@ -236,6 +238,11 @@ Si queremos obtener un listado de todos los comandos ingresados podemos escribir
 ```
 
 
+
+Debemos tener presente que cada usuario tendrá su propio historial, por lo que en ocasiones puede ser interesante loguearnos para saber cómo se actúo ante una determinada situación.
+
+
+
 #### Timestamp de Historial
 
 Si queremos obtener el timestamp de cuándo fue ingresado cada comando debemos cargar la variable `HISTTIMEFORMAT` con el formato del timestamp que deseamos:
@@ -246,44 +253,62 @@ HISTTIMEFORMAT="%Y-%m-%d %T "
 
 Luego cuando ingresemos `history` veremos el comando acompañado de la hora de cuando fue ingresado. En algunas distribuciones no nos mostrará la fecha correcta de los pasados pero sí trackeará la fecha a partir de ahora.
 
-Esta variable estará almacenada sólo en la sesión, por lo que **si cerramos la ventana se perderán esos cambios**. Para hacerlo permanente editamos el archivo `~/.bashrc` por ejemplo con `nano ./.bashrc` colocando `HISTTIMEFORMAT="%Y-%m-%d %T "` .
+Esta variable estará almacenada sólo en la sesión, por lo que **si cerramos la ventana se perderán esos cambios**. Para hacerlo permanente editamos el archivo `~/.bashrc` por ejemplo con `nano ./.bashrc` colocando `HISTTIMEFORMAT="%Y-%m-%d %T "`  (notar el espacio después del timestamp y antes del comando).
 
 
 
-> Veremos `HISTCONTROL=ignoreboth` esto hace referencia a que no queremos guardar en el historial líneas duplicadas ni tampoco aquellas líneas que comienzan con un espacio. Esto puede ser **útil a la hora ocultar un comando con información sensible** (antecediendo un espacio.)
+> En ese mismo archivo (`.bashrc`) veremos el comando `HISTCONTROL=ignoreboth` que hace referencia a que no queremos guardar en el historial líneas duplicadas ni tampoco aquellas líneas que comienzan con un espacio. Esto puede ser **útil a la hora ocultar un comando con información sensible** (antecediendo un espacio.)
 
 
 
-#### Repetir Comando !`
+#### Repetir Comando `!`
 
-Si quisiéramos ejecutar el comando `clear` podríamos poner `!16`
+Si quisiéramos ejecutar un comando en particular que sabemos que ya ejecutamos, por ejemplo `clear` podríamos ejecuctar `history` y de acuerdo al número que aparece al comienzo poner `!16`
 
 Esto lo hace gracias a un archivo llamado `.bash_history` en el directorio home del usuario.
 
 
 
-> En Linux normalmente al signo de exclamación se lo conoce como **bang**.
+> En Linux normalmente al signo de exclamación se lo conoce como *bang*.
 
 
 
-#### **Reverse Search** (`CONTROL+R` )
+#### Repetir último Comando (`!!`) 
 
-> Si sabemos que utilizamos un comando que tenía la cadena "hola" podemos hacer uso del comando `grep` y de un pipe: `history | grep hola`. Esto mismo podemos hacerlo también ingresando `CONTROL+R` y escribiendo por ejemplo "hola" y nos mostrará el último comando que ingresamos que tenía esa cadena y si presionamos `CONTROL+R` nuevamente iremos hacia atrás en el historial donde se reúne esa condición. 
->
-> Si queremos ejecutarlo tal cual presionamos `ENTER` y sino la flecha hacia el costado para editarlo. Si queremos salir presionamos `CONTROL+C`
-
-
-
-#### Último Comando (`!!`) 
-
-> Con `!!` referenciamos el último comando ejecutado. Esto puede tener un caso interesante de uso cuando ingresamos un comando y nos olvidamos de poner `sudo`, poniendo `sudo !!` evitamos tener que escribir el comando nuevamente.
+> Con `!!` referenciamos el último comando ejecutado. Esto puede tener un caso interesante de uso cuando ingresamos un comando y nos olvidamos de poner `sudo`, poniendo `sudo !!` (*bang bang*) evitamos tener que escribir el comando nuevamente.
 >
 > Por ejemplo si queremos actualizar el índice del repositorio de paquetes 
-> 
+>
 > ```
 > apt update
 > sudo !!
 > ```
+
+### 
+
+#### Listar n comandos del historial
+
+```
+history 4
+```
+
+
+
+#### Filtrar comandos del historial
+
+Si queremos filtrar los comandos que tengan una determinada cadena podemos encadenar el comando `grep` utilizando pipes.
+
+```
+history | grep apt
+```
+
+
+
+#### **Reverse Search** en el historial (`CONTROL+R` )
+
+> Si sabemos que utilizamos un comando que tenía la cadena "hola" podemos hacer uso del comando `grep` y de un pipe: `history | grep hola`. Esto mismo podemos hacerlo también ingresando `CONTROL+R` y escribiendo por ejemplo "hola" y nos mostrará el último comando que ingresamos que tenía esa cadena y si presionamos `CONTROL+R` nuevamente iremos hacia atrás en el historial donde se reúne esa condición. 
+>
+> Si queremos ejecutarlo tal cual presionamos `ENTER` y sino la flecha hacia el costado para editarlo. Si queremos salir presionamos `CONTROL+C`
 
 
 

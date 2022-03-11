@@ -203,34 +203,9 @@ Si queremos que una tarea se ejecute de manera periódica podemos hacerlo ingres
 
 Elegimos la tarea que queremos programar, vamos a **Configure** y en la parte de **Build Triggers** elegimos **Build periodically** y en ese campo ponemos la expresión. Por ejemplo si queremos que se ejecute cada dos minutos: `*/2 * * * *`
 
-### Cron Expressions
-
-Las *cron expressions*  tienen la siguiente estructura:
-
-```
-<minute> <hour> <day-of-month> <month> <day-of-week> <command>
-```
-
-* minute (0-59)
-* hour (0-23)
-* day of month (1-31)
-* month (1-12) (también podemos poner `JAN` - `DEC`)
-* day of the week (0 - 6) (también podemos poner `SUN` - `SAT`)
 
 
-
-> En la página https://crontab.guru/ podemos simular las distintas expresiones y ver cuando se ejecutarán.
-
-
-
-* Si queremos que algo se ejecute en todos los minutos, todas las horas, todos los días del mes, todos los meses y todos los días de la semana tendremos: `* * * * *`
-* Si queremos que algo se ejecute cada 5 minutos: `5 * * * *`
-
-* Si queremos ejecutar algo a las 12 del mediodía: `0 12 * * *`
-* Si queremos ejecutar algo de 13hs a 13:05hs una vez por minuto todos los días: `0-5 13 * * * `
-* Si queremos que algo se ejecute de 13:15 y a las 13:45 todos los jueves de junio: `15,45 13 * 6 Tue (notar que podemos poner `TUE` con cualquier capitalización)
-* Si queremos que algo se ejecute el día 15 de todos los meses a las 9:30hs: `30 9 15 * *`
-* Si queremos que algo se ejecute cada 2 minutos `*/2 * * * *`
+> En las notas de Linux podremos ver información sorbre las *cron expressions*.
 
 
 
