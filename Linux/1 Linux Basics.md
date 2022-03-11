@@ -187,7 +187,9 @@ Por ejemplo si queremos ejecutar un script que realice un backup todos los días
 0 3 * * * /usr/local/bin/website_backup.sh
 ```
 
-> Siempre que trabajemos con cron jobs debemos indicar el *full path*.
+> Siempre que trabajemos con cron jobs debemos indicar el *full path*. Si bien normalmente para ejecutarlo manualemente podríamos ingresar sólamente el nombre del script `website_backup`, esto es porque en nuestra distribución el path incluye `usr/local/bin` por defecto y nuestra shell sabe que debe buscar allí los comandos. Sin embargo, en el usuario con el cual estamos ejecutando los cron jobs puede no suceder lo mismo y queremos asegurarnos que no haya inconvenientes.
+
+
 
 ## Cron Expressions
 
@@ -205,9 +207,9 @@ Las *cron expressions* estan formados por 6 campos y   tienen la siguiente estru
 
 
 
-> En la página https://crontab.guru/ podemos simular las distintas expresiones y ver cuando se ejecutarán.
+> En la páginas https://crontab.guru/ o https://crontab-generator.org/ podemos simular las distintas expresiones y ver cuando se ejecutarán.
 
-
+  
 
 * Si queremos que algo se ejecute en todos los minutos, de todas las horas, de todos los días del mes, de todos los meses y de todos los días de la semana tendremos: `* * * * *`
 * Si queremos que algo se ejecute **a las y 5** de cada hora: `5 * * * *`
@@ -244,3 +246,124 @@ Si queremos que un comando se ejecute cada vez que el servidor se reinice:
 @reboot
 ```
 
+
+
+## Output Redirection
+
+Si queremos mutear la salida o ejecutar un determinado comando de manera silenciosa:
+
+```
+echo Hola >/dev/null 2>&1
+```
+
+
+
+## Nano
+
+Nano es un editor de texto, muy simple de usar y por eso normalmente elegido por los principiantes. En muchas distribuciones ya viene instalado, lo cual podemos chequear con:
+
+```
+which nano
+```
+
+Con lo cual obtenemos `/usr/bin/nano` indicándonos donde se encuentra el binario. En caso de no tenerlo, podemos instalarlo en Debian y Ubuntu usando `apt` con:
+
+```
+sudo apt install nano
+```
+
+
+
+## Crear nuevo 
+
+Si queremos crear un nuevo docuemento podemos ingresar `nano` y nos aparecerá **New Buffer** en la parte superior.
+
+
+
+## Guardar como...
+
+Luego de editarlo con `CTRL+O` indicamos que queremos guardarlo, le damos un nombre presionamos `ENTER` y con `CTRL+X` cerramos el editor. 
+
+> Si no indicamos una ubicación guardará el archivo en la ubicación actual.
+
+
+
+## Editar Documento
+
+Si queremos editar un documento que se encuentra en el directorio de trabajo local:
+
+```
+nano file.txt
+```
+
+
+
+Mientras que si se encuentra en otra ubicación debemos colocar la ruta:
+
+```
+nano /etc/ssh/sshd_config
+```
+
+
+
+## Buscar
+
+Con `CTRL+W` buscamos la cadena de texto deseada (si estamos en windows y no queremos que nos cierre la terminal podemos hacerlo con `F6`).
+
+
+
+## Cortar Línea 
+
+```
+CTRL+K
+```
+
+
+
+## Pegar Línea
+
+```
+CTRL+U
+```
+
+
+
+## Iniciar en línea específica
+
+```
+nano +15 sshd_config
+```
+
+
+
+## Abrir archivo en modo lectura
+
+Si estamos trabajando con un archivo y no queremos editarlo accidentalmente, podemos abrirlo en *view only*.
+
+```
+nano -v sshd_config
+```
+
+
+
+## Ir a línea
+
+Si presionamos `CTRL+W` o `F6` veremos que el menú cambia y nos indica que si presionamos `CTRL+T` podremos navegar a la línea deseada:
+
+
+
+## Chequear Ortografía
+
+Para chequar la sintaxis de una línea en particular debemos instalar el paquete **spell**
+
+```
+sudo apt install spell
+```
+
+Una vez instalado este paquete podremos chequar la ortografía dentro de nano:
+
+```
+CTRL+T
+```
+
+Nos seleccionará la palabra mal escrita y podremos ingresar una palabra de reemplazo, presionamos `ENTER` y luego `Y` para confirmar. Por último `CTRL+C` para salir del modo de chequeo de escritura.

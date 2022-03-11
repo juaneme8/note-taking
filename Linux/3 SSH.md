@@ -222,3 +222,14 @@ ssh root@94.237.92.33
 
 Luego nos preguntará si queremos agregar la *fingerprint* del servidor a la lista de servidores confiados. De esta forma cuando nos conectemos nuevamente se asegurará que la key sea la misma con lo cual tendremos certeza de estar en el servidor deseado.
 
+
+
+## Cambiar puerto
+
+SSH utiliza por defecto el puerto 22, sin embargo es posible cambiarlo:
+
+```
+nano /etc/ssh/sshd_config
+```
+
+Luego donde dice `#Port 22` lo descomentamos y colocamos por ejemplo `Port 2222`.
