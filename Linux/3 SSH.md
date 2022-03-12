@@ -41,12 +41,6 @@ Obtendremos como salida `/usr/bin/ssh`.
 
 
 
-## Instalar en Windows
-
-La forma mas fácil de obtener un cliente SSH es utilizando **PuTTY** que lo descargamos en [putty.org](putty.org) e instalamos normalmente.
-
-
-
 ## Comprobar Claves Existentes
 * [Documentación GitHub](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/checking-for-existing-ssh-keys)
 
@@ -98,9 +92,33 @@ Debemos copiar la clave pública al servidor para tener la **public key authenti
 ssh-copy-id root@172.30.93.216 
 ```
 
-Por último nos preguntará la contraseña del usuario y nos dirá que agregó una clave.
+Por último nos preguntará la contraseña del usuario y nos dirá que agregó una clave. 
+
+La próxima vez que nos conectemos no nos pedirá la contraseña (a lo sumo nos pedirá la *passphrase* en caso de haberla configurado).
+
+Este comando creará automáticamente el archivo `authorized_keys` en `~/.ssh`. Cada vez que agreguemos una clave para conectarnos con ese usuario agregará una nueva línea a este archivo.
 
 
+
+De lo explicado anteriormente se entiende que en lugar de con `ssh-copy-id` podríamos haber hecho lo siguiente:
+
+```
+cat ~/.ssh/id_rsa.pub | ssh sgf@172.30.93.216 "mkdir ~/.ssh; cat >> ~/.ssh/authorized_keys"
+```
+
+## SSH en Windows
+
+La forma mas fácil de obtener un cliente SSH en Windows es utilizando **PuTTY** que lo descargamos en [putty.org](putty.org) e instalamos normalmente.
+
+> Sin embargo debemos tener presente que Git for Windows instala un SSH, una versión de OpenSSH, cosa que podemos verificar con `which ssh`
+
+Indicando el usuario y la IP del servidor podremos conectarnos de la misma manera que hicimos anteriormente.
+
+Podemos guardar la sesión de modo tal que no tengamos que ingresar el usuario y la IP del servidor cada vez que queremos conectarnos. 
+
+En Windows podemos generar la clave con **PuTTY Key Generator** que también viene instalado, en el campo **Number of bits** ingresamos `4096` y hacemos click en **Generate**. Luego tendremos que mover el mouse aleatoriamente dentro del rectángulo y generará la clave. Seleccionamos todo, copiamos y lo pegamos en notepad. Luego guardamos por ejemplo en **Documents** en una carpeta **ssh keys** como `public key`.  Para guardar la clave privada hacemos click en **Save private key** y nos instará a colocar un *passphrase* y lo guardamos como `private key.ppk`.
+
+Luego nos conectamos con PuTTY al servidor y actualizamos el archivo `~/.ssh/authorized_keys` agregando la clave pública recién generada.  Cerramos la conexión y antes de volver a conectarnos en PuTTY vamos al apartado **Auth** y en **Private key file for authentication** cargamos a la ruta privada. En caso de haber guardado una sesión la actualizamos con este agregado.
 
 ## Generación de clave para GitHub
 * [Documentación GitHub](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
