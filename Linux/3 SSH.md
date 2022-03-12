@@ -47,7 +47,76 @@ La forma mas fácil de obtener un cliente SSH es utilizando **PuTTY** que lo des
 
 
 
-# GitLab y GitHub
+## Comprobar Claves Existentes
+* [Documentación GitHub](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/checking-for-existing-ssh-keys)
+
+Lo primero que debemos hacer es chequear si existen SSH Keys existentes en el directorio `.ssh` para ello ejecutamos `ls -al ~/.ssh` si obtenemos  **ls: cannot access '~/.ssh': No such file or directory** es que no hay ninguna y podemos continuar. 
+
+Esto lo hacemos para evitar sobrescribirla dándole el mismo nombre cuando creemos una clave nueva.
+
+
+
+## Generación de una clave
+
+Este comando creará el directorio `.ssh` en caso de que este no exista aún.
+
+```
+ssh-keygen -b 4096
+```
+
+> Con `-b 4096` especificamos la longitud en bits, que en este caso es mucho mas fuerte que el default.
+
+
+
+Luego nos preguntará el nombre del archivo y si presionamos `ENTER` nos asignará los nombres `id_rsa` y `id_rsa.pub` en `/home/juan/.ssh`
+
+Por último nos preguntará si queremos ingresar una *passphrase* lo cual es muy aconsejable ya que agregamos una capa más de seguridad y luego de ingresarla presionamos `ENTER`. Se [recomienda](https://www.ssh.com/academy/ssh/passphrase) utilizar minúsculas, mayúsculas, números, caracteres especiales y al menos 15 caracteres. Debemos tener presente que en caso de olvidarla no hay forma de recuperarla. Si no queremos poner ninguna presionamos `ENTER` directamente.
+
+Si ahora ejecutamos `ls -al ~/.ssh` veremos que tenemos un archivo `id_rsa` y uno `id_rsa.pub`. Nunca debemos mostrar el contenido de `id_rsa` que es la clave privada.
+
+
+
+## Conexión por SSH a Servidor
+
+A continuación debemos copiar la clave publica al servidor que nos queremos conectar, pero antes probamos que nos podamos conectar efectivamente usando ssh.
+
+```
+ssh root@172.30.93.216
+```
+
+A continuación nos preguntará si queremos conectarnos a ese servidor y nos mostrará la *fingerprint* con lo cual diferencia ese server de cualquier otro, ingresamos **yes** para proceder. Por último nos pedirá la contraseña y ya podemos ingresar.
+
+La conexión por ssh funciona pero todavía no tenemos **public key authentication**, por lo que nos desconectamos con `CTRL+d`
+
+
+
+## Copiar clave pública a servidor
+
+Debemos copiar la clave pública al servidor para tener la **public key authentication**, para ello:
+
+```
+ssh-copy-id root@172.30.93.216 
+```
+
+Por último nos preguntará la contraseña del usuario y nos dirá que agregó una clave.
+
+
+
+## Generación de clave para GitHub
+* [Documentación GitHub](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
+
+
+
+Lo primero que hacemos es a brir Git Bash y ejecutar: `ssh-keygen -t ed25519 -C "juaneme8@gmail.com"`.
+
+> Ed25519 es el nombre del algoritmo, podemos ver más información en [este artículo](https://medium.com/risan/upgrade-your-ssh-key-to-ed25519-c6e8d60d3c54)
+
+Luego nos preguntará el nombre del archivo y si presionamos `ENTER` nos asignará los nombres `id_ed25519` y `id_ed25519.pub`. 
+Como vamos a trabajar con más de un servicio (ejemplo GitHub y GitLab) conviene ponerle un nombre personalizado por ejemplo `id_ed25519_github.pub` colocamos `C:\Users\juan.ocho/.ssh/id_ed25519_github`.
+
+
+
+## GitLab y GitHub
 
 Debemos generar claves tanto para GitLab como para GitHub y necesitamos un modo de que el cliente ssh sepa qué clave utilizar para cada servicio.
 Si bien para la generación de claves utiliza un algoritmo distinto, el proceso para trabajar con dos servicios lo encontramos explicado en [este artículo](https://dev.to/vyasriday/managing-different-ssh-keys-for-gitlab-and-github-4k5g)
@@ -55,6 +124,7 @@ Si bien para la generación de claves utiliza un algoritmo distinto, el proceso 
 > Cuando hablamos de los algoritmos utilizados para generar las llaves públicas y privadas, debemos tener en cuenta que **Ed25519** es el más fuerte matemáticamente hablando y más rápido. En caso de que no pueda utilizarse **Ed25519** se recomienda utilizar RSA con al menos **3072 bits** de longitud. [Más información](https://nbeguier.medium.com/a-real-world-comparison-of-the-ssh-key-algorithms-b26b0b31bfd9)
 
 ## Creamos archivo `config`
+
 Creamos el archivo `config` que le permitirá al cliente ssh saber qué clave usar. Como vamos a usar el comando `touch` para crear el archivo lo ejecutamos en Git Bash: `touch ~/.ssh/config `
 
 Luego en este archivo le indicamos qué clave utilizar basándonos en el proveedor con el que estemos trabajando:
@@ -74,29 +144,11 @@ IdentityFile ~/.ssh/id_ed25519_gitlab
 Por lo tanto estos serán los nombres que tendremos que darle a nuestras claves `id_ed25519_github` y `id_ed25519_gitlab`
 
 > Las llaves públicas y privadas también serán creadas en este mismo directorio `.ssh` en el home `~` del usuario. 
-
-## Comprobar Claves Existentes
-* [Documentación GitHub](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/checking-for-existing-ssh-keys)
-
-Lo primero que debemos hacer es chequear si existen SSH Keys existentes en el directorio `.ssh` para ello ejecutamos `ls -al ~/.ssh` si obtenemos  **ls: cannot access '~/.ssh': No such file or directory** es que no hay ninguna y podemos continuar. En caso de tener alguna con el comando que vamos a ejecutar a continuación la sobrescribiríamos.
-
-## Generación de una nueva clave
-* [Documentación GitHub](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
-
-Este comando creará el directorio `.ssh` en caso de que este no exista aún.
-
-Lo primero que hacemos es abrir Git Bash y ejecutar `ssh-keygen -t ed25519 -C "juaneme8@gmail.com"`.
-
-> Ed25519 es el nombre del algoritmo, podemos ver más información en [este artículo](https://medium.com/risan/upgrade-your-ssh-key-to-ed25519-c6e8d60d3c54)
-
-Luego nos preguntará el nombre del archivo y si presionamos `ENTER` nos asignará los nombres `id_ed25519` y `id_ed25519.pub`. 
-Como vamos a trabajar con más de un servicio (ejemplo GitHub y GitLab) conviene ponerle un nombre personalizado por ejemplo `id_ed25519_github.pub` colocamos `C:\Users\juan.lauria/.ssh/id_ed25519_github`.
-
-Por último nos preguntará si queremos ingresar una *passphrase* y luego de ingresarla presionamos `ENTER`. Se [recomienda](https://www.ssh.com/academy/ssh/passphrase) utilizar minúsculas, mayúsculas, números, caracteres especiales y al menos 15 caracteres.
-
-> Si ahora ejecutamos `ls -al ~/.ssh` veremos que tenemos un archivo `id_ed25519_github` y uno `id_ed25519_github.pub`
+>
+> 
 
 ## Agregar la clave al ssh-agent
+
 Para evitar tener que escribir el passphrase cada vez que hacemos un push o pull, debemos agregar la llave privada al `ssh-agent`. 
 
 > El proceso mencionado a continuación funciona sólo con Git Bash.
@@ -190,7 +242,7 @@ Los pasos a seguir son los mismos que para GitHub pero también es posible consu
 
 ## Generación de una nueva clave
 La creación de la clave es la misma que para GitHub `ssh-keygen -t ed25519 -C "juaneme8@gmail.com"`
-Luego nos preguntará la ruta deseada a lo que colocamos: `C:\Users\juan.lauria/.ssh/id_ed25519_gitlab`
+Luego nos preguntará la ruta deseada a lo que colocamos: `C:\Users\juan.ocho/.ssh/id_ed25519_gitlab`
 A continuación indicamos la *passphrase* y con `ls ~/.ssh` chequeamos que se hayan creado ambas claves corretamente.
 
 ## Agregar clave a GitLab
