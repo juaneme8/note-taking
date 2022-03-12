@@ -116,7 +116,7 @@ Indicando el usuario y la IP del servidor podremos conectarnos de la misma maner
 
 Podemos guardar la sesión de modo tal que no tengamos que ingresar el usuario y la IP del servidor cada vez que queremos conectarnos. 
 
-En Windows podemos generar la clave con **PuTTY Key Generator** que también viene instalado, en el campo **Number of bits** ingresamos `4096` y hacemos click en **Generate**. Luego tendremos que mover el mouse aleatoriamente dentro del rectángulo y generará la clave. Seleccionamos todo, copiamos y lo pegamos en notepad. Luego guardamos por ejemplo en **Documents** en una carpeta **ssh keys** como `public key`.  Para guardar la clave privada hacemos click en **Save private key** y nos instará a colocar un *passphrase* y lo guardamos como `private key.ppk`.
+En Windows podemos generar la clave con **PuTTY Key Generator** que también viene instalado, en el campo **Number of bits** ingresamos `4096` y hacemos click en **Generate**. Luego tendremos que +++--mover el mouse aleatoriamente dentro del rectángulo y generará la clave. Seleccionamos todo, copiamos y lo pegamos en notepad. Luego guardamos por ejemplo en **Documents** en una carpeta **ssh keys** como `public key`.  Para guardar la clave privada hacemos click en **Save private key** y nos instará a colocar un *passphrase* y lo guardamos como `private key.ppk`.
 
 Luego nos conectamos con PuTTY al servidor y actualizamos el archivo `~/.ssh/authorized_keys` agregando la clave pública recién generada.  Cerramos la conexión y antes de volver a conectarnos en PuTTY vamos al apartado **Auth** y en **Private key file for authentication** cargamos a la ruta privada. En caso de haber guardado una sesión la actualizamos con este agregado.
 
