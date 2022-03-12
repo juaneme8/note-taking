@@ -1,36 +1,49 @@
 # SSH
+> Basado en el video de [LearnLinuxTV](https://youtu.be/bfwfRCCFTVI)
 > Basado en la [documentación](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh)  de GitHub
 > Basado en el [video](https://www.youtube.com/watch?v=wHh3IgJvXcE) de FalconMasters.
 > Basado en el [video](https://www.youtube.com/watch?v=nQDFBd5NFA8) de Madness Labs.
 
 ## Introducción
 
+OpenSSH o SSH es el standard en lo relativo a la administración remota de servidores Linux.
+
 Cuando queremos enviar un mensaje y que no sea descubierto por otras personas, procedemos a cifrarlo con una contraseña de modo tal que la persona en el otro extremo con esa contraseña pueda descifrarlo. Sin embargo, si enviamos esta contraseña, la intercepción por una persona no deseada le permitiría acceder al mensaje. 
 
 Antiguamente se utilizaba el  **Telnet** para entre otras cosas controlar una computadora remotamente. Sin embargo, este tiene la característica de que cualquier persona en la red podría ver el tráfico y así descubrir los comandos e información que estaba siendo enviada.
 
+Es por esto que no es aconsejable utilizar **password authentication** y utilizar en cambio **public key authentication**.
+
 Utilizando en cambio **SSH** gracias al cifrado asimétrico de un sólo camino mediante **llaves públicas y privadas** viene a solucionar este problema. Las llaves públicas y privadas son creadas por aquella persona que quiere recibir un mensaje. Como ambas llaves están vinculadas matemáticamente, aquello cifrado con la llave pública sólo puede ser abierto con la llave privada. Como consecuencia de esto cuando queremos **recibir** un mensaje, enviamos la llave pública. Esto no representa un riesgo, ya que por ser pública no se comprometen los datos si es interceptada por alguien. Luego el emisor del mensaje junto con la llave pública realizará un cifrado del mensaje y lo envía al receptor. Aunque sean intervenidas la llave pública y el mensaje secreto, estos no podrán ser descubiertos sin la llave privada. El receptor en cambio, con la llave privada convierte el mensaje cifrado en el mensaje real. 
 Si queremos hacer el flujo inverso de información, bastará con que el hasta ahora emisor genere una llave pública y privada y repita la lógica anterior. 
 
-
-
-> Como analogía podemos pensar que Telnet es como enviar una hoja de papel con el mensaje escrito. SSH en cambio es como enviar el mensaje desde A dentro de un portafolio cerrado con un candado, B al recibirlo le coloca otro candado y lo vuelve a enviar al emisor que abre su candado y lo envía al receptor que luego abre su candado y accede al mensaje. Esto mismo se repite cuando el 
-
-
-
 Cuando nos conectamos a GitHub mediante una conexión HTTPS debemos ingresar de manera permanente el usuario y la contraseña, si bien HTTPS es una conexión segura el nombre de usuario y la contraseña se están guardando en un entorno local por que ante un robo de la pc pueden ser crackeados y alguien podría lograr el acceso al repositorio. Para evitar esto agregamos más seguridad trabajando con llaves públicas y privadas con la ventaja adicional de que no tendremos que estar ingresando usuario y contraseña todo el tiempo. 
 
-En nuestro ordenador creamos una llave pública y una privada, luego le enviamos la llave pública al repositorio y en lugar de conectarnos mediante HTTPS nos conectaremos mediante el protocolo SSH. Es el mismo protocolo que usamos para conectarnos a servidores remotos Unix (Linux o Mac). En la primera conexión GitHub nos enviará su propia llave pública, de esta manera podremos tener una conexión en ambas direcciones completamente cifrada por SSH. Además también se le puede agregar una contraseña a la llave privada y también es posible cifrar los discos duros (en Windows esto se puede hacer con Bitlocker).
+En nuestro ordenador creamos una llave pública y una privada, luego le enviamos la llave pública al repositorio y en lugar de conectarnos mediante HTTPS nos conectaremos mediante el protocolo SSH. Es el mismo protocolo que usamos para conectarnos a servidores remotos Unix (Linux o Mac). En la primera conexión GitHub nos enviará su propia llave pública, de esta manera podremos tener una conexión en ambas direcciones completamente cifrada por SSH. Además también se le puede agregar una *passphrase* a la llave privada y también es posible cifrar los discos duros (en Windows esto se puede hacer con Bitlocker).
 
 >Debemos tener una llave pública y una privada para cada ordenador y a su vez una para cada servicio GitHub, GitLab, etc.
-
-El uso del protocolo SSH nos permite conectarnos y autenticar con servidores y servicios remotos. Gracias a las *SSH keys* podremos conectarnos a GitHub sin proporcionar usuario y contraseña cada visita.
-
-La *SSH key* se trata de un archivo que tiene una clave con la cual podremos utilizar en GitHub para clonar, pushear, etc.
 
 
 
 > Si en GitLab tenemos activado el 2FA e intentamos acceder mediante HTTPS nos indicará que debemos generar un token personal con permisos de lectura y escritura. Una vez hecho esto cuando intentemos hacer alguna acción como push, pull, fetch, etc debemos ingresar dicho token como si fuera la contraseña. En caso de haber trabajado con otra contraseña anteriormente, debemos eliminarla en las credenciales de windows o editarla por esta otra.
+
+
+
+## Verificar Cliente OpenSSH
+
+Las distribuciones de Linux por lo general tienen instalado OpenSSH por default, pero podemos verificarlo con:
+
+```
+which ssh
+```
+
+Obtendremos como salida `/usr/bin/ssh`.
+
+
+
+## Instalar en Windows
+
+La forma mas fácil de obtener un cliente SSH es utilizando **PuTTY** que lo descargamos en [putty.org](putty.org) e instalamos normalmente.
 
 
 
@@ -63,23 +76,23 @@ Por lo tanto estos serán los nombres que tendremos que darle a nuestras claves 
 > Las llaves públicas y privadas también serán creadas en este mismo directorio `.ssh` en el home `~` del usuario. 
 
 ## Comprobar Claves Existentes
-https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/checking-for-existing-ssh-keys
+* [Documentación GitHub](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/checking-for-existing-ssh-keys)
 
-Para chequear si existen SSH Keys existentes en el directorio `.ssh` ejecutamos `ls -al ~/.ssh` si obtenemos  **ls: cannot access '~/.ssh': No such file or directory** debemos crear una nueva clave SSH.
+Lo primero que debemos hacer es chequear si existen SSH Keys existentes en el directorio `.ssh` para ello ejecutamos `ls -al ~/.ssh` si obtenemos  **ls: cannot access '~/.ssh': No such file or directory** es que no hay ninguna y podemos continuar. En caso de tener alguna con el comando que vamos a ejecutar a continuación la sobrescribiríamos.
 
 ## Generación de una nueva clave
-https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
+* [Documentación GitHub](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
 
-1. Abrir Git Bash.
-2. Ejecutar `ssh-keygen -t ed25519 -C "juaneme8@gmail.com"`
+Este comando creará el directorio `.ssh` en caso de que este no exista aún.
+
+Lo primero que hacemos es abrir Git Bash y ejecutar `ssh-keygen -t ed25519 -C "juaneme8@gmail.com"`.
 
 > Ed25519 es el nombre del algoritmo, podemos ver más información en [este artículo](https://medium.com/risan/upgrade-your-ssh-key-to-ed25519-c6e8d60d3c54)
 
-3. Luego nos preguntará el nombre del archivo y si presionamos `ENTER` nos asignará los nombres `id_ed25519` y `id_ed25519.pub`. 
-Como vamos a trabajar con más de un servicio (ejemplo GitHub y GitLab) conviene ponerle un nombre personalizado por ejemplo `id_ed25519_github.pub` colocamos `C:\Users\juan.lauria/.ssh/id_ed25519_github`
+Luego nos preguntará el nombre del archivo y si presionamos `ENTER` nos asignará los nombres `id_ed25519` y `id_ed25519.pub`. 
+Como vamos a trabajar con más de un servicio (ejemplo GitHub y GitLab) conviene ponerle un nombre personalizado por ejemplo `id_ed25519_github.pub` colocamos `C:\Users\juan.lauria/.ssh/id_ed25519_github`.
 
-
-5. Por último nos preguntará si queremos ingresar una *passphrase* y luego de ingresarla presionamos `ENTER`. Se [recomienda](https://www.ssh.com/academy/ssh/passphrase) utilizar minúsculas, mayúsculas, números, caracteres especiales y al menos 15 caracteres.
+Por último nos preguntará si queremos ingresar una *passphrase* y luego de ingresarla presionamos `ENTER`. Se [recomienda](https://www.ssh.com/academy/ssh/passphrase) utilizar minúsculas, mayúsculas, números, caracteres especiales y al menos 15 caracteres.
 
 > Si ahora ejecutamos `ls -al ~/.ssh` veremos que tenemos un archivo `id_ed25519_github` y uno `id_ed25519_github.pub`
 
@@ -222,7 +235,7 @@ ssh root@94.237.92.33
 
 Luego nos preguntará si queremos agregar la *fingerprint* del servidor a la lista de servidores confiados. De esta forma cuando nos conectemos nuevamente se asegurará que la key sea la misma con lo cual tendremos certeza de estar en el servidor deseado.
 
-
+***
 
 ## Cambiar puerto
 
