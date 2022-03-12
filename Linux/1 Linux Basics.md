@@ -258,7 +258,7 @@ echo Hola >/dev/null 2>&1
 
 
 
-## Nano
+# Nano
 
 Nano es un editor de texto, muy simple de usar y por eso normalmente elegido por los principiantes. En muchas distribuciones ya viene instalado, lo cual podemos chequear con:
 
@@ -367,3 +367,175 @@ CTRL+T
 ```
 
 Nos seleccionará la palabra mal escrita y podremos ingresar una palabra de reemplazo, presionamos `ENTER` y luego `Y` para confirmar. Por último `CTRL+C` para salir del modo de chequeo de escritura.
+
+
+
+# Versiones de Linux 
+
+Se recomienda instalar la versión **LTS** ya que las actualizaciones de seguridad están disponibles durante más tiempo que en otras versiones.
+
+## Versión Instalada
+
+Para conocer la distribución y su versión instalada en nuestro servidor
+
+```
+cat /etc/os-release
+```
+
+
+
+# Recomendaciones de Seguridad
+
+## Crear usuario no root
+
+Es aconsejable no utilizar `root` en un servidor Linux a menos que sea absolutamente necesario ya que ante un error puede que causemos grandes daños. Cuando instalamos Ubuntu en un servidor no tendremos este problema ya que en el proceso crearemos un usuario, pero cuando trabajamos con una instancia VPS comenzaremos trabajando con `root`. Es por eso que lo primero que debemos hacer es crear un usuario no root al que le daremos privilegios de `sudo` para poder ejecutar comandos como `root` desde un usuario normal.
+
+En lo sucesivo asumimos que estamos logueados como `root` y por eso no ponemos `sudo`, en caso de no estarlo debemos ponerlo.
+
+```
+adduser juan
+```
+
+Luego tendremos que ingresar la contraseña y nos pedirá una serie de datos y podemos dejarlos en blanco e ir presionando `ENTER`. Por último nos preguntará si la información es correcta y nos mostrará `Y/n` el hecho de que tenga mayúscula la `Y` da cuenta que se trata de la opción por defecto por lo que podremos presionar nuevamente `ENTER` directamente.
+
+El siguiente paso es agregar este usuario al grupo `sudu` ya que siendo miembro de este grupo podrá utilizar `sudo`.
+
+```
+usermod -aG sudo juan
+```
+
+> Con `-aG` indicamos que queremos agregar un usuario a un grupo.
+
+Podemos verificar que el usuario forma parte de ese grupo 
+
+```
+groups juan
+```
+
+
+
+### Cambiar usuario
+
+```
+su - juan
+```
+
+> Si estamos logueados como root no nos pedirá el password.
+
+Para verificar que `sudo` funciona
+
+```
+sudo ls /etc
+```
+
+Luego nos pedirá el password.
+
+
+
+## Actualizaciones
+
+Realizar una actualización completa de los parches de seguridad del servidor antes de colocarlo en producción.
+
+Para refrescar la lista de los paquetes que tenemos disponibles para actualizar.
+
+```
+sudo apt update
+```
+
+Para instalar las actualizaciones disponibles
+
+```
+sudo apt dist-upgrade
+```
+
+Luego reiniciamos el servidor `sudo reboot`
+
+
+
+## Actualizaciones Automáticas
+
+```
+sudo apt install unattended-upgrades
+```
+
+Luego yendo a `etc/apt/apt.conf.d` veremos que tenemos una serie de archivos con `ls -l` que mas adelante editaremos.
+
+Para asegurarnos que las actualizaciones automáticas están instaladas:
+
+```
+sudo dpkg-reconfigure --priority=low unattended-upgrades
+```
+
+Luego nos preguntará si queremos descargar e instalar actualizaciones estables automáticamente e indicamos que sí.
+
+
+
+En `20auto-upgrades`agregamos dos líneas, una para que el listado de paquetes se refresque automáticamente y otra para que instale automáticamente estas actualizaciones:
+
+```
+APT::Periodic::Update-Package-Lists "1";
+APT::Periodic::Unattended-Package-Lists "1";
+
+```
+
+En `50unattended-upgrades`veremos que tenemos habilitadas las actualizaciones relacionadas con **security** y **infra security**
+
+
+
+Si queremos recibir un correo cada vez que unattended upgrades actualiza algo, debemos descomentar esta línea y colocar el mail:
+
+```
+Unattended-Upgrade::Mail ""
+```
+
+
+
+En otra opción veremos `Unattended-Upgrade::Mail Report "on-change";` pero esto puede ser molesto si tenemos muchos servidores, por lo que podemos cambiarlo a:
+
+```
+Unattended-Upgrade::Mail Report "only-on-error"
+```
+
+
+
+Para evitar que se llene el disco con versiones viejas del kernel descomentamos esta línea:
+
+```
+Unattended-Upgrade::Remove-Unused-Kernel-Packages "true"
+```
+
+En la misma dirección para evitar tener muchos paquetes que no usamos (lo cual también atenta con la seguridad ya que lo aconsejable es tener el menor número de paquetes) también debemos descomentar la línea:
+
+```
+Unattended-Upgrade::Remove-New-Unused-Dependencies "true"
+```
+
+También descomentamos:
+
+```
+Unattended-Upgrade::Remove-Unused-Dependencies "fase"
+```
+
+
+
+Si tenemos la posibilidad de contar con una ventana de mantenimiento que habilita a reiniciar el servidor (y no un servicio 24x7) también podemos descomentar y cambiar a `true`:
+
+```
+Unattended-Upgrade::Automatic-Reboot "false";
+```
+
+En la misma dirección si queremos que se reinicie aunque haya un usuario conectado:
+
+```
+Unattended-Upgrade::Automatic-Reboot-WithUsers "true";
+```
+
+En relación a lo anterior tenemos:
+
+```
+Unattended-Upgrade::Automatic-Reboot-Time "02:00";
+```
+
+
+
+**En todos estos casos debemos analizar la situación propia de nuestro servidor y evaluar si deseamos contar con esa opción o no.**
