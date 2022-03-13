@@ -386,6 +386,8 @@ cat /etc/os-release
 
 # Recomendaciones de Seguridad
 
+> Basado en [5 Easy Tweaks to increase your Linux Server's Security](https://youtu.be/OVsMaXQkktQ) de LearnLinuxTV.
+
 ## Crear usuario no root
 
 Es aconsejable no utilizar `root` en un servidor Linux a menos que sea absolutamente necesario ya que ante un error puede que causemos grandes daños. Cuando instalamos Ubuntu en un servidor no tendremos este problema ya que en el proceso crearemos un usuario, pero cuando trabajamos con una instancia VPS comenzaremos trabajando con `root`. Es por eso que lo primero que debemos hacer es crear un usuario no root al que le daremos privilegios de `sudo` para poder ejecutar comandos como `root` desde un usuario normal.
@@ -539,3 +541,92 @@ Unattended-Upgrade::Automatic-Reboot-Time "02:00";
 
 
 **En todos estos casos debemos analizar la situación propia de nuestro servidor y evaluar si deseamos contar con esa opción o no.**
+
+
+
+## Configuraciones en `sshd_config`
+
+### Autenticación por ssh con llave pública
+
+Queremos plantear una autenticación con llave pública en lugar de utilizar el password para conectarnos por ssh.
+
+:stop_sign: Ver el apartado de SSH donde se explica esta alternativa a la autenticación con password.
+
+
+
+### Deshabilitar Autenticación por ssh con contraseña
+
+Editamos el archivo de configuración del servicio de ssh.
+
+```
+sudo nano /etc/ssh/sshd_config
+```
+
+Donde dice `PermitRootLogin yes` podemos cambiarlo a `no` para impedir el logueo como `root`.
+
+Donde dice `PasswordAuthentication yes` colocamos `no` de manera que sólo sea posible conectarnos por *public key authentication*
+
+Los cambios tendrán efecto recién cuando reiniciemos el servicio de ssh:
+
+```
+sudo systemctl restart sshd
+```
+
+> Aunque hemos reiniciado el servicio y estamos conectados por ssh no se desconecta.
+
+
+
+:warning: Es importante abrir dos sesiones antes de editar este archivo. En caso de que cometamos algún error y no podamos volver a conectarnos, tendremos la otra sesión para solucionar el problema.
+
+
+
+## Implementación Fail2Ban
+
+Fail2Ban es un framework escrito en python que protege los sistemas Linux de ataques de fuerza bruta. Entre las múltiples funcionalidades que tiene una de ellas es para proteger los ataques de fuerza bruta en un servidor por SSH. También nos permite monitorear la magnitud de los ataques basado en el número de intentos de autenticación que son realizados.
+
+Para instalarlo
+
+```
+sudo apt install fail2ban
+```
+
+Para verificar que está corriendo
+
+```
+systemctl status fail2ban
+```
+
+Para chequear de qué nos está protegiendo inicialmente
+
+```
+sudo fail2ban-client status
+```
+
+Debemos verificar que aparezca `- Jail list: sshd`  lo cual significa que fail2ban está controlando ese servicio, chequeando los logs y si ve muchos fallos al ingresar por SSH baneará la IP que está intentando entrar al servidor. 
+
+Debemos evitar que banee accidentalmente nuestra dirección IP. podríamos editar de manera directa `/etc/fail2ban/jail.conf` pero no es conveniente ya que en caso de actualizaciones este archivo se pisará. Por ese motivo realizamos una copia (desde el directorio de ese archivo):
+
+```
+sudo cp jail.conf jail.local
+```
+
+En caso de que exista `jail.local` fail2ban utilizará ese, caso contrario utilizará `jail.conf`. 
+
+Por lo tanto ahora editamos `jail.local` sabiendo que no será sobrescrito:
+
+```
+sudo nano jail.local
+```
+
+
+
+En el campo `ignoreip = 127.0.0.1/8::1` lo aconsejable es descomentarlo y colocar la IP pública desde donde vamos a querer conectarnos de modo que nunca seamos baneados nosotros mismos. También podríamos poner la IP de una VPN desde la cual nos conectamos si fuera este el caso.
+
+
+
+Dentro de las configuraciones veremos:
+
+`bantime = 10m` es decir que la IP será baneada por 10 minutos.
+
+`maxretry=5` es la cantidad de intentos que puede fallar.
+

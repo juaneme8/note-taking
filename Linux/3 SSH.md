@@ -50,7 +50,7 @@ Esto lo hacemos para evitar sobrescribirla dándole el mismo nombre cuando creem
 
 
 
-## Generación de una clave
+## Generación de clave
 
 Este comando creará el directorio `.ssh` en caso de que este no exista aún.
 
@@ -59,12 +59,18 @@ ssh-keygen -b 4096
 ```
 
 > Con `-b 4096` especificamos la longitud en bits, que en este caso es mucho mas fuerte que el default.
+>
+> Si queremos crear una clave de otro tipo podemos poner `ssh-keygen -t ed25519` que tiene mejor seguridad que la default de tipo rsa. Ed25519 es el nombre del algoritmo, podemos ver más información en [este artículo](https://medium.com/risan/upgrade-your-ssh-key-to-ed25519-c6e8d60d3c54)
 
 
 
 Luego nos preguntará el nombre del archivo y si presionamos `ENTER` nos asignará los nombres `id_rsa` y `id_rsa.pub` en `/home/juan/.ssh`
 
-Por último nos preguntará si queremos ingresar una *passphrase* lo cual es muy aconsejable ya que agregamos una capa más de seguridad y luego de ingresarla presionamos `ENTER`. Se [recomienda](https://www.ssh.com/academy/ssh/passphrase) utilizar minúsculas, mayúsculas, números, caracteres especiales y al menos 15 caracteres. Debemos tener presente que en caso de olvidarla no hay forma de recuperarla. Si no queremos poner ninguna presionamos `ENTER` directamente.
+Por último nos preguntará si queremos ingresar una *passphrase* lo cual es muy aconsejable ya que agregamos una capa más de seguridad y luego de ingresarla presionamos `ENTER`. Se [recomienda](https://www.ssh.com/academy/ssh/passphrase) utilizar minúsculas, mayúsculas, números, caracteres especiales y al menos 15 caracteres. Debemos tener presente que en caso de olvidarla no hay forma de recuperarla. Si no queremos poner ninguna presionamos `ENTER` directamente. 
+
+:bulb: Si estamos trabajando con Linux en el host es común que la passphrase nos la pida una sola vez y la cachee en memoria. Tengamos en cuenta que nos protege especialmente en el caso de que nos roben la clave privada, pero de todos modos ante esa situación lo aconsejable es eliminar esa clave y generar una nueva.
+
+
 
 Si ahora ejecutamos `ls -al ~/.ssh` veremos que tenemos un archivo `id_rsa` y uno `id_rsa.pub`. Nunca debemos mostrar el contenido de `id_rsa` que es la clave privada.
 
@@ -75,7 +81,7 @@ Si ahora ejecutamos `ls -al ~/.ssh` veremos que tenemos un archivo `id_rsa` y un
 A continuación debemos copiar la clave publica al servidor que nos queremos conectar, pero antes probamos que nos podamos conectar efectivamente usando ssh.
 
 ```
-ssh root@172.30.93.216
+ssh juan@172.30.93.216
 ```
 
 A continuación nos preguntará si queremos conectarnos a ese servidor y nos mostrará la *fingerprint* con lo cual diferencia ese server de cualquier otro, ingresamos **yes** para proceder. Por último nos pedirá la contraseña y ya podemos ingresar.
@@ -89,7 +95,7 @@ La conexión por ssh funciona pero todavía no tenemos **public key authenticati
 Debemos copiar la clave pública al servidor para tener la **public key authentication**, para ello:
 
 ```
-ssh-copy-id root@172.30.93.216 
+ssh-copy-id juan@172.30.93.216 
 ```
 
 Por último nos preguntará la contraseña del usuario y nos dirá que agregó una clave. 
@@ -97,6 +103,14 @@ Por último nos preguntará la contraseña del usuario y nos dirá que agregó u
 La próxima vez que nos conectemos no nos pedirá la contraseña (a lo sumo nos pedirá la *passphrase* en caso de haberla configurado).
 
 Este comando creará automáticamente el archivo `authorized_keys` en `~/.ssh`. Cada vez que agreguemos una clave para conectarnos con ese usuario agregará una nueva línea a este archivo.
+
+
+
+Si quremos copiar la clave con el nombre default `id_rsa.pub` no hace falta indicarlo explícitamente, mientras que si quisiéramos copiar otra (por ejemplo de otro tipo) deberíamos indicarlo de este modo:
+
+```
+ssh-copy-id -i ~/.ssh/ed25519.pub juan@172.30.93.216
+```
 
 
 
@@ -127,7 +141,7 @@ Luego nos conectamos con PuTTY al servidor y actualizamos el archivo `~/.ssh/aut
 
 Lo primero que hacemos es a brir Git Bash y ejecutar: `ssh-keygen -t ed25519 -C "juaneme8@gmail.com"`.
 
-> Ed25519 es el nombre del algoritmo, podemos ver más información en [este artículo](https://medium.com/risan/upgrade-your-ssh-key-to-ed25519-c6e8d60d3c54)
+
 
 Luego nos preguntará el nombre del archivo y si presionamos `ENTER` nos asignará los nombres `id_ed25519` y `id_ed25519.pub`. 
 Como vamos a trabajar con más de un servicio (ejemplo GitHub y GitLab) conviene ponerle un nombre personalizado por ejemplo `id_ed25519_github.pub` colocamos `C:\Users\juan.ocho/.ssh/id_ed25519_github`.
