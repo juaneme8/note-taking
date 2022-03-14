@@ -211,7 +211,29 @@ Cuando usamos el comando `clear` o `CONTROL+L` si scrolleamos para arriba veremo
 
 
 
-#### Comandos `pushd` y `popd`
+### Comando `sed`
+
+En ocasiones puede que tengamos que editar un archivo de configuración (por ejemplo dentro de un contenedor) y no tengamos ningún editor disponible  (`vi`, `vim`, `nano`).
+
+Una solución podría ser instalar uno de estos paquetes, pero puede que no tengamos privilegios o aún teniéndolos si son cambios pequeños puede que nos convenga editar el archivo al vuelo.
+
+```
+sed -i "/s/texttobechanged/textwanted/g" filename
+```
+
+
+
+Ejemplo de uso:
+
+```
+docker exec 900b... sed -i "s/It works!/Docker1/" /usr/local/apache2/htdocs/index.html
+```
+
+> En Windows este comando utilizando comillas simples no funcionó.
+
+
+
+### Comandos `pushd` y `popd`
 
 Mediante la utilización del comando "**pushd**" podemos decirle a nuestro shell que guarde temporalmente la ubicación actual de mi directorio y acto seguido posicionarnos en una nueva carpeta, luego con el comando "**popd**" volveremos a la carpeta original sin necesidad de andar escribiendo toda la ruta original.
 
