@@ -1561,6 +1561,198 @@ neststat -nr
 
 
 
-## Comando `cmatrix`
+### Comando `cmatrix`
 
 Si ejecutamos `cmatrix` veremos un fondo de pantalla con caracteres estilo Matrix.
+
+
+
+# `systemd`
+
+> Basado en el video https://www.youtube.com/watch?v=5JVBpXiYMKo
+
+**Systemd** nos permitirá manejar los servicios de nuestro servidor Linux pudiendo iniciarlos, detenerlos o reiniciarlos según sea el caso. Veremos el comando `systemctl` que es una utilidad de systemd.
+
+>  El término servicio, unidad o daemons se utilizará como sinónimo.
+
+
+
+Como necesitamos un servicio de ejemplo para manejar con `systemd` instalamos Apache.
+
+```
+sudo apt install apache2
+```
+
+:family: Este comando está presente en múltiples distribuciones CentOS, Debian, Ubuntu, Fedora, ArchLinux, etc.
+
+Luego podremos conectarnos a `http://localhost` (no https porque no hemos añadido un certificado) o a la dirección IP en caso de que sea un servidor Linux y verificar si está funcionando. En algunas distribuciones comienzan el proceso automáticamente.
+
+En ocasiones debemos configurar además el firewall para poder acceder a la página de muestra del servidor web.
+
+
+
+## Comando `systemctl`
+
+El comando `systemctl` es una utilidad de `systemd` responsable de controlar el sistema systemd en sí y el manejador de servicios.
+
+Si ejecutamos `systemctl` veremos una larga lista con todos los servicios ejecutándose en *background*.
+
+```
+systemctl
+```
+
+
+
+### Estado Servicio
+
+Si queremos obtener el estado de un servicio en particular, utilizamos el nombre del paquete con el cual lo instalamos:
+
+```
+systemctl status apache2
+```
+
+
+
+Si una unidad nos aparece como **disabled e inactive**. Al estar **disabled** no iniciará automáticamente cuando la máquina bootee, lo que haría necesario que lo iniciemos manualmente cada vez. 
+
+ 
+
+### Habilitar Servicio
+
+Para habilitar este servicio
+
+```
+sudo systemctl enable apache2
+```
+
+Si ahora verificamos el estado veremos que nos aparece como loaded pero continúa **inactive**. Si reiniciáramos el sistema iniciaría automáticamente.
+
+
+
+### Iniciar Servicio
+
+Para iniciar este servicio:
+
+```
+sudo systemctl start apache2
+```
+
+
+
+> Notar que no necesitamos `sudo` para ver el estado de un servicio pero en algunos casos puede que nos muestre mas información si lo hacemos con `sudo`.
+
+
+
+### Habilitar e Iniciar Servicio
+
+Si queremos habilitarlo e iniciar el servicio a la vez:
+
+```
+sudo systemctl enable --now apache2
+```
+
+
+
+### Reiniciar Servicio
+
+Cuando cambiamos la configuración muchas veces necesitaremos reiniciar la unidad para que tome los cambios.
+
+```
+sudo systemctl restart apache2
+```
+
+
+
+### Recargar Configuración
+
+Cuando reiniciamos el servicio este será detenido y luego iniciará nuevamente, en ocasiones puede que esto no sea necesario y que baste con recargar el servicio. **No todos los cambios en la configuración admiten esto** pero es aconsejable probar, ya que en caso de tratarse de un servidor web los clientes serán desconectados si reiniciamos.
+
+```
+sudo systemctl reload apache2
+```
+
+
+
+### Detener Servicio
+
+Si queremos detener un servicio
+
+```
+sudo systemctl stop apache2
+```
+
+
+
+### Deshabilitar Servicio
+
+```
+sudo systemctl disable apache2
+```
+
+
+
+### Servicios para un usuario
+
+En ocasiones vamos a querer ejecutar un servicio sólo para un usuario en particular.
+
+Utilizaremos como ejemplo el paquete **Sync** que es utilizado para sincronizar archivos entre dos o más computadoras.
+
+```
+sudo apt install syncthing
+```
+
+
+
+Para obtener el estado para un usuario en particular:
+
+```
+systemctl status syncthing@juan
+```
+
+Veremos que nos aparece como **disabled** e **inactive**
+
+
+
+Para habilitarlo
+
+```
+sudo systemctl enable syncthing@juan
+```
+
+Para iniciar
+
+```
+sudo systemctl start syncthing@juan
+```
+
+Aunque podríamos haber hecho ambas cosas en un paso con `--now` como vimos anteriormente.
+
+Este paquete trabaja con el puerto 8384 por lo que ingresando a `localhost:8384` podríamos ver una interfaz web (sin embargo esto puede que no esté disponible si estamos trabajando con un servidor).
+
+
+
+### Información Servicios
+
+Podremos encontrar información sobre los servicios en:
+
+```
+cd /usr/lib/systemd/system
+```
+
+```
+nano syncthing@.service
+```
+
+
+
+### Listar Servicios
+
+Vimos que con `systemctl` podemos listar los servicios.
+
+También podemos hacerlo de manera mas clara con:
+
+```
+systemctl list-unit-files --type=service
+```
+
+En la primera columna veremos el nombre del servicio, en la segunda si está habilitado o no y en la tercera el vendor preset que indicará si el servicio debe iniciarse automáticamente una vez instalado.
