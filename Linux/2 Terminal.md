@@ -1241,17 +1241,145 @@ Primero tenemos `john` que es el nombre de usuario, luego `x` que significa que 
 
 ### Comando `usermod`
 
+:vhs: Basado en el video de [LearnLinuxTV](https://youtu.be/p8QOnty6rSU?list=PLT98CRl2KxKHKd_tH3ssq0HPrThx2hESW)
+
 El comando `usermod` nos permite modificar un usuario existente.
 
-Si queremos que al loguearnos en lugar de utilizar Shell utilicemos Bash, deberíamos utilizar el comando `usermod` para generar este cambio. Nuevamente ingresando `usermod` veremos las opciones con las cuales podemos utilizar este comando y para lograr lo dicho anteriormente debemos usar `usermod -s /bin/xxx usuario` o `usermod --shell /bin/xxx usuario`
+#### Agregar usuario a grupo
+
+Si queremos agregar un usuario a un grupo, por ejemplo el user `juan` al grupo `admins`.
+
+```
+sudo usermod -aG admins juan
+```
+
+En Ubuntu para utilizar `sudo` debemos ser miembros del grupo sudo. En caso de que no lo seamos nos aparecerá un mensaje: **juan is not in the sudoers file. This incident will be reported**. 
+
+> Además de ser miembros del grupo `sudo` para ejecutar el comando, **el grupo en cuestión debe existir** para que podamos agregar un usuario a el. En caso de que no exista debemos crearlo primero con el comando `groupadd`.
+
+En ese caso debemos desconectarnos del servidor y loguearnos como root y ejecutar:
+
+```
+usermod -aG sudo juan
+```
+
+> Notar que no usamos sudo porque estamos logueados como `root`.
+
+Luego podremos verificar que los cambios fueron realizados con:
+
+```
+groups juan
+```
+
+A pesar de que nos aparezca el grupo nuevo en el listado para que entre en efecto la nueva membresía debemos desloguearnos y loguearnos nuevamente.
+
+#### Agregar usuario a mas de un grupo
+
+```
+sudo usermod -aG admins,developers juan
+```
+
+
+
+#### Utilizar Bash en lugar de Shell
+
+Si queremos que al loguearnos en lugar de utilizar Shell utilicemos Bash debemos usar `usermod -s /bin/xxx usuario` o `usermod --shell /bin/xxx usuario`.
 
 ```
 usermod -s /bin/bash john
 ```
 
-Nuevamente con `cat /etc/passwd` veremos que los cambios fueron aplicados.
+> Con `cat /etc/passwd` veremos que los cambios fueron aplicados.
 
-Los **passwords** son almacenados encriptados en `/etc/shadow` archivo que podremos abrir con `cat /etc/shadow` pero sólo desde el **root** user.
+> :lock: Los **passwords** son almacenados encriptados en `/etc/shadow` archivo que podremos abrir con `cat /etc/shadow` pero sólo desde el **root** user.
+
+
+
+#### Cambiar home directory
+
+Si queremos cambiar el directorio home de modo que este pase a ser `/home/myhome` (no es necesario que este directorio exista con anterioridad) podemos utilizar el comando `usermod` con la opción `-d`.
+
+No podemos hacerlo desde el mismo usuario con el que estamos logueados, suponemos a continuación que lo hacemos con `root`, por eso omitimos `sudo`
+
+```
+usermod -d /home/myhome juan
+```
+
+Si queremos mover el contenido del directorio actual al nuevo directorio:
+
+```
+usermod -d /home/myhome --move-home juan
+```
+
+Para verificar que el cambio fue aplicado cuando nos logueamos nuevamente:
+
+* Si estamos en `~` si ejecutamos `pwd`.
+
+* ```
+  echo $HOME
+  ```
+
+  En ambos casos deberíamos ver el nuevo directorio.
+
+
+
+#### Cambiar nombre de usuario
+
+Es posible cambiarle el nombre a un usuario. En este caso lo haremos logueados como `root`:
+
+```
+usermod -l juan2 juan
+```
+
+Esto podremos verificarlo de esta forma:
+
+```
+cat /usr/passwd
+```
+
+
+
+#### Bloquear Usuario
+
+Si queremos que un usuario no pueda ingresar, desde `root` podemos hacer lo siguiente:
+
+```
+usermod -L juan
+```
+
+
+
+#### Desbloquear Usuario
+
+```
+usermod -U juan
+```
+
+
+
+#### Programar Deshabilitación de Cuenta
+
+Es posible establecer la fecha en la cual una cuenta será deshabilitada.
+
+```
+usermod -e "2022-03-21" juan 
+```
+
+Esto podremos verificarlo con:
+
+```
+chage -l juan
+```
+
+
+
+Para quitar la fecha de expiración
+
+```
+sudo usermod -e "" juan
+```
+
+Las fechas de expiración son almacenadas en el archivo  [`/etc/shadow`](https://linuxize.com/post/etc-shadow-file/) 
 
 
 
@@ -1289,7 +1417,7 @@ De manera similar a lo visto para el manejo de usuarios, para el manejo de grupo
 
 ### Comando `groupadd`
 
-El comando `groupadd`nos permite agregar un grupo.
+El comando `groupadd`nos permite crear un grupo.
 
 ```bash
 groupadd developers
