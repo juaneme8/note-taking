@@ -8,7 +8,7 @@
 # Características
 Chakra UI se define como una **librería de UI simple, modular y accesible**.
 * Está basado en la especificación de [Styled-Systems](https://styled-system.com/) donde explica cómo deberíamos crear un theme de manera eficiente.
-* Cuenta con theme default que puede ser personalizado fácil.
+* Cuenta con theme default que puede ser personalizado fácilmente.
 * Para estilos y personalización utiliza Emotion *under the hood* creando clases de style que se aplican en run time.
 * Soporta **dark mode** de manera nativa.
 * Nos permite realizar sitios **responsive** sin la necesidad de escribir media queries.

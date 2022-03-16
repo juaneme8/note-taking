@@ -77,6 +77,12 @@ Como consecuencia de esto podremos usar el color `primary` y mapeará con `purpl
 
 > También podríamos usar `primary.500` y será equivalente a `purple.500` 
 
+```
+<Container background="primary.200">
+
+</Container>
+```
+
 
 
 ## Estilos Globales

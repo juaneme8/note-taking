@@ -30,17 +30,7 @@ Para inicializar la configuración ejecutamos `npx eslint --init` e ingresamos a
 6. Luego elegimos una **guía de estilos populares** y luego `standard` (es un preset que trabaja sin puntos y comas por ejemplo).
 7. Luego indicamos que queremos la **configuración en JSON**.
 8. Nos dirá las dependencias que debe utilizar y nos preguntará si puede hacerlo con `npm`.
-Las dependencias que instalará son las siguientes: 
-`
-eslint-plugin-react@latest
-eslint-config-standard@latest
-eslint@^7.12.1
-eslint-plugin-import@^2.22.1
-eslint-plugin-node@^11.1.0
-eslint-plugin-promise@^4.2.1
-`
 
-> Si le indicáramos que vamos a trabajar con TypeScript nos instalaría esas mismas y además: `@typescript-eslint/parser@latest` y `@typescript-eslint/eslintplugin@latest`
 
 
 
@@ -91,7 +81,7 @@ Con `npx eslint . --fix` los podemos solucionar los problemas que sean soluciona
 > Notar que como los scripts del `package.json` tienen acceso al PATH no es necesario poner `/node_modules/bin/`
 
 ## ESLint Fix al guardar
-Las reglas de standardjs establecen que debemos usar *single quotes* y *2 spaces indentation*, si queremos que en caso de haber violado esta regla al guardar se corrija automáticamente, en  `settings.json` debemos poner:
+Las reglas de standardjs establecen que debemos usar *single quotes* y *2 spaces indentation*, si queremos que en caso de haber violado esta regla al guardar se corrija automáticamente debemos utilizar la siguiente configuración:
 
 ```json
 "editor.codeActionsOnSave": {
@@ -122,7 +112,14 @@ Esto podemos ponerlo en una carpeta `.vscode` y dentro en un archivo `settings.j
 Con `node: true` podemos agregar variables de entorno (con `process.env`) .
 
 * Si nos aparece el mensaje **'React' must be in scope when using JSX  react/react-in-jsx-scope** debido a que actualmente no es necesario importar React podemos deshabilitar esta regla del siguiente modo:
-``rules: { 'react/react-in-jsx-scope' : 'off'}``
+
+  ```
+  "rules": {
+      "react/react-in-jsx-scope": "off"
+    }
+  ```
+
+  
 
 * Si queremos desactivar la regla que nos marca error **'...' is missing in props validation** por no tener definidos los tipos de las props con PropTypes:  [Artículo de Typechecking with PropTypes](https://reactjs.org/docs/typechecking-with-proptypes.html)
 `"react/prop-types": "off"`
