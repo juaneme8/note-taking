@@ -1942,6 +1942,8 @@ Para no tener que ingresar estos comandos manualmente a la hora ejecutar los tre
 
 ## Docker Compose
 
+> Instalación en Servidor Linux: https://docs.docker.com/compose/install/
+
 Docker Compose nos permite ejecutar de manera simple aplicaciones con múltiples contenedores usando un sólo archivo y **automáticamente los colocará en la misma red**. 
 
 Docker Compose es una herramienta construida sobre la base de Docker Engine y en la actualidad para Windows y Mac viene incluida en Docker Desktop, lo cual podemos verificar con `docker-compose --version`. 
