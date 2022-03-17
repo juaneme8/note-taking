@@ -1,6 +1,6 @@
 # Diseño Responsivo
 Con Chakra podremos realizar el equivalente a los media queries pasándole props al componente. Esto se conoce como *responsive styles*.
-Por ejemplo si queremos tener un `Stack` que tenga una dirección `row` (pensar en la dirección como el modo en que se apilan) para tamaños de pantalla chicos y `column` para `sm` en adelante podremos especificar:
+Por ejemplo si queremos tener un `Stack` que tenga una dirección `column` para tamaños de pantalla chicos y `row` para `sm` en adelante podremos especificar:
 
 ```jsx
 <Stack direction={{ base: 'column', sm: 'row' }}>
