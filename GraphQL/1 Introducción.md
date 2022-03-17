@@ -4,37 +4,20 @@
 >
 > Basado en [videos midudev](https://www.youtube.com/watch?v=QG-qbmW-wes)
 >
-> Basado en [video Fazt](https://www.youtube.com/watch?v=fIZxZk_szWw)
 
 ## Características
 
-* GraphQL es **lenguaje de consultas**. **Graph** significa grafo y **QL** query language.
-
-* Es un lenguaje utilizado para obtener datos de una API.
-
+* GraphQL es **lenguaje de consultas**. **Graph** significa grafo y **QL** query language. Es decir un lenguaje de consutlas para obtener datos de una API.
 * Es considerado una capa entre el frontend y el backend. A diferencia de SQL por ejemplo que es entre el backend y la DB.
-
 * Permite la **comunicación de datos entre servidor y cliente** (navegador). 
-
 * **Código abierto**.
-
 * **Creado por Facebook**.
-
 * Es **utilizable en múltiples lenguajes de programación**. 
-
-* Es *platform agnostic* esto significa que no es necesario usarlo con una tecnología en particular (puede usarse con React, Angular, Vue, etc).
-
 * Es **flexible y eficiente** comparado con el enfoque RESTful.
 
-  
-
-* Nos permite describir los datos.
-
 * Nos permite pedir sólo los datos que queremos, lo cual genera una **optimización y mejora en el rendimiento** en los datos que viajan.
-
 * Nos permite obtener datos predecibles ya que se corresponderán con la descripción.
-
-* Haremos **una única petición** a un *supercharged endpoint* y será el servidor de GraphQL el encargado de recoger los datos de las distintas fuentes.
+* Haremos **una única petición** a un *supercharged endpoint* y será el servidor de GraphQL el encargado de recoger los datos de las distintas fuentes. Trabajamos haciendo peticiones de tipo POST a ese único endpoint. 
 
 
 
@@ -57,7 +40,7 @@ domain.com/authors/:id
 
 De este último obtendríamos `name` ,`age`, `bio`, `booksIds` (un array con los id de cada libro).
 
-Vemos que sólo para obtener info del libro y del autor hemos tenido que hacer dos requests, esto nos da la pauta que en ciertos casos puede volverse ineficiente. Imaginemos si además queremos mostrar todos los libros escritos por ese autor, en ese caso serían necesarios nuevos requests al endpoint mostrado en primer lugar.
+Vemos que sólo para obtener info del libro y del autor hemos tenido que hacer dos requests, esto nos da la pauta que en ciertos casos puede volverse ineficiente. Imaginemos si además queremos mostrar todos los libros escritos por ese autor, en ese caso serían necesarios nuevos requests al endpoint mostrado en primer lugar utilizando el array `booksIds`
 
 Para obtener estos mismos datos con un enfoque GraphQL haríamos la siguiente query:
 
@@ -80,77 +63,13 @@ Para obtener estos mismos datos con un enfoque GraphQL haríamos la siguiente qu
 
 
 
-> **Simplicidad**
-
-Con un único HTTP request hemos obtenido toda la información anidada.
-
-
-
-> **Selectividad**
-
-Con GraphQL podemos ser **selectivos** en cuanto a los datos que queremos recibir, por ejemplo siguiendo con el ejemplo anterior, si no queremos recibir algunos datos podemos omitirlos en la query:
-
-```
-{
-    book(id:123){
-        title
-        author{
-            name
-            books{
-				title
-            }
-        }
-    }
-}
-```
-
-
-
-> **Supercharged Endpoint**
-
-En GraphQL en vez de contar con muchos endpoints contamos con uno sólo recargado con el cual podemos obtener todos los datos. Trabajamos haciendo peticiones de tipo POST a ese único endpoint. 
-
-Podremos tener distintos puntos de entrada y nos movemos hacia los datos relacionados, como podemos ver en los siguientes dos ejemplos:
-
-```
-{
-	book(id:1){
-		title
-		genre
-		author{
-			name
-			age
-			books{
-				title
-			}
-		}
-	}
-}
-```
-
-
-
-```
-{
-	author(id:2){
-		name
-		books{
-			title
-			similar{
-				title
-			}
-		}
-	}
-}
-```
-
-
-
 # :trophy: Servidor Express, Apollo y MongoDB
 
-> Basado en el [video](https://www.youtube.com/watch?v=fIZxZk_szWw) de Fazt
+> :vhs: Basado en el [video de Apollo Server](https://www.youtube.com/watch?v=fIZxZk_szWw) de Fazt
+>
+> :vhs: Basado en el [video sobre modularizar en archivos](https://www.youtube.com/watch?v=_YN_fs-fuaI) de Fazt
 
-Si bien podríamos trabajar directamente con Apollo Server, utilizamos Express y Express Apollo Server ya que es útil tener la posibilidad de tener una REST API además de la GraphQL API en el mismo servidor.
+Si bien podríamos trabajar directamente con Apollo Server, utilizamos Express y Express Apollo Server ya que puede ser el caso que tengamos una REST API existente y queramos trabajar también con una de GraphQL.
 
 ```
 npm i express apollo-server-express graphql
@@ -166,7 +85,7 @@ npm i dotenv mongoose
 
 
 
-> En cuanto a la estructura en ocasiones trabajamos sobre una carpeta `src`, pero en este caso lo haremos en la raíz.
+> En cuanto a la **estructura** para evitar tener todo en un mismo archivos y que se vuelva dificil de manejar tendremos los siguientes archivos. 
 
 * `app.js`
 
@@ -176,17 +95,14 @@ npm i dotenv mongoose
 
 
 
-> :package: Instalamos la extensión GraphQL de GraphQL Foundation.
-
-
-
 En `app.js`.
 
 * Creamos un servidor de Express.
-
 * En `/` creamos una ruta de la REST API que muestra un mensaje de bienvenida.
 * `ApolloServer` es un wrapper utiliza el servidor que creamos y lo extiende. Creamos un nuevo objeto `ApolloServer` y le pasamos `typeDefs` y `resolvers` `const server = new ApolloServer({ typeDefs, resolvers });`. Luego con el objeto creado utilizamos el método `start` que devuelve una promesa (para usar `await` lo colocamos en una función `async`). `await server.start();` Por último lo asociamos al servidor express para que extienda sus funcionalidades `server.applyMiddleware({ app });`
 * En caso de ingresar a otra dirección distinta de `/` o `/graphql` mostraremos un mensaje de "not found" y entregamos un 404. Lo hacemos después de `  server.applyMiddleware({ app });` para que nos permita ingresar a `/graphql`
+
+
 
 ```javascript
 const express = require('express');
@@ -220,7 +136,10 @@ const start = async () => {
 start();
 ```
 
-
+> :information_source: [Docs](https://www.apollographql.com/docs/apollo-server/api/apollo-server/):
+> Always call `await server.start()` *before* calling `server.applyMiddleware` and starting your HTTP server. This allows you to react to Apollo Server startup failures by crashing your process instead of starting to serve traffic. 
+>
+> :information_source: Si en lugar de con require queremos trabajar con **ECMAScript Modules** en `package.json` agregamos `"type":"module"` .
 
 ## Integración con MongoDB
 
@@ -278,6 +197,45 @@ module.exports = model('Task', taskSchema);
 ```
 
 
+
+## Iniciar Aplicación
+
+Para leventar el servidor ejecutamos `node index.js` o bien si queremos correrlo con nodemon `npx nodemon index.js` (atención en las mutaciones si estamos trabajando con Nodemon)
+
+## Playground
+
+A partir de la versión 3 de `apollo-server` cuando vayamos http://localhost:4000/ a nos redireccionará a https://studio.apollographql.com/. Si queremos en cambio trabajar con **GraphQL Playground** podemos instalar las siguientes versiones: 
+
+```
+"apollo-server": "2.24.0",
+"graphql": "15.5.0"
+```
+
+
+
+:memo: Con `CONTROL+SPACE` tendremos un autocompletado del comando que podemos ejecutar. La primera vez nos sugerirá entre query, mutation, etc y luego si ponemos `query {}` y volvemos a presionarlo nos sugerirá las posibles queries a ejecutar.
+
+:memo: Si ponemos `{ }` es lo mismo que si ponemos `query {}`
+
+
+
+### :rocket: Primera Query
+
+Queremos generar una query `hello` que devuelva un mensaje de bienvenida. Por lo tanto debemos editar `typeDefs.js` con la query `hello` que devuelve un string.
+
+```
+const { gql } = require('apollo-server-express');
+
+const typeDefs = gql`
+  type Query {
+    hello: String
+  }
+`;
+
+module.exports = { typeDefs };
+```
+
+El hecho de usar `gql` nos permite obtener un coloreado apropiado pero podríamos haber trabajado directamente con un string sin esa palabra. Para ello debemos **instalar la extensión GraphQL de GraphQL Foundation**.
 
 ### :rocket: Listado de tareas
 
@@ -385,17 +343,17 @@ const resolvers = {
 module.exports = {resolvers}
 ```
 
-> Notar que al parámetro  `parent` como no lo vamos a utilizar lo nombramos como `_`. Además a `context` e `info` tampoco los usaremos.
+> Notar que al parámetro  `parent` como no lo vamos a utilizar lo nombramos como `_`. Además de `parent` y `args` recibimos a `context` e `info` que tampoco usaremos.
 >
 > En este caso hicimos destructuring de este modo `const { title, description } = args;` pero también podríamos haberlo hecho al recibir `args` es decir ` createTask: async (_, {title, description})`
 
 Luego en el Sandbox indicamos las características del documento a agregar:
 
-```
+```js
 mutation{
   createTask(
-    title:"My task", 
-    description:"this is my task"
+    	title:"My task", 
+    	description:"this is my task"
     )
     {
       id
@@ -475,6 +433,9 @@ async getTask(id){
 	return
 }
 ```
+
+> This is a Feature coming with ES2015. You can skip the function-keyword for **method**-definitions (not for plain functions).
+> So `{ doSth(){/*...*/ } }` is simply a shorthand for `{ doSth: function(){/*...*/ } }` o en nuestro caso usando arrow functions es lo mismo que tener `doSth: () => {/*...*/ }`
 
 
 
@@ -576,7 +537,7 @@ mutation{
 
 
 
-#### Uso de type
+### :memo: Uso de `input`
 
 En `typeDefs` hemos indicado que por ejemplo a la hora de crear una tarea en `createTask` esperamos recibir un `title` y una `description`, podríamos haber utilizado `input` como veremos a continuación.
 
@@ -785,7 +746,7 @@ mutation{
 
 ### Variables de Entorno
 
-Tenemos instalado el paquete dotenv, por lo que creamos un archivo `.env` con el siguiente contenido:
+Tenemos instalado el paquete **dotenv**, por lo que creamos un archivo `.env` con el siguiente contenido:
 
 ```
 PORT=3000
@@ -794,7 +755,7 @@ MONGODB_URI=mongodb://localhost/tasksdb
 
 
 
-Luego agregamos a `.gitignore` tanto `.env` como `node_modules` ya que no queremos que formen parte del sistema de control de versiones.
+:weight_lifting_man: Luego agregamos a `.gitignore` tanto `.env` como `node_modules` ya que no queremos que formen parte del sistema de control de versiones.
 
 
 
@@ -842,7 +803,7 @@ git push heroku main
 
 
 
-En la sección Config Vars podremos configurar las variables de entorno (la variable `PORT` es asignada automaticamente por lo que no debemos definirla).
+En la sección **Config Vars** podremos configurar las variables de entorno (la variable `PORT` es asignada automaticamente por lo que no debemos definirla).
 
 
 
@@ -854,15 +815,17 @@ heroku logs --tail
 
 
 
-Tener presente que al visitar la URL `/` veremos el mensaje de bienvenida pero en `/graphql` no veremos la interfaz, sino que tendremos que interactuar mediante Postman o una aplicación cliente por ejemplo usando Apollo Client.
+Tener presente que al visitar la URL `/` veremos el mensaje de bienvenida pero en `/graphql` no veremos la interfaz, sino que tendremos que interactuar mediante Postman o una aplicación cliente por ejemplo usando **Apollo Client**.
 
 
 
 # Servidor Apollo Server y sin DB
 
+> Basado en videos midudev. [Parte 1](https://youtu.be/QG-qbmW-wes) - [Parte2](https://youtu.be/3vldzoNRz-8) - [Parte3](https://youtu.be/W63nU-co5cA?list=RDCMUC8LeXCWOalN8SxlrPcG-PaQ) - [Parte4](https://youtu.be/abRe0M7L5yo?list=RDCMUC8LeXCWOalN8SxlrPcG-PaQ) - [Parte5](https://youtu.be/ndQ6nWeQ7A0?list=RDCMUC8LeXCWOalN8SxlrPcG-PaQ)
+
 Utilizaremos **Apollo** por un lado con **Apollo Server** y también **Apollo Client** (con React).
 
-Desde la aplicación web haremos la petición utilizando GraphQL que llegará a Apollo y será este quien se encargará de buscar la información a una REST API, microservicios o base de datos.
+Desde la aplicación web haremos la petición utilizando GraphQL que llegará a Apollo y será este quien se encargará de buscar la información proveniente de una DB, REST API o microservicio.
 
 ```
 mkdir md-graphql-server
@@ -871,17 +834,15 @@ npm init -y
 npm i apollo-server graphql 
 ```
 
-> En `package.json` agregamos `"type":"module"` para utilizar ECMAScript Modules, de este modo podremos utilizar `import {gql} from 'apollo-server'`.
 
 
-
-:link: En la documentación encontramos los primeros pasos explicados claramente: https://www.apollographql.com/docs/apollo-server/getting-started/
+:link: En la documentación encontramos los [primeros pasos](https://www.apollographql.com/docs/apollo-server/getting-started/) explicados claramente: 
 
 
 
 Creamos un archivo `index.js` con los siguientes elementos:
 
-* `people`que es un array de objetos con los datos simulando una base de datos en memoria que luego vendrán de una API o una DB. 
+* `people`que es un array de objetos con los datos simulando una base de datos en memoria que luego vendrán de una REST API o una DB. 
 
 * `typeDefs` que es la descripción de estos datos y de las peticiones que se pueden hacer. 
 
@@ -937,7 +898,8 @@ const server= new ApolloServer({
     resolvers
 })
 
-server.listen().then(({ url }) => {
+server.listen()
+.then(({ url }) => {
 	console.log(`🚀 Server ready at ${url}`)
 }); 
 ```
@@ -946,18 +908,21 @@ server.listen().then(({ url }) => {
 
 
 
-Para leventar el servidor ejecutamos `node index.js` o bien si queremos correrlo con nodemon `npx nodemon index.js` (atención en las mutaciones si estamos trabajando con nodemon)
+ `server.listen()` es una función asincrónica y utilizamos promesas, también podríamos utilizar `async/await` como vemos a continuación:
 
-A partir de la versión 3 de `apollo-server` cuando vayamos http://localhost:4000/ a nos redireccionará a https://studio.apollographql.com/. Si queremos en cambio trabajar con **GraphQL Playground** podemos instalar las siguientes versiones: 
+```js
+const startApolloServer = async () => {
+	const server= new ApolloServer({
+    	typeDefs,
+    	resolvers
+	})
+	
+	const {url} = await server.listen();
+	console.log(`🚀 Server ready at ${url}`)
+}
 
+startApolloServer();
 ```
-"apollo-server": "2.24.0",
-"graphql": "15.5.0"
-```
-
-
-
-> :memo: Con `CONTROL+SPACE` tendremos un autocompletado del comando que podemos ejecutar. La primera vez nos sugerirá entre query, mutation, luego si ponemos `query {}` y volvemos a presionarlo nos sugerirá las posibles queries a ejecutar.
 
 
 
@@ -1027,9 +992,9 @@ query{
 
 
 
-## Query con Parámetros
+### :balloon:`findPerson`
 
-Es posible tener una query con parámetros por ejemplo un caso en el que recibimos un argumento String que será requerido y retornamos un objeto `Person`. Por lo tanto en `typeDefs` dentro de `Query`
+Es posible tener una **query con parámetros**. Por ejemplo un caso en el que recibimos un argumento String que será requerido y retornamos un objeto `Person`. Por lo tanto en `typeDefs` dentro de `Query`
 
 ```javascript
 const typeDefs = gql`
@@ -1060,8 +1025,6 @@ const resolvers={
 ```
 
 
-
-### :balloon:`findPerson`
 
 Para probar el funcionamiento de esta query
 
@@ -1109,15 +1072,19 @@ Obtendremos en cambio
 }
 ```
 
-> En este caso podremos trabajar con optional chaining `person?.phone` para no tener inconvenientes. 
+> En este caso podremos trabajar con optional chaining `person?.phone` para no tener inconvenientes si elobjeto es `null`.
 
 
 
 ## Resolvers
 
-Apollo utiliza los resolvers para cómo popular cada campo y así poder responder las consultas. 
+Apollo utiliza los resolvers para saber cómo popular cada campo y así poder responder las consultas. 
 
 Un resolver es una función responsable de popular la data de un campo del esquema.
+
+
+
+### Default Resolver
 
 Si no definimos ninguno utilizará el *default resolver* como podemos ver a continuación
 
@@ -1148,13 +1115,13 @@ const resolvers = {
 	
 	}
 	Person:{
-		address: (parent) => `${parent.stree} ${parent.city}`,
+		address: (parent) => `${parent.street} ${parent.city}`,
 		check: () => 'test'
 	}
 }
 ```
 
-Por ejemplo `address` es un cálculo sobre información que tengo (con lo que podemos extrar lógica que normalmente haríamos en el cliente) y `check` es un campo que devuelve un valor fijo.
+Por ejemplo `address` es un cálculo sobre información que tengo (con lo que podemos extraer lógica que normalmente haríamos en el cliente) y `check` es un campo que devuelve un valor fijo.
 
 
 
@@ -1341,3 +1308,13 @@ Queremos evitar que una persona con el mismo nombre sea añadida varias veces. E
 ## Manejo de Errores
 
 https://www.apollographql.com/docs/apollo-server/data/errors/
+
+
+
+## Estructura de Proyectos
+
+Si bien es posible colocar `typeDefs` y los `resolvers` en un único archivo, cuando el proyecto crezca esto será dificil de mantener. Fue por eso que optamos por trabajar con múltiples archivos `typeDefs.js` y `resolvers.js`. Sin embargo, en casos en que manejemos entidades distintas (por ejemplo autores y libros), es conveniente separar aún mas las cosas.
+
+* Mas info en [video Fazt](https://www.youtube.com/watch?v=fIZxZk_szWw) que a su vez está basado en [este artículo](https://www.apollographql.com/blog/backend/schema-design/modularizing-your-graphql-schema-code/) pero simplificado.
+
+* Básicamente tendremos un archivo `schema.js` donde unimos lo proveniente de `author.js` y `book.js` que tienen typeDefs (tipos de datos, mutaciones, queries) por un lado y resolvers. 
