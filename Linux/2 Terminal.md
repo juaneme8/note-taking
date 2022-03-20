@@ -9,12 +9,31 @@
 La terminal se caracteriza por brindarnos **flexibilidad** para realizar todo tipo de tareas con unos pocos comandos, **velocidad** a la hora de realizarlos y es **fundamental a la hora de trabajar con servidores remotos** es la única opción ya que no contamos con una interfaz gráfica.
 
 ## ¿Qué es la terminal?
-La terminal es una **interfaz gráfica** que muestra el *prompt* y simula una **línea de comandos** o **shell**. La **shell** es un programa que en función de los comandos que le pasamos le indica al **sistema operativo** la acción que debe realizar.
 
-Existen distintos tipos de **shells**:
-* Bash Shell (el curso de Devars es basado en esta shell y utilizando la distribución de Linux liviana Arch Linux)
+Linux cuenta con dos tipos de interfaces CLI (*Command Line Interface*) y GUI (**Graphical User Interface**) . La mayoría de los servidores no contarán con una GUI, por lo que será fundamental aprender cómo funciona la CLI para poder manejarnos cómodamente cuando tengamos que realizar alguna tarea.
+
+La terminal es una **interfaz gráfica** que muestra el *prompt* y simula una **línea de comandos** o **shell**. 
+
+## Shell
+
+Recibe el nombre de **Linux Shell**  el programa que en función de los comandos que le pasamos le indica al **sistema operativo** la acción que debe realizar.
+
+Existen distintos tipos de **shells** con comportamientos también distintos:
+
+* Bourne Shell (sh)
+* CShell (csh o tcsh)
 * Z Shell (presente en macOS de 2019 en adelante, casi los mismos comandos que Bash Shell)
-* PowerShell (shell de windows con algunos comandos diferentes)
+* Bourne Again Shell (bash) (el curso de Devars es basado en esta shell y utilizando la distribución de Linux liviana Arch Linux). Cuenta con más funcionalidades que shell
+
+
+
+Si queremos conocer cual shell estamos utilizando 
+
+```
+echo $SHELL
+```
+
+
 
 **Un comando es un programa** que se puede ejecutar desde la terminal y puede recibir parámetros y opciones.
 
@@ -134,11 +153,32 @@ El comando `help` nos permite obtener ayuda sobre cualquier comando, por ejemplo
 
 ### Comando `echo`
 
-El comando `echo` se utiliza para mostrar líneas de texto que son pasadas como argumento en la línea de comandos. Por ejemplo podremos poner: `echo Hola Mundo` y mostraremos "Hola Mundo" en pantalla. 
+El comando `echo` se utiliza para mostrar líneas de texto que son pasadas como argumento en la línea de comandos. Por ejemplo podremos poner: `echo "Hola Mundo"` y mostraremos "Hola Mundo" en pantalla. 
 
 >Luego veremos con el operador de redirección que es posible colocar ese mismo mensaje como contenido de un archivo en lugar de mostrarlo en la pantalla.
 
  
+
+#### `echo` de variable
+
+```
+msg="Hello World"
+echo $msg
+```
+
+Si queremos imprimir alguna variable de la sesión, podemos listarlas con 
+
+```
+env
+```
+
+```
+echo $HOME
+```
+
+
+
+#### `echo` de proceso corriendo:
 
 Con `echo $0` mostramos la ubicación del shell, con una imagen de Ubuntu en un contenedor de Docker veo `bash`  (lo mismo veo desde WSL) y si lo hago en Git Bash veo `/usr/bin/bash`
 
@@ -152,9 +192,15 @@ El comando `whoami` nos permite ver cual es el usuario que está ejecutando la t
 
 
 
+### Comando `id`
+
+El comando `id` nos permite obtener el uid, gid, groups y los grupos de los que forma parte el usuario.
+
+
+
 ### Comando `pwd`
 
-Con el comando `pwd` *(print working directory)* podremos obtener la **ruta absoluta** donde nos encontramos dentro del file system.
+Con el comando `pwd` *(present working directory)* podremos obtener la **ruta absoluta** donde nos encontramos dentro del file system.
 
 
 
@@ -196,6 +242,16 @@ Podemos utilizarlos con  **rutas relativas** (por ejemplo con `cd boot`) o **rut
 > El **autocompletado** me permite si quiero navegar a una carpeta llamada `Users` puedo poner `cd U` y presionar `TAB` y me mostrará todas las que comienzan con esa letra, si sólo hubiera una con los caracteres ingresados la autocompletará.
 
 * Si queremos navegar al directorio en el que estuvimos anteriormente podemos hacer `cd -`
+
+
+
+### Ejecutar Múltiples Comandos
+
+Si queremos ejecutar varios comandos uno después del otro podemos separarlos por `;`.
+
+```
+cd new_directory; mkdir www; pwd
+```
 
 
 
@@ -453,21 +509,21 @@ El comando `bc`  *(basic calculator)* nos permite abrir una aplicación de una c
 
 ### Comando `curl`
 
-El comando `curl` nos permite hacer un request HTTP mediante comando, es decir que visitaremos una página y veremos su contenido en pantalla.
+El comando `curl` nos permite hacer un request HTTP, es decir que visitaremos una página y veremos su contenido en pantalla.
 
 ```
-curl https://www.google.com.ar
+curl fredrikson.com.ar/resume.pdf
 ```
 
 
 
 > Si hacemos `curl ifconfig.me` podremos visitar esa página y nos devolverá la ip pública desde donde la estamos visitando es decir la el servidor.
 
+Si en lugar de escribir los datos recibidos en *stdout* queremos descargar el contenido como un archivo podemos usar la opción `-O`
 
-
-### Comando `df`
-
-El comando `df` muestra el espacio usado y libre en cada disco.
+```
+curl fredrikson.com.ar/resume.pdf -O
+```
 
 
 
@@ -478,6 +534,18 @@ El comando `wget` nos permite descargar un archivo de internet:
 ```
 wget fredrikson.com.ar/resume.pdf
 ```
+
+De la misma manera vista para `curl` podremos en este caso cambiarle el nombre al archivo descargado (en realidad [es un concepto mas complejo](https://www.gnu.org/software/wget/manual/html_node/Download-Options.html#Download-Options)) con `-O`.
+
+```
+wget fredrikson.com.ar/resume.pdf -O cv.pdf
+```
+
+
+
+### Comando `df`
+
+El comando `df` muestra el espacio usado y libre en cada disco.
 
 
 
@@ -504,9 +572,27 @@ mkdir test
 
 
 
+#### Crear árbol de directorios
+
+Si tenemos que crear un directorio `/tmp/asia/india/bangalore` una forma sería:
+
+```
+mkdir /tmp/asia
+mkdir /tmp/asia/india
+mkdir /tmp/asia/india/bangalore
+```
+
+Sin embargo podemos hacer esto de un solo paso con:
+
+```
+mkdir -p /tmp/asia/india/bangalore
+```
+
+
+
 ### Comando `mv`
 
-El comando `mv` nos permite renombrar archivos y carpetas o moverlo de ubicación. 
+El comando `mv` nos permite renombrar archivos y carpetas o moverlos de ubicación. 
 
 Por ejemplo para renombrar un directorio:
 
@@ -544,10 +630,10 @@ Con `ls documents/` podremos verificar que ahora tenemos un archivo `file1.txt`
 
 
 
-Si queremos copiar un directorio debemos utilizar `cp -a` con lo cual le estamos diciendo que queremos utilizar varios argumentos incluido el `-r` par que sea una copia recursiva.
+Si queremos copiar un directorio debemos utilizar `cp -r` 
 
 ```
-cp -a myMusic/ myMedia/
+cp -r myMusic/ myMedia/
 ```
 
 
@@ -622,6 +708,18 @@ cat file1.txt file2.txt
 
 
 
+### `cat` para ingresar contenido
+
+Podemos usar `cat` junto con el `>` *redirection symbol* si queremos cargar contenido en un archivo.
+
+```
+cat > new_file.txt
+```
+
+A patir de este momento podremos ingresar contenido al archivo (incluso podremos colocar saltos de línea presionando `ENTER`) y cuando hayamos terminado presionamos `CTRL+d`.
+
+Luego con `cat new_file.txt` veremos el contenido agregado.
+
 ### Comando `more`
 
 El comando `more` es útil cuando tenemos archivos largos y no queremos mostrar todo el contenido de una sino que lo queremos de manera paginada:
@@ -694,6 +792,8 @@ rm file.txt
 
 
 
+#### Eliminar varios archivos
+
 También es posible borrar más de un archivo a la vez:
 
 ```bash
@@ -702,6 +802,8 @@ rm file1.txt file2.txt file3.txt
 
 
 
+#### Eliminar según patrón
+
 O bien podemos borrar todos los archivos que tengan un cierto patrón, por ejemplo todos los archivos que comiencen con un cierto nombre:
 
 ```bash
@@ -709,6 +811,8 @@ rm file*
 ```
 
 
+
+#### Eliminar directorio
 
 Para eliminar un directorio debemos hacerlo con `rm -r test` con lo cual eliminaremos la carpeta y todo su contenido recursivamente.
 
@@ -1208,6 +1312,35 @@ El comando `htop` es un visor de procesos similar al comando `top` pero más vis
 
 
 ## Manejo de Usuarios
+
+## Privilegios `sudo`
+
+Cuando se trata de realizar tareas no todos los usuarios pueden realizar todas ellas. Todos los sistemas Linux tienen un **usuario root**, que no tiene ninguna restricción en cuanto a sus tareas. En cambio los **usuarios regulares** tienen restringidas sus acciones sobre el sistema. Si queremos que un usuario normal realice tareas privilegiadas como instalar y configurar software o servicios, el root user puede hacer esto posible asignándole permisos de sudo. Ese usuario será agregado al archivo `/etc/sudoers`. Cuando un usuario regular (que tiene privilegios de sudo) quiere elevar su nivel de permisos puede agregar el prefijo sudo al comando que desea ejecutar.
+
+> En la mayoría de los entornos de producción se restringe el acceso al usuario root y casi nunca nos vamos a loguear con ellos, justamente por las capacidades que este tiene y la posibilidad de cometer algún error.
+
+### Comando `su`
+
+El comando `su` (switch user) nos permite pasar de un usuario a otro.
+
+`su -` 
+
+- logs you into root with the root environment
+- (as opposed to `su` which logs you into root with your environment)
+
+And I understand what `sudo` does
+
+- you are root for one command
+
+
+
+`su` requires the root password and `sudo` requires your user password
+
+Therefore `sudo su -` will put you into a root environment but it will ask you for your user password instead of the root password (once sudo has given you root privileges, `su -` can be executed with no password).
+
+Luego con `CTRL+D` nos desconectaremos de ese usuario.
+
+
 
 ### Comando `useradd`
 
