@@ -512,12 +512,12 @@ El comando `bc`  *(basic calculator)* nos permite abrir una aplicación de una c
 El comando `curl` nos permite hacer un request HTTP, es decir que visitaremos una página y veremos su contenido en pantalla.
 
 ```
-curl fredrikson.com.ar/resume.pdf
+curl https://google.com.ar
 ```
 
+Si hacemos `curl ifconfig.me` podremos visitar esa página y nos devolverá la ip pública desde donde la estamos visitando es decir la el servidor.
 
 
-> Si hacemos `curl ifconfig.me` podremos visitar esa página y nos devolverá la ip pública desde donde la estamos visitando es decir la el servidor.
 
 Si en lugar de escribir los datos recibidos en *stdout* queremos descargar el contenido como un archivo podemos usar la opción `-O`
 

@@ -340,15 +340,3 @@ sudo service ssh status
 ```bash
 usermod -aG sudo username 
 ```
-
-
-
-## Información OS
-
-Si queremos obtener información sobre el sistema operativo, podremos ejecutar el siguiente comando:
-
-```
-cat /etc/*release*
-```
-
-> Notar el uso de *wildcard* ya que el archivo puede llamarse de diferentes formas segun la distribución con la que estemos trabajando.

@@ -293,3 +293,92 @@ Para conocer la distribución y su versión instalada en nuestro servidor
 cat /etc/os-release
 ```
 
+
+
+Como este archivo puede llamarse de diferentes formas según la distribución con la que estemos trabajando, podemos recurrir a un *wildcard* a la hora de mostrarlo en pantalla:
+
+```
+cat /etc/*release*
+```
+
+ 
+
+## Package Managerss
+
+Los manejadores de paquetes nos permiten instalar software en sistemas Linux.
+
+### rpm
+
+CentOS utiliza **RPM** (Red Hat Package Manager) al igual que Red Hat Enterprise Linux y Fedora. El software es empaquetado en un bundle con la extensión rpm.
+
+* Instalación:
+
+```
+rpm -i telnet.rpm
+```
+* Desinstalación:
+
+```
+rpm -e telnet.rpm
+```
+
+* Obtener información sobre un paquete instalado (*query the database*)
+
+```
+rpm -q telnet.rpm
+```
+
+
+
+rpm requiere que indiquemos la ubicación exacta del paquete rpm y no instalará las dependencia que tenga el paquete. Existe una solución que utilizando un único comando encuentra la ubicación del paquete, lo instala e instala también todas sus dependencias. 
+
+
+
+### Yum
+
+Yum es un manejador de paquetes que utiliza rpm por debajo
+
+```
+yum install ansible
+```
+
+Este comando buscará en los repositorios, instalará el paquete y también sus dependencias.
+
+La información sobre los repositorios está en `/etc/yum.repos.d`
+
+
+
+#### Obtener lista de repositorios
+
+```
+yum repolist
+```
+
+Luego con 
+
+```
+ls /etc/yum-repos.d
+```
+
+Podremos ver los archivos con los que estos repositorios están configurados con la dirección donde están todos los paquetes `.rpm`.
+
+
+
+Para listar los paquetes instalados o disponibles:
+
+```
+yum list ansible
+```
+
+Para eliminar un paquete
+
+```
+yum remove ansible
+```
+
+Instalar version específica
+
+```
+yum install ansible-2.4.2.0
+```
+
