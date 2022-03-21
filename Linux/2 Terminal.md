@@ -718,6 +718,8 @@ cat > new_file.txt
 
 A patir de este momento podremos ingresar contenido al archivo (incluso podremos colocar saltos de línea presionando `ENTER`) y cuando hayamos terminado presionamos `CTRL+d`.
 
+> Este método no es viable para cuando tenemos que lidiar con grandes cantidades de texto, en esos casos debemos usar alternativas como Vi, Vim, Nano
+
 Luego con `cat new_file.txt` veremos el contenido agregado.
 
 ### Comando `more`

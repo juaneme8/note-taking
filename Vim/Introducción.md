@@ -1,10 +1,20 @@
+# Introducción
+
+Tanto Vim como VI son editores de código muy famosos que aún en caso de que no lo usemos habitualmente para desarrollar es importante conocer pues puede que sea el único editor disponible cuando nos conectemos remotamente a un servidor.
+
+
+
+# Vi
+
+Vi viene instalado en la mayoría de los sistemas operativos.
+
 # Vim
 
 > [Vim Basics in 8 Minutes](https://youtu.be/ggSyF1SVFr4)
 >
-> (Vim Text Editor for Beginners)[https://www.youtube.com/playlist?list=PLT98CRl2KxKHy4A5N70jMRYAROzzC2a6x] by LearnLinuxTV
+> [Vim Text Editor for Beginners](https://www.youtube.com/playlist?list=PLT98CRl2KxKHy4A5N70jMRYAROzzC2a6x) by LearnLinuxTV
 
-Tanto Vim como VI son editores de código muy famoso que aún en caso de que no lo usemos habitualmente para desarrollar es importante conocer pues puede que sea el único editor disponible cuando nos conectemos remotamente a un servidor.
+
 
 
 
@@ -28,7 +38,7 @@ vim
 
 
 
-Según LearnLinuxTV es recomendable instalar la siguiente versión:
+Según [LearnLinuxTV](https://www.learnlinux.tv/) es recomendable instalar la siguiente versión:
 
 ```
 sudo apt install vim-nox
@@ -66,7 +76,7 @@ Si  presionamos la letra `i` pasaremos al *insert mode*.
 
 #### Comandos básicos
 
-* `i` para pasar a *insert mode* en la posición actual.
+* `i` para pasar a *insert mode* en la posición actual, `ESC` volveremos al *normal mode*.
 
 * `A` para pasar a *insert mode* al final de la línea.
 
@@ -82,10 +92,6 @@ Si  presionamos la letra `i` pasaremos al *insert mode*.
 
 * `:set number` para mostrar los números al lado de cada línea
 
-* `dd` para eliminar una línea.
-
-* `3dd` para eliminar tres líneas.
-
 * `u` deshacer la última acción.
 
 * `CONTROL+R` para rehacer la última acción (asociar con la búsqueda inversa en la terminal)
@@ -94,9 +100,33 @@ Si  presionamos la letra `i` pasaremos al *insert mode*.
 
   Una vez ahi:
 
-  * Con `n` buscar siguiente (hasta .
+  * Con `n` buscar siguiente ocurrencia.
   * Con `SHIFT+n` buscar anterior.
 
 * `:%s/word1/word2/g` para reemplazar la palabra "word1" por "word2" de manera global.
 
 * `:%s/word1/word2/gc` para reemplazar la palabra "word1" por "word2" de manera global con confirmación antes de cada cambio.
+
+
+
+#### Eliminar
+
+* `x` para eliminar un caracter.
+
+* `dd` para eliminar una línea.
+
+* `3dd` para eliminar tres líneas.
+
+
+
+#### Copiar
+
+* `yy` copiar línea
+* `p` pegar línea
+
+
+
+#### Movimiento
+
+* `CTRL+u` scroll hacia arriba
+* `CTRL+d` scroll hacia abajo
