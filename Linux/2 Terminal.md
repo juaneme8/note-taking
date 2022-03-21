@@ -1828,9 +1828,31 @@ Si ejecutamos `cmatrix` veremos un fondo de pantalla con caracteres estilo Matri
 
 
 
-# `systemd`
+# Servicios
 
-> Basado en el video https://www.youtube.com/watch?v=5JVBpXiYMKo
+Un servicio de Linux es un programa que se ejecuta de fondo (como por ejemplo en web servers, database servers, Docker, etc) 
+
+Cuando instalamos software que funciona de fondo es configurado automáticamente como un servicio y vamos a querer asegurarnos que esté corriendo y también que siga corriendo cuando el servidor se resetee.
+
+Para iniciar este servicio ejecutamos:
+
+```
+service apache2 start
+```
+
+> Existe una forma más moderna de hacer esto utilizando `systemctl` en servidores que utilizan `systemd` para manejar sus servicios.
+>
+>  (notar que el start viene antes del nombre del servicio)
+>
+> ```
+> systemctl start apache2 
+> ```
+
+
+
+## `systemd`
+
+> Basado en el [video](https://www.youtube.com/watch?v=5JVBpXiYMKo)
 
 **Systemd** nos permitirá manejar los servicios de nuestro servidor Linux pudiendo iniciarlos, detenerlos o reiniciarlos según sea el caso. Veremos el comando `systemctl` que es una utilidad de systemd.
 
@@ -1852,7 +1874,7 @@ En ocasiones debemos configurar además el firewall para poder acceder a la pág
 
 
 
-## Comando `systemctl`
+### Comando `systemctl`
 
 El comando `systemctl` es una utilidad de `systemd` responsable de controlar el sistema systemd en sí y el manejador de servicios.
 
@@ -1864,7 +1886,7 @@ systemctl
 
 
 
-### Estado Servicio
+#### Estado Servicio
 
 Si queremos obtener el estado de un servicio en particular, utilizamos el nombre del paquete con el cual lo instalamos:
 
@@ -1878,9 +1900,9 @@ Si una unidad nos aparece como **disabled e inactive**. Al estar **disabled** no
 
  
 
-### Habilitar Servicio
+#### Habilitar Servicio
 
-Para habilitar este servicio
+Para configurar este servicio para que arranque al iniciar.
 
 ```
 sudo systemctl enable apache2
@@ -1890,7 +1912,7 @@ Si ahora verificamos el estado veremos que nos aparece como loaded pero continú
 
 
 
-### Iniciar Servicio
+#### Iniciar Servicio
 
 Para iniciar este servicio:
 
@@ -1904,7 +1926,7 @@ sudo systemctl start apache2
 
 
 
-### Habilitar e Iniciar Servicio
+#### Habilitar e Iniciar Servicio
 
 Si queremos habilitarlo e iniciar el servicio a la vez:
 
@@ -1914,7 +1936,7 @@ sudo systemctl enable --now apache2
 
 
 
-### Reiniciar Servicio
+#### Reiniciar Servicio
 
 Cuando cambiamos la configuración muchas veces necesitaremos reiniciar la unidad para que tome los cambios.
 
@@ -1924,7 +1946,7 @@ sudo systemctl restart apache2
 
 
 
-### Recargar Configuración
+#### Recargar Configuración
 
 Cuando reiniciamos el servicio este será detenido y luego iniciará nuevamente, en ocasiones puede que esto no sea necesario y que baste con recargar el servicio. **No todos los cambios en la configuración admiten esto** pero es aconsejable probar, ya que en caso de tratarse de un servidor web los clientes serán desconectados si reiniciamos.
 
@@ -1934,7 +1956,7 @@ sudo systemctl reload apache2
 
 
 
-### Detener Servicio
+#### Detener Servicio
 
 Si queremos detener un servicio
 
@@ -1944,7 +1966,7 @@ sudo systemctl stop apache2
 
 
 
-### Deshabilitar Servicio
+#### Deshabilitar Servicio
 
 ```
 sudo systemctl disable apache2
@@ -1952,7 +1974,7 @@ sudo systemctl disable apache2
 
 
 
-### Servicios para un usuario
+#### Servicios para un usuario
 
 En ocasiones vamos a querer ejecutar un servicio sólo para un usuario en particular.
 
@@ -1992,7 +2014,7 @@ Este paquete trabaja con el puerto 8384 por lo que ingresando a `localhost:8384`
 
 
 
-### Información Servicios
+#### Información Servicios
 
 Podremos encontrar información sobre los servicios en:
 
@@ -2006,7 +2028,7 @@ nano syncthing@.service
 
 
 
-### Listar Servicios
+#### Listar Servicios
 
 Vimos que con `systemctl` podemos listar los servicios.
 
@@ -2017,3 +2039,107 @@ systemctl list-unit-files --type=service
 ```
 
 En la primera columna veremos el nombre del servicio, en la segunda si está habilitado o no y en la tercera el vendor preset que indicará si el servicio debe iniciarse automáticamente una vez instalado.
+
+
+
+## Configurar Programa como Servicio
+
+Es posible configurar un programa propio (por ejemplo un servidor web que al visitarlo nos muestre un mensaje de bienvenida) o software de terceros como servicio.
+
+Esto nos permitiría trabajar del modo que lo hacemos con los servicios:
+
+```
+systemctl start my_app
+```
+
+```
+systemctl stop my_app
+```
+
+Como con `systemctl` podemos manejar los servicios `systemd` debemos configurar nuestro programa como un servicio de ese tipo. Esto lo hacemos creando un archivo de configuración en  la ruta `/etc/systemd/system` y le damos el nombre que queremos que tenga el servicio por ejemplo `my_app.service` y dentro del archivo creamos:
+
+```
+[Unit]
+Description=My pyrhon web application
+
+[Service]
+ExecStart=/usr/bin/python3 /opt/code/my_app.py
+```
+
+Luego para indicarle a systemd que hay un nuevo servicio, debemos ejecutar:
+
+```
+systemctl daemon-reload
+```
+
+```
+systemctl start my_app 
+```
+
+```
+systemctl stop my_app
+```
+
+```
+systemctl status my_app
+```
+
+
+
+### Inicio Automático
+
+Si queremos que se inicie automáticamente cuando arranca el sistema:
+
+```
+[Service]
+ExecStart=/usr/bin/python3 /opt/code/my_app.py
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Con esto le decimos el orden en que queremos que se ejecute, es decir después de qué servicio y eso es lo que le estamos diciendo con `multi-user.target`
+
+Ahora sí podremos ejecutar
+
+```
+systemctl enable my_app
+```
+
+de esta manera se iniciará automáticamente al reiniciar.
+
+
+
+### Otras configuraciones:
+
+* Si queremos incorporar una descripción del servicio.
+
+```
+[Unit]
+Description=My pyrhon web application
+```
+
+
+
+* Si nuestra aplicación tiene otras dependencias y tenemos que ejecutar scripts o comandos antes o después del inicio de la aplicación, podemos indicarlos de esta forma:
+
+```
+[Service]
+ExecStart=/usr/bin/python3 /opt/code/my_app.py
+ExecStartPre=/opt/code/configure_db.sh
+ExecStartPost=/opt/code/email_status.sh
+```
+
+
+
+* Si queremos que la aplicación reinicie automáticamente en caso de crasheo:
+
+```
+[Service]
+ExecStart=/usr/bin/python3 /opt/code/my_app.py
+Restart=always
+```
+
+
+
+* Si queremos ver un ejemplo real de estos archivos podemos analizar `/lib/systemd/system/docker.service`
