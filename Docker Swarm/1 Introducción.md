@@ -6,59 +6,182 @@ Docker Swarm es una herramienta para poder escalar las aplicaciones dockerizadas
 
 ## Introducción
 
-Suponemos el caso de un clúster de máquinas que a partir de una conexión a internet, llega a un balanceador de cargas encargado de recibir peticiones y distribuirlas en tres servidores. Esto podría resolverse con Docker y Docker Compose, pero podría ser tedioso cuando tengamos que realizar actualizaciones. En cada máquina tendremos el daemon de Docker corriendo los contenedores, tendremos que frenarlos, quitarlos del balanceador de cargas (para no matar una conexión existente) y haciendo que se rebalancee hacia otro lado. Luego volviendo a subir los contenedores y repitiendo lo mismo para todas las máquinas. Esto se conoce como *rolling deployment* esta tarea es tediosa y será necesario automatizarla para no hacerla a mano y que sea propensa a fallos. Docker Swarm ofrece una solución de clustering que propone que tener un cluster de muchas máquinas que a los ojos de los operadores de la infraestructura se vea como un único Docker daemon. Lo usamos como si estuviéramos usándolo en nuestra máquina local y tendremos la capacidad de actualizar servicios, rotar contenedores, etc. Con esto **lograremos aplicaciones altamente disponibles y muy fáciles de administrar**.
+Suponemos el caso de un clúster de máquinas que a partir de una conexión a internet, llega a un balanceador de cargas encargado de recibir peticiones y distribuirlas en tres servidores. 
+
+![image-20220321215509872](C:\Users\JuaNeMe\Documents\Code\note-taking\Docker Swarm\imgs\0.png)
+
+Esto podría resolverse con Docker y Docker Compose, pero podría ser tedioso cuando tengamos que realizar actualizaciones. En cada máquina tendremos el daemon de Docker corriendo los contenedores (con Docker Compose o con un script), tendremos que frenarlos, quitarlos del balanceador de cargas (para no matar una conexión existente) y haciendo que se rebalancee hacia otro lado. Luego volviendo a subir los contenedores y repitiendo lo mismo para todas las máquinas. Esta solución de clustering se conoce como *rolling deployment* esta tarea es tediosa y será necesario automatizarla para no hacerla a mano y que sea propensa a fallos. Lo ideal sería tener muchas máquinas y administrarlas de manera más simple como cuando trabajamos con Docker Compose que podemos escalar de manera simple (ponemos scale 4 y tendremos 4 contenedores sirviendo la misma aplicación). Docker Swarm ofrece una solución de clustering que propone que tener un clúster de muchas máquinas que a los ojos de los operadores de la infraestructura se vea como un único Docker daemon por lo que logra administrarlas muy fácilmente.
+
+![image-20220321220357929](C:\Users\JuaNeMe\Documents\Code\note-taking\Docker Swarm\imgs\1.png)
+
+Lo usamos como si estuviéramos usándolo en nuestra máquina local y tendremos la capacidad de actualizar servicios, rotar contenedores, etc. Con esto **lograremos aplicaciones altamente disponibles y muy fáciles de administrar**.
 
 
 
 ## Aplicaciones Productivas
 
-Las aplicaciones productivas deben ser capaces de sobrevivir la carga
+Las aplicaciones productivas deben ser capaces de sobrevivir la carga como así también a situaciones catastróficas, sirviendo siempre el contenido a los usuarios.
 
-En este tipo de aplicaciones nos centramos en dos conceptos:
+Para lograr esto nos centramos en dos conceptos:
 
-La **escalabilidad** que nos permitirá aumentar la potencia de cómputo para poder servir a mayor cantidad de peticiones o peticiones más pesadas sin producir una denegación de servicio. Es posible escalar verticalmente (esto se conoce como *ponerle mas fierro*, mas núcleos mas procesadores mas memoria RAM). Esta visión tiene dos desventajas, por un lado que existe un límite físico en cuanto a la potencia de la máquina y el riesgo de que si este servidor falla toda la aplicación se cae (aunque no sea sólo una podrían ser pocas).
+La **escalabilidad** consiste en poder aumentar la potencia de cómputo de la infraestructura para poder servir a mayor cantidad de peticiones en la medida que la demanda avanza sin producir una denegación de servicio. La escalabilidad entonces se puede encarar de dos formas:
 
-La **escalabilidad horizontal** consiste en tener muchas máquinas una al lado del a otra, distribuyendo la carga. Este es el enfoque mas usado, ya que son computadoras mas pequeñas físicas o en la nube que suelen ser pequeñas. Los proveedores como AWS, Azure ofrecen soluciones de escalabilidad horizontal.
+Es posible escalar verticalmente (esto se conoce como *ponerle mas fierro*, mas núcleos, mas procesadores mas memoria RAM). Gracias a esto podré correr más procesos, más contenedores. Si bien esta visión es simple ya que demanda dinero pero no debo configurar redes ni otras cosas, tiene dos desventajas. Por un lado que existe un límite físico en cuanto a la potencia de la máquina (o esta se vuelve muy cara o directamente no la conseguimos) y el riesgo de que si este servidor falla toda la aplicación se cae (aunque no sea sólo una podrían ser pocas). También es posible escalar horizontalmente, que consiste en tener muchas máquinas una al lado de la otra, distribuyendo la carga de procesos en cada una de ellas. Este es el enfoque mas usado, ya que son computadoras mas pequeñas (por ende más baratas y pueden ser físicas o en la nube) que suelen ser todas iguales y de requerimientos accesibles. Incluso los proveedores como AWS, Azure ofrecen soluciones de escalabilidad horizontal preconfiguradas.
 
-La **disponibilidad** es la capacidad de una aplicación servicio de estar las 24 horas del día disponible, aún ante un evento inesperado. Tener un uptime del 99.9% aun ante un evento catastrófico por ejemplo la rotura de un servidor. Es mucho más fácil tener alta disponibilidad con escalabilidad horizontal.
+La **disponibilidad** es la capacidad de una aplicación o servicio de estar las 24 horas del día disponible, aún ante un evento inesperado. Tener un uptime muy alto por encima del 99.9% aun ante un evento catastrófico por ejemplo la rotura de un servidor (por ejemplo ante la rotura de un disco o una simple pérdida de conexión).  Quizás con ese servidor roto no podré resistir tanta carga pero no será tan grave el problema ya que tendré otros servidores que podrán atender las peticiones.
 
-Swarm nos permite enfrentar estos problemas de manera sencilla pudiendo escalar infraestructura para correr contenedores
+Es mucho más fácil tener alta disponibilidad con escalabilidad horizontal.
+
+Swarm nos permite enfrentar estos problemas de manera sencilla pudiendo escalar infraestructura para correr contenedores.
 
 
 
 ## Arquitectura de Swarm
 
-Tenemos un esquema dos tipos de máquinas los **managers**(o administradores) y los **workers**.
+Tenemos un esquema dos tipos de máquinas los **managers** (o administradores) y los **workers**.
 
-![image-20220321185349868](C:\Users\JuaNeMe\Documents\Code\note-taking\Docker Swarm\imgs\1)
+![image-20220321185349868](C:\Users\JuaNeMe\Documents\Code\note-taking\Docker Swarm\imgs\2.png)
 
-Los *manager nodes* son aquellos nodos (término para referirnos a la máquina, servidor o VM) encargados de administrar el clúster Swarm. Estas máquinas están conectadas en red entre sí y administra la comunicación entre ellas. Deciden donde se corren los nodos, cómo se comunican entre sí. También tiene a su cargo monitorear los nodos donde se corren contenedores de modo que si alguno se cae y pierde conectividad con el swarm puedan reposicionar esos contenedores en otros nodos que tengan disponibilidad.
+Los *manager nodes* son aquellos nodos (término para referirnos a la máquina, servidor o VM) encargados de administrar el clúster Swarm. Estas máquinas están conectadas en red entre sí y administra la comunicación entre ellas. Deciden donde se corren los contenedores, cómo se comunican entre sí. También tiene a su cargo monitorear los nodos donde se corren contenedores de modo que si alguno se cae o pierde conectividad con el swarm puedan reposicionar esos contenedores en otros nodos que tengan disponibilidad.
 
-Los *worker nodes* suelen ser mas que los *manager nodes* y en ellos se va a correr los contenedores productivos. Los manager nodes podrían también correr contenedores pero como tienen a cargo la sensible tarea tarea de coordinar el Swarm y no queremos que destinen sus recursos en otra misión.
+Los *worker nodes* suelen ser mas en cantidad que los *manager nodes* y en ellos se va a correr (muy probablemente) los contenedores productivos. En los manager nodes también podrían correrse contenedores pero como tienen a cargo la sensible tarea tarea de coordinar el estado del cluster, no queremos que destinen sus recursos en otra misión.
 
-Todos los nodos tienen que estar dentro de la misma red y tener el docker daemon, idealmente de la misma versión
+Todos los nodos tienen que estar dentro de la misma red y tener el Docker daemon, idealmente de la misma versión
 
 
 
 ## Requisitos para Swarm
 
-Las aplicaciones deben cumplir ciertos requisitos para Docker Swarm, es necesario que siga los siguientes factores (twelvefactor.net)
+Las aplicaciones deben cumplir ciertos requisitos para ser corridas en Docker Swarm, si bien hay distintas opiniones existe un consenso de que si cumple los siguientes requisitos estará lista:
 
-* **Codebase**: el codigo debe estar en un repositorio (git por ejemplo relación 1 a 1 entre repositorio y aplicación)
-* **Dependencies**: las dependencias deben estar declaradas (por ejemplo en `package.json`, deberian venir con la aplicación y no dar por sentado que estén instaladas en la máquina).
-* **Configuration**: si la aplicación será ejecutada en distintos ambientes (desarrollo, testing, integración, qa o produción), deberiamos tener el mismo código y que la queremos que el comportamiento se modifique mediante una configuración. Puede ser mediante un archivo dentro de la imagen o mediante variables de entorno al correr el contenedor.  
-* Backing services: los servicios en los cuales se apoya la aplicación (base de datos por ejemplo) deben ser tratados como cosas exterrnas a la aplicación y por configuración decimos como conectarse.
-* **Build, Release and Run** estas tres fases deben estar bien separadas y no podemos hacer build cuando vamos a ejecutar el run.
-* **Processes**: la aplicación debe ejecutarse como un proceso stateless no puede depender de un estado externo (archivos en la maquina o algo en memoria).
+> Podemos encontrar más información en [12factor.net](https://12factor.net/).
+
+* **Codebase**: el código debe estar en un repositorio (git por ejemplo con una paridad 1 a 1 entre repositorio y aplicación)
+
+* **Dependencies**: las dependencias deben estar declaradas explícitamente en algún archivo versionable (por ejemplo en Node tenemos `package.json`). Además deberían venir empaquetadas con la aplicación y no dar por sentado que estén instaladas en la máquina donde vamos a correr el proceso).
+
+* **Configuration**: si la aplicación será ejecutada en distintos ambientes (desarrollo, testing, integración, QA, produción), deberíamos tener el mismo código y que el comportamiento se modifique mediante una configuración. Esto podría ser mediante un archivo dentro de la imagen o mediante variables de entorno al correr el contenedor.  
+
+* **Backing services**: son los servicios en los cuales se apoya la aplicación (base de datos, cache, storage de archivos por ejemplo) deben ser tratados como servicios externos a los cuales la aplicación se enchufa. No deben formar parte del entregable y por configuración le diremos como conectarse.
+
+* **Build, Release and Run** estas tres fases deben estar bien separadas y no podemos por ejemplo un build cuando vamos a ejecutar el run. 
+
+  > Suponiendo una situación de NodeJs con TypeScript y tenemos que hacer el build, este no podríamos hacerlo en el servidor de producción sino que tendríamos que hacerlo durante el deploy y el entregable ya tiene que estar buildeado.
+
+* **Processes**: la aplicación debe ejecutarse como un proceso stateless no puede depender el funcionamiento correcto de la aplicación de que exista un estado externo (archivos en la máquina o algo en memoria).
+
 * **Port binding**: las aplicaciones deben exponerse a través de un puerto en la máquina sin un intermediario.
-* **Concurrency**: la aplicación debe poder correr con multiples instancias en paralelo.
-* **Disposability**: la aplicación tiene que estar diseñada para ser fácilmente detruible. Debe poder apagarse y levantar otra de manera mas simple.
-* **Dev/Prod parity**: debemos lograr que el entorno de desarrollo sea lo mas pasible a producción.
-* **Logs**: todos los logs de la aplicación deben tratarse como flujos de device (la aplicación debe escupir a stdout)
-* **Admin processes**: todas las tareas administrativas deben poder ser ejecutadas como proceso independiente REPL teniendo acceso al estado del servidor sin entrar en un modo de administración.
+
+* **Concurrency**: la aplicación debe poder correr con multiples instancias en paralelo (notar que esto es lo que plantea la escalabilidad horizontal).
+
+* **Disposability**: la aplicación tiene que estar diseñada para ser fácilmente destruible. Debe poder apagarse y levantar otra de manera muy simple y rápida.
+
+* **Dev/Prod parity**: debemos lograr que el entorno de desarrollo sea lo mas parecido posible a producción.
+
+* **Logs**: todos los logs de la aplicación deben tratarse como flujos de device (no debemos escribir a un archivo sino que la aplicación debe enviar a standard output)
+
+* **Admin processes**: todas las tareas administrativas deben poder ser ejecutadas como proceso independiente de la aplicación (por ejemplo para debuggear algún proceso desde adentro del servidor con el estado en memoria del mismo).
+
+  No es que iniciamos la aplicación en modo administración, sino que debo poder correr un proceso dentro de ella que me permita administrarla.
+
+   Las tecnologias modernas tienen el REPL, cuando entramos a un servidor Node y escribimos `node` tenemos la consola pero tenemos acceso también al estado del servidor.
 
 Cumpliendo estas condiciones podremos aprovechar al máximo lo que ofrece Swarm.
 
 
 
-Con Docker Desktop instalado podremos ejecutar `docker` y según la salida veremos si la instalación fue exitosa. Luego ejecutamos `docker --version` y obtenemos la versión. Con `docker info` podremos obtener información.
+## Instalación Docker
+
+Ver notas de Docker para la instalación de Docker Desktop. 
+
+Una vez instalado podremos ejecutar `docker` y según la salida veremos si la instalación fue exitosa. Luego ejecutamos `docker --version` y obtenemos la versión. Con `docker info` podremos obtener información.
+
+
+
+## Primeros pasos
+
+Docker Swarm es un modo de ejecutar Docker, no es que tenemos que instalar algo aparte como sí sucede por ejemplo si queremos usar Docker Compose en Linux.
+
+Para iniciar un swarm productivo:
+
+```
+docker swarm init
+```
+
+Nos aparecerá un mensaje como el siguiente:
+
+```
+Swarm initialized: current node (x9ubiu1m8doev9t7lrlk22j77) is now a manager.
+
+To add a worker to this swarm, run the following command:
+
+    docker swarm join --token SWMTKN-1-18rstdx2vwjn4xsxhhalv6aqxe3sgijswd46wsbpi28v2ff1o0-bnplqwnvf8k1a27z65rf18q45 192.168.65.3:2377
+
+To add a manager to this swarm, run 'docker swarm join-token manager' and follow the instructions.
+```
+
+
+
+Como podemos ver nos indica los comandos a ejecutar para agregar un worker o un manager al swarm. De hecho si ingresamos `docker swarm join-token manager` veremos que el comando es el mismo pero cambia el token.
+
+
+
+Para listar los nodos:
+
+```
+docker node ls
+```
+
+> En una primera instancia el único nodo será nuestra computadora.
+
+
+
+Para inspeccionar el nodo:
+
+```
+docker node inspect oiz...
+```
+
+> Siendo `oiz...` el id del nodo.
+
+Otra forma de hacerlo es:
+
+```
+docker node inspect self
+```
+
+
+
+Para imprimir esta información de manera más lejible podemos usar el flag `--pretty`
+
+```
+docker node inspect --pretty self
+```
+
+> En casi todos los comandos `inspect` en modo swarm contamos con la opción `--pretty` pero en algunos casos oculta información por lo que debemos usarla cuando sabemos que está allí lo que buscamos.
+
+Obtendremos un JSON y en una parte veremos un campo `TLSInfo `con un certificado TLS con el cual el manager va a encriptar toda la comunicación entre los nodos. Esto es interesante ya que todo se transmitirá en la red encriptado por lo que en caso de correr swarms en la nube y tener que intercambiar secretos o claves privadas para configurar servicios, esto evitaría filtraciones.
+
+
+
+Para salir de un swarm:
+
+```
+docker swarm leave
+```
+
+Veremos que nos tirará un error porque somos un manager (a diferencia de lo que sucedería si se va un worker donde los managers tomarían los contenedores que estaban corriendo en el y se lo van a poner a correr a otro nodo). Si se va un manager el swarm podría quedar en un estado irrecuperable.
+
+Si estamos seguros de que queremos hacerlo:
+
+```
+docker swarm leave --force
+```
+
+Si ahora ejecutamos 
+
+```
+docker info
+```
+
+Veremos que dice `Swarm: inactive` y si iniciamos otro swarm pasará a `Swarm: active` y a mostrar mas infromación sobre el nodo.
