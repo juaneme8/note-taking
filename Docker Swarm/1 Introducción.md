@@ -102,6 +102,10 @@ Una vez instalado podremos ejecutar `docker` y según la salida veremos si la in
 
 Docker Swarm es un modo de ejecutar Docker, no es que tenemos que instalar algo aparte como sí sucede por ejemplo si queremos usar Docker Compose en Linux.
 
+
+
+### Iniciar Modo Swarm
+
 Para iniciar un swarm productivo:
 
 ```
@@ -126,6 +130,8 @@ Como podemos ver nos indica los comandos a ejecutar para agregar un worker o un 
 
 
 
+### Listar Nodos
+
 Para listar los nodos:
 
 ```
@@ -135,6 +141,8 @@ docker node ls
 > En una primera instancia el único nodo será nuestra computadora.
 
 
+
+### Inspeccionar Nodo
 
 Para inspeccionar el nodo:
 
@@ -164,6 +172,8 @@ Obtendremos un JSON y en una parte veremos un campo `TLSInfo `con un certificado
 
 
 
+### Salir Modo Swarm
+
 Para salir de un swarm:
 
 ```
@@ -185,3 +195,185 @@ docker info
 ```
 
 Veremos que dice `Swarm: inactive` y si iniciamos otro swarm pasará a `Swarm: active` y a mostrar mas infromación sobre el nodo.
+
+
+
+### Creación Servicio
+
+Si corremos contenedores con `docker run` o `docker compose up` no estaremos aprovechando las virtudes de Docker Swarm. El daemon en modo swarm es igual al normal pero tiene mas funcionalidades. El concepto de servicio es similar al visto al estudiar Docker Compose, siendo este encargado de agrupar a varios contenedores.
+
+Con el Docker daemon corriendo en modo swarm vamos a crear un servicio:
+
+```
+docker service create --name pinger alpine ping www.google.com.ar
+```
+
+Vemos que pasará por una etapa de preparación donde descarga la imagen, ejecuta el contenedor y finalmente nos aparece un mensaje indicando que convergio.
+
+
+
+>Simularemos una aplicación con cierta carga producto de realizar muchas consultas todo el tiempo.
+
+> :information_source: La distribución **alpine** usada habitualmente en Docker como imagen base por su pequeño tamaño tiene la ventaja adicional de que está orientada en seguridad, lo cual hace que tengamos menos vulnerabilidades que usando un despliegue mas grande de Linux.
+
+
+
+### Listar Servicios
+
+Para ver los servicios corriendo
+
+```
+docker service ls
+```
+
+
+
+Existe una correspondencia entre servicios y contenedores. En este caso como estamos trabajando con un único nodo podremos ver ese contenedor corriendo (Docker swarm hizo el run por nosotros)
+
+```
+docker ps
+```
+
+Podremos ver que el contenedor tiene un nombre único generado automáticamente.
+
+
+
+## 
+
+### Estado Servicio
+
+Para analizar el estado de un servicio en particular: 
+
+```
+docker service ps pinger
+```
+
+Veremos que el id devuelto no es ni el del servicio, ni el del contenedor sino el id de la tarea o task.
+
+Las tasks surgen dado que los managers para correr servicios utilizan un enfoque llamado *schedulling* mediante el cual planifican en qué nodos van a ejecutarse los contenedores y para eso les asigna tareas.
+
+ 
+
+Como este servicio tiene una sola réplica tiene una sola tarea en **DESIRED STATE** (Running) y **CURRENT STATE** (Running x minutes ago).
+
+
+
+##  Ciclo de vida Servicio
+
+![image-20220322093434709](C:\Users\juan.lauria\Documents\Code\note-taking\Docker Swarm\imgs\3.png)
+
+> Notar que la imagen muestra que el cliente le habla al daemon.
+
+
+
+### Inspeccionar Servicio
+
+Para inspeccionar un servicio
+
+```
+docker service inspect pinger
+```
+
+> Recordar que podríamos usar `-pretty` aunque si bien es bonito de entender, no cuenta con toda la data completa.
+
+
+
+Veremos en el JSON un campo `TaskTemplate.ContainerSpec.Image` que dice `alpine:latest@sha256:621...` lo que viene después del @ se conoce como digest, es un identificador de la imagen mas allá del tag ya que si pushean otro layer on ese tag, la que tengo yo tengo deja de ser oficialmente `latest`.
+
+
+
+La existencia del campo `TaskTemplate` nos da la pauta que el manager node le envía al worker para que puedan construir los contenedores de esta tarea.
+
+
+
+### Visualizar Logs Servicio
+
+```
+docker service logs -f pinger
+```
+
+> Utilizamos `-f` para hacer follow y con `CTRL+c` podremos salir.
+
+Veremos en pantalla todos los pings que está realizando cada un segundo. Aca vemos la importancia de cumplir con los 12 factores ya que al estar escupiendo el log al stdout podemos visualizar lo que está sucediendo cosa que no podríamos si estuvieramos escribiendo un archivo.  
+
+
+
+### Eliminar Servicio
+
+```
+docker service rm pinger
+```
+
+Sin embargo si ejecutamos `docker ps` veremos que aunque se eliminó el servicio, todavía seguimos teniendo el contenedor. El **DESIRED STATE** pasará a ser shut down pero tardará unos segundos en apagarlo.
+
+
+
+## PlayWithDocker
+
+Utilizaremos la herramienta [PlayWithDocker](https://labs.play-with-docker.com/) donde podremos loguearnos con nuestra cuenta de Docker, que es un playground gratuito para poder utilizar Docker y Docker Swarm.
+
+Es un espacio de trabajo que tendremos por 4 horas.
+
+con **ADD NEW INSTANCE** tendré una máquina a mi disposición con un cierto hardware, con una determinada IP y con Ubuntu, Git y Docker instalado. 
+
+* Copiando la dirección que aparece en el navegador tendremos acceso a la misma máquina y podremos trabajar de manera colaborativa con varias personas.
+
+* Con `ALT+ENTER` pasamos a una terminal de pantalla completa.
+* Haciendo click en **EDITOR** veremos el filesystem. Incluso será posible crear un archivo vacío, `touch hola.txt`, abrir el editor y agregar contenido de manera visual. 
+* Es posible conectarnos a este nodo por SSH, desde nuestra terminal podremos pegar el comando que nos ofrece y nos conectaremos automáticamente.
+* Es posible copiar con `CTRL+Insert` y pegar con `SHIFT+Insert`.
+
+
+
+## Arquitectura Multi Nodo
+
+Si en el playground ejecutamos
+
+```
+docker swarm init
+```
+
+
+
+Obtendremos un error: **Error response from daemon: could not choose an IP address to advertise since this system has multiple addresses on different interfaces (192.168.0.18 on eth0 and 172.18.0.75 on eth1) - specify one with --advertise-addr**
+
+ Nos está indicando que tenemos múltiples interfaces de red (lo podemos comprobar con `ifconfig`) , cosa que no nos sucede en nuestra máquina pues tenemos una única.
+
+Usaremos la IP que nos aparece en la parte de arriba de la página, por ejemplo 192.168.0.33
+
+```
+docker swarm init --advertise-addr 192.168.0.33
+```
+
+> Podemos escribir --adv y presionar TAB para que se autocomplete.
+
+> Veremos que nos aparece el icono de una persona al lado del nodo en el panel lateral, lo cual nos da la pauta de que se trata de un manager.
+
+A continuación creamos dos instancias que lógicamente tienen el docker daemon pero no tienen el modo swarm activado (cosa que podremos verificar con `docker info`)
+
+Ejecutamos ahora el comando `docker swarm join` con el token recibido al crear el manager en ambas instancias.
+
+Si ahora en el manager (no en los worker nodes que no podrán manejar aspectos relacionados con la administración del swarm) queremos listar los nodos:
+
+```
+docker node ls
+```
+
+* Veremos uno de los nodos con **MANAGER STATUS** de Leader y los otros no dicen nada lo cual nos indica que son workers.
+* Veremos un asterísco indicándonos en qué nodo nos encontramos actualmente.
+
+
+
+### Creación de Servicio
+
+```
+docker service create --name pinger ping www.google.com
+```
+
+
+
+Con `docker service ls` veremos el servicio y para saber donde están asignadas las tareas de este servicio (en este caso será solo una tarea) `docker service ps pinger`. Por defecto las tareas son asignadas a cualquier nodo del swarm y vemos que la asignó al nodo1 aunque es el manager (por ende con `docker ps` lo veremos corriendo allí). Podemos aplicar restricciones si queremos que no corran en algun nodo en particular. 
+
+
+
+## Escalar Horizontalmente
