@@ -294,7 +294,7 @@ docker service logs -f pinger
 
 > Utilizamos `-f` para hacer follow y con `CTRL+c` podremos salir.
 
-Veremos en pantalla todos los pings que está realizando cada un segundo. Aca vemos la importancia de cumplir con los 12 factores ya que al estar escupiendo el log al stdout podemos visualizar lo que está sucediendo cosa que no podríamos si estuvieramos escribiendo un archivo.  
+Veremos en pantalla todos los pings que está realizando cada un segundo. Acá vemos la importancia de cumplir con los 12 factores ya que al estar escupiendo el log al stdout podemos visualizar lo que está sucediendo cosa que no podríamos si estuviéramos escribiendo un archivo.  
 
 
 
@@ -386,7 +386,11 @@ Suponemos el caso que queremos tener 5 réplicas:
 docker service scale pinger=5
 ```
 
-
+> Si no queremos ver la salida interactiva y queremos retomar el control de manera inmediata podemos ejecutarlo con la opción `-d`.
+>
+> ```
+> docker service scale -d pinger=5
+> ```
 
 ```
 docker service ps pinger
@@ -403,7 +407,7 @@ En este momento tenemos la ventaja de que si se cae un nodo (salvo que sea el ma
 
 
 
-## Actualizaciones
+## Actualización de Versión
 
 Suponiendo que tenemos una versión nueva del código, lo normal sería generar una nueva imagen y luego actualizar el servicio con ella. En cambio simularemos esos cambios actualizando la plantilla del servicio. Recordemos que un servicio genera un template para las tareas y es eso lo que le da a los nodos para que las ejecuten.
 
@@ -423,11 +427,19 @@ Para hacer una actualización "en caliente" del servicio y cambiarle su configur
 docker service update --args "ping www.amazon.com" pinger
 ```
 
+> Si no queremos ver el output interactivo y obtener el control inmediatamente podemos utilizar la opción `-d`.
+>
+> ```
+> docker service update -d --args "ping www.amazon.com" pinger
+> ```
+
+
+
 A partir de este momento se actualizarán de a una todas las tareas, si lo hiciera de una borrando todos los contenedores y creando nuevos tendríamos un momento de *downtime*. Es decir que en caso de que se trate de una aplicación expuesta no podríamos servir a las peticiones de los usuarios. 
 
   
 
-## Rollback
+## Rollback de Versión
 
 Si luego de efectuar una actualización ejecutamos `docker service inspect pinger` veremos que apareció un nuevo campo llamado `PreviousSpec`. Docker swarm cuando hace una actualización de un servicio se guarda el contenido de la configuración anterior de modo que si hay algún problema podamos hacer un *rollback* rápido (no tendremos que preocuparnos por recordar las variables de entorno, imagen usada, ni ponernos a hacer inspect) y volver a la versión anterior.
 
@@ -444,3 +456,48 @@ Ejecutando `docker service ps pinger` veremos las tareas tanto        con sus ve
 **También es posible inspeccionar tareas viejas para saber por qué fallaron.**
 
 Es posible configurar la cantidad de versiones que queremos guardar.
+
+ 
+
+## Escenario Realista
+
+Hasta ahora trabajamos con pinger  (servicio que a partir de una imagen de alpine node realiza un ping) para simular una aplicación. Esto lo hicimos para no escribir código, pero más allá de eso lo importante es que buscamos asegurar que funcione todo el tiempo.
+
+Consideramos ahora un caso de alta demanda ejecutando una aplicación crítica que no puede caerse. Esta tiene actualizaciones permanentes con un CI/CD y una situación en la que se produce una falla y no podemos conectarnos remotamente para hacer el rollback.
+
+Para simular un caso de alta demanda escalamos aún mas el servicio (que hasta ahora tenía 5 réplicas).
+
+```
+docker service scale pinger=20
+```
+
+Otra forma de hacer esto mismo es con:
+
+```
+docker service update --replicas=20
+```
+
+Si no queremos ver el output interactivo y obtener el control inmediatamente podemos utilizar la opción `-d`.
+
+```
+docker service update -d --replicas=20
+```
+
+
+
+## Modificar comportamiento default
+
+Queremos sacar una nueva versión nuevamente actualizando los argumentos de la tarea.
+
+```
+docker service update --args="ping amazon.com.ar" pinger
+```
+
+Cuando tenemos muchas tareas el comportamiento por defecto de actualizar una a una las tareas puede que se vuelva muy lento en situaciones donde tenemos muchas.
+
+Si hacemos `docker service inspect pinger` veremos el campo `"UpdateConfig"` hace referencia a cómo se comportará este servicio cuando tiene que hacer un update.
+
+* `"Pararellism"` hace referencia a de a cuantas tareas queremos que vaya haciendo el cambio (por defecto es 1)
+* `"Order"`: Por defecto es `"stop-first"` hace referencia a que primero apagará las tareas que quiere actualizar y una vez apagadas creará las nuevas. La alternativa es `"start-first"` que creará más tareas y cuando estas estén listas borrará las viejas. Esto en infraestructura de la nube se suele llamar *overprovisioning* y consiste en hacer mas infraestructura de la que necesito para asegurarme que no me quedo sin carga y cuando están los cambios borro lo viejo.
+
+MINUTO 5 - VIDEO 13
