@@ -377,3 +377,70 @@ Con `docker service ls` veremos el servicio y para saber donde están asignadas 
 
 
 ## Escalar Horizontalmente
+
+Para escalar nuestro servicio para que tenga varias replicas.
+
+Suponemos el caso que queremos tener 5 réplicas:
+
+```
+docker service scale pinger=5
+```
+
+
+
+```
+docker service ps pinger
+```
+
+Podremos ver que el servicio tiene 5 tareas que no estarán corriendo el mismo nodo. De hecho si vemos que en `node1` hay dos tareas y desde esa terminal ejecutamos `docker ps` veremos esos dos contenedores.
+
+
+Si ejecutamos ahora `docker service logs -f pinger` veremos el output de todas las tareas (aún con contenedores de distintos nodos) en tiempo real sin perder nada de información.
+
+
+
+En este momento tenemos la ventaja de que si se cae un nodo (salvo que sea el manager) no dejaremos de responder ante peticiones.
+
+
+
+## Actualizaciones
+
+Suponiendo que tenemos una versión nueva del código, lo normal sería generar una nueva imagen y luego actualizar el servicio con ella. En cambio simularemos esos cambios actualizando la plantilla del servicio. Recordemos que un servicio genera un template para las tareas y es eso lo que le da a los nodos para que las ejecuten.
+
+```
+docker service inspect pinger
+```
+
+> Podremos ver por ejemplo `Mode.Replicated.Replicas`igual a 5.
+
+Nos encontramos con el campo `Spec.TaskTemplate.ContainerSpec.Args` que es igual a `["ping","www.google.com"] y queremos cambiar estos argumentos de modo que le haga ping a otra cosa.
+
+
+
+Para hacer una actualización "en caliente" del servicio y cambiarle su configuración (podría ser la imagen lo que le cambiamos)
+
+```
+docker service update --args "ping www.amazon.com" pinger
+```
+
+A partir de este momento se actualizarán de a una todas las tareas, si lo hiciera de una borrando todos los contenedores y creando nuevos tendríamos un momento de *downtime*. Es decir que en caso de que se trate de una aplicación expuesta no podríamos servir a las peticiones de los usuarios. 
+
+  
+
+## Rollback
+
+Si luego de efectuar una actualización ejecutamos `docker service inspect pinger` veremos que apareció un nuevo campo llamado `PreviousSpec`. Docker swarm cuando hace una actualización de un servicio se guarda el contenido de la configuración anterior de modo que si hay algún problema podamos hacer un *rollback* rápido (no tendremos que preocuparnos por recordar las variables de entorno, imagen usada, ni ponernos a hacer inspect) y volver a la versión anterior.
+
+```
+docker service rollback pinger
+```
+
+Este rollback lo va efectuando también de a una tarea a la vez.
+
+
+
+Ejecutando `docker service ps pinger` veremos las tareas tanto        con sus versiones actuales como sus versiones pasadas. Por ejemplo si tenemos una versión inicial, una cuando actualizamos y una tercera al hacer un rollback, es posible que actualmente la corra un nodo distinto al o los que la corrieron anteriormente. Swarm se encarga de colocar las tareas en nodos que las puedan correr.
+
+**También es posible inspeccionar tareas viejas para saber por qué fallaron.**
+
+Es posible configurar la cantidad de versiones que queremos guardar.
