@@ -317,11 +317,12 @@ Es un espacio de trabajo que tendremos por 4 horas.
 con **ADD NEW INSTANCE** tendré una máquina a mi disposición con un cierto hardware, con una determinada IP y con Ubuntu, Git y Docker instalado. 
 
 * Copiando la dirección que aparece en el navegador tendremos acceso a la misma máquina y podremos trabajar de manera colaborativa con varias personas.
-
 * Con `ALT+ENTER` pasamos a una terminal de pantalla completa.
 * Haciendo click en **EDITOR** veremos el filesystem. Incluso será posible crear un archivo vacío, `touch hola.txt`, abrir el editor y agregar contenido de manera visual. 
 * Es posible conectarnos a este nodo por SSH, desde nuestra terminal podremos pegar el comando que nos ofrece y nos conectaremos automáticamente.
 * Es posible copiar con `CTRL+Insert` y pegar con `SHIFT+Insert`.
+* Es posible hacer click en la llave fija y elegir un template por ejemplo **3 managers y 2 workers**.
+* Cuando hacemos un servicio que publica un puerto nos entrega un endpoint público (url pública) para visitarlo.
 
 
 
@@ -497,7 +498,79 @@ Cuando tenemos muchas tareas el comportamiento por defecto de actualizar una a u
 
 Si hacemos `docker service inspect pinger` veremos el campo `"UpdateConfig"` hace referencia a cómo se comportará este servicio cuando tiene que hacer un update.
 
+```json
+"UpdateConfig": {
+    "Parallelism": 1,
+    "FailureAction": "pause",
+    "Monitor": 5000000000,
+    "MaxFailureRatio": 0,
+    "Order": "stop-first"
+},
+```
+
+
+
 * `"Pararellism"` hace referencia a de a cuantas tareas queremos que vaya haciendo el cambio (por defecto es 1)
 * `"Order"`: Por defecto es `"stop-first"` hace referencia a que primero apagará las tareas que quiere actualizar y una vez apagadas creará las nuevas. La alternativa es `"start-first"` que creará más tareas y cuando estas estén listas borrará las viejas. Esto en infraestructura de la nube se suele llamar *overprovisioning* y consiste en hacer mas infraestructura de la que necesito para asegurarme que no me quedo sin carga y cuando están los cambios borro lo viejo.
 
-MINUTO 5 - VIDEO 13
+
+
+Para cambiar estos dos parámetros `Pararellism` y `Order`:
+
+```
+docker service update --update-pararellism 4 --update-order start-first pinger
+```
+
+Luego con `docker service inspect pinger` podremos verificar que se cambiaron estos valores.
+
+Luego para actualizar el servicio ya con estos cambios:
+
+```
+docker service update --args "ping www.facebook.com" pinger
+```
+
+
+
+Siguiendo con las otras opciones:
+
+* `FailureAction` es un parámetro que nos permite configurar qué sucede si estamos actualizando y falla. Por defecto es `pause`, pero también podemos continuar o hacer rollback automáticamente.
+* `Monitor` es la ventana de tiempo en nano segundos que queremos darle a docker swarm para monitorear a una tarea nueva para determinar si falló o no. El valor por defecto es de 5 segundos pero dependenderá un poco del tiempo de startup de nuestra aplicación.
+* `MaxFailureRatio` hace referencia a la proporción de tareas que deben fallar para que se considere que falló.
+
+
+
+También tenemos estos mismos parámetros pero asociados a la configuración del rolllback:
+
+```
+"RollbackConfig": {
+    "Parallelism": 1,
+    "FailureAction": "pause",
+    "Monitor":  5000000000,
+    "MaxFailureRatio": 0,
+    "Order": "stop-first"
+},
+```
+
+La única diferencia es que `FailureAction` acepta `pause` y `continue` (pero lógicamente `rollback` no)
+
+* Queremos que si falla el 10% de las actualizaciones que haga un rollback:
+
+```
+docker service update --update-failure-action rollback --update-max-failure-ratio 0.5
+```
+
+Notar que estos cambios en las configuraciones son inmediatas, pues debe cambiar solamente el template.
+
+* También queremos que en caso de hacer rollback lo haga de a todas las tareas a la vez (0 indica todas a la vez)
+
+```
+docker service update --rollback-pararellism 0 pinger 
+```
+
+Luego probamos que esto funcionó actualizando el servicio y haciéndolo fallar:
+
+```
+docker service update --args "ping asdasd;asdas" pinger
+```
+
+Veremos que realiza el rollback porque falló más del 50% de las tareas, como teníamos `start-first` en la configuración de actualización esto hace que sea mucho más rápido (creo las tareas nuevas pero como estas fallan, las borra y continúa con las viejas).
