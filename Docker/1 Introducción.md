@@ -1901,7 +1901,7 @@ docker run
 -v stock:/data/db
 mongo:4.0-xenial
 ```
-> En Compass debemos conectarnos especificando `localhost:27018`
+> En Compass debemos conectarnos especificando `localhost:27018` (cambiar de paste string a fill individual fields)
 
 Luego desde la carperta `backend` creamos la imagen e iniciamos un contenedor con dicha imagen:
 
@@ -2537,7 +2537,9 @@ Luego de esto veremos que se creo el archivo `20210926031908-populate-movies.js`
 
 El archivo `20210208213312-populate-movies.js` como veremos a continuación tiene una función `up` para upgrading donde agregaremos elementos a la db y una `down` para downgrading donde los eliminaremos.
 
+Editamos este archivo con los datos que queremos agregar.
 
+Los mismos podemos obtenerlos de Mongo Compass, yendo a Export Collection, **Export Full Collection**, eligiendo los campos deseados y generando un `.JSON`.
 
 ```js
 module.exports = {
@@ -2570,6 +2572,8 @@ En `package.json` agregamos el siguiente script:
 ```
 
 Comando `migrate-mongo up` (o con `npm run db:up` ) ejecutamos todos los *migration scripts* para cargar datos a la base de datos. Si lo ejecutamos mas de una vez no hará efecto ya que dentro de la DB tenemos una colección llamada `changelog` con los scripts que fueron ejecutados indicando su `fileName` y `appliedAt` .
+
+Si agregamos un nuevo archivo tendremos que volver a ejecutar `docker-compose build --no-cache`
 
 
 
@@ -2628,6 +2632,10 @@ command:  sh -c './wait-for db:27017 && npm run db:up && npm start'
 ```
 
 > Esperará a tener tráfico en el puerto default de MongoDB que es el 27017.
+
+
+
+:rotating_light: 03/22 Esto no me funcionó pero si con `docker-entrypoint.sh`
 
 
 
@@ -3258,6 +3266,21 @@ ENTRYPOINT ["nginx","-g","daemon off;"]
 ```
 
 > Notar que la IP la acompañamos de `http://`
+
+
+
+### Node 16
+
+En el backend al utilizar como imagen base `FROM node:16-alpine3.13` obtenemos un error:
+
+```
+#9 9.981 npm ERR! Error: EACCES: permission denied, open '/app/package-lock.json'
+#9 9.981 npm ERR!  [Error: EACCES: permission denied, open '/app/package-lock.json'] {
+```
+
+Modificamos el `Dockerfile` de acuerdo a lo siguiente:
+
+https://forum.codewithmosh.com/t/docker-npm-permission-denied/4766/3
 
 
 

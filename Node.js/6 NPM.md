@@ -50,7 +50,7 @@ En el archivo veremos como *key/value pairs* todas nuestras las respuestas del w
 
  Son utilizadas durante el desarrollo y no deben ser incluidas en el **production environment** donde hagamos el deploy de la app (sin embargo estarán en **node_modules** junto al resto de las dependencias).
 
-Por ejemplo `npm i jshint --save-dev` será agregadas al `package.json` en la propiedad `devDependencies`
+Por ejemplo `npm i jshint --save-dev` otra opción es hacerlo con `-D` será agregadas al `package.json` en la propiedad `devDependencies`
 
 ```json
  "devDependencies": {
@@ -85,7 +85,7 @@ npm run
 
 ### Instalación Paquetes
 
-Al ejecutar `npm install lodash` npm descarga la versión más reciente del paquete del npm registry y la coloca en la carpeta **node_modules**. A su vez cada módulo tiene su archivo `package.json` con su objeto de dependencias (que también se encuentran en la misma carpeta en node_modules de la aplicación node).
+Al ejecutar `npm install lodash` npm descarga la versión más reciente del paquete del npm registry y la coloca en la carpeta `node_modules`. A su vez cada módulo tiene su archivo `package.json` con su objeto de dependencias (que también se encuentran en la misma carpeta en `node_modules` de la aplicación node).
 
 En versiones anteriores las dependencias de un paquete eran colocadas dentro de la carpeta del paquete y a su vez dentro de una nueva carpeta node_modules. Como consecuencia de esto terminábamos con el mismo paquete instalado varias veces y además esto representaba un inconveniente pro el anidamiento y el límite de caracteres de windows en cuanto a los paths. Como excepción a la situación actual donde todos los paquetes están en la carpeta node_modules si un paquete usa una versión distinta entonces esa versión sí se almacenará localmente con ese paquete. La versión que requiere nuestra app estará en node_modules y la que requiera ese paquete estará en node_modules/nombrePaquete/node_modules
 
@@ -252,13 +252,16 @@ Para conocer la versión instalada de un paquete una forma es ir a `node_modules
 
 
 
-Como esto puede resultar tedioso si tenemos múltiples dependencias  que revisar por lo que podemos `npm list` con lo cual obtenemos los números de versiones instaladas de nuestras dependencias y un árbol de las dependencias de las dependencias.
-Si sólo queremos ver las dependencias de nuestra aplicación `npm list --depth=0`
+Con `npm ls` obtenemos las versiones instaladas de nuestras dependencias. Si además nos interesan las dependencias de las dependencias podemos ejecutar `npm ls --all`
+
+
+
+:rotating_light: Esto puede ser útil si nos encontramos con un vulnerabilidad servera y con `npm audit` detectamos que es por culpa de un paquete y queremos saber quién depende de él por ejemplo `npm ls minimist`.
 
 
 
 ### Ver Metadata Paquetes
-* `npm view express` nos permite obtener en consola el `package.json`.
+* `npm view express` nos permite obtener en consola el `package.json` de ese paquete.
 * `npm view express dependencies` vemos las dependencias de ese paquete (no el árbol completo)
 * `npm view express version`  vemos la versión instalada
 * `npm view express versions` vemos todas las versiones existentes (útil para upgrades y downgrades)
@@ -320,5 +323,23 @@ const resultado = nPaquete.add(1,2)
 console.log(resultado) //3
 ```
 
-### Actualizar Paquete Publicado
-Si luego de realizar cambios en nuestro paquete intentamos ejecutar `npm publish` obtendremos un error, ya que debemos especificar el nuevo número de versión. Esto podremos hacerlo manualmente en `package.json` o mediante comando de consola: `npm version major`, `npm version minor` o bien `npm version patch` donde incrementará el número automáticamente. Una vez hecho esto sí debemos ejecutar `npm publish`
+### Actualizar Versión
+Si bien podremos actualizar la versión manualmente en `package.json` también podemos incrementar automáticamente el número que corresponda (major, minor o patch) con:
+
+```
+npm version major
+```
+
+```
+npm version minor
+```
+
+```
+npm version patch
+```
+
+
+
+>  Si queremos luego publicar la nueva versión debemos ejecutar `npm publish`
+
+Si luego de realizar cambios en nuestro paquete intentamos ejecutar `npm publish` obtendremos un error, ya que debemos especificar el nuevo número de versión. 
