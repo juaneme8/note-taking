@@ -652,4 +652,32 @@ En cuanto a los puertos cuando trabajamos con docker run -p hacemos un binding d
 
 # Routing Mesh
 
-En el caso que analizamos anteriormente tenemos 5 nodos o máquinas y tres contenedores. Tenemos la certeza de que las requests llegarán a un nodo con contenedores atendiendo en ese puerto gracias al routing  mesh.
+En el caso que analizamos anteriormente tenemos 5 nodos o máquinas y tres contenedores. Tenemos la certeza de que las requests llegarán a un nodo con contenedores atendiendo en ese puerto gracias al *routing mesh*.
+
+Cuando un nodo del Docker Swarm recibe una petición para un puerto determinado
+
+Cuando recibo una petición en un nodo **para un servicio en un puerto en particular**, si en ese nodo tengo algo escuchando en ese puerto lo proceso. En caso contrario a esa petición la captura el Routing Mesh. Si tengo un servicio en otro nodo escuchando en ese puerto y si existe deriva la petición allí. De esta manera no se pierden peticiones, cuando tenemos más nodos que contenedores.
+
+Es posible tener más de un contenedor en un mismo nodo y esto se pone de manifiesto si ejecutamos:
+
+```
+docker scale app=6
+```
+
+Como tenemos 5 nodos, estamos segudos de que tendremos más de un contenedor en un nodo. Esto contrasta con lo que ocurre con Docker Run obtendríamos un error si queremos usar el mismo puerto para dos contenedores.
+
+Con `docker service ps app` podremos saber en qué nodo tenemos más de un contenedor y luego desde ese nodo podremos ejecutar `docker ps` y veremos que ambos aparecen escuchando al mismo puerto con `3000/tcp`.
+
+Con Swarm los puertos de los servicios no se bindean directamente a los puertos del nodo sino que utilizan una red especial llamada *ingress*. Es por eso que podemos tener muchos más servicios escuchando en puertos públicos que la cantidad de nodos que tenemos. En caso de demanda podremos escalar los servicios y aprovechar de este modo una mayor potencia (sin que sea un impedimento pisarnos con un puerto).
+
+```
+docker network ls
+```
+
+> Si queremos crear otro servicio publicado en el mismo puerto sí obtendremos un error, pero sí podremos tener muchas tareas del mismo servicio gracias al routing mesh.
+
+
+
+## Configuración Tareas
+
+Queremos que las tareas corran en los workers y no en los managers, para ello es posible especificar dónde pueden correr ciertas tareas.
