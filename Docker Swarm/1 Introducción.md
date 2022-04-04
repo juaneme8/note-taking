@@ -574,3 +574,82 @@ docker service update --args "ping asdasd;asdas" pinger
 ```
 
 Veremos que realiza el rollback porque falló más del 50% de las tareas, como teníamos `start-first` en la configuración de actualización esto hace que sea mucho más rápido (creo las tareas nuevas pero como estas fallan, las borra y continúa con las viejas).
+
+
+
+# Servicios Expuestos al Exterior
+
+Trabajaremos ahora con servicios expuestos al exterior y para ello en el [repositorio](https://github.com/platzi/swarm) del Curso de Platzi nos encontramos con tres proyectos.
+
+El primero es **hostname** que recibe un `GET` a la raíz y responde con el nombre del host del servidor donde está corriendo.
+
+```javascript
+const express = require('express')
+const os = require('os');
+const app = express();
+const port = 3000;
+
+const hostname = os.hostname();
+
+app.get('/', (req, res) => {
+  res.send(`Saludos desde ${hostname}!`);
+});
+
+app.listen(port, () => console.log(`Server listening on port ${port}!`))
+```
+
+ 
+
+La imagen debe estar disponible en un repositorio (DockerHub pro ejemplo) ya que no basta con construirla en un nodo sino que debe ser accesible por todos ellos.
+
+Desde el directorio del repositorio clonado de GitHub:
+
+```
+docker build -t juaneme8/swarm-hostname .
+```
+
+Luego la publicamos:
+
+```
+docker push juaneme8/swarm-hostname
+```
+
+
+
+Luego en **PlayWithDocker** en lugar de construir a mano el Swarm, utilizaremos un template haciendo click en el botón de la llave fija. Elegimos la opción **3 Managers and 2 Workers**.
+
+A continuación desde un manager con `docker node ls` podremos ver los nodos.
+
+A continuación vamos a crear el servicio con 3 réplicas (en lugar de escalarlo luego lo creamos con un número de réplicas predefinido).
+
+```
+docker service create -d --name app --publish 3000:3000 --replicas=3 juaneme8/swarm-hostname
+```
+
+> `-d` nos permite crear el servicio de manera *dettached*
+>
+> `--publish` podemos usar `-p` como en docker run. 
+
+
+
+Con `docker service ps app` poremos ver el estado en **Preparing** cuando estén descargando las imágenes y esperamos hasta que pase a **Running**.
+
+Acabamos de crear un servicio que publica un puerto, por ese motivo en PWD nos aparecerá en la parte superior un link que hace referencia al puerto publicado (3000 en nuestro caso). Haciendo click en ese botón accederemos con el navegador mediante una URL pública, al servidor. 
+
+Luego desde la terminal hacemos curl requests a esta url y veremos que nos responde cada una de las réplicas.  
+
+```
+curl http://ip172-18-0-42-c95kqog9jotg0089379g-3000.direct.labs.play-with-docker.com/
+```
+
+Swarm se encarga de que nuestra petición llegue a cada uno de los contenedores.
+
+Docker por defecto pone como hostname el id del contenedor de las tareas (:warning:  CHEQUEAR :warning: ).
+
+En cuanto a los puertos cuando trabajamos con docker run -p hacemos un binding del puerto del contenedor y el del host. 
+
+ 
+
+# Routing Mesh
+
+En el caso que analizamos anteriormente tenemos 5 nodos o máquinas y tres contenedores. Tenemos la certeza de que las requests llegarán a un nodo con contenedores atendiendo en ese puerto gracias al routing  mesh.
