@@ -680,4 +680,47 @@ docker network ls
 
 ## Configuración Tareas
 
-Queremos que las tareas corran en los workers y no en los managers, para ello es posible especificar dónde pueden correr ciertas tareas.
+Es importante que las tareas corran en nodos workers y no en nodos managers ya que estos tienen a su cargo tareas administrativas fundamentales para el funcionamiento del Swarm (y no queremos que por generar una carga adicional de RAM terminemos ocasionando eventos catastróficos que compromentan al Swarm) y para lograr esto es posible debemos configurar dónde queremos que corra cada tarea.
+
+Para visualizar las tareas de manera más sencilla a cómo lo venimos haciendo hasta ahora:
+
+```
+docker service create 
+-d 
+--name viz 
+-p 8080:8080 
+--constraint=node.role=manager
+--mount=type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock
+dockersamples/visualizer
+```
+
+
+
+* Recordemos que los nodos managers son aquellos con acceso a la información del listado de nodos, servicios, etc., por ende esto debemos correrlo en un manager. Es por esto que indicamos que sus tareas están restringidas a los managers `--constraint=node.role==manager`.
+
+* Además debe poder comunicarse con el Docker Daemon cosa que hacemos montando el socket (por donde se puede comunicar uno con él) del docker daemon: `--mount=type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock`  
+
+  Con esto le decimos que las tareas del servicio deben montarles a sus contenedores el socket de Docker mediante el cual se comunicarán con el daemon.
+
+
+
+Bajará la imagen y veremos que pasar de **Preparing** a **Running**.
+
+```
+docker service ps viz
+```
+
+
+
+En PWD veremos ahora un botón con el puerto 8080 y si ingresamos ahí veremos la UI del Visualizer que nos muestra cada uno de los nodos y los contenedores que corren en ellos.
+
+
+
+Debemos agregar una restricción a un servicio existente para que la aplicación corra sólo en nodos workers:
+
+```
+docker service update --constrant-add node.role==worker --update-parallellism=0 app
+```
+
+Queremos que la actualización no la haga uno por uno (el valor por default es 1) sino que lo haga todas las tareas a la vez. Si ahora vamos a la interfaz gráfica veremos que como detecta que hay tareas que no cumplen con el requisito solicitado, los está replanificando (rescheduling) para que estén las tareas sólo en los nodos workers. De esta manera estamos redistribuyendo la carga de los managers a los workers.
+
