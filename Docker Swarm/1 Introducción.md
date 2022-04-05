@@ -574,3 +574,153 @@ docker service update --args "ping asdasd;asdas" pinger
 ```
 
 Veremos que realiza el rollback porque falló más del 50% de las tareas, como teníamos `start-first` en la configuración de actualización esto hace que sea mucho más rápido (creo las tareas nuevas pero como estas fallan, las borra y continúa con las viejas).
+
+
+
+# Servicios Expuestos al Exterior
+
+Trabajaremos ahora con servicios expuestos al exterior y para ello en el [repositorio](https://github.com/platzi/swarm) del Curso de Platzi nos encontramos con tres proyectos.
+
+El primero es **hostname** que recibe un `GET` a la raíz y responde con el nombre del host del servidor donde está corriendo.
+
+```javascript
+const express = require('express')
+const os = require('os');
+const app = express();
+const port = 3000;
+
+const hostname = os.hostname();
+
+app.get('/', (req, res) => {
+  res.send(`Saludos desde ${hostname}!`);
+});
+
+app.listen(port, () => console.log(`Server listening on port ${port}!`))
+```
+
+ 
+
+La imagen debe estar disponible en un repositorio (DockerHub pro ejemplo) ya que no basta con construirla en un nodo sino que debe ser accesible por todos ellos.
+
+Desde el directorio del repositorio clonado de GitHub:
+
+```
+docker build -t juaneme8/swarm-hostname .
+```
+
+Luego la publicamos:
+
+```
+docker push juaneme8/swarm-hostname
+```
+
+
+
+Luego en **PlayWithDocker** en lugar de construir a mano el Swarm, utilizaremos un template haciendo click en el botón de la llave fija. Elegimos la opción **3 Managers and 2 Workers**.
+
+A continuación desde un manager con `docker node ls` podremos ver los nodos.
+
+A continuación vamos a crear el servicio con 3 réplicas (en lugar de escalarlo luego lo creamos con un número de réplicas predefinido).
+
+```
+docker service create -d --name app --publish 3000:3000 --replicas=3 juaneme8/swarm-hostname
+```
+
+> `-d` nos permite crear el servicio de manera *dettached*
+>
+> `--publish` podemos usar `-p` como en docker run. 
+
+
+
+Con `docker service ps app` poremos ver el estado en **Preparing** cuando estén descargando las imágenes y esperamos hasta que pase a **Running**.
+
+Acabamos de crear un servicio que publica un puerto, por ese motivo en PWD nos aparecerá en la parte superior un link que hace referencia al puerto publicado (3000 en nuestro caso). Haciendo click en ese botón accederemos con el navegador mediante una URL pública, al servidor. 
+
+Luego desde la terminal hacemos curl requests a esta url y veremos que nos responde cada una de las réplicas.  
+
+```
+curl http://ip172-18-0-42-c95kqog9jotg0089379g-3000.direct.labs.play-with-docker.com/
+```
+
+Swarm se encarga de que nuestra petición llegue a cada uno de los contenedores.
+
+Docker por defecto pone como hostname el id del contenedor de las tareas (:warning:  CHEQUEAR :warning: ).
+
+En cuanto a los puertos cuando trabajamos con docker run -p hacemos un binding del puerto del contenedor y el del host. 
+
+ 
+
+# Routing Mesh
+
+En el caso que analizamos anteriormente tenemos 5 nodos o máquinas y tres contenedores. Tenemos la certeza de que las requests llegarán a un nodo con contenedores atendiendo en ese puerto gracias al *routing mesh*.
+
+Cuando un nodo del Docker Swarm recibe una petición para un puerto determinado
+
+Cuando recibo una petición en un nodo **para un servicio en un puerto en particular**, si en ese nodo tengo algo escuchando en ese puerto lo proceso. En caso contrario a esa petición la captura el Routing Mesh. Si tengo un servicio en otro nodo escuchando en ese puerto y si existe deriva la petición allí. De esta manera no se pierden peticiones, cuando tenemos más nodos que contenedores.
+
+Es posible tener más de un contenedor en un mismo nodo y esto se pone de manifiesto si ejecutamos:
+
+```
+docker scale app=6
+```
+
+Como tenemos 5 nodos, estamos segudos de que tendremos más de un contenedor en un nodo. Esto contrasta con lo que ocurre con Docker Run obtendríamos un error si queremos usar el mismo puerto para dos contenedores.
+
+Con `docker service ps app` podremos saber en qué nodo tenemos más de un contenedor y luego desde ese nodo podremos ejecutar `docker ps` y veremos que ambos aparecen escuchando al mismo puerto con `3000/tcp`.
+
+Con Swarm los puertos de los servicios no se bindean directamente a los puertos del nodo sino que utilizan una red especial llamada *ingress*. Es por eso que podemos tener muchos más servicios escuchando en puertos públicos que la cantidad de nodos que tenemos. En caso de demanda podremos escalar los servicios y aprovechar de este modo una mayor potencia (sin que sea un impedimento pisarnos con un puerto).
+
+```
+docker network ls
+```
+
+> Si queremos crear otro servicio publicado en el mismo puerto sí obtendremos un error, pero sí podremos tener muchas tareas del mismo servicio gracias al routing mesh.
+
+
+
+## Configuración Tareas
+
+Es importante que las tareas corran en nodos workers y no en nodos managers ya que estos tienen a su cargo tareas administrativas fundamentales para el funcionamiento del Swarm (y no queremos que por generar una carga adicional de RAM terminemos ocasionando eventos catastróficos que compromentan al Swarm) y para lograr esto es posible debemos configurar dónde queremos que corra cada tarea.
+
+Para visualizar las tareas de manera más sencilla a cómo lo venimos haciendo hasta ahora:
+
+```
+docker service create 
+-d 
+--name viz 
+-p 8080:8080 
+--constraint=node.role=manager
+--mount=type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock
+dockersamples/visualizer
+```
+
+
+
+* Recordemos que los nodos managers son aquellos con acceso a la información del listado de nodos, servicios, etc., por ende esto debemos correrlo en un manager. Es por esto que indicamos que sus tareas están restringidas a los managers `--constraint=node.role==manager`.
+
+* Además debe poder comunicarse con el Docker Daemon cosa que hacemos montando el socket (por donde se puede comunicar uno con él) del docker daemon: `--mount=type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock`  
+
+  Con esto le decimos que las tareas del servicio deben montarles a sus contenedores el socket de Docker mediante el cual se comunicarán con el daemon.
+
+
+
+Bajará la imagen y veremos que pasar de **Preparing** a **Running**.
+
+```
+docker service ps viz
+```
+
+
+
+En PWD veremos ahora un botón con el puerto 8080 y si ingresamos ahí veremos la UI del Visualizer que nos muestra cada uno de los nodos y los contenedores que corren en ellos.
+
+
+
+Debemos agregar una restricción a un servicio existente para que la aplicación corra sólo en nodos workers:
+
+```
+docker service update --constrant-add node.role==worker --update-parallellism=0 app
+```
+
+Queremos que la actualización no la haga uno por uno (el valor por default es 1) sino que lo haga todas las tareas a la vez. Si ahora vamos a la interfaz gráfica veremos que como detecta que hay tareas que no cumplen con el requisito solicitado, los está replanificando (rescheduling) para que estén las tareas sólo en los nodos workers. De esta manera estamos redistribuyendo la carga de los managers a los workers.
+
