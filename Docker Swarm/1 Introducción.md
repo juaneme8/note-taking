@@ -678,7 +678,7 @@ docker network ls
 
 
 
-## Configuración Tareas
+# Establecer Constraints
 
 Es importante que las tareas corran en nodos workers y no en nodos managers ya que estos tienen a su cargo tareas administrativas fundamentales para el funcionamiento del Swarm (y no queremos que por generar una carga adicional de RAM terminemos ocasionando eventos catastróficos que compromentan al Swarm) y para lograr esto es posible debemos configurar dónde queremos que corra cada tarea.
 
@@ -723,4 +723,62 @@ docker service update --constrant-add node.role==worker --update-parallellism=0 
 ```
 
 Queremos que la actualización no la haga uno por uno (el valor por default es 1) sino que lo haga todas las tareas a la vez. Si ahora vamos a la interfaz gráfica veremos que como detecta que hay tareas que no cumplen con el requisito solicitado, los está replanificando (rescheduling) para que estén las tareas sólo en los nodos workers. De esta manera estamos redistribuyendo la carga de los managers a los workers.
+
+
+
+# Vaciar un Worker
+
+Una vez que definimos dónde queremos que se ejecuten las tareas. Ahora es posible que una falla que veamos con algún sensor de sistema de monitoreo (problemas de conectividad, disco, etc) o porque así lo deseamos, queramos vaciar las tareas que se están ejecutando en un nodo. En ese caso vamos a querer quitar las tareas de ese nodo hasta solucionar esta situación.
+
+Desde el manager del Swarm lo primero que hacemos es litar los nodos.
+
+```
+docker node ls
+```
+
+A continuación suponemos que queremos vaciar el llamado worker2:
+
+```
+docker node inspect --pretty worker2
+```
+
+
+
+Vemos el campo `Availavility` que si bien su información la vemos al ejecutar `docker node ls`, nos servirá para conocer el nombre del campo que queremos actualizar.
+
+```
+docker node update --availability drain worker2
+```
+
+Con `drain` indicamos que queremos drenar el nodo es decir sacar las cosas que hay en él.
+
+Podemos verificar el nuevo estado con `docker node ls`.
+
+
+
+En nuestro caso de 3 managers y 2 workers, las 6 réplicas serán ejecutadas por el `worker1` y veremos que su carga de memoria habrá aumentado. Durante el tiempo en que se rotaron esas tareas tuvimos menos potencia (throughput) pero no tuvimos downtime.
+
+Una vez realizadas las tareas de mantenimiento podremos volver a utilizar el worker2.
+
+```
+docker node update --availability active worker2
+```
+
+Lo chequeamos nuevamente con `docker node ls`
+
+
+
+Sin embargo, las tareas continúan ejecutándose en el `worker1`. Esto es así debido a que el planificador de tareas, si no tiene ningún motivo para redistribuir la carga no lo hará. Por motivo nos referimos a un service update o si tiene tareas que no pudo meter en ningún otro nodo, etc.
+
+Para volver a un entorno distribuido con tareas en `worker2` debemos forzar una actualización, cambiando el valor de una variable de entorno aunque esta no sirva para nada.
+
+```
+docker service update -d --env-add UNA_VARIABLE=de-entorno --update-pararellism=0 app
+```
+
+> El `--update-pararellism=0` lo hacemos para ganar velocidad pero en un servicio productivo no deberíamos hacerlo.
+
+
+
+
 
