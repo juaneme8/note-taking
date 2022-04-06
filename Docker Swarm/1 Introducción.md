@@ -780,5 +780,121 @@ docker service update -d --env-add UNA_VARIABLE=de-entorno --update-pararellism=
 
 
 
+# Comunicación entre Servicios
 
+Para trabajar con servicios que se comunican entre sí en el mismo Swarm, debemos entender cómo funciona el networking de Swarm, es decir las redes e interconexión entre nodos.
+
+
+
+## Listar Redes
+
+```
+docker network ls
+```
+
+La network de docker standalone viene con las redes `bridge`, `host` y `none`. Cuando iniciemos un Swarm en el docker daemon nos aparecerán dos redes más `docker_gwbridge`(como driver es `bridge` y tiene scope `local`) e `ingress` (que es una red especial que en driver aparece como overlay y en scope swarm).
+
+El hecho de en la red `ingress` el driver sea `overlay` nos da la pauta que está disponible a nivel cluster, es decir está presente en todas las máquinas y es en todas la misma. Son las que debemos usar cuando queremos interconectar servicios de swarm entre sí.
+
+La red `docker_gwbridge` es local y habrá una en cada uno de los nodos. Esta será la encargada de conectar la red ingress overlay con la red física de cada uno de los nodos del swarm.
+
+
+
+## Creación Red
+
+Creación de red nueva que pueda ser utilizada por cualquier servicio o tarea desde cualquier nodo.
+
+```
+docker network create --driver overlay app-net
+```
+
+Para verificar la creación `docker network ls`.
+
+La `ingress` no debemos tocarla normalmente.
+
+
+
+## Inspeccionar Red
+
+```
+docker network inspect app-net
+```
+
+En la medida que tengamos servicios conectados a esta red obtendremos más información.
+
+
+
+## ej. Networking
+
+En el repositorio del curso, utilizamos el ejemplo **networking** que consiste en una aplicación express que cuenta con un endpoint que  que se conecta a una DB Mongo y escribe un mensaje.
+
+```
+docker build -t juaneme8/swarm-networking .
+```
+
+```
+docker push juaneme8/swarm-networking
+```
+
+
+
+Luego en el swarm de PWD debemos crear el servicio de Mongo y conectarlo a la red.
+
+```
+docker service create -d --name db mongodb --network app-net
+```
+
+> Vamos a tener que pasarle como variable de entorno la URL de la base de datos.
+
+Podemos verificar el estado con `docker service ps db`
+
+
+
+Luego creamos el servicio de la aplicación basada en la imagen swarm-networking:
+
+```
+docker service create -d --name app --networking app-net -p 3000:3000 juaneme8/swarm-networking 
+```
+
+Con `docker service ls` chequeamos tener ambas cosas corriendo.
+
+Si ingresamos a la URL provista por PWD veremos que nos tira error debido a que está intentando trabajar con localhost:27017 y debemos pasarle en cambio la variable de entorno `MONGO_URL` cosa que hacemos con:
+
+```
+docker service update --env-add MONGO_URL=mongodb://db/test
+```
+
+Si dos servicios están conectados a la misma red van a poder encontrarse por hostname es por eso que utilizo `db`. Esto es similar a lo que ocurre en Docker compose o cuando conectamos dos servicios a la misma red en Docker local, la diferencia es que aca sucede *across host* por tratarse de una red *overlay*.
+
+A partir de este momento nos funcionará ingresando a la URL provista por PWD.
+
+Si hacemos `docker network inspect app-net` desde un nodo que tiene servicios conectados a la red veremos en `Containers` los contenedores conectados a esa red y en `Peers` las ip de los nodos que participan en la red overlay.
+
+
+
+### Lectura de datos DB
+
+Podemos fijarnos en qué nodo están las tareas del servicio db y conectarnos a ese contenedor a fin de visualizar los elementos que fueron agregados a la base de datos.
+
+```
+docker exec -it c66... bash
+```
+
+```
+mongo
+```
+
+```
+use test
+```
+
+```
+db.pings.find()
+```
+
+
+
+### Comentario sobre Swarm y DB 
+
+Usando el networking interno de Swarm hemos logrado que dos servicios en nodos distintos puedan comunicarse. **Debemos tener presente que no es aconsejable correr una base de datos en el Swarm.** Si bien esto en una aplicación productiva no debería hacerse pero sí sería útil por ejemplo si queremos levantar un Swarm en un entorno de testing por ejemplo de un pull-request de nuestro proyecto. En ese caso levantamos una pequeña base de datos y cuando terminamos borramos todo.
 
