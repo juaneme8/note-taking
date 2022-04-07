@@ -308,6 +308,14 @@ Sin embargo si ejecutamos `docker ps` veremos que aunque se eliminó el servicio
 
 
 
+Si queremos eliminar más de un servicio a la vez podemos hacerlo con:
+
+```
+docker service rm app db
+```
+
+
+
 ## PlayWithDocker
 
 Utilizaremos la herramienta [PlayWithDocker](https://labs.play-with-docker.com/) donde podremos loguearnos con nuestra cuenta de Docker, que es un playground gratuito para poder utilizar Docker y Docker Swarm.
@@ -898,3 +906,57 @@ db.pings.find()
 
 Usando el networking interno de Swarm hemos logrado que dos servicios en nodos distintos puedan comunicarse. **Debemos tener presente que no es aconsejable correr una base de datos en el Swarm.** Si bien esto en una aplicación productiva no debería hacerse pero sí sería útil por ejemplo si queremos levantar un Swarm en un entorno de testing por ejemplo de un pull-request de nuestro proyecto. En ese caso levantamos una pequeña base de datos y cuando terminamos borramos todo.
 
+
+
+## Eliminar Red
+
+```
+docker network rm app-net
+```
+
+
+
+# Stack
+
+Hasta ahora vimos cómo crear servicios, dónde queremos que corran, dónde no queremos que corran, como publicar servicios al exterior, cómo interconectar servicios dentro del Swarm,etc. Cuando queremos hacer algo complejo tendremos que ejecutar una serie de tareas en orden y esto puede volverse tedioso.
+
+Existe una herramienta que simplifica esta tarea. En la [carpeta stacks](https://github.com/platzi/swarm/tree/master/stacks) del repositorio del curso nos encontramos con un archivo `stackfile.yml` con el siguiente contenido:
+
+```yaml
+version: "3"
+
+services:
+  app:
+    image: gvilarino/swarm-networking
+    environment:
+      MONGO_URL: "mongodb://db:27017/test"
+    depends_on:
+      - db
+    ports:
+      - "3000:3000"
+
+  db:
+    image: mongo
+```
+
+Como podemos apreciar es idéntico a un compose file pero logrando correr multi nodo.
+
+
+
+Copiamos el contenido de ese archivo y lo pegamos en un archivo:
+
+```
+vim stackfile.yml 
+```
+
+
+
+Para ejecutar el contenido de este archivo
+
+```
+docker stack --compose-file stackfile.yml
+```
+
+
+
+:alarm_clock: Minuto 3 v19.
