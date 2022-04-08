@@ -483,7 +483,7 @@ docker service scale pinger=20
 Otra forma de hacer esto mismo es con:
 
 ```
-docker service update --replicas=20
+docker service update --replicas=20 pinger
 ```
 
 Si no queremos ver el output interactivo y obtener el control inmediatamente podemos utilizar la opción `-d`.
@@ -698,7 +698,7 @@ docker service create
 --name viz 
 -p 8080:8080 
 --constraint=node.role=manager
---mount=type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock
+--mount type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock
 dockersamples/visualizer
 ```
 
@@ -706,7 +706,7 @@ dockersamples/visualizer
 
 * Recordemos que los nodos managers son aquellos con acceso a la información del listado de nodos, servicios, etc., por ende esto debemos correrlo en un manager. Es por esto que indicamos que sus tareas están restringidas a los managers `--constraint=node.role==manager`.
 
-* Además debe poder comunicarse con el Docker Daemon cosa que hacemos montando el socket (por donde se puede comunicar uno con él) del docker daemon: `--mount=type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock`  
+* Además debe poder comunicarse con el Docker Daemon cosa que hacemos montando el socket (por donde se puede comunicar uno con él) del docker daemon: `--mount type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock`  
 
   Con esto le decimos que las tareas del servicio deben montarles a sus contenedores el socket de Docker mediante el cual se comunicarán con el daemon.
 
@@ -918,9 +918,13 @@ docker network rm app-net
 
 # Stack
 
-Hasta ahora vimos cómo crear servicios, dónde queremos que corran, dónde no queremos que corran, como publicar servicios al exterior, cómo interconectar servicios dentro del Swarm,etc. Cuando queremos hacer algo complejo tendremos que ejecutar una serie de tareas en orden y esto puede volverse tedioso.
+Hasta ahora vimos cómo crear servicios, dónde queremos que corran, dónde no queremos que corran, como publicar servicios al exterior, cómo interconectar servicios dentro del Swarm,etc. Sin embargo cuando queremos hacer algo complejo tendremos que ejecutar una serie de tareas en orden y esto puede volverse tedioso.
 
-Existe una herramienta que simplifica esta tarea. En la [carpeta stacks](https://github.com/platzi/swarm/tree/master/stacks) del repositorio del curso nos encontramos con un archivo `stackfile.yml` con el siguiente contenido:
+Para solucionar este problema contamos con los stacks que son una herramienta que nos permite controlar como se despliegan los servicios mediante un archivo. 
+
+
+
+En la [carpeta stacks](https://github.com/platzi/swarm/tree/master/stacks) del repositorio del curso nos encontramos con un archivo `stackfile.yml` con el siguiente contenido. 
 
 ```yaml
 version: "3"
@@ -939,7 +943,7 @@ services:
     image: mongo
 ```
 
-Como podemos apreciar es idéntico a un compose file pero logrando correr multi nodo.
+Como podemos apreciar es idéntico a un compose file pero logrando correr multinodo.
 
 
 
@@ -951,12 +955,205 @@ vim stackfile.yml
 
 
 
-Para ejecutar el contenido de este archivo
+Para ejecutar el contenido de este archivo y crear todos los servicios juntos utilizamos:
 
 ```
-docker stack --compose-file stackfile.yml
+docker stack deploy --compose-file stackfile.yml app
+```
+
+Nos creará la network `app_default` y también los servicios `app_db` y `app_app`
+
+
+
+## Ventajas
+
+La importancia trabajar con un stackfile y no una serie de comandos es que podremos versionarlo en el repositorio y también como describirá la arquitectura de la aplicación servirá a la gente que se una al equipo en aquellos casos en que la documentación no sea suficientemente buena.
+
+
+
+## Listar Stacks
+
+```
+docker stack ls
+```
+
+Veremos el stack y nos dirá que tiene 2 servicios. Para listar los servicios podemos ejecutar `docker service ls`.
+
+
+
+## Listar Tareas de un Stack
+
+```
+docker stack ps app
+```
+
+## Listar Servicios de un Stack
+
+```
+docker stack services app
+```
+
+Acá si tuviéramos n réplicas en uno de los servicios aca veríamos el cartel `n/n` mientras que en el listado anterior veríamos las n tareas por separado.
+
+
+
+## Constraints
+
+En caso de estar en un esquema productivo, queremos que todas las tareas corran en los workers para ello podríamos agregar el constraint al servicio que no lo esté haciendo como vimos anteriormente o editar el `stackfile.yml`. 
+
+```
+version: "3"
+
+services:
+  app:
+    image: gvilarino/swarm-networking
+    environment:
+      MONGO_URL: "mongodb://db:27017/test"
+    depends_on:
+      - db
+    ports:
+      - "3000:3000"
+    deploy:
+      placement:
+        constraints: [node.role==worker]
+      
+  db:
+    image: mongo
+```
+
+> Podríamos utilizar este mismo archivo para Docker Compose pero ignorará el contenido del atributo deploy.
+>
+> Esto mismo podríamos hacerlo para los dos servicios pero lo hacemos para el sevicio que vimos que sus tareas se desplegaban en un manager.
+
+
+
+Para actualizar de acuerdo a los cambios que acabamos de realizar ejecutamos el mismo comando:
+
+```
+docker stacks deploy --compose-file stackfile.yml app
+```
+
+Como ya tiene un stack con ese nombre se fija las diferencias y genera los cambios .
+
+
+
+## Eliminar Stack
+
+```
+docker stack rm app
+```
+
+Con este comando eliminaremos los servicios y la red overlay necesaria para la interconexión entre nodos.
+
+ 
+
+# Estructura Productiva
+
+Estudiaremos un escenario productivo en el cual queremos múltiples aplicaciones o micro-servicios en el mismo Swarm pero accesibles mediante distintos nombres de dominio (`api.domain.com`, `domain.com/web`, `backoffice.domain.com`). Hasta ahora cuando expusimos una app con el puerto 3000 por ejemplo, utilizamos la url pública provista por PWD. En un entorno productivo en cambio tendremos que realizar ciertas configuraciones.
+
+
+
+## Traefik
+
+Vamos a trabajar con un **proxy inverso** que recibe las peticiones y según el nombre de sub-dominio las redirecciona al servicio encargado de atenderla.
+
+Utilizaremos para tal fin la herramienta llamada Trafik. Es un intermediario entre las peticiones que vienen de internet a nuestra infraestructura.
+
+Vamos a querer conectar un montón de servicios a Traefik para que pueda rutear la información. Estos servicios no necesariamente van a estar conectados entre sí, pero sí Traefik debe comunicarse con ellos. Para esto debemos crear una red overlay.
+
+En PWD empezamos creando esta red:
+
+```
+docker network create --driver overlay proxy-net
+```
+
+Creamos el servicio de Traefik:
+
+```
+docker service create 
+--name proxy
+--constraint=node.role==manager
+-p 80:80
+-p 9090:8080
+--mount type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock
+--network proxy-net
+traefik
+--docker --docker.swarmMode --docker.domain=guido.com --docker.watch
+```
+
+Va a detectar que servicios aparecen en el Swarm cuando los creemos y los va a incorporar a su lista de reverse proxy en función de algunas etiquetas que les pongamos al crearlos. Para esto tiene que escuchar los eventos del Swarm y para ello debe tener acceso al socket del Docker daemon del un manager (para eso debe correr en un manager)
+
+En el puerto 80 publicamos el proxy http y en el 9090 (no usamos el 8080 por si allí tenemos el visualizer) la UI de administración
+
+Lo que agregamos después del nombre son parámetros de ejecución para las tareas de ese servicio:
+
+* `--docker --docker.swarmMode` para indicarle que debe trabajar con un orquestador Swarm.
+* `--docker.domain=guido.com` para indicarle el dominio con el cual queremos trabajar.
+
+* `--docker.watch` es para descubrir los nuevos servicios qeu van apareciendo en el Swarm.
+
+* `--api` es para que nos muestre la UI de administración.
+
+Luego de ejecutar este comando con PWD podremos entrar al 9090 donde veremos la UI de Traefik. Si entramos al 80 nos tirará un 404.
+
+
+
+Vamos a crear un servicio que queremos exponer a través de Traefik.
+
+```
+docker service create
+--name app1
+--network proxy-net
+--label traefik.port=3000
+gvilarino/swarm-hostname
+```
+
+Con la etiqueta `--label traefik.port=3000` le estamos poniendo metadata que le servirá a Traefik para saber a qué puerto debe mandar las conexiones entrantes.
+
+Traefik recibe en el puerto 80 y se lo debe mandar al 3000 a esta aplicación.
+
+Para verificar que esto funcion:
+
+```
+curl -H "Host: app1.guido.com" http://localhost
+```
+
+Hacemos un curl con host header al dominio que queremos y le pegamos a Traefik con http:localhost. A partir de ese momento obtendremos la respuesta del contenedor.
+
+En `app1.guido.com` decimos que `guido.com` es el *top level domain* y `app1` es el nombre del servicio.
+
+
+
+Creamos otro servicio (si bien esto mismo podríamos hacerlo escalando, imaginemos que se trata de aplicaciones distintas)
+
+```
+docker service create
+--name app2
+--network proxy-net
+--label traefik.port=3000
+gvilarino/swarm-hostname
+```
+
+> Notar que ambos servicios están escuchando en el puerto 3000 cosa que es posible mediante (obviamente si ahora le pegamos al swarm localhost:3000 no va funcionar, pero pegándole al 80 con el dominio correcto traefik va a saber a donde mandarlo). Gracias a esto no tendremos que cambiar los puertos en los que escucha cada una de las aplicaciones. Bastará con exponerlos detrás de un reverse proxy.
+
+
+
+```
+curl -H "Host: app2.guido.com" http://localhost
 ```
 
 
 
-:alarm_clock: Minuto 3 v19.
+Si queremos cambiar la imagen:
+
+```
+docker service update --image gvilarino/swarm-networking app2
+```
+
+
+
+En el Dashboard de Traefik veremos los frontends (definición de las rutas de entrada) y los backends (los servidores)
+
+
+
+# Swarms Productivos
