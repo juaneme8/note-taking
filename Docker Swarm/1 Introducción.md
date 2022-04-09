@@ -1157,3 +1157,14 @@ En el Dashboard de Traefik veremos los frontends (definición de las rutas de en
 
 
 # Swarms Productivos
+
+El número de managers debe ser impar. Esto lo podemos comprobar con los templates de PWD (que nos ofrece 3 managers and 2 workers o 5 managers and no workers)
+
+```
+docker node ls
+```
+
+Veremos en la columna **manager status** que solo uno de ellos dice Leader.
+
+:alarm_clock: VIDEO 21 - MINUTO 1 
+
