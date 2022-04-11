@@ -1158,13 +1158,12 @@ En el Dashboard de Traefik veremos los frontends (definición de las rutas de en
 
 # Swarms Productivos
 
-El número de managers debe ser impar. Esto lo podemos comprobar con los templates de PWD (que nos ofrece 3 managers and 2 workers o 5 managers and no workers)
+El número de managers debe ser impar. Esto lo podemos comprobar con los templates de PWD (que nos ofrece 3 managers and 2 workers, 5 managers and no workers, etc)
 
 ```
 docker node ls
 ```
 
-Veremos en la columna **manager status** que solo uno de ellos dice Leader.
+Veremos en la columna **manager status** que solo uno de ellos dice **Leader** esto significa que uno de ellos será el encargado de tomar las decisiones y el resto acompañará. Esto cambiará después de cierto tiempo en el cual los managers votarán al próximo líder. Para evitar la posibilidad de empate es que deben ser impares. Esto se conoce como **algoritmo raft**.
 
-:alarm_clock: VIDEO 21 - MINUTO 1 
-
+Como conclusión podemos decir que en un entorno productivo los managers no deben ser sometidos a mucha carga de procesamiento porque deben ocuparse del Swarm y como mínimo deben ser tres (si tenemos sólo uno y se nos cae sería crítico). En tanto los workers en ocasiones vamos a querer que tener distintos grupos de workers con características específicas por ejemplo distintas características de hardware como unos con mucha RAM otros con mucha potencia de CPU según la necesidad. 
