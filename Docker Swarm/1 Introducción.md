@@ -1167,3 +1167,161 @@ docker node ls
 Veremos en la columna **manager status** que solo uno de ellos dice **Leader** esto significa que uno de ellos será el encargado de tomar las decisiones y el resto acompañará. Esto cambiará después de cierto tiempo en el cual los managers votarán al próximo líder. Para evitar la posibilidad de empate es que deben ser impares. Esto se conoce como **algoritmo raft**.
 
 Como conclusión podemos decir que en un entorno productivo los managers no deben ser sometidos a mucha carga de procesamiento porque deben ocuparse del Swarm y como mínimo deben ser tres (si tenemos sólo uno y se nos cae sería crítico). En tanto los workers en ocasiones vamos a querer que tener distintos grupos de workers con características específicas por ejemplo distintas características de hardware como unos con mucha RAM otros con mucha potencia de CPU según la necesidad. 
+
+
+
+## Administración de Swarm Productivo
+
+En lugar de tener que conectarnos siempre por SSH para adminisitrar el Swarm productivo podemos utilizar una herramienta que ofrece una interfaz visual para administrar un Swarm. Esta herramienta se llama **Portainer** y funciona tanto para el modo standalone como para el modo Swarm.
+
+> Estas herramientas deben contar con un almacenamiento ya que deben persistir cosas en disco (estado interno, stacks, etc) mediante volúmenes, pero por defecto Docker Swarm viene sólamente con el Docker local ese decir que ese volumen será local y estará sólo en un nodo. Existen plugins de storage de Swarm que nos permiten que ese volumen en lugar de escribirse en el disco del nodo se escriba en un disco en AWS, Azure o donde queramos.
+
+
+
+Creamos un volumen
+
+```
+docker volume create portainer_data
+```
+
+Podemos verificar que el DRIVER el local con:
+
+```
+docker volume ls
+```
+
+
+
+Creamos un servicio:
+
+```
+docker service create 
+--name protainer
+-p 9000:9000
+--constraint node.role==manager
+--mount type=bind,src=/var/run/docker.sock, dst=/var/run/docker.sock
+--mount type=volume,src=portainer-data,dst=/data
+portainer/portainer
+-H unix:///var/run/docker.sock
+```
+
+
+
+> Como contraint utilizamos `--constraint node.role==manager` ya que tendremos que manejar datos de Swarm, desplegar servicios, etc.
+>
+> Como parámetro debemos pasarle `-H unix:///var/run/docker.sock` (notar el uso de triple barra).
+
+
+
+EN PWD tendremos un acceso al puerto 9000 mediante un link público para acceder a la interfaz de Portainer. Lo primero que debemos hacer es crear los datos de login de un usuario administrador.
+
+
+
+# Ejemplo Completo Swarm
+
+Podremos ver la potencia de Docker Swarm con [example-voting-app](https://github.com/dockersamples/example-voting-app) que trabaja con distintos servicios una aplicación web en Python llamada `voting-app` que recibe los votos, se almacenan los votos en Redis, luego de cierto tiempo un worker en .NET almacena los votos en una DB en PostgreSQL y con Node.js una aplicación web `result-app` que muestra todos los votos.
+
+En el repositorio nos encontramos con varios archivos stackfiles y usaremos el llamado `docker-stack.yml`, presionamos RAW y copiamos todo el contenido.
+
+```
+version: "3"
+services:
+
+  redis:
+    image: redis:alpine
+    networks:
+      - frontend
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 2
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+  db:
+    image: postgres:9.4
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - backend
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+   :
+    image: dockersamples/examplevotingapp_vote:before
+    ports:
+      - 5000:80
+    networks:
+      - frontend
+    depends_on:
+      - redis
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 2
+      restart_policy:
+        condition: on-failure
+  result:
+    image: dockersamples/examplevotingapp_result:before
+    ports:
+      - 5001:80
+    networks:
+      - backend
+    depends_on:
+      - db
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 2
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+
+  worker:
+    image: dockersamples/examplevotingapp_worker
+    networks:
+      - frontend
+      - backend
+    depends_on:
+      - db
+      - redis
+    deploy:
+      mode: replicated
+      replicas: 1
+      labels: [APP=VOTING]
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+        window: 120s
+      placement:
+        constraints: [node.role == manager]
+
+  visualizer:
+    image: dockersamples/visualizer:stable
+    ports:
+      - "8080:8080"
+    stop_grace_period: 1m30s
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+
+networks:
+  frontend:
+  backend:
+
+volumes:
+  db-data:
+```
+
+
+
+Luego en Portainer podemos ir a **Stacks** y luego **Add stack**, le asignamos el nombre voting y podremos pegarlo en el editor web, subir un archivo o indicar la ruta del repositorio. Por último hacemos click en **Deploy the stack**.
+
+Tanto desde la interfaz web ingresando al stack como desde la terminal de PWD podremos ejecutar `docker stack ls` o `docker stack ps voting` y visualizaremos los servicios y tareas de cada uno.
+
