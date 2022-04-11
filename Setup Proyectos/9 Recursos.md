@@ -15,6 +15,14 @@ Recopilación de las páginas/herramientas mencionadas en las unidades y algunas
 Si queremos un servicio que nos permita especificar el color de fondo y de fuente: 
 [https://dummyimage.com/600x400/000/fff](https://dummyimage.com/600x400/000/fff)
 
+
+
+## Avatares
+
+https://i.pravatar.cc/150?u=hola
+
+> En este caso la medida será de 150px y siempre que referenciemos a `?u=hola` mostrará la misma foto.
+
 ## Gradientes
 * [https://webgradients.com/](https://webgradients.com/)
 * [https://piggment.co/](https://piggment.co/)
