@@ -1325,3 +1325,32 @@ Luego en Portainer podemos ir a **Stacks** y luego **Add stack**, le asignamos e
 
 Tanto desde la interfaz web ingresando al stack como desde la terminal de PWD podremos ejecutar `docker stack ls` o `docker stack ps voting` y visualizaremos los servicios y tareas de cada uno.
 
+
+
+# Problemas Swarm
+
+Para evitar tener problemas y eventualmente downtime debemos tener ciertas precauciones.
+
+## Limpieza de Imágenes y Contenedores
+
+Este punto se conoce como house keeping y trata del mantenimiento del espacio en disco, ya que como Swarm depende del algoritmo raft, en esta lógica los contenedores harán uso del disco, las tareas cuando las vamos creando o hacemos deploy de nuevas versiones requerirán nuevas imágenes y aunque estas sean livianas debemos hacer mantenimiento para evitar que se llene el disco.
+
+Utilizaremos un servicio que toma todas las imágenes que no tienen contenedores corriendo y las borra y todos los contenedores que están parados hace n tiempo los borra.
+
+Se trata de un servicio que corre en **modo global** cuyo propósito es conectarse al Docker Daemon y eliminar las cosas que quedaron viejas. Utiliza [meltwarter/docker-cleanup](https://github.com/meltwater/docker-cleanup) que está deprecado por lo que no mostramos los comandos usados.
+
+
+
+## Administración de Logs
+
+Los logs también van generando ocupación de disco. Esto podría ocasionar que se caiga un nodo. El log driver por default es json-file, pero podríamos usar uno que utiliza logstash de AWS, utilizar syslog de Linux. Esto lo podemos controlar con:
+
+En la [documentación](https://docs.docker.com/config/containers/logging/configure/) nos encontramos con la configuración de los logging drivers que nos permite configurar el driver, limitar el tamaño por log y la cantidad de archivos.
+
+
+
+## Herramientas de Monitoreo
+
+Es posible limitar la cantidad de recursos utilizados por las tareas de un servicio mediante un flag en docker service create. Para ello es importante ver de manera gráfica qué sucede con el swarm. 
+
+Existen distintas alternativas, una de ellas es Premetheus o una paga llamada Datadog
