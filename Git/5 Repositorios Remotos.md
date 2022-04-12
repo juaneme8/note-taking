@@ -156,7 +156,7 @@ Si queremos crear una página personal debemos crear un repositorio llamado `use
 
 
 
-## Cambiar nombre de `master` a `main`
+## Renombrar rama de `master` a `main`
 
 Cuando trabajemos con repositorios antiguos y queramos cambiar el nombre de la rama principal de `master` a `main` podemos seguir el siguiente tutorial.
 

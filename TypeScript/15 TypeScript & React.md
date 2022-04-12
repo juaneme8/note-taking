@@ -8,7 +8,7 @@
 
 El uso de TypeScript en React nos permite la **detección temprana de bugs** potenciales en la medida que ingresamos el código en lugar de detectarlos en *runtime*. 
 
-Nos permite describir la estructura de un objeto y de es manera tener mejor **documentación y autocompletado**.
+Nos permite describir la estructura o contrato de un objeto y de esta manera tener mejor **documentación y autocompletado**.
 
 Por último **favorece el mantenimiento y refactoreo** del código.
 
@@ -18,8 +18,17 @@ Como aspectos negativos exige ingresar mucho más código y estar atentos a los 
 
 
 
-## Proyecto con TypeScript
-### Create React App
+### Observaciones 
+
+* La extensión de los componentes es `.tsx` y para aquellos archivos que no tenemos jsx usamos `.ts`
+* Si en `App.tsx` nos posicionamos sobre el componente (:sparkles: en TS el hover es fundamental :sparkles:) veremos `function App(): JSX.Element` esto básicamente nos  está diciendo que devuelve JSX. Esto se trata de una **inferencia de tipo**.
+* Si ejecutamos `npm run build` en la carpeta `build/static/js` veremos que tenemos el código compilado a JavaScript.
+* Muchas veces los errores de TS conviene leerlos de abajo hacia arriba, pues encontraremos el motivo de los mismos más rápidamente.
+
+
+
+# Proyecto con TypeScript
+## TypeScript y Create React App
 
 Si queremos utilizar create-react-app podemos crear un template que viene con TypeScript de la siguiente forma:
 
@@ -31,48 +40,43 @@ Como en cualquier aplicación CRA en `src` veremos `index.tsx` que es el entrypo
 
 
 
-### Vite
+## TypeScript y Vite
 
 ```
 npm init vite@latest
 ```
 
-Luego elegimos el nombre del proyectco, luego `react` como framework y por último indicamos que queremos usar TypeScript  eligiendo `react-ts`.
+Luego elegimos el nombre del proyecto, luego `react` como framework y por último indicamos que queremos usar TypeScript  eligiendo `react-ts`.
 
-Finalmente `cd nombre-proyecto` y ejecutamos `npm i`.
+Finalmente `cd nombre-proyecto` y ejecutamos `npm i`  y `npm run dev`
 
 
 
-### Observaciones 
+> Si queremos hacerlo en un sólo paso: 
+>
+> ```
+> npx @vitejs/app mi-app --template react-ts
+> ```
 
-* La extensión de los componentes es `.tsx` y para aquellos archivos que no tenemos jsx usamos `.ts`
-* Si en `App.tsx` nos posicionamos sobre el componente (:sparkles: en TS el hover es fundamental :sparkles:) veremos `function App(): JSX.Element` esto básicamente nos  está diciendo que devuelve JSX. Esto se trata de una **inferencia de tipo**.
-* Si ejecutamos `npm run build` en la carpeta `build/static/js` veremos que tenemos el código compilado a JavaScript.
-* Muchas veces los errores de TS conviene leerlos de abajo hacia arriba, pues encontraremos el motivo de los mismos más rápidamente.
 
-## Tipado de Componentes
 
-En`App.tsx` debemos especificar que se trata de un componente funcional de React y esto lo hacemos con `React.FC`. Si no lo hacemos nos aparecerá como que se trata de un elemento de tipo `JSX.Element` y  no nos permitirá por ejemplo acceder a `children` en caso de necesitarlo.
+## TypeScript y Next.js
 
-```jsx
-import React from 'react';
-
-const App: React.FC = () => {
-  return <h1>Hello World!</h1>;
-};
-
-export default App;
+```
+npx create-next-app@latest --ts
 ```
 
-Así mismo si se trata de un componente que va a recibir props  podemos crear una interfaz y así nos sugerirá las props al hacer destructuring:
 
-```jsx
-import React from 'react';
 
+# Tipado Componentes Funcionales
+
+Cuando tenemos un componente funcional una opción es expresarlo de este modo:
+
+```typescript
 interface Props {
 	name: String
 }
-const About: React.FC<Prop> = ({name}) => {
+const About = ({name}:Props) => {
   return <h1>Hello {name}!</h1>;
 };
 
@@ -81,11 +85,56 @@ export default About;
 
 
 
-## 
+Otra opción es especificar que se trata de un componente funcional de React y esto lo hacemos con `React.FC`. Esto nos permitiría acceder a ciertas propiedades del componente como por ejemplo habilitarnos para recibir children aún sin especificarlo en la interface de las Props. Esto según algunos autores puede no ser aconsejable.
 
-## Prop Types
+Si posicionamos el mouse por encima del nombre del componente no nos aparecerá más `JSX.Element` y nos dirá en cambio `React.FC<Props>`.
 
-### Props de tipo string, number, boolean
+```jsx
+interface Props {
+	name: String
+}
+const About: React.FC<Props> = ({name}) => {
+  return <h1>Hello {name}!</h1>;
+};
+
+export default About;
+```
+
+> También es posible en lugar de poner `React.FC<Props>` poner `React.FunctionComponent<Props>`
+
+
+
+## Tipar Métodos
+
+Aunque no es una buena práctica y normalmente conviene extraerlo en componentes aparte, en ocasiones tendremos funciones que retornan JSX. En esos casos es aconsejable tiparlas lo cual nos ayudará a detectar errores a futuro. Por ejemplo suponemos un caso en el que tenemos un método `renderList` que retorna una lista de elementos de tipo JSX.
+
+```typescript
+const List = ({subs}: Props) => {
+    
+	const renderList = ():JSX.Element[] => {
+		return subs.map(sub => {
+            return (
+            	<li key=...>
+                     <h4>...</h4>
+                     <p>...</p>
+                </li>
+            )
+        }
+	}
+	
+	return (
+		<ul>
+			{renderList()}
+		</ul>
+	)
+}
+```
+
+
+
+# Prop Types
+
+## Props de tipo string, number, boolean
 
 Supongamos que tenemos un componente `Greet` que recibe via props un string `name` y lo muestra en pantalla.
 
@@ -158,7 +207,7 @@ Apenas modifiquemos `GreetProps` obtendremos un error en el componente que utili
 
 
 
-### Props de tipo Objeto
+## Props de tipo Objeto
 
 Supongamos que tenemos un componente `Person` que recibe como props un objeto `name` con una propiedad `first` y otra `last`.
 
@@ -182,7 +231,7 @@ export const Person = (props: PersonProps) => {
 
 
 
-### Props de tipo array de objetos
+## Props de tipo array de objetos
 
 Supongamos que tenemos un componente `PersonList` que en lugar de un nombre debe mostrar una lista de nombres que recibe como un array de objetos `names` con una propiedad `first` y una `last` via props. 
 
@@ -219,7 +268,7 @@ type PersonListProps = {
 
 
 
-### Props de tipo unión de strings
+## Props de tipo unión de strings
 
 Supongamos que tenemos un componente `Status` que recibe mediante una prop `status` un string que no puede tomar cualquier valor, sino que debe ser uno de los siguientes:`loading`, `sucess` o `error`.
 
@@ -243,7 +292,7 @@ export const Status = (props: StatusProps) => {
 
 
 
-### Props  `children`
+## Props  `children`
 
 Supongamos que tengo un componente `Heading` y queremos pasarle un texto entre los tags de apertura y cierre de modo que lo reciba en `props.children` y lo muestre en pantalla.
 
@@ -262,21 +311,23 @@ export const Heading = (props: HeadingProps) => {
 
 
 
-En el componente padre tendremos `<Heading>Mensaje que queremos mostrar</Heading>`
+En el componente padre tendremos `<Heading>Mensaje que queremos mostrar</Heading>`. 
 
 
 
-En el caso anterior hemos utilizado como `children` un string pero también podría haber sido un componente React. Supongamos que tenemos un componente `Oscar` que queremos que reciba como `props.children` a un componente `Heading` con el mensaje a mostrar por el primero.
+En el caso anterior hemos utilizado como `children` un string pero también podría haber sido un componente React. Supongamos que tenemos un componente `Card` que queremos que reciba como `props.children` a un componente `Heading` con el mensaje a mostrar por el primero.
 
-En `Oscar.tsx`
+En `Card.tsx`
 
 ```tsx
-type OscarProps = {
+type CardProps = {
 	children: React.ReactNode
 }
 ```
 
-> Este tipo proviene de @types/react y si estamos utilizando React 17 en adelante no habrá necesidad de importar React.
+> Otra opción sería poner `children: JSX.Element` y aceptaría sólo componentes.
+>
+> `React.ReactNode` proviene de @types/react y si estamos utilizando React 17 en adelante no habrá necesidad de importar React.
 
 
 
@@ -296,11 +347,11 @@ type GreetProps = {
 
 
 
-### Props de eventos
+## Props de eventos
 
 Trabajaremos con dos de los eventos más usados click event de un `button` y change event de un elemento `input`.
 
-#### Click Event
+### Click Event
 
 Trabajamos con un componente `Input` que recibe como props `handleClick`.
 
@@ -357,7 +408,7 @@ En `App.tsx` tendremos `      <Button handleClick={(event, id) => console.log('B
 
 
 
-#### Change Event
+### Change Event
 
 Trabajamos con un archivo `Input.tsx` que recibe como props `value` y `handleChange`
 
@@ -375,7 +426,7 @@ export const Input = (props: InputProps) => {
 
 En `App.tsx` lo utilizamos de esta forma `<Input value="test" handleChange={event => console.log(event.target.value)} />`
 
-### Props de estilos
+## Props de estilos
 
 Trabajamos con un componente `Container.tsx`
 
@@ -412,7 +463,7 @@ export const Input = ({value,handleChange}: InputProps) => {
 
 
 
-### Exportar tipos
+# Exportar tipos
 
 En componentes simples tiene sentido definir los tipos en la parte superior, sin embargo cuando estos tienen múltiples tipos nos conviene hacerlo en un archivo aparte.
 
@@ -463,7 +514,7 @@ export const Person = (props: PersonProps) => {
 
 
 
-### Reutilizar tipos
+# Reutilizar tipos
 
 Para asegurar la reutilización y evitar repeticiones, es importante reutilizar los tipos siempre que sea posible. 
 
@@ -515,11 +566,11 @@ type PersonListProps = {
 
 
 
-## Tipos en el hook `useState`
+# Tipos en el hook `useState`
 
 Estudiaremos como establecer los tipos de los hooks, comenzando por el `useState` hook.
 
-#### `useState` con tipo inferido de valor inicial
+## `useState` con tipo inferido de valor inicial
 
 El primer caso que consideramos será aquel en el cual el tipo es inferido en función del valor inicial. 
 
@@ -550,7 +601,7 @@ Si ponemos el cursor sobre `isLoggedIn` veremos que se trata de un `boolean` y p
 
 
 
-##### Tipo un poco más complejo
+### Tipo un poco más complejo
 
 Suponemos ahora que queremos almacenar en una variable de estado `const [subs, setSubs]` los sucriptores a un canal. En primer lugar le asignamos como valor inicial un array con dos elementos.
 
@@ -668,7 +719,7 @@ Hemos puesto `const [subs, setSubs] = useState<Subscriptor[]>([]);` pero podría
 
 
 
-##### Manejo del Estado
+### Manejo del Estado
 
 Puede ser conveniente tener una interface que usemos para manejar el estado del componente:
 
@@ -688,7 +739,7 @@ const [newSubsNumber, setNewSubsNumbers] = useState<AppState["newSubsNumber"]>(0
 
 
 
-#### `useState` con tipo del valor inicial distinto del valor futuro
+## `useState` con tipo del valor inicial distinto del valor futuro
 
 En ocasiones no conocemos el valor inicial de una variable de estado y la asignaremos luego. 
 
@@ -743,7 +794,7 @@ export const User = () => {
 
 
 
-#### `useState` Type Assertion
+## `useState` Type Assertion
 
 Anteriormente vimos que la posibilidad de que el valor sea `null` nos exige chequear siempre que no lo sea antes de acceder a las propiedades, es por eso que si  tenemos absoluta certeza de que `user` nunca será `null` (por ejemplo si se seteará en un efecto `useEffect` y no tenemos el método logout) podemos definir como valor inicial un objeto vacío como si fuera de tipo `AuthUser` y esto lo hacemos con el keyword `as`.
 
@@ -753,7 +804,7 @@ De esta manera podremos acceder a `name` y `email` sin chequear que sea `null` e
 
 
 
-## Tipos en el hook `useReducer` 
+# Tipos en el hook `useReducer` 
 
 Si bien `useState` es un hook útil cuando manejamos valores simples de estado, mientras que es conveniente utilizar `useReducer` cuando el estado es más complejo y el estado futuro depende del estado anterior.
 
@@ -842,7 +893,7 @@ Luego debido a la inferencia de tipos veremos que si posicionamos el mouse en `c
 
 Hemos definido el `type` como `string`
 
-```
+```typescript
 type CounterAction = {
     type: string,
     payload: number
@@ -851,7 +902,7 @@ type CounterAction = {
 
 Esto a futuro puede traernos inconvenientes porque en lugar de "increment" y "decrement" podríamos poner "reset" sin que nos marque ningún error (a pesar de que esto lo atajaríamos con el `default` case del switch). Esto lo solucionamos utilizando template literals en lugar de `string`.
 
-```
+```typescript
 type CounterAction = {
     type: 'increment'|'decrement',
     payload: number
@@ -911,7 +962,7 @@ export const Counter = () => {
 
 Otra opción sería indicar que `payload` es opcional:
 
-```
+```typescript
 type CounterAction = {
     type: 'increment' | 'decrement' | 'reset',
     payload?: number
@@ -978,11 +1029,11 @@ export const Counter = () => {
 
 
 
-## Tipos en el hook `useContext`
+# Tipos en el hook `useContext`
 
 A la hora de trabajar con TypeScript y React Context usando hooks trabajaremos con `useContext` para consumir el valor del contexto.
 
-### `useContext` con tipo inferido de valor inicial
+## `useContext` con tipo inferido de valor inicial
 
 A los fines didácticos consideraremos el uso de React Context para proporcionar un tema a nuestros componentes usando Context API. Para ello asumimos que tenemos los archivos `theme.ts`, `Box.tsx` y `ThemeContext.tsx`
 
@@ -1064,7 +1115,7 @@ En este caso simplifica mucho las cosas el hecho de que conocemos el valor del c
 
 
 
-### `useContext` con tipo del valor inicial distinto del valor futuro
+## `useContext` con tipo del valor inicial distinto del valor futuro
 
 * `UserContext.tsx` que es el encargado de manejar el estado de autenticación de un usuario. Contará con una variable de estado `user` (que valdrá null inicialmente y al loguearse tendrá el nombre de usuario y mail) y una función para loguearse. Recibirá como prop `children` un componente al cual le pasará este contexto.
 
@@ -1160,33 +1211,7 @@ TUTORIAL CODEVOLUTION INCOMPLETO
 
 
 
-# TypeScript y Next.js
-
-```
-npx create-next-app@latest --ts
-```
-
-
-
-# TypeScript y Vite.js
-
-```
-npm init vite@latest
-```
-
-Luego el menu nos preguntará el nombre del proyecto, la librería a utilizar (react) y luego elegiremos que queremos utilizar TypeScript (react-ts). A continuación `npm install` y `npm run dev`
-
-
-
-> Si queremos hacerlo en un sólo paso: 
->
-> ```
-> npx @vitejs/app mi-app --template react-ts
-> ```
-
-
-
-## Consumo API
+# Consumo API
 
 A continuación crearemos un ejemplo con TypeScript del consumo de una API con la estructura de archivos que tendría una aplicación real.
 
