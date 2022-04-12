@@ -8,7 +8,7 @@ https://www.youtube.com/watch?v=oykl1Ih9pMg&t=2s
 
 ###### Deploy Web App with Docker, Nginx and SSL (HTTPS)
 
-Similar al anterior pero usando Docker
+Similar al anterior pero usando Docker Compose.
 
 https://www.youtube.com/watch?v=zJPlyjfV4C0
 

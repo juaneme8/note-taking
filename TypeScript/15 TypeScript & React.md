@@ -1,8 +1,58 @@
 # TypeScript & React.js
 
-## Contenido para Revisar
+> Basado en el [video](https://youtu.be/15VKbky2gB4) de midudev.
+>
+> Basado en la [lista de reproducción](https://www.youtube.com/playlist?list=PLC3y8-rFHvwi1AXijGTKM0BKtHzVC-LSK) de Codevolution. 
 
-En`App.tsx` debemos especificar que se trata de un componente funcional de React y esto lo hacemos con `React.FC`
+## Introducción
+
+El uso de TypeScript en React nos permite la **detección temprana de bugs** potenciales en la medida que ingresamos el código en lugar de detectarlos en *runtime*. 
+
+Nos permite describir la estructura de un objeto y de es manera tener mejor **documentación y autocompletado**.
+
+Por último **favorece el mantenimiento y refactoreo** del código.
+
+También tiene la ventaja que hace que no sea necesario utilizar la librería `prop-types` puesto que TypeScript cumple una tarea similar pero es mucho más potente. Existe una diferencia y es que `prop-types` en desarrollo funciona en *run-time* por lo que veríamos los errores en la consola, mientras que en TS funciona en *build-time* por lo que los errores los veremos en el editor o en la compilación. 
+
+Como aspectos negativos exige ingresar mucho más código y estar atentos a los errores mostrados por el compilador pero a la larga el beneficio es notable y nos permitirá evolucionar como desarrolladores React.
+
+
+
+## Proyecto con TypeScript
+### Create React App
+
+Si queremos utilizar create-react-app podemos crear un template que viene con TypeScript de la siguiente forma:
+
+```bash
+npx create-react-app react-typescript-demo --template typescript
+```
+
+Como en cualquier aplicación CRA en `src` veremos `index.tsx` que es el entrypoint de nuestra aplicación donde montamos el componente `App.tsx` en el nodo `root` del DOM. 
+
+
+
+### Vite
+
+```
+npm init vite@latest
+```
+
+Luego elegimos el nombre del proyectco, luego `react` como framework y por último indicamos que queremos usar TypeScript  eligiendo `react-ts`.
+
+Finalmente `cd nombre-proyecto` y ejecutamos `npm i`.
+
+
+
+### Observaciones 
+
+* La extensión de los componentes es `.tsx` y para aquellos archivos que no tenemos jsx usamos `.ts`
+* Si en `App.tsx` nos posicionamos sobre el componente (:sparkles: en TS el hover es fundamental :sparkles:) veremos `function App(): JSX.Element` esto básicamente nos  está diciendo que devuelve JSX. Esto se trata de una **inferencia de tipo**.
+* Si ejecutamos `npm run build` en la carpeta `build/static/js` veremos que tenemos el código compilado a JavaScript.
+* Muchas veces los errores de TS conviene leerlos de abajo hacia arriba, pues encontraremos el motivo de los mismos más rápidamente.
+
+## Tipado de Componentes
+
+En`App.tsx` debemos especificar que se trata de un componente funcional de React y esto lo hacemos con `React.FC`. Si no lo hacemos nos aparecerá como que se trata de un elemento de tipo `JSX.Element` y  no nos permitirá por ejemplo acceder a `children` en caso de necesitarlo.
 
 ```jsx
 import React from 'react';
@@ -31,35 +81,7 @@ export default About;
 
 
 
-## Introducción
-
-El uso de TypeScript en React nos permite la **detección temprana de bugs** potenciales en la medida que ingresamos el código en lugar de detectarlos en *runtime*. 
-
-Nos permite describir la estructura de un objeto y de es manera tener mejor **documentación y autocompletado**.
-
-Por último **favorece el mantenimiento y refactoreo** del código.
-
-Como aspectos negativos exige ingresar mucho más código y estar atentos a los errores mostrados por el compilador pero a la larga el beneficio es notable y nos permitirá evolucionar como desarrolladores React.
-
-
-
-## Proyecto con TypeScript
-Si queremos utilizar create-react-app podemos crear un template que viene con TypeScript de la siguiente forma:
-
-```bash
-npx create-react-app react-typescript-demo --template typescript
-```
-
-Como en cualquier aplicación CRA en `src` veremos `index.tsx` que es el entrypoint de nuestra aplicación donde montamos el componente `App.tsx` en el nodo `root` del DOM. 
-
-
-
-Algunas observaciones:
-
-* La extensión de los componentes es `.tsx`
-* Si en `App.tsx` nos posicionamos sobre el componente funciona, veremos `function App(): JSX.Element` esto básicamente nos  está diciendo que devuelve JSX. Esto se trata de una **inferencia de tipo**.
-
-
+## 
 
 ## Prop Types
 
@@ -96,12 +118,14 @@ export const Greet = (props: GreetProps) => {
 
 Luego de hacer esto tendremos dos ventajas:
 
-* En el componente en sí nos proporciona el **autocompletado** ya que ni bien escribimos `props.` nos sugerirá `name` y lo mismo en el componente padre nos ayudará a escribir las props apenas ingresemos la primera letra.
+* En el componente en sí nos proporciona el **autocompletado** ya que ni bien escribimos `props.` nos sugerirá `name` y lo mismo en el componente padre nos ayudará a escribir las props apenas ingresemos la  primera letra.
 * En el componente padre nos permitirá una rápida detección de errores si le pasamos un tipo incorrecto a `name`.
 
 
 
-> Es prácticamente indistinto utilizar `type` o `interface` para lo que acabamos de hacer. Sin embargo, hay quienes recomiendan usar `types` en aplicaciones y `interfaces` en bibliotecas.
+> Es prácticamente indistinto utilizar `type` o `interface` para definir los tipos recibidos por Props. Sin embargo, hay quienes recomiendan usar `types` en aplicaciones y `interfaces` en bibliotecas. De los autores estudiados midudev y Goncy utilizan `interface` y vishwas `type`.
+>
+> Algunas personas a las interfaces les ponen una `I`mayúscula al comienzo esto es algo que viene de otros lenguajes con tipado pero está desaconsejado en TS.
 
 
 
@@ -177,6 +201,19 @@ export const PersonList = (props: PersonListProps) => {
             }
         </div>
     )
+}
+```
+
+
+
+Podríamos haber utilizado también la siguiente notación:
+
+```typescript
+type PersonListProps = {
+    names: <Array{
+        first: string,
+        last: string
+    }>
 }
 ```
 
@@ -484,7 +521,9 @@ Estudiaremos como establecer los tipos de los hooks, comenzando por el `useState
 
 #### `useState` con tipo inferido de valor inicial
 
-El primer caso que consideramos será aquel en el cual el tipo es inferido en función del valor inicial. Para ello creamos un componente `LoggedIn.tsx`. En él tendremos un botón Login y uno Logout y debemos mostrar un mensaje acorde a ese estado.
+El primer caso que consideramos será aquel en el cual el tipo es inferido en función del valor inicial. 
+
+Para ello creamos un componente `LoggedIn.tsx`. En él tendremos un botón Login y uno Logout y debemos mostrar un mensaje de acuerdo a la variable de estado `isLoggedIn`.
 
 ```tsx
 import { useState } from "react"
@@ -511,6 +550,144 @@ Si ponemos el cursor sobre `isLoggedIn` veremos que se trata de un `boolean` y p
 
 
 
+##### Tipo un poco más complejo
+
+Suponemos ahora que queremos almacenar en una variable de estado `const [subs, setSubs]` los sucriptores a un canal. En primer lugar le asignamos como valor inicial un array con dos elementos.
+
+```typescript
+import React, { useState } from 'react';
+
+type Props = {};
+
+const Subs = (props: Props) => {
+  const [subs, setSubs] = useState([
+    {
+      nick: 'juan',
+      subMonths: 3,
+      avatar: 'https://i.pravatar.cc/150?u=juan',
+      description: 'he loves to code',
+    },
+    {
+      nick: 'ocho',
+      subMonths: 12,
+      avatar: 'https://i.pravatar.cc/150?u=ocho',
+    },
+  ]);
+  return (
+    <ul>
+      {subs.map(sub => (
+        <li key={sub.nick}>
+          <img src={sub.avatar} alt={sub.nick} />
+          <p>{sub.description?.substring(0, 6)}</p>
+        </li>
+      ))}
+    </ul>
+  );
+};
+
+export default Subs;
+```
+
+En ese caso como en el valor inicial uno de los elementos del array tiene el campo `description` y el otro no lo tiene, si nos posicionamos sobre `subs` inferirá que su tipo es la unión de ambos tipos de objetos:
+
+```typescript
+const subs: ({
+    nick: string;
+    subMonths: number;
+    avatar: string;
+    description: string;
+} | {
+    nick: string;
+    subMonths: number;
+    avatar: string;
+    description?: undefined;
+})[]
+```
+
+Como `description` es opcional si queremos usar un método debemos utilizar *optional chaining* ya que podrá ser *undefined*:
+
+```typescript
+<h2>{sub.description?.substring(0, 6)}</h2>
+```
+
+
+
+Si queremos hacer lo mismo pero sin que tenga que inferir el tipo sino que utilizamos un tipo genérico mediante una interface `Subscriptor`.
+
+```typescript
+import React, { useState, useEffect } from 'react';
+
+type Props = {};
+
+interface Subscriptor {
+  nick: string;
+  subMonths: number;
+  avatar: string;
+  description?: string;
+}
+
+const INITIAL_STATE = [
+  {
+    nick: 'juan',
+    subMonths: 3,
+    avatar: 'https://i.pravatar.cc/150?u=juan',
+    description: 'he loves to code and play with his dog',
+  },
+  {
+    nick: 'ocho',
+    subMonths: 12,
+    avatar: 'https://i.pravatar.cc/150?u=ocho',
+  },
+];
+
+const Subs = (props: Props) => {
+  const [subs, setSubs] = useState<Subscriptor[]>([]);
+
+  // useEffect(() => {
+  //   setSubs(INITIAL_STATE);
+  // }, []);
+
+  return (
+    <ul>
+      {subs.map(sub => (
+        <li key={sub.nick}>
+          <img src={sub.avatar} alt={sub.nick} />
+          <p>{sub.subMonths} months with us</p>
+          <p>{sub.description?.substring(0, 20)}...</p>
+        </li>
+      ))}
+    </ul>
+  );
+};
+
+export default Subs;
+
+```
+
+Hemos puesto `const [subs, setSubs] = useState<Subscriptor[]>([]);` pero podríamos haber puesto también `const [subs, setSubs] = useState<Array<Subscriptor>>([]);`
+
+
+
+##### Manejo del Estado
+
+Puede ser conveniente tener una interface que usemos para manejar el estado del componente:
+
+```
+interface AppState{
+	subs: Array<Subscriptor>
+	newSubsNumber: number
+}
+```
+
+De modo tal que luego al definir las variables de estado tengamos:
+
+```
+const [subs, setSubs] = useState<AppState["subs"]>([]);
+const [newSubsNumber, setNewSubsNumbers] = useState<AppState["newSubsNumber"]>(0)
+```
+
+
+
 #### `useState` con tipo del valor inicial distinto del valor futuro
 
 En ocasiones no conocemos el valor inicial de una variable de estado y la asignaremos luego. 
@@ -523,7 +700,7 @@ Como inicialmente no disponemos de estos datos le damos valor `null`
 
 Sin embargo, debido a la inferencia de tipo, cuando el botón de login sea clickeado no nos dejará setear el usuario con como un objeto de tipo `AuthUser` es decir: `setUser({name:'juaneme8', email:'j8@example.com'})` sino que esperará que le pasemos `null`. 
 
-En este caso no podremos confiar en la inferencia de tipo sino que tendremos que especificarle que el tipo podrá ser `null` o de tipo `AuthUser` y esto lo hacemos con:
+En este caso no podremos confiar en la inferencia de tipo sino que tendremos que utilizar **tipos genéricos** indicándole que el tipo podrá ser `null` o de tipo `AuthUser` y esto lo hacemos con:
 
 `const [user, setUser] = useState<AuthUser|null>(false)`
 
