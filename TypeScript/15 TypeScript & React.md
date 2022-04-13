@@ -132,6 +132,257 @@ const List = ({subs}: Props) => {
 
 
 
+# Tipar Eventos
+
+Consideramos un componete `Form` que consiste en una serie de inputs. 
+
+
+
+## Change Event
+
+Ni bien creamos el método `  const handleChange = evt => {};` veremos que nos aparece **Parameter 'evt' implicitly has an 'any' type.** 
+
+Para ayudarnos a obtener el tipo que debe ser `evt` podemos utilizar una expresión en línea como vemos a continuación y luego posicionar el mouse sobre `evt` de donde obtendremos: `React.ChangeEvent<HTMLInputElement>`
+
+```typescript
+ <input
+        onChange={evt => {
+          setInputValues({ ...inputValues, [evt.target.name]: evt.target.value });
+        }}
+        type='text'
+        name='nick'
+        placeholder='nick'
+        value={inputValues.nick}
+      />
+```
+
+Luego el bloque de código nos queda:
+
+```typescript
+import { useState } from 'react';
+
+const Form = () => {
+  const [inputValues, setInputValues] = useState({
+    nick: '',
+    subMonths: 0,
+    avatar: '',
+    description: '',
+  });
+
+  const handleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValues({ ...inputValues, [evt.target.name]: evt.target.value });
+  };
+
+  console.log({ inputValues });
+
+  return (
+    <form>
+      <input onChange={handleChange} type='text' name='nick' placeholder='nick' value={inputValues.nick} />
+      <input
+        onChange={handleChange}
+        type='number'
+        name='subMonths'
+        placeholder='subMonths'
+        value={inputValues.subMonths}
+      />
+      <input onChange={handleChange} type='text' name='avatar' placeholder='avatar' value={inputValues.avatar} />
+      <input
+        onChange={handleChange}
+        type='text'
+        name='description'
+        placeholder='description'
+        value={inputValues.description}
+      />
+      <button>Enviar</button>
+    </form>
+  );
+};
+
+export default Form;
+	
+```
+
+Supongamos que decidimos cambiar el `input` de `description` por un `textarea`, en ese caso nos aparecería un error que leyéndolo de abajo hacia arriba diría: **...Type 'HTMLTextAreaElement' is missing the following properties from type 'HTMLInputElement'...**
+
+Entonces modificamos el tipo de esta forma:
+
+```typescript
+const handleChange = (evt: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setInputValues({ ...inputValues, [evt.target.name]: evt.target.value });
+  };
+```
+
+
+
+## Reutilizar Interfaces
+
+Las interfaces que hacen a la lógica de negocios es conveniente exportarlas a un archivo `types.d.ts` (que creamos en `src` no en `components`) de modo tal que las reutilicemos. 
+
+Este archivo tiene unas características:
+
+* Las exportaremos para que sean utilizadas por cualquier paquete que utilice nuestra biblioteca.
+* En ese archivo sólo podemos tener definiciones
+
+```typescript
+export interface Sub {
+	nick: string
+	subMonths: number
+	avatar:string
+	description?:string
+}
+```
+
+Lo anterior como forma parte de la lógica de negocios lo hemos extraído a un archivo aparte.
+
+La idea será luego reutilizar esta interface en todos los lugares donde podamos. Notar que **a la hora de importar lo hacemos sin la extensión** por lo que en este caso eliminamos `.d.ts` y quedará `import {Sum} from '../types'`.
+
+
+
+```typescript
+import { useState } from 'react';
+import { Sub } from '../types';
+
+interface FormState {
+  inputValues: Sub;
+}
+
+const Form = () => {
+  const [inputValues, setInputValues] = useState<FormState['inputValues']>({
+    nick: '',
+    subMonths: 0,
+    avatar: '',
+    description: '',
+  });
+
+  const handleChange = (evt: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setInputValues({ ...inputValues, [evt.target.name]: evt.target.value });
+  };
+
+  console.log({ inputValues });
+
+  return (
+    <form>
+      <input onChange={handleChange} type='text' name='nick' placeholder='nick' value={inputValues.nick} />
+      <input
+        onChange={handleChange}
+        type='number'
+        name='subMonths'
+        placeholder='subMonths'
+        value={inputValues.subMonths}
+      />
+      <input onChange={handleChange} type='text' name='avatar' placeholder='avatar' value={inputValues.avatar} />
+      <textarea onChange={handleChange} name='description' placeholder='description' value={inputValues.description} />
+       <button>Enviar</button>
+    </form>
+  );
+};
+
+export default Form;
+
+```
+
+Notar que `FormState` lo dejamos preparado para si en un futuro tenemos que manejar otros estados, con `const [inputValues, setInputValues] = useState<FormState['inputValues']>({..})`
+
+
+
+## Submit Event
+
+Suponemos que desde la función padre le pasamos a `Form` una prop `onNewSub` con referencia a una función`handleNewSub` que utiliza el setter. 
+
+```typescript
+import React, { useState } from 'react';
+import { Sub } from '../../types';
+
+interface FormState {
+  inputValues: Sub;
+}
+
+interface FormProps {
+  onNewSub: (sub: Sub) => void;
+}
+
+const Form = ({ onNewSub }: FormProps) => {
+  const [inputValues, setInputValues] = useState<FormState['inputValues']>({
+    nick: '',
+    subMonths: 0,
+    avatar: '',
+    description: '',
+  });
+
+  const handleChange = (evt: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setInputValues({ ...inputValues, [evt.target.name]: evt.target.value });
+  };
+
+  const handleSubmit = (evt: React.FormEvent<HTMLFormElement>) => {
+    evt.preventDefault();
+    onNewSub(inputValues);
+  };
+
+
+  return (
+    <form onSubmit={handleSubmit}>
+      //...
+      //...
+      //...
+      <button>Enviar</button>
+    </form>
+  );
+};
+
+export default Form;
+
+```
+
+En el componente padre (`Subs`) donde usamos a `Form`
+
+```typescript
+import React, { useEffect } from 'react';
+import { Sub } from '../../types';
+import Form from './Form';
+
+const INITIAL_STATE = [
+  //...
+  //...
+];
+
+const Subs = () => {
+  const [subs, setSubs] = React.useState<Sub[]>([]);
+
+  useEffect(() => {
+    setSubs(INITIAL_STATE);
+  }, []);
+
+  const handleNewSub = (newSub: Sub): void => {
+    setSubs([...subs, newSub]);
+  };
+
+  return (
+    <>
+      <ul>
+        {subs.map(sub => (
+          <li key={sub.nick}>
+            //...
+            //...
+          </li>
+        ))}
+      </ul>
+      <Form onNewSub={handleNewSub} />
+    </>
+  );
+};
+
+export default Subs;
+
+```
+
+Nunca debemos pasarle el set state "hacia abajo" al componente hijo, porque el tipado se volverá más complejo de manera innecesaria. En caso de que lo hiciéramos nos ayudamos del hover sobre `onNewSub={setSubs}` para saber que el tipo de esta prop que será  `Dispatch<SetStateAction<Sub[]>` no olvidar agregarle `React.` a lo que copiamos: `React.Dispatch<React.SetStateAction<Sub[]>`
+
+
+
+# :rotating_light: 
+
+Luego en `handleSubmit` trabajaremos con `setSubs(subs => [..subs,inputValues])`. :rotating_light: **Notar que recibo como props sólo a `setSubs` y también accedo al valor del estado `subs`** 
+
 # Prop Types
 
 ## Props de tipo string, number, boolean
@@ -638,6 +889,14 @@ const Subs = (props: Props) => {
 
 export default Subs;
 ```
+
+
+
+# :bar_chart: pravatar.cc
+
+Como avatar placeholder utilizamos el servicio https://pravatar.cc
+
+
 
 En ese caso como en el valor inicial uno de los elementos del array tiene el campo `description` y el otro no lo tiene, si nos posicionamos sobre `subs` inferirá que su tipo es la unión de ambos tipos de objetos:
 
