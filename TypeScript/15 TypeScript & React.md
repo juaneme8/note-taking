@@ -397,7 +397,7 @@ Algunas personas a las interfaces les ponen una `I`mayúscula al comienzo esto e
 
 # :tada:`useReducer`
 
-Queremos trabajar con un reducer que tenga como acciones actualizar el campo modificado y resetearlos todos luego de hacer submit.
+Queremos trabajar con un reducer que tenga como acciones actualizar un campo modificado en un formulario y resetearlos todos luego de hacer submit.
 
 Primero agregamos un botón Clear que al presionarlo invoque a `handleClear` que limpie todos los campos del formulario. A su vez invocamos este método al realizar el submit del formulario.
 
@@ -569,7 +569,7 @@ export default useNewSubform;
 
 Mientras que `Form.tsx` nos queda:
 
-```
+```typescript
 import useNewSubform from '../hooks/useNewSubform';
 import formReducer from '../hooks/useNewSubform';
 import { Sub } from '../types';
@@ -639,6 +639,10 @@ export default Form;
 ```
 
 
+
+### Ocultar Implementación
+
+La idea de utilizar custom hooks es no mostrar fuera de ellos qué implementación tienen. Por ello quizás en lugar de 
 
 
 
@@ -1757,7 +1761,7 @@ const divRef = useRef<HTMLDivElement>(null)
 
 Inicialmente planteamos el fetching de la misma manera que siempre realizándolo dentro de un `useEffect`
 
-```
+```typescript
 useEffect(()=> {
 	fetch(http://localhost:3001/subs)
 		.then(res => res.json())
@@ -1767,7 +1771,7 @@ useEffect(()=> {
 },[])
 ```
 
-Sin embargo, debemos tener presente que como TypeScript no funciona en runtime sino en buildtime, si la API está devolviendo unas propiedades distintas a las que esperamos no obtendremos ningún error en pantalla pero la aplicación no funcionará del modo esperado. 
+Sin embargo, debemos tener presente que como TypeScript no funciona en *run-time* sino en *build-time*, si la API está devolviendo unas propiedades distintas a las que esperamos no obtendremos ningún error en pantalla pero la aplicación no funcionará del modo esperado. 
 En este caso `subs` deberá ser un array de `Sub` y como lo que me está llegando no respeta ese contrato tendré problemas.
 
 Si nos fijamos posicionando el mouse sobre  `res.json()` veremos que es de tipo `any`. Esto lo solucionamos de la siguiente manera:
@@ -1880,6 +1884,49 @@ export type SubsResponseFromApi = Array<{
 
 
 
+## Especificando tipo devuelto con  axios
+
+Utilizando **axios** podremos especificar el dato devuelto por la API de otra manera:
+
+```typescript
+
+useEffect(()=> {
+	const fetchSubs = () => {
+		return 
+		axios.get<SubResponseFromApi[]>("http://localhost:3001/subs")
+			.then(res => res.data)
+	}
+	const mapFromApiToSubs = (apiResponse: SubResponseFromApi[]):Array<Sub> => {
+		return apiResponse.map(subFromApi => {
+			const {
+				nick,
+				months: subMonths,
+				profileUrl: avatar
+				description
+			}=subFromApi;
+			
+			return {
+				nick, 
+				subMonths, 
+				avatar, 
+				description
+			}
+		})
+	}
+	
+	fetchSubs()
+		.then(apiSubs => {
+			 const subs = mapFromApiToSubs(apiSubs))
+			 setSubs(subs))
+		});
+	
+},[])
+```
+
+Son dos formas de hacer lo mismo pero en la anterior no tenemos que ver la implementación y desde fuera de la función podemos obtener información y esto puede ser ventajoso en determinados casos.
+
+
+
 ## Consumo API
 
 A continuación crearemos un ejemplo con TypeScript del consumo de una API con la estructura de archivos que tendría una aplicación real.
@@ -1966,3 +2013,10 @@ export default App
 
 ```
 
+
+
+# Repositorio Recomendado
+
+https://github.com/typescript-cheatsheets/react
+
+Encontraremos un montón de casos de uso de React y TypeScript, como ser diferencia entre `interface` o `type`
