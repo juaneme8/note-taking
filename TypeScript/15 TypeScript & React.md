@@ -134,7 +134,7 @@ const List = ({subs}: Props) => {
 
 # Tipar Eventos
 
-Consideramos un componete `Form` que consiste en una serie de inputs. 
+Consideramos un componente `Form` que consiste en una serie de inputs. 
 
 
 
@@ -383,6 +383,265 @@ Nunca debemos pasarle el set state "hacia abajo" al componente hijo, porque el t
 
 Luego en `handleSubmit` trabajaremos con `setSubs(subs => [..subs,inputValues])`. :rotating_light: **Notar que recibo como props sólo a `setSubs` y también accedo al valor del estado `subs`** 
 
+
+
+# `type` vs `interface`
+
+Es prácticamente indistinto utilizar `type` o `interface` para definir los tipos recibidos por Props. Sin embargo, hay quienes recomiendan usar `types` en aplicaciones y `interfaces` en bibliotecas. De los autores estudiados midudev y Goncy utilizan `interface` y vishwas `type`.
+
+`interface` tiene la ventaja de que es extensible y además se puede poner dos veces la definición y se combinarán por lo que la mayoría de las veces será aconsejable utilizarlo en lugar de `type`.
+
+Algunas personas a las interfaces les ponen una `I`mayúscula al comienzo esto es algo que viene de otros lenguajes con tipado pero está desaconsejado en TS.
+
+
+
+# :tada:`useReducer`
+
+Queremos trabajar con un reducer que tenga como acciones actualizar el campo modificado y resetearlos todos luego de hacer submit.
+
+Primero agregamos un botón Clear que al presionarlo invoque a `handleClear` que limpie todos los campos del formulario. A su vez invocamos este método al realizar el submit del formulario.
+
+```
+ const handleClear = () => {
+    setInputValues({
+      nick: '',
+      subMonths: 0,
+      avatar: '',
+      description: '',
+    });
+  };
+```
+
+Como algo parecido también hacemos al inicializar la variable de estado, nos conviene utilizar una constante `INITIAL_STATE`.
+
+
+
+Queremos refactorizar para utilizar un `useReducer`:
+
+```typescript
+import { useReducer, useState } from 'react';
+import { Sub } from '../types';
+
+const INITIAL_STATE = {
+  nick: '',
+  subMonths: 0,
+  avatar: '',
+  description: '',
+};
+
+interface FormProps {
+  onNewSub: (sub: Sub) => void;
+}
+
+interface FormState {
+  inputValues: Sub;
+}
+
+type FormReducerAction =
+  | {
+      type: 'change_value';
+      payload: { inputName: string; inputValue: string };
+    }
+  | {
+      type: 'clear_form';
+    };
+
+const formReducer = (state: FormState['inputValues'], action: FormReducerAction) => {
+  switch (action.type) {
+    case 'change_value':
+      const { inputName, inputValue } = action.payload;
+      return {
+        ...state,
+        [inputName]: inputValue,
+      };
+    case 'clear_form':
+      return INITIAL_STATE;
+  }
+};
+
+const Form = ({ onNewSub }: FormProps) => {
+  // const [inputValues, setInputValues] = useState<FormState['inputValues']>(INITIAL_STATE);
+
+  const [inputValues, dispatch] = useReducer(formReducer, INITIAL_STATE);
+
+  const handleChange = (evt: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    // setInputValues({ ...inputValues, [evt.target.name]: evt.target.value });
+
+    const { name, value } = evt.target;
+    dispatch({
+      type: 'change_value',
+      payload: {
+        inputName: name,
+        inputValue: value,
+      },
+    });
+  };
+
+  const handleSubmit = (evt: React.FormEvent<HTMLFormElement>) => {
+    evt.preventDefault();
+    onNewSub(inputValues);
+    handleClear();
+  };
+
+  const handleClear = () => {
+    dispatch({ type: 'clear_form' });
+  };
+
+  console.log({ inputValues });
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input onChange={handleChange} type='text' name='nick' placeholder='nick' value={inputValues.nick} />
+      <input
+        onChange={handleChange}
+        type='number'
+        name='subMonths'
+        placeholder='subMonths'
+        value={inputValues.subMonths}
+      />
+      <input onChange={handleChange} type='text' name='avatar' placeholder='avatar' value={inputValues.avatar} />
+      <textarea onChange={handleChange} name='description' placeholder='description' value={inputValues.description} />
+      <button onClick={handleClear} type='button'>
+        Clear
+      </button>
+      <button type='submit'>Send</button>
+    </form>
+  );
+};
+
+export default Form;
+
+```
+
+> A la hora de definir `FormReducerAction` utilizamos `type` en lugar de `interface` pero por una cuestión de usar uno y el otro.
+>
+> En el switch no colocamos default ya que TypeScript debido a lo que hemos especificado en `FormReducerAction` nos ayudará a que sólo ingresemos las dos opciones aceptadas, pero bien podríamos poner `default: return state`
+
+## :tada: Custom Hook
+
+Creamos en la raíz una carpeta `hooks` y extramos  `formReducer` y todos los tipos y constantes que de él dependan en un custom hook `useNewSubForm`.
+
+Ese archivo nos queda:
+
+```typescript
+import { useReducer } from 'react';
+import { Sub } from '../types';
+
+const INITIAL_STATE = {
+  nick: '',
+  subMonths: 0,
+  avatar: '',
+  description: '',
+};
+interface FormState {
+  inputValues: Sub;
+}
+
+type FormReducerAction =
+  | {
+      type: 'change_value';
+      payload: { inputName: string; inputValue: string };
+    }
+  | {
+      type: 'clear_form';
+    };
+
+const formReducer = (state: FormState['inputValues'], action: FormReducerAction) => {
+  switch (action.type) {
+    case 'change_value':
+      const { inputName, inputValue } = action.payload;
+      return {
+        ...state,
+        [inputName]: inputValue,
+      };
+    case 'clear_form':
+      return INITIAL_STATE;
+  }
+};
+const useNewSubform = () => {
+  return useReducer(formReducer, INITIAL_STATE);
+};
+
+export default useNewSubform;
+
+
+```
+
+Mientras que `Form.tsx` nos queda:
+
+```
+import useNewSubform from '../hooks/useNewSubform';
+import formReducer from '../hooks/useNewSubform';
+import { Sub } from '../types';
+
+const INITIAL_STATE = {
+  nick: '',
+  subMonths: 0,
+  avatar: '',
+  description: '',
+};
+
+interface FormProps {
+  onNewSub: (sub: Sub) => void;
+}
+
+const Form = ({ onNewSub }: FormProps) => {
+  // const [inputValues, setInputValues] = useState<FormState['inputValues']>(INITIAL_STATE);
+
+  const [inputValues, dispatch] = useNewSubform();
+
+  const handleChange = (evt: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    // setInputValues({ ...inputValues, [evt.target.name]: evt.target.value });
+
+    const { name, value } = evt.target;
+    dispatch({
+      type: 'change_value',
+      payload: {
+        inputName: name,
+        inputValue: value,
+      },
+    });
+  };
+
+  const handleSubmit = (evt: React.FormEvent<HTMLFormElement>) => {
+    evt.preventDefault();
+    onNewSub(inputValues);
+    handleClear();
+  };
+
+  const handleClear = () => {
+    dispatch({ type: 'clear_form' });
+  };
+
+  console.log({ inputValues });
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input onChange={handleChange} type='text' name='nick' placeholder='nick' value={inputValues.nick} />
+      <input
+        onChange={handleChange}
+        type='number'
+        name='subMonths'
+        placeholder='subMonths'
+        value={inputValues.subMonths}
+      />
+      <input onChange={handleChange} type='text' name='avatar' placeholder='avatar' value={inputValues.avatar} />
+      <textarea onChange={handleChange} name='description' placeholder='description' value={inputValues.description} />
+      <button onClick={handleClear} type='button'>
+        Clear
+      </button>
+      <button type='submit'>Send</button>
+    </form>
+  );
+};
+
+export default Form;
+```
+
+
+
+
+
 # Prop Types
 
 ## Props de tipo string, number, boolean
@@ -420,12 +679,6 @@ Luego de hacer esto tendremos dos ventajas:
 
 * En el componente en sí nos proporciona el **autocompletado** ya que ni bien escribimos `props.` nos sugerirá `name` y lo mismo en el componente padre nos ayudará a escribir las props apenas ingresemos la  primera letra.
 * En el componente padre nos permitirá una rápida detección de errores si le pasamos un tipo incorrecto a `name`.
-
-
-
-> Es prácticamente indistinto utilizar `type` o `interface` para definir los tipos recibidos por Props. Sin embargo, hay quienes recomiendan usar `types` en aplicaciones y `interfaces` en bibliotecas. De los autores estudiados midudev y Goncy utilizan `interface` y vishwas `type`.
->
-> Algunas personas a las interfaces les ponen una `I`mayúscula al comienzo esto es algo que viene de otros lenguajes con tipado pero está desaconsejado en TS.
 
 
 
@@ -1466,11 +1719,168 @@ La ventaja del uso del contexto está en que todos los componentes tendrán acce
 
 
 
-TUTORIAL CODEVOLUTION INCOMPLETO
+# :warning: TUTORIAL CODEVOLUTION INCOMPLETO
 
 
 
-# Consumo API
+# Tipos en el hook `useRef`
+
+Suponemos que queremos tener una referencia a un div, en ese caso comenzaríamos escribiendo algo así:
+
+```
+const divRef = useRef()
+```
+
+
+
+```
+<div ref={divRef}>
+	...
+	...
+	...
+</div>
+```
+
+
+
+Como en la referencia guardaremos un div, colocamos `useRef<HTMLDivElement>()`, pero si ponemos solo esto nos dirá que **type undefined  is not assignable to type HTMLDivElement | null**, por lo tanto debemos darle un valor inicial a la referencia:
+
+```
+const divRef = useRef<HTMLDivElement>(null)
+```
+
+> Otra opción podría ser `const divRef = useRef<HTMLDivElement | undefined>()`
+
+
+
+# Fetching de Datos
+
+Inicialmente planteamos el fetching de la misma manera que siempre realizándolo dentro de un `useEffect`
+
+```
+useEffect(()=> {
+	fetch(http://localhost:3001/subs)
+		.then(res => res.json())
+		.then(subs => {
+			setSubs(subs)
+		})
+},[])
+```
+
+Sin embargo, debemos tener presente que como TypeScript no funciona en runtime sino en buildtime, si la API está devolviendo unas propiedades distintas a las que esperamos no obtendremos ningún error en pantalla pero la aplicación no funcionará del modo esperado. 
+En este caso `subs` deberá ser un array de `Sub` y como lo que me está llegando no respeta ese contrato tendré problemas.
+
+Si nos fijamos posicionando el mouse sobre  `res.json()` veremos que es de tipo `any`. Esto lo solucionamos de la siguiente manera:
+
+```typescript
+useEffect(()=> {
+	const fetchSubs = ():Promise<SubResponseFromApi[]> => {
+		return 
+		fetch(http://localhost:3001/subs)
+			.then(res => res.json())
+	}
+	
+	fetchSubs()
+		.then(subs => setSubs(subs))
+	
+},[])
+```
+
+Ahora sí, obtendremos un error en pantalla si hacemos esto.
+
+```typescript
+useEffect(()=> {
+	const fetchSubs = ():Promise<SubResponseFromApi[]> => {
+		return 
+		fetch(http://localhost:3001/subs)
+			.then(res => res.json())
+	}
+	const mapFromApiToSubs = (apiResponse: SubResponseFromApi[]):Array<Sub> => {
+		return apiResponse.map(subFromApi => {
+			const {
+				nick,
+				months: subMonths,
+				profileUrl: avatar
+				description
+			}=subFromApi;
+			
+			return {
+				nick, 
+				subMonths, 
+				avatar, 
+				description
+			}
+		})
+	}
+	
+	fetchSubs()
+		.then(apiSubs => {
+			 const subs = mapFromApiToSubs(apiSubs))
+			 setSubs(subs))
+		});
+	
+},[])
+```
+
+La separación en dos métodos facilita el testing a futuro, no necesariamente tendríamos que pegarle a la API real podría ser una data obtenida de local storage por ejemplo.
+
+Lo mismo expresado de una manaera mucho más compacta:
+
+```
+fetchSubs()
+	.then(mapFromApiToSubs)
+	.then(setSubs)
+		
+```
+
+
+
+* Otra opción podría ser utilizando `as`:
+
+```typescript
+useEffect(()=> {
+	fetch(http://localhost:3001/subs)
+		.then(res => res.json() as Promise<SubResponseFromApi[]>)
+		.then(subs => {
+			setSubs(subs)
+		})
+},[])
+```
+
+
+
+En `types.d.ts` además de `Sub` agregamos otro tipo `SubResponseFromApi`
+
+```typescript
+export interface Sub {
+  nick: string
+  subMonths: number
+  avatar: string
+  description?: string
+}
+
+export interface SubResponseFromApi {
+	nick:string
+	months: number
+	profileUrl: string
+	description: string
+}
+```
+
+También podríamos haber puesto directamente en plural `SubsResponseFromApi` y que fuera una array:
+
+```typescript
+export type SubsResponseFromApi = Array<{
+	nick:string
+	months: number
+	profileUrl: string
+	description: string
+}>
+```
+
+
+
+## Consumo API
 
 A continuación crearemos un ejemplo con TypeScript del consumo de una API con la estructura de archivos que tendría una aplicación real.
 
