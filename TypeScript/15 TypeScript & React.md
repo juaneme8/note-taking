@@ -6,7 +6,7 @@
 
 ## Introducción
 
-El uso de TypeScript en React nos permite la **detección temprana de bugs** potenciales en la medida que ingresamos el código en lugar de detectarlos en *runtime*. 
+El uso de TypeScript en React nos permite la **detección temprana de bugs** en la medida que ingresamos el código en, es deicr en *buildtime* lugar de detectarlos en *runtime*. 
 
 Nos permite describir la estructura o contrato de un objeto y de esta manera tener mejor **documentación y autocompletado**.
 
@@ -18,7 +18,7 @@ Como aspectos negativos exige ingresar mucho más código y estar atentos a los 
 
 
 
-### Observaciones 
+## Observaciones 
 
 * La extensión de los componentes es `.tsx` y para aquellos archivos que no tenemos jsx usamos `.ts`
 * Si en `App.tsx` nos posicionamos sobre el componente (:sparkles: en TS el hover es fundamental :sparkles:) veremos `function App(): JSX.Element` esto básicamente nos  está diciendo que devuelve JSX. Esto se trata de una **inferencia de tipo**.
@@ -48,15 +48,15 @@ npm init vite@latest
 
 Luego elegimos el nombre del proyecto, luego `react` como framework y por último indicamos que queremos usar TypeScript  eligiendo `react-ts`.
 
-Finalmente `cd nombre-proyecto` y ejecutamos `npm i`  y `npm run dev`
-
-
-
 > Si queremos hacerlo en un sólo paso: 
 >
 > ```
 > npx @vitejs/app mi-app --template react-ts
 > ```
+
+
+
+En cualquiera de los casos finalmente hacemos `cd mi-app` y ejecutamos `npm i`  y `npm run dev`
 
 
 
@@ -70,7 +70,7 @@ npx create-next-app@latest --ts
 
 # Tipado Componentes Funcionales
 
-Cuando tenemos un componente funcional una opción es expresarlo de este modo:
+Cuando tenemos un componente funcional una opción es tiparlo de este modo:
 
 ```typescript
 interface Props {
@@ -85,9 +85,9 @@ export default About;
 
 
 
-Otra opción es especificar que se trata de un componente funcional de React y esto lo hacemos con `React.FC`. Esto nos permitiría acceder a ciertas propiedades del componente como por ejemplo habilitarnos para recibir children aún sin especificarlo en la interface de las Props. Esto según algunos autores puede no ser aconsejable.
+Otra opción es especificar que se trata de un componente funcional de React y esto lo hacemos con `React.FC`. 
 
-Si posicionamos el mouse por encima del nombre del componente no nos aparecerá más `JSX.Element` y nos dirá en cambio `React.FC<Props>`.
+En ese caso si posicionamos el mouse por encima del nombre del componente no nos aparecerá más `JSX.Element` y nos dirá en cambio `React.FC<Props>`.
 
 ```jsx
 interface Props {
@@ -100,6 +100,8 @@ const About: React.FC<Props> = ({name}) => {
 export default About;
 ```
 
+> Esto nos permitiría acceder a ciertas propiedades del componente como por ejemplo habilitarnos para recibir `children` aún sin especificarlo en la interface de las Props. :skull_and_crossbones: Esto según algunos autores puede no ser aconsejable.
+>
 > También es posible en lugar de poner `React.FC<Props>` poner `React.FunctionComponent<Props>`
 
 
@@ -140,11 +142,13 @@ Consideramos un componente `Form` que consiste en una serie de inputs.
 
 ## Change Event
 
+A la hora de modificar el valor de los campos, trabajaremos con el evento `onChange` que actúa sobre la variable de estado `inputValues`.
+
 Ni bien creamos el método `  const handleChange = evt => {};` veremos que nos aparece **Parameter 'evt' implicitly has an 'any' type.** 
 
-Para ayudarnos a obtener el tipo que debe ser `evt` podemos utilizar una expresión en línea como vemos a continuación y luego posicionar el mouse sobre `evt` de donde obtendremos: `React.ChangeEvent<HTMLInputElement>`
+Para ayudarnos a obtener el tipo que debe ser `evt` podemos utilizar una **expresión en línea** como vemos a continuación y luego posicionar el mouse sobre `evt` de donde obtendremos: `React.ChangeEvent<HTMLInputElement>`
 
-```typescript
+```javascript
  <input
         onChange={evt => {
           setInputValues({ ...inputValues, [evt.target.name]: evt.target.value });
@@ -156,7 +160,9 @@ Para ayudarnos a obtener el tipo que debe ser `evt` podemos utilizar una expresi
       />
 ```
 
-Luego el bloque de código nos queda:
+
+
+Luego que obtuvimos este dato, quitamos la expresión en línea y lo colocamos en una función aparte poniendo `onChange={handleChange}`
 
 ```typescript
 import { useState } from 'react';
@@ -214,14 +220,71 @@ const handleChange = (evt: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElem
 
 
 
+# `type` vs `interface`
+
+Es prácticamente indistinto utilizar `type` o `interface` para definir los tipos recibidos por Props. Sin embargo, hay quienes recomiendan usar `types` en aplicaciones y `interfaces` en bibliotecas. 
+
+> :nerd_face: De los autores estudiados midudev y Goncy utilizan `interface` y Codevolution `type`.
+
+`interface` tiene la ventaja de que es extensible y además se puede poner dos veces la definición y se combinarán por lo que la mayoría de las veces será aconsejable utilizarlo en lugar de `type`.
+
+Algunas personas a las interfaces les ponen una `I`mayúscula al comienzo esto es algo que viene de otros lenguajes con tipado pero está desaconsejado en TS.
+
+> Cuando trabajamos con `type` separamos los elementos con `,` mientras que en `interface` lo hacemos con `;`
+
+## Inteface de lógica de Negocios
+
+Como regla mnemotécnica cuando hablamos de interfaces de la lógica de negocios podemos pensar que son aquellas que le contaríamos a un amigo no programador, por ejemplo "cada subscriptor va a tener un nick, un campo que almacena los meses que lleva suscripto, etc" y no le diríamos "voy a tener una variable de estado de tipo suscriptor"
+
+
+
+```typescript
+export interface Sub {
+	nick: string
+	subMonths: number
+	avatar:string
+	description?:string
+}
+```
+
+
+
+
+
+## Interface de Estado
+
+Puede ser conveniente tener una interface que usemos para manejar el estado del componente:
+
+```typescript
+interface FormState{
+	inputValues: Sub;
+	subs: Array<Subscriptor>
+	newSubsNumber: number
+}
+```
+
+De modo tal que luego al definir las variables de estado tengamos:
+
+```typescript
+const [inputValues, setInputValues] = useState<FormState['inputValues']>(INITIAL_STATE);
+const [subs, setSubs] = useState<AppState["subs"]>([]);
+const [newSubsNumber, setNewSubsNumbers] = useState<AppState["newSubsNumber"]>(0)
+```
+
+
+
 ## Reutilizar Interfaces
 
-Las interfaces que hacen a la lógica de negocios es conveniente exportarlas a un archivo `types.d.ts` (que creamos en `src` no en `components`) de modo tal que las reutilicemos. 
+Las interfaces que hacen a la lógica de negocios  es conveniente exportarlas a un archivo `types.d.ts` (que creamos en `src` no en `components`) de modo tal que las reutilicemos.
 
-Este archivo tiene unas características:
+Este archivo `types.d.ts` tiene unas características:
 
 * Las exportaremos para que sean utilizadas por cualquier paquete que utilice nuestra biblioteca.
-* En ese archivo sólo podemos tener definiciones
+* En ese archivo sólo podemos tener definiciones.
+* La idea será luego reutilizar esta interface en todos los lugares donde podamos.
+* **A la hora de importar lo hacemos sin la extensión** por lo que en este caso eliminamos `.d.ts` y quedará `import {Sum} from '../types'`.
+
+
 
 ```typescript
 export interface Sub {
@@ -233,8 +296,6 @@ export interface Sub {
 ```
 
 Lo anterior como forma parte de la lógica de negocios lo hemos extraído a un archivo aparte.
-
-La idea será luego reutilizar esta interface en todos los lugares donde podamos. Notar que **a la hora de importar lo hacemos sin la extensión** por lo que en este caso eliminamos `.d.ts` y quedará `import {Sum} from '../types'`.
 
 
 
@@ -281,13 +342,11 @@ export default Form;
 
 ```
 
-Notar que `FormState` lo dejamos preparado para si en un futuro tenemos que manejar otros estados, con `const [inputValues, setInputValues] = useState<FormState['inputValues']>({..})`
-
 
 
 ## Submit Event
 
-Suponemos que desde la función padre le pasamos a `Form` una prop `onNewSub` con referencia a una función`handleNewSub` que utiliza el setter. 
+Suponemos que desde la función padre le pasamos al componente `Form` una prop `onNewSub` con referencia a una función`handleNewSub` que utiliza el setter. 
 
 ```typescript
 import React, { useState } from 'react';
@@ -324,7 +383,7 @@ const Form = ({ onNewSub }: FormProps) => {
       //...
       //...
       //...
-      <button>Enviar</button>
+      <button>Send</button>
     </form>
   );
 };
@@ -381,268 +440,7 @@ Nunca debemos pasarle el set state "hacia abajo" al componente hijo, porque el t
 
 # :rotating_light: 
 
-Luego en `handleSubmit` trabajaremos con `setSubs(subs => [..subs,inputValues])`. :rotating_light: **Notar que recibo como props sólo a `setSubs` y también accedo al valor del estado `subs`** 
-
-
-
-# `type` vs `interface`
-
-Es prácticamente indistinto utilizar `type` o `interface` para definir los tipos recibidos por Props. Sin embargo, hay quienes recomiendan usar `types` en aplicaciones y `interfaces` en bibliotecas. De los autores estudiados midudev y Goncy utilizan `interface` y vishwas `type`.
-
-`interface` tiene la ventaja de que es extensible y además se puede poner dos veces la definición y se combinarán por lo que la mayoría de las veces será aconsejable utilizarlo en lugar de `type`.
-
-Algunas personas a las interfaces les ponen una `I`mayúscula al comienzo esto es algo que viene de otros lenguajes con tipado pero está desaconsejado en TS.
-
-
-
-# :tada:`useReducer`
-
-Queremos trabajar con un reducer que tenga como acciones actualizar un campo modificado en un formulario y resetearlos todos luego de hacer submit.
-
-Primero agregamos un botón Clear que al presionarlo invoque a `handleClear` que limpie todos los campos del formulario. A su vez invocamos este método al realizar el submit del formulario.
-
-```
- const handleClear = () => {
-    setInputValues({
-      nick: '',
-      subMonths: 0,
-      avatar: '',
-      description: '',
-    });
-  };
-```
-
-Como algo parecido también hacemos al inicializar la variable de estado, nos conviene utilizar una constante `INITIAL_STATE`.
-
-
-
-Queremos refactorizar para utilizar un `useReducer`:
-
-```typescript
-import { useReducer, useState } from 'react';
-import { Sub } from '../types';
-
-const INITIAL_STATE = {
-  nick: '',
-  subMonths: 0,
-  avatar: '',
-  description: '',
-};
-
-interface FormProps {
-  onNewSub: (sub: Sub) => void;
-}
-
-interface FormState {
-  inputValues: Sub;
-}
-
-type FormReducerAction =
-  | {
-      type: 'change_value';
-      payload: { inputName: string; inputValue: string };
-    }
-  | {
-      type: 'clear_form';
-    };
-
-const formReducer = (state: FormState['inputValues'], action: FormReducerAction) => {
-  switch (action.type) {
-    case 'change_value':
-      const { inputName, inputValue } = action.payload;
-      return {
-        ...state,
-        [inputName]: inputValue,
-      };
-    case 'clear_form':
-      return INITIAL_STATE;
-  }
-};
-
-const Form = ({ onNewSub }: FormProps) => {
-  // const [inputValues, setInputValues] = useState<FormState['inputValues']>(INITIAL_STATE);
-
-  const [inputValues, dispatch] = useReducer(formReducer, INITIAL_STATE);
-
-  const handleChange = (evt: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    // setInputValues({ ...inputValues, [evt.target.name]: evt.target.value });
-
-    const { name, value } = evt.target;
-    dispatch({
-      type: 'change_value',
-      payload: {
-        inputName: name,
-        inputValue: value,
-      },
-    });
-  };
-
-  const handleSubmit = (evt: React.FormEvent<HTMLFormElement>) => {
-    evt.preventDefault();
-    onNewSub(inputValues);
-    handleClear();
-  };
-
-  const handleClear = () => {
-    dispatch({ type: 'clear_form' });
-  };
-
-  console.log({ inputValues });
-
-  return (
-    <form onSubmit={handleSubmit}>
-      <input onChange={handleChange} type='text' name='nick' placeholder='nick' value={inputValues.nick} />
-      <input
-        onChange={handleChange}
-        type='number'
-        name='subMonths'
-        placeholder='subMonths'
-        value={inputValues.subMonths}
-      />
-      <input onChange={handleChange} type='text' name='avatar' placeholder='avatar' value={inputValues.avatar} />
-      <textarea onChange={handleChange} name='description' placeholder='description' value={inputValues.description} />
-      <button onClick={handleClear} type='button'>
-        Clear
-      </button>
-      <button type='submit'>Send</button>
-    </form>
-  );
-};
-
-export default Form;
-
-```
-
-> A la hora de definir `FormReducerAction` utilizamos `type` en lugar de `interface` pero por una cuestión de usar uno y el otro.
->
-> En el switch no colocamos default ya que TypeScript debido a lo que hemos especificado en `FormReducerAction` nos ayudará a que sólo ingresemos las dos opciones aceptadas, pero bien podríamos poner `default: return state`
-
-## :tada: Custom Hook
-
-Creamos en la raíz una carpeta `hooks` y extramos  `formReducer` y todos los tipos y constantes que de él dependan en un custom hook `useNewSubForm`.
-
-Ese archivo nos queda:
-
-```typescript
-import { useReducer } from 'react';
-import { Sub } from '../types';
-
-const INITIAL_STATE = {
-  nick: '',
-  subMonths: 0,
-  avatar: '',
-  description: '',
-};
-interface FormState {
-  inputValues: Sub;
-}
-
-type FormReducerAction =
-  | {
-      type: 'change_value';
-      payload: { inputName: string; inputValue: string };
-    }
-  | {
-      type: 'clear_form';
-    };
-
-const formReducer = (state: FormState['inputValues'], action: FormReducerAction) => {
-  switch (action.type) {
-    case 'change_value':
-      const { inputName, inputValue } = action.payload;
-      return {
-        ...state,
-        [inputName]: inputValue,
-      };
-    case 'clear_form':
-      return INITIAL_STATE;
-  }
-};
-const useNewSubform = () => {
-  return useReducer(formReducer, INITIAL_STATE);
-};
-
-export default useNewSubform;
-
-
-```
-
-Mientras que `Form.tsx` nos queda:
-
-```typescript
-import useNewSubform from '../hooks/useNewSubform';
-import formReducer from '../hooks/useNewSubform';
-import { Sub } from '../types';
-
-const INITIAL_STATE = {
-  nick: '',
-  subMonths: 0,
-  avatar: '',
-  description: '',
-};
-
-interface FormProps {
-  onNewSub: (sub: Sub) => void;
-}
-
-const Form = ({ onNewSub }: FormProps) => {
-  // const [inputValues, setInputValues] = useState<FormState['inputValues']>(INITIAL_STATE);
-
-  const [inputValues, dispatch] = useNewSubform();
-
-  const handleChange = (evt: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    // setInputValues({ ...inputValues, [evt.target.name]: evt.target.value });
-
-    const { name, value } = evt.target;
-    dispatch({
-      type: 'change_value',
-      payload: {
-        inputName: name,
-        inputValue: value,
-      },
-    });
-  };
-
-  const handleSubmit = (evt: React.FormEvent<HTMLFormElement>) => {
-    evt.preventDefault();
-    onNewSub(inputValues);
-    handleClear();
-  };
-
-  const handleClear = () => {
-    dispatch({ type: 'clear_form' });
-  };
-
-  console.log({ inputValues });
-
-  return (
-    <form onSubmit={handleSubmit}>
-      <input onChange={handleChange} type='text' name='nick' placeholder='nick' value={inputValues.nick} />
-      <input
-        onChange={handleChange}
-        type='number'
-        name='subMonths'
-        placeholder='subMonths'
-        value={inputValues.subMonths}
-      />
-      <input onChange={handleChange} type='text' name='avatar' placeholder='avatar' value={inputValues.avatar} />
-      <textarea onChange={handleChange} name='description' placeholder='description' value={inputValues.description} />
-      <button onClick={handleClear} type='button'>
-        Clear
-      </button>
-      <button type='submit'>Send</button>
-    </form>
-  );
-};
-
-export default Form;
-```
-
-
-
-### Ocultar Implementación
-
-La idea de utilizar custom hooks es no mostrar fuera de ellos qué implementación tienen. Por ello quizás en lugar de 
+Luego en `handleSubmit` trabajaríamos con `setSubs(subs => [..subs,inputValues])`. :rotating_light: **Notar que recibo como props sólo a `setSubs` y también accedo al valor del estado `subs`** 
 
 
 
@@ -664,7 +462,7 @@ export const Greet = (props) => {
 
 En ese momento obtendremos el mensaje `'props' implicitly has 'any' type`. Esto significa que debemos indicar la estructura de las props a recibir. 
 
-Esto lo hacemos utilizando la palabra reservada `type` con la cual definimos la estructura de las `props` que recibirá el componente. Luego la utilizamos indicando `(props: GreetProps)`.
+Esto como ya vimos podemos hacerlo utilizando la palabra reservada `type` con la cual definimos la estructura de las `props` que recibirá el componente. Luego la utilizamos indicando `(props: GreetProps)`.
 
 ```tsx
 type GreetProps = {
@@ -863,7 +661,7 @@ Trabajaremos con dos de los eventos más usados click event de un `button` y cha
 
 Trabajamos con un componente `Input` que recibe como props `handleClick`.
 
-En primer lugar consideramos el caso en que no recibimos ningún parámetro y tampoco no retornamos ninguno.
+En primer lugar consideramos el caso en que no recibimos ningún parámetro y tampoco no retornamos ninguno por eso ponemos `handleClick: () => void`.
 
 ```tsx
 type ButtonProps = {
@@ -876,9 +674,9 @@ export const Button = (props: ButtonProps) => {
 }
 ```
 
-> Notar que al poner `handleClick: () => void` indicamos que no recibe ningún parámetro y no retorna nada, por ejemplo consideramos que lo usaremos para hacer un llamado a una API.
 
-Luego en `App.tsx` tendremos ` <Button handleClick={() => console.log('Button clicked')} />`
+
+Al utilizar este componente en `App.tsx` tendremos ` <Button handleClick={() => console.log('Button clicked')} />`
 
 
 
@@ -975,7 +773,9 @@ export const Input = ({value,handleChange}: InputProps) => {
 
 En componentes simples tiene sentido definir los tipos en la parte superior, sin embargo cuando estos tienen múltiples tipos nos conviene hacerlo en un archivo aparte.
 
-Por ejemplo tenemos `Person.tsx` con el siguiente código:
+Si son pocos tipos podemos utilizar diretamente algo como `types.d.ts` mientras que otra alternativa es tener un archivo con los tipos de cada componente como mostraremos a continuación.
+
+Inicialmente en `Person.tsx` tenemos:
 
 ```tsx
 type PersonProps = {
@@ -1006,7 +806,7 @@ export types PersonProps = {
 }
 ```
 
-Y los importamos en `Person.tsx`
+Y los importamos en `Person.tsx` 
 
 ```tsx
 import {PersonProps} from './Person.types'
@@ -1147,15 +947,21 @@ const Subs = (props: Props) => {
 export default Subs;
 ```
 
+>  Notar que como en el valor inicial uno de los elementos del array tiene el campo `description` y el otro no lo tiene, si nos posicionamos sobre `subs` inferirá que su tipo es la unión de ambos tipos de objetos:
 
 
-# :bar_chart: pravatar.cc
+
+#### :bar_chart: pravatar.cc
 
 Como avatar placeholder utilizamos el servicio https://pravatar.cc
 
+```
+https://i.pravatar.cc/150?u=juan'
+```
+
+> La dirección anterior nos muestra un avatar de 150px que será único de acuerdo al parámetro  `u` que le pasamos.
 
 
-En ese caso como en el valor inicial uno de los elementos del array tiene el campo `description` y el otro no lo tiene, si nos posicionamos sobre `subs` inferirá que su tipo es la unión de ambos tipos de objetos:
 
 ```typescript
 const subs: ({
@@ -1171,7 +977,7 @@ const subs: ({
 })[]
 ```
 
-Como `description` es opcional si queremos usar un método debemos utilizar *optional chaining* ya que podrá ser *undefined*:
+Como `description` es opcional si queremos usar un método del string debemos utilizar *optional chaining* ya que podrá ser *undefined*:
 
 ```typescript
 <h2>{sub.description?.substring(0, 6)}</h2>
@@ -1231,27 +1037,7 @@ export default Subs;
 
 ```
 
-Hemos puesto `const [subs, setSubs] = useState<Subscriptor[]>([]);` pero podríamos haber puesto también `const [subs, setSubs] = useState<Array<Subscriptor>>([]);`
-
-
-
-### Manejo del Estado
-
-Puede ser conveniente tener una interface que usemos para manejar el estado del componente:
-
-```
-interface AppState{
-	subs: Array<Subscriptor>
-	newSubsNumber: number
-}
-```
-
-De modo tal que luego al definir las variables de estado tengamos:
-
-```
-const [subs, setSubs] = useState<AppState["subs"]>([]);
-const [newSubsNumber, setNewSubsNumbers] = useState<AppState["newSubsNumber"]>(0)
-```
+Hemos puesto `const [subs, setSubs] = useState<Subscriptor[]>([]);` pero podríamos haber puesto también `const [subs, setSubs] = useState<Array<Subscriptor>>([]);` hay quienes consideran esta opción más fácil de leer pues empezando de izquierda a derecha rápidamente nos damos cuenta que se trata de una array.
 
 
 
@@ -1259,7 +1045,7 @@ const [newSubsNumber, setNewSubsNumbers] = useState<AppState["newSubsNumber"]>(0
 
 En ocasiones no conocemos el valor inicial de una variable de estado y la asignaremos luego. 
 
-Supongamos que trabajamos con un componente `User.tsx` que cuenta también con dos botones de Login y Logut y queremos que al loguearnos se almacene en una variable de estado `user` los datos de un usuario de tipo `AuthUser`. 
+Supongamos que trabajamos con un componente `User.tsx` que cuenta también con dos botones de Login y Logut y queremos que al loguearnos se almacene en una variable de estado `user` los datos de un usuario de tipo `AuthUser` (un tipo que es un objeto con campos `name` y `mail`) 
 
 Como inicialmente no disponemos de estos datos le damos valor `null`
 
@@ -1306,13 +1092,13 @@ export const User = () => {
 
 
 
-> A la hora de renderizar estos campos veremos que al hacer click en el Intellicense se incluye el *optional chaining operator* automáticamente  ya que `user` puede ser `null` y sólo queremos acceder a las propiedades `name` e `email` si no lo es.
+> A la hora de renderizar estos campos veremos que al hacer click en el Intellisence se incluye el *optional chaining operator* automáticamente  ya que `user` puede ser `null` y sólo queremos acceder a las propiedades `name` e `email` si no lo es.
 
 
 
 ## `useState` Type Assertion
 
-Anteriormente vimos que la posibilidad de que el valor sea `null` nos exige chequear siempre que no lo sea antes de acceder a las propiedades, es por eso que si  tenemos absoluta certeza de que `user` nunca será `null` (por ejemplo si se seteará en un efecto `useEffect` y no tenemos el método logout) podemos definir como valor inicial un objeto vacío como si fuera de tipo `AuthUser` y esto lo hacemos con el keyword `as`.
+Anteriormente vimos que la posibilidad de que el valor sea `null` nos exige chequear siempre que no lo sea antes de acceder a las propiedades, es por eso que si tenemos absoluta certeza de que `user` nunca será `null` (por ejemplo si se seteará en un efecto `useEffect` y no tenemos el método logout) podemos definir como valor inicial un objeto vacío como si fuera de tipo `AuthUser` y esto lo hacemos con el keyword `as`.
 
 `const [user, setUser] = useState<AuthUser>({} as AuthUser)`
 
@@ -1358,7 +1144,7 @@ export const Counter = () => {
 }
 ```
 
-Veremos que tenemos líneas rojas indicandonos errores en la línea `function reducer(state, action) {` debido a que debemos especificar el tipo de `state` y `action`. Como sabemos el tipo de datos que van a almacenar estar variables definimos los `type`
+Veremos que tenemos líneas rojas indicándonos errores en la línea `function reducer(state, action) {` debido a que debemos especificar el tipo de `state` y `action`. Como sabemos el tipo de datos que van a almacenar estar variables, definimos los `type`
 
 
 
@@ -1403,7 +1189,7 @@ export const Counter = () => {
 }
 ```
 
-Luego debido a la inferencia de tipos veremos que si posicionamos el mouse en `const [state, dispatch] = useReducer(reducer, initialState);` en `state` sabrá que es de tipo `CounterState`, en `dispatch` de tipo `React.Dispatch<CounterAction>` (esto podría ser útil si tenemos que pasar a un componente `state` o `dispatch` como props).
+Luego debido a la inferencia de tipos veremos que si posicionamos el mouse en `const [state, dispatch] = useReducer(reducer, initialState);` en `state` sabrá que es de tipo `CounterState`, en `dispatch` de tipo `React.Dispatch<CounterAction>` (este dato podría ser útil si tenemos que pasar a un componente `state` o `dispatch` como props).
 
 
 
@@ -1487,6 +1273,10 @@ type CounterAction = {
 
 Pero esto traería el incoveniente que de que dentro del case `increment` y `decrement` como esos sí usan `action.payload` nos aparecería "Object is possibly 'undefined'", lo cual podríamos solucionar colocando `(action.payload || 0)`.
 
+
+
+## Discriminated Unions
+
 Una solución mas conveniente es usar lo que se conoce como **discriminated unions** sería creando dos tipos `UpdateAction` (con `type` y `payload`), `ResetAction` )(sólo con `type `) y declarando `CounterAction` como la unión de los dos.
 
  
@@ -1545,15 +1335,315 @@ export const Counter = () => {
 
 
 
+# :tada:`useReducer`
+
+Queremos trabajar con un reducer que tenga dos acciones una para actualizar un campo modificado en un formulario y para resetearlos todos luego de hacer submit.
+
+Primero agregamos un botón Clear que al presionarlo invoque a `handleClear` que limpie todos los campos del formulario. A su vez invocamos este método al realizar el submit del formulario.
+
+```typescript
+ const handleClear = () => {
+    setInputValues({
+      nick: '',
+      subMonths: 0,
+      avatar: '',
+      description: '',
+    });
+  };
+```
+
+Como algo parecido también hacemos al inicializar la variable de estado, nos conviene utilizar una constante `INITIAL_STATE`.
+
+
+
+Queremos refactorizar para utilizar un `useReducer`:
+
+```typescript
+import { useReducer, useState } from 'react';
+import { Sub } from '../types';
+
+const INITIAL_STATE = {
+  nick: '',
+  subMonths: 0,
+  avatar: '',
+  description: '',
+};
+
+interface FormProps {
+  onNewSub: (sub: Sub) => void;
+}
+
+interface FormState {
+  inputValues: Sub;
+}
+
+type FormReducerAction =
+  | {
+      type: 'change_value';
+      payload: { inputName: string; inputValue: string };
+    }
+  | {
+      type: 'clear_form';
+    };
+
+const formReducer = (state: FormState['inputValues'], action: FormReducerAction) => {
+  switch (action.type) {
+    case 'change_value':
+      const { inputName, inputValue } = action.payload;
+      return {
+        ...state,
+        [inputName]: inputValue,
+      };
+    case 'clear_form':
+      return INITIAL_STATE;
+  }
+};
+
+const Form = ({ onNewSub }: FormProps) => {
+  // const [inputValues, setInputValues] = useState<FormState['inputValues']>(INITIAL_STATE);
+
+  const [inputValues, dispatch] = useReducer(formReducer, INITIAL_STATE);
+
+  const handleChange = (evt: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    // setInputValues({ ...inputValues, [evt.target.name]: evt.target.value });
+
+    const { name, value } = evt.target;
+    dispatch({
+      type: 'change_value',
+      payload: {
+        inputName: name,
+        inputValue: value,
+      },
+    });
+  };
+
+  const handleSubmit = (evt: React.FormEvent<HTMLFormElement>) => {
+    evt.preventDefault();
+    onNewSub(inputValues);
+    handleClear();
+  };
+
+  const handleClear = () => {
+    dispatch({ type: 'clear_form' });
+  };
+
+  console.log({ inputValues });
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input onChange={handleChange} type='text' name='nick' placeholder='nick' value={inputValues.nick} />
+      <input
+        onChange={handleChange}
+        type='number'
+        name='subMonths'
+        placeholder='subMonths'
+        value={inputValues.subMonths}
+      />
+      <input onChange={handleChange} type='text' name='avatar' placeholder='avatar' value={inputValues.avatar} />
+      <textarea onChange={handleChange} name='description' placeholder='description' value={inputValues.description} />
+      <button onClick={handleClear} type='button'>
+        Clear
+      </button>
+      <button type='submit'>Send</button>
+    </form>
+  );
+};
+
+export default Form;
+
+```
+
+> Notar que el dispatch lo hago adentro del `handleChange`, eso no cambia respecto de cuando utilizábamos `useState`.
+>
+> A la hora de definir `FormReducerAction` utilizamos `type` en lugar de `interface` pero por una cuestión de usar tanto uno como el otro.
+>
+> En el switch no colocamos default ya que TypeScript debido a lo que hemos especificado en `FormReducerAction` nos asegurará que sólo ingresemos las dos opciones aceptadas, pero bien podríamos poner `default: return state`
+>
+> Al definir `FormReducerAction` podría haber usado **discriminated unions** y definir un tipo `ChangeAction` y otro `ClearAction` y finalmente definirlo como la unión entre ambos.
+
+
+
+## :tada: Custom Hook
+
+Creamos en la raíz una carpeta `hooks` y extraemos  `formReducer` y todos los tipos y constantes que de él dependan en un custom hook `useNewSubForm`.
+
+Ese archivo nos queda:
+
+```typescript
+import { useReducer } from 'react';
+import { Sub } from '../types';
+
+const INITIAL_STATE = {
+  nick: '',
+  subMonths: 0,
+  avatar: '',
+  description: '',
+};
+interface FormState {
+  inputValues: Sub;
+}
+
+type FormReducerAction =
+  | {
+      type: 'change_value';
+      payload: { inputName: string; inputValue: string };
+    }
+  | {
+      type: 'clear_form';
+    };
+
+const formReducer = (state: FormState['inputValues'], action: FormReducerAction) => {
+  switch (action.type) {
+    case 'change_value':
+      const { inputName, inputValue } = action.payload;
+      return {
+        ...state,
+        [inputName]: inputValue,
+      };
+    case 'clear_form':
+      return INITIAL_STATE;
+  }
+};
+const useNewSubform = () => {
+  return useReducer(formReducer, INITIAL_STATE);
+};
+
+export default useNewSubform;
+
+
+```
+
+Mientras que `Form.tsx` nos queda:
+
+```typescript
+import useNewSubform from '../hooks/useNewSubform';
+import formReducer from '../hooks/useNewSubform';
+import { Sub } from '../types';
+
+const INITIAL_STATE = {
+  nick: '',
+  subMonths: 0,
+  avatar: '',
+  description: '',
+};
+
+interface FormProps {
+  onNewSub: (sub: Sub) => void;
+}
+
+const Form = ({ onNewSub }: FormProps) => {
+  // const [inputValues, setInputValues] = useState<FormState['inputValues']>(INITIAL_STATE);
+
+  const [inputValues, dispatch] = useNewSubform();
+
+  const handleChange = (evt: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    // setInputValues({ ...inputValues, [evt.target.name]: evt.target.value });
+
+    const { name, value } = evt.target;
+    dispatch({
+      type: 'change_value',
+      payload: {
+        inputName: name,
+        inputValue: value,
+      },
+    });
+  };
+
+  const handleSubmit = (evt: React.FormEvent<HTMLFormElement>) => {
+    evt.preventDefault();
+    onNewSub(inputValues);
+    handleClear();
+  };
+
+  const handleClear = () => {
+    dispatch({ type: 'clear_form' });
+  };
+
+  console.log({ inputValues });
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input onChange={handleChange} type='text' name='nick' placeholder='nick' value={inputValues.nick} />
+      <input
+        onChange={handleChange}
+        type='number'
+        name='subMonths'
+        placeholder='subMonths'
+        value={inputValues.subMonths}
+      />
+      <input onChange={handleChange} type='text' name='avatar' placeholder='avatar' value={inputValues.avatar} />
+      <textarea onChange={handleChange} name='description' placeholder='description' value={inputValues.description} />
+      <button onClick={handleClear} type='button'>
+        Clear
+      </button>
+      <button type='submit'>Send</button>
+    </form>
+  );
+};
+
+export default Form;
+```
+
+
+
+#### Ocultar Implementación
+
+La idea de utilizar custom hooks es no mostrar fuera de ellos qué implementación tienen. Por ello quizás en lugar de tener en el hook:
+
+```typescript
+const useNewSubform = () => {
+  return useReducer(formReducer, INITIAL_STATE);
+};
+export default useNewSubform;
+```
+
+Y en donde lo utilizamos:
+
+```typescript
+const [inputValues, dispatch] = useNewSubform();
+```
+
+De manera de ocultar el `dispatch` podemos tener en el hook:
+
+```typescript
+const useNewSubform = () => {
+  const [inputValues, dispatch] = useReducer(formReducer, INITIAL_STATE);
+  
+  const clearForm = useCallback(()=> dispatch({type:'clear'}),[])
+  
+  return {
+  	formState: inputValues,
+  	clearForm
+  }
+};
+export default useNewSubform;
+```
+
+Faltaría completarlo con la acción de modificar un campo del formulario pero sirve para tener una idea de lo que tendríamos que hacer.
+
+
+
+Finalmente lo utilizaríamos así:
+
+```typescript
+const [formState, clearForm] = useNewSubform();
+```
+
+
+
+
+
 # Tipos en el hook `useContext`
 
 A la hora de trabajar con TypeScript y React Context usando hooks trabajaremos con `useContext` para consumir el valor del contexto.
 
 ## `useContext` con tipo inferido de valor inicial
 
+> :rotating_light: El caso que se mostrará es un poco complejo porque trabaja con un valor a compartir que proviene de otro archivo y también el contexto en sí se lo trabaja en un archivo aparte y utilizando `children`, en caso de dudas recurrir a notas iniciales de Context API.
+
 A los fines didácticos consideraremos el uso de React Context para proporcionar un tema a nuestros componentes usando Context API. Para ello asumimos que tenemos los archivos `theme.ts`, `Box.tsx` y `ThemeContext.tsx`
 
-Queremos usar el tema como un contexto y usarlo para estilar el `div` dentro de `Box`
+Queremos usar el tema como un contexto y usarlo para estilar un `div` dentro de `Box`
 
 
 
@@ -1574,7 +1664,7 @@ export const theme = {
 
 
 
-A continuación en `ThemeContext.tsx` (notar que el componente se llama `ThemeContextProvider`) creamos el contexto `ThemeContext` haciendo uso de `createContext` (esto sucede fuera del componente y quizás podamos recordarlo más fácil si vemos que se exporta para ser usado luego en `Box.tsx`).
+En un archivo `ThemeContext.tsx` creamos el componente `ThemeContextProvider` (notar que difiere con el nombre del archivo porque `ThemeContext` quiero que sea el contexto) y en él creamos el contexto `ThemeContext` haciendo uso de `createContext` (**esto sucede fuera del componente** y quizás podamos recordarlo más fácil si vemos que se exporta para ser usado luego en `Box.tsx`).
 
 
 
@@ -1599,7 +1689,7 @@ export const ThemeContextProvider = ({ children }: ThemeContextProviderProps) =>
 
 
 
-En `App.tsx`
+En `App.tsx` importamos `ThemeContextProvider`
 
 ```tsx
 <ThemeContextProvider>
@@ -1609,7 +1699,7 @@ En `App.tsx`
 
 
 
-En `Box.tsx`
+En `Box.tsx` importamos `ThemeContext` y hacemos uso de dicho contexto.
 
 ```tsx
 import { useContext } from "react"
@@ -1633,7 +1723,7 @@ En este caso simplifica mucho las cosas el hecho de que conocemos el valor del c
 
 ## `useContext` con tipo del valor inicial distinto del valor futuro
 
-* `UserContext.tsx` que es el encargado de manejar el estado de autenticación de un usuario. Contará con una variable de estado `user` (que valdrá null inicialmente y al loguearse tendrá el nombre de usuario y mail) y una función para loguearse. Recibirá como prop `children` un componente al cual le pasará este contexto.
+* `UserContext.tsx` que es el encargado de manejar el estado de autenticación de un usuario. Contará con una variable de estado `user` (que valdrá `null` inicialmente y al loguearse tendrá `name` y `email`) y una función para loguearse. Recibirá como prop `children` un componente al cual le pasará este contexto.
 
   > El archivo se llama `UserContext.tsx`
   >
@@ -1717,7 +1807,7 @@ export const User = () => {
 }
 ```
 
-Notar que haciendo uso de **type assertion** `createContext({} as UserContextType)` no tenemos que chequear que sea null ni usar el optional chaining operator, cosa que sí sucedería si le decimos que puede ser `null`: `createContext<UserContextType | null>(null)`
+Notar que haciendo uso de **type assertion** o *type casting* `createContext({} as UserContextType)` no tenemos que chequear que sea null ni usar el optional chaining operator, cosa que sí sucedería si le decimos que puede ser `null`: `createContext<UserContextType | null>(null)`
 
 La ventaja del uso del contexto está en que todos los componentes tendrán acceso al estado sin que tengan que recibirlo mediante props.
 
@@ -1729,15 +1819,15 @@ La ventaja del uso del contexto está en que todos los componentes tendrán acce
 
 # Tipos en el hook `useRef`
 
-Suponemos que queremos tener una referencia a un div, en ese caso comenzaríamos escribiendo algo así:
+Suponemos que queremos tener una referencia a un `div`, en ese caso comenzaríamos escribiendo algo así:
 
-```
+```typescript
 const divRef = useRef()
 ```
 
 
 
-```
+```typescript
 <div ref={divRef}>
 	...
 	...
@@ -1747,9 +1837,9 @@ const divRef = useRef()
 
 
 
-Como en la referencia guardaremos un div, colocamos `useRef<HTMLDivElement>()`, pero si ponemos solo esto nos dirá que **type undefined  is not assignable to type HTMLDivElement | null**, por lo tanto debemos darle un valor inicial a la referencia:
+Como en la referencia guardaremos un div, colocamos un tipo genérico `useRef<HTMLDivElement>()`, pero si ponemos solo esto nos dirá que **type undefined  is not assignable to type HTMLDivElement | null**, por lo tanto debemos darle un valor inicial a la referencia:
 
-```
+```typescript
 const divRef = useRef<HTMLDivElement>(null)
 ```
 
@@ -1790,7 +1880,7 @@ useEffect(()=> {
 },[])
 ```
 
-Ahora sí, obtendremos un error en pantalla si hacemos esto.
+Ahora sí, obtendremos un error en pantalla si no mapeamos para solucionar las discrepancias entre valor esperado y valor devuelto por la API. Esto es lo que hacemos a continuación:
 
 ```typescript
 useEffect(()=> {
@@ -1828,7 +1918,7 @@ useEffect(()=> {
 
 La separación en dos métodos facilita el testing a futuro, no necesariamente tendríamos que pegarle a la API real podría ser una data obtenida de local storage por ejemplo.
 
-Lo mismo expresado de una manaera mucho más compacta:
+Lo mismo expresado de una manera mucho más compacta:
 
 ```
 fetchSubs()
@@ -1839,7 +1929,7 @@ fetchSubs()
 
 
 
-* Otra opción podría ser utilizando `as`:
+* Otra opción podría ser utilizando **type assertion** con `as`:
 
 ```typescript
 useEffect(()=> {
@@ -1927,6 +2017,29 @@ Son dos formas de hacer lo mismo pero en la anterior no tenemos que ver la imple
 
 
 
+## Refactoring 
+
+Nunca en los componentes deberemos tener fetching de datos (no debería estar la palabra fetch ni axios), debemos tener en cambio una carpeta `services` y dentro un archivo `getAllSubs` .
+
+Luego en ese archivo haríamos:
+
+```typescript
+export const getAllsubs = () => {
+	return fetchSubs().then(mapFromApiToSubs)
+}
+```
+
+Finalmente en la implementación:
+
+```typescript
+const [subs, setSubs] = useState<AppState["subs"]>([])
+useEffect(()=> {
+	getAllSubs().then(setSubs)
+},[])
+```
+
+De hecho esto último lo extraeríamos a un custom hook.
+
 ## Consumo API
 
 A continuación crearemos un ejemplo con TypeScript del consumo de una API con la estructura de archivos que tendría una aplicación real.
@@ -1948,7 +2061,7 @@ export interface Gift {
 }
 ```
 
-En `api.ts` suponemos que queremos retornar los primeros tres elementos:
+En `api.ts` suponemos que queremos retornar los primeros tres elementos y mapeamos para que cumpla el contrato esperado por la interface `Gift`. Como vimos anteriormente podríamos tener una interface `GiftResponseFromAPI` y tendría todos los campos de la API.
 
 ```typescript
 import { Gift } from "./types";
