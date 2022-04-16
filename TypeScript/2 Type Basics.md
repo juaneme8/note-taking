@@ -57,7 +57,7 @@ ninja = {
 A la hora de hacer esto debemos incluir todas las propiedades del objeto inicial, no siendo posible agregar nuevas propiedades acá tampoco. 
 
 # Tipos explícitos
-Hasta el momento TypeScript infiere el tipo de la variable de acuerdo al valor que le damos, sin embargo, en ocasiones puede que queramos inicializar la variable sin darle un valor por lo que no podría inferirlo. En estos casos le damos a la variable un tipo de manera explícita.
+Hasta el momento vimos cómo TypeScript infiere el tipo de la variable de acuerdo al valor que le damos, sin embargo, en ocasiones puede que queramos inicializar la variable sin darle un valor por lo que no podría inferirlo. En estos casos le damos a la variable un tipo de manera explícita.
 
 ```ts
 let character:string;

@@ -1,9 +1,9 @@
 # TypeScript
-> Basado en la [playlist](https://www.youtube.com/watch?v=2pZmKW9-I_k&list=PL4cUxeGkcC9gUgr39Q_yD6v-bSyMwKPUI&ab_channel=TheNetNinja) de The Net Ninja - [Rrepositorio](https://github.com/iamshaunjp/typescript-tutorial)
+> Basado en la [playlist](https://www.youtube.com/watch?v=2pZmKW9-I_k&list=PL4cUxeGkcC9gUgr39Q_yD6v-bSyMwKPUI&ab_channel=TheNetNinja) de The Net Ninja - [Repositorio](https://github.com/iamshaunjp/typescript-tutorial)
 > Los archivos de este proyecto están en `md-typescript`
 
 # Introducción
-TypeScript es un **lenguaje de programación** creado por Microsoft construido encima de JavaScript y se lo conoce como un **superset de JavaScript** que extiende a ese lenguaje con nuevas características y sintaxis. Cualquier código de JavaScript es código TypeScript, por lo que pueden convivir en un mismo proyecto
+TypeScript es un **lenguaje de programación** creado por Microsoft construído encima de JavaScript y se lo conoce como un **superset de JavaScript** que extiende a ese lenguaje con nuevas características y sintaxis. Cualquier código de JavaScript es código TypeScript, por lo que pueden convivir en un mismo proyecto.
 
 Una herramienta interesante es el siguiente [TypeScript Playground](https://www.typescriptlang.org/play) donde podremos ejecutar código TS y probar en la medida que vamos aprendiendo.
 
@@ -26,7 +26,7 @@ npm install -g typescript
 
 
 ## Compilar `.ts`
-Al trabajar con TypeScript los archivos deben tener la extensión `.ts` (`tsx` al trabajar con React) , supongamos que creamos el archivo `sandbox.ts`  de modo que para compilarlo y obtener `sandbox.js` debemos ejecutar `tsc sandbox.ts`
+Al trabajar con TypeScript los archivos deben tener la extensión `.ts` (`tsx` al trabajar con React) , supongamos que creamos el archivo `sandbox.ts` , debemos ejecutar `tsc sandbox.ts` para compilarlo y obtendremos `sandbox.js` 
 
 En cambio si quisiéramos que el archivo de salida tuviera otro nombre podemos hacerlo hacerlo con: `tsc sandbox.ts output.js`
 
@@ -57,7 +57,7 @@ Mediante el comando `tsc --init` inicializamos un archivo de configuración `tsc
 2. * Donde dice `"//outDir:" "./` debemos descomentarlo y poner:
 `"outDir": "./public",`
 
-A partir de ahora para compilar debemos ejecutar simplemente `tsc` y si queremos configurar un **watch** podemos ejecutar `tsc -w`  con lo cual estará atento a los cambios que se realicen en **todos los archivos** de `src` y los compilará automáticamente.
+A partir de ahora para compilar debemos ejecutar simplemente `tsc` y si queremos configurar un **watch** podemos ejecutar `tsc -w`  con lo cual estará atento a los cambios que se realicen en **todos los archivos** de `src` y los compilará automáticamente a `public`.
 
 **NOTA:** Si creamos un archivo fuera de la carpeta `src` también nos lo compilará a la carpeta `public`. Como este comportamiento no es el deseado, debemos agregar la siguiente propiedad `tsconfig.json`
 ```json
