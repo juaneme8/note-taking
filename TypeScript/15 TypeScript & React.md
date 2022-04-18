@@ -85,7 +85,7 @@ export default About;
 
 
 
-Otra opción es especificar que se trata de un componente funcional de React y esto lo hacemos con `React.FC`. 
+Otra opción es especificar que se trata de un componente funcional de React y esto lo hacemos con `React.FC` o `React.VFC`.
 
 En ese caso si posicionamos el mouse por encima del nombre del componente no nos aparecerá más `JSX.Element` y nos dirá en cambio `React.FC<Props>`.
 
@@ -230,7 +230,7 @@ Es prácticamente indistinto utilizar `type` o `interface` para definir los tipo
 
 Algunas personas a las interfaces les ponen una `I`mayúscula al comienzo esto es algo que viene de otros lenguajes con tipado pero está desaconsejado en TS.
 
-> Cuando trabajamos con `type` separamos los elementos con `,` mientras que en `interface` lo hacemos con `;`
+> Cuando trabajamos con `type` separamos los elementos con `,` mientras que en `interface` lo hacemos con `;` (o podemos no poner nada directamente).
 
 ## Inteface de lógica de Negocios
 
@@ -2042,7 +2042,9 @@ De hecho esto último lo extraeríamos a un custom hook.
 
 ## Consumo API
 
-A continuación crearemos un ejemplo con TypeScript del consumo de una API con la estructura de archivos que tendría una aplicación real.
+A continuación crearemos un ejemplo con TypeScript del consumo de una API con la estructura de archivos que tendría una aplicación real. 
+
+:open_file_folder: Repositorio **[md-typescript-fetch](https://github.com/juaneme8/md-typescript-fetch)**
 
 Utilizaremos en el ejemplo Punk API (https://punkapi.com/) que devuelve un listado de cervezas cuando le pegamos al endpoint https://api.punkapi.com/v2/beers.
 
