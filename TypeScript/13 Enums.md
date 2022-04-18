@@ -49,3 +49,9 @@ const docTwo: Resource<object> = {
 };
 
 ```
+
+
+
+## Enum vs Union Types
+
+Existe una disputa entre sí conviene usar enums o union types como podemos ver en [este artículo](https://blog.bam.tech/developer-news/should-you-use-enums-or-union-types-in-typescript)

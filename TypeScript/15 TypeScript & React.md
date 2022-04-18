@@ -85,7 +85,7 @@ export default About;
 
 
 
-Otra opción es especificar que se trata de un componente funcional de React y esto lo hacemos con `React.FC` o `React.VFC`.
+Otra opción es especificar que se trata de un componente funcional de React y esto lo hacemos con `React.FC` (tiene definido implícitamente que vamos a recibir una prop `children` que es un `React.Node`) o `React.VFC` (es lo aconsejable cuando no usamos `children`)
 
 En ese caso si posicionamos el mouse por encima del nombre del componente no nos aparecerá más `JSX.Element` y nos dirá en cambio `React.FC<Props>`.
 
@@ -100,9 +100,9 @@ const About: React.FC<Props> = ({name}) => {
 export default About;
 ```
 
-> Esto nos permitiría acceder a ciertas propiedades del componente como por ejemplo habilitarnos para recibir `children` aún sin especificarlo en la interface de las Props. :skull_and_crossbones: Esto según algunos autores puede no ser aconsejable.
+> Esto nos permitiría acceder a ciertas propiedades del componente como por ejemplo habilitarnos para recibir `children` aún sin especificarlo en la interface de las Props. :skull_and_crossbones: Esto según algunos autores puede no ser aconsejable
 >
-> También es posible en lugar de poner `React.FC<Props>` poner `React.FunctionComponent<Props>`
+> Poner `React.FC<Props>` es equivalente a poner `React.FunctionComponent<Props>`
 
 
 
@@ -2132,6 +2132,6 @@ export default App
 
 # Repositorio Recomendado
 
-https://github.com/typescript-cheatsheets/react
+[typescript-cheatsheets/react](https://github.com/typescript-cheatsheets/react) o la [página web](https://react-typescript-cheatsheet.netlify.app/)
 
 Encontraremos un montón de casos de uso de React y TypeScript, como ser diferencia entre `interface` o `type`
