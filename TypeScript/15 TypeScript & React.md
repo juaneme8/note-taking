@@ -1943,6 +1943,18 @@ useEffect(()=> {
 
 
 
+* Otra opción podría ser utilizando `async/wait` y haciendo lo siguiente:
+
+```
+const subs:SubResponseFromApi[] = res.json();
+```
+
+
+
+> Si quisiéramos trabajar con `response.status` y `response.message` además de los tipos de datos fetcheados de la API podríamos utilizar 
+
+
+
 En `types.d.ts` además de `Sub` agregamos otro tipo `SubResponseFromApi`
 
 ```typescript

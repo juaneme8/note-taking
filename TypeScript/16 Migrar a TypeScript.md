@@ -178,3 +178,61 @@ npm install typescript @types/react
 
 
 > Basado en el repositorio [FourtyFourChallenge](https://github.com/matias3981/FourtyFourChallenge)
+
+
+
+En caso de que algo de TypeScript no funcione del modo esperado podemos copiar `tsconfig.json` de un proyecto de Next.js.
+
+
+
+## TypeScript y Styled Components
+
+Debemos instalar los tipos `@types/styled-components`
+
+Cuando los styled components reciben una prop debemos indicarlo del siguiente modo:
+
+```react
+const Wrapper = styled.article<isVisible:boolean>`
+	opacity: ${({isVisible}) => isVisible ? 1: 0}
+`
+```
+
+
+
+## de CRA a TypeScript
+
+> Basado en el repositorio [carolinaGalassi/busca-bugs](https://github.com/carolinaGalassi/busca-bugs)
+
+Para migrar una aplicación de Create React App a TypeScript debemos instalar las siguientes dependencias.
+
+```
+npm install --save-dev typescript @types/react @types/node @types/react-dom @types/jest
+```
+
+Una vez que renombremos archivos a `.tsx` al ejecutar `npm start` detectará que tenemos TypeScript y nos creará el archivo `tsconfig.json`. Notar que `strict: true` por lo que nos aparecerán bastantes errores en pantalla, podemos pasarlo a `false` para hacer una migración más amena.
+
+
+
+## Solución Temporaria
+
+En ciertos casos no podremos lograr que nos compile y para poder ver en pantalla la aplicación e ir migrando de a poco podemos colocar `as any`.
+
+Por ejemplo en este caso en una situación habitual usando Material UI:
+
+```typescript
+cons useStyles = makeStyles(theme => buscabugsStyle(theme) as any)
+```
+
+Si hacemos hover sobre `makeStyles` al importarlo veremos que ya viene con los estilos por lo que no tendremos que instalar tipos.
+
+En [este post](https://stackoverflow.com/questions/66102018/using-makestyles-in-material-ui-with-typescript) vemos cómo implemementar los tipos de `makeStyles` en Material UI.
+
+
+
+* `unknown[]` no es tan malo como `any[]`
+* `keyof typeof texts` si tenemos un objeto `texts` le estamos diciendo que el tipo será el texto de alguna de sus propiedades.
+* `VoidFunction` es una función que no recibe nada yno devuelve nada.
+* `Bug[][]` es la forma de definir un array de arrays.
+* `createContext<State>({} as State)`
+* `React.FC`cuando usamos `children` y no recibimos props.
+* `React.VFC<any>` cuando no usamos `children` y no sabemos qué recibimos por `props`.
