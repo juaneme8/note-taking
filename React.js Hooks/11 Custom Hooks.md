@@ -1,8 +1,290 @@
 # Custom Hooks
-Un *custom hook* es una función de JavaScript cuyo nombre comienza con `use`.
+
+> **BootCamp midudev:** [video 1](https://youtu.be/K4vCTeKKCkU) - [video 2](https://youtu.be/1zYf4Yw1jqs) - [video 3](https://youtu.be/aCVlqh1pQF4?list=PLV8x_i1fqBw0Kn_fBIZTa3wS_VZAqddX7)
+
+Un *custom hook* es una función de JavaScript cuyo nombre comienza con `use`, React utiliza esta notación para determinar que es un custom hook y de esta manera realizar algunas cosas detrás de escenas (guardar cosas en memoria, optimizar, etc)
 Hasta ahora estudiamos los hooks `useState`, `useEffect`, `useContext`, `useReducer`, `useCallback`, `useMemo`, `useRef` y sabemos que en definitiva los hooks son funciones que son invocadas dentro de los componentes. Es posible e incluso recomendable crear nuestros propios hooks, extrayendo lógica y colocándola en funciones reutilizables.
+
 Un *custom hook* puede invocar a otros hooks en caso de necesitarlo, por lo que podremos utilizar en el *custom hook* los built-in hooks.
-La motivación para utilizar *custom hooks* está dada por el hecho de poder compartir lógica entre componentes como alternativa más simple frente a **HOCs** o **render props**.
+
+La motivación para utilizar *custom hooks* está dada por el hecho de poder compartir lógica entre componentes como alternativa más simple frente a **HOCs** o **render props**
+
+* Los custom hooks permiten que las aplicaciones sean más **mantenibles y escalables**, ya que vamos a **reutilizar la lógica**.
+* Los custom hooks pueden someterse a tests.
+
+* Debemos tratar de utilizar los `useEffect` lo menos posible dentro de los componentes, por eso cada vez que veamos uno debemos preguntarnos si no podría implementarse la misma solución en un custom hook. Recordemos que dentro de un custom hook podemos usar otros hooks (en este caso `useEffect`).
+* No debemos darles nombres que denoten la implementación por ejemplo en lugar de usar `useApiFetchNotes` debemos usar `useNotes`
+
+
+
+> :link: En la página https://usehooks.com/ podremos encontrar varios ejemplos de custom hooks.
+
+
+
+## Ejemplo Contador
+
+Suponemos un caso en el que tenemos un contador simple:
+
+```javascript
+import { useState } from "react";
+
+const Counter = () => {
+  const [counter, setCounter] = useState(0);
+
+  return (
+    <div>
+      {counter}
+      <button onClick={() => setCounter(counter + 1)}>+</button>
+      <button onClick={() => setCounter(counter - 1)}>-</button>
+      <button onClick={() => setCounter(0)}>zero</button>
+    </div>
+  );
+};
+
+export default Counter;
+```
+
+Podemos ver que **la lógica y la visualización están juntas**, por lo que si quisiéramos implementar otro contador tendríamos que duplicar gran parte del código.
+
+Lo que hacemos en cambio será crear el custom hook `useCounter` con la finalidad de desacoplar la parte visual de la gestión del estado.
+
+```javascript
+import { useState } from "react";
+
+const useCounter = () => {
+  const [counter, setCounter] = useState(0);
+
+  const increment = () => setCounter(counter + 1);
+  const decrement = () => setCounter(counter - 1);
+  const reset = () => setCounter(0);
+
+  return { counter, increment, decrement, reset };
+};
+
+const Counter = () => {
+  const { counter, increment, decrement, reset } = useCounter();
+
+  return (
+    <div>
+      {counter}
+      <button onClick={increment}>+</button>
+      <button onClick={decrement}>-</button>
+      <button onClick={reset}>zero</button>
+    </div>
+  );
+};
+
+export default Counter;
+```
+
+Tenemos tres operaciones de gestión del estado. 
+
+Notar que no devolvemos el `setCounter` para **ocultar la implementación** (el modo en que actualizamos nuestro estado). No sería posible que el usuario lo cambiar al valor que le diera la gana.
+
+
+
+Suponemos un escenario en el que tenemos dos contadores:
+
+```javascript
+import { useState } from "react";
+
+const useCounter = () => {
+  const [counter, setCounter] = useState(0);
+
+  const increment = () => setCounter(counter + 1);
+  const decrement = () => setCounter(counter - 1);
+  const reset = () => setCounter(0);
+
+  return { counter, increment, decrement, reset };
+};
+
+const Counter = () => {
+  const counterA = useCounter();
+  const counterB = useCounter();
+
+  return (
+    <div>
+      <div>
+        {counterA.counter}
+        <button onClick={counterA.increment}>+</button>
+        <button onClick={counterA.decrement}>-</button>
+        <button onClick={counterA.reset}>zero</button>
+      </div>
+      <div>
+        {counterB.counter}
+        <button onClick={counterB.increment}>+</button>
+        <button onClick={counterB.decrement}>-</button>
+        <button onClick={counterB.reset}>zero</button>
+      </div>
+    </div>
+  );
+};
+
+export default Counter;
+```
+
+
+
+También podríamos pasarle un valor inicial al custom hook (con un valor por defecto que será usado en caso de que no le pasemos ninguno)
+
+```js
+import { useState } from "react";
+
+const useCounter = (initialValue = 0) => {
+  const [counter, setCounter] = useState(initialValue);
+
+  const increment = () => setCounter(counter + 1);
+  const decrement = () => setCounter(counter - 1);
+  const reset = () => setCounter(0);
+
+  return { counter, increment, decrement, reset };
+};
+
+const Counter = () => {
+  const { counter, increment, decrement, reset } = useCounter(99);
+
+  return (
+    <div>
+      {counter}
+      <button onClick={increment}>+</button>
+      <button onClick={decrement}>-</button>
+      <button onClick={reset}>zero</button>
+    </div>
+  );
+};
+
+export default Counter;
+```
+
+> En este caso el valor inicial es 99 y el valor por defecto es 0.
+
+
+
+## Estructura Hooks
+
+Los custom hooks debemos colocarlos en una carpeta `hooks` por ejemplo para lo visto anteriormente creamos `useCounter.js`
+
+```js
+import { useState } from "react";
+
+const useCounter = (initialValue = 0) => {
+  const [counter, setCounter] = useState(initialValue);
+
+  const increment = () => setCounter(counter + 1);
+  const decrement = () => setCounter(counter - 1);
+  const reset = () => setCounter(0);
+
+  return { counter, increment, decrement, reset };
+};
+
+export { useCounter };
+
+```
+
+
+
+Luego lo importamos como `import { useCounter } from "./hooks/useCounter";`
+
+
+
+## Custom Hooks para Formularios
+
+Podríamos crear un custom hook `useField` que le pasemos como valor inicial el `type` (text, password, number, etc) y se encargue de devolvernos un objeto con las propiedades `value`, `type`, ``onChange`, etc para manejar dicho campo.
+
+> :link: Si queremos opciones mucho más potentes con validaciones y otros beneficios podemos usar [react-hook-form.com](react-hook-form.com) o [formik](https://formik.org/).
+
+
+
+Por ejemplo en un caso donde queremos manejar dos inputs username y password, podríamos pasar de esto:
+
+```js
+import { useState } from "react";
+
+const Form = () => {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleChangeUsername = (e) => {
+    setUsername(e.target.value);
+  };
+  const handleChangePassword = (e) => {
+    setPassword(e.target.value);
+  };
+
+  return (
+    <div>
+    <div>
+      <label htmlFor="username">Username: </label>
+      <input
+        id="username"
+        type="text"
+        name="username"
+        value={username}
+        onChange={handleChangeUsername}
+      />
+    </div>
+    <div>
+      <label htmlFor="password">Password: </label>
+      <input
+        id="password"
+        type="password"
+        name="password"
+        value={password}
+        onChange={handleChangePassword}
+      />
+    </div>
+    </div>
+  );
+};
+
+export default Form;
+```
+
+
+
+Lo mismo podría ser refactorizado utilizando custom hooks de la siguiente manera:
+
+```js
+import { useState } from "react";
+
+const useField = ({ type }) => {
+  const [value, setValue] = useState("");
+
+  const onChange = (e) => {
+    setValue(e.target.value);
+  };
+
+  return {
+    type,
+    value,
+    onChange
+  };
+};
+
+const Form = () => {
+  const username = useField({ type: "text" });
+  const password = useField({ type: "password" });
+
+  return (
+    <div>
+      <div>
+        <label htmlFor="username">Username: </label>
+        <input id="username" name="username" {...username} />
+      </div>
+      <div>
+        <label htmlFor="password">Password: </label>
+        <input id="password" name="password" {...password} />
+      </div>
+    </div>
+  );
+};
+
+export default Form;
+```
+
+> Notar que usamos el *spread operator* `{...username} ` porque hubiera sido lo mismo que poner `type: {username.type} value: {username.value} onChange:{username.onChange}` 
+
+
 
 ## Ejemplo `useDocumentTitle`
  El propósito es crear un *custom hook* que actualice el título del documento con el valor de un contador de clics de un botón. Primero lo haremos sin utilizar *custom hooks* y luego extraeremos la lógica usando uno. Comenzamos con `DocTitleOne`
