@@ -1914,6 +1914,7 @@ docker run
 -d
 -p 3001:3001
 --network stock-app
+--network-alias api
 -e MONGO_DB_URI=mongodb://db/stock
 -e PORT=3001
 api:v1

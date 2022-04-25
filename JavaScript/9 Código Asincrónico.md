@@ -1,6 +1,9 @@
 # Código Asincrónico
-La función `setTimeout()` nos permite ejecutar código no bloqueante o asincrónico. 
 El código asincrónico no ocupa lugar en el stack de ejecución de JavaScript por lo que continúa ejecutando otras líneas y pasado el tiempo de asincronía realiza la acción pendiente. 
+
+La función `setTimeout()` nos permite ejecutar código no bloqueante o asincrónico. 
+
+
 ```jsx
 setTimeout(()=> {
 	console.log('Mensaje 1');
@@ -35,3 +38,33 @@ El servidor por seguridad nos perdirá autenticación (nombre de usuario, passwo
 
 En las Devtools cuando la pestaña de Network veremos todos los recursos que estamos descargando para la correcta visualización del sitio a través del protocolo http.
 En los mensajes además del **body** contamos con **headers** (request y response headers) y esta información podremos verla también las Devtools. 
+
+
+
+# Promesas
+
+## `Promise.all`
+
+```js
+ const p1 = 
+       fetch("https://rickandmortyapi.com/api/character/?name=cowboy")
+ .then((response) => response.json())
+ .then((data) => data.results[0]);
+
+   const p2 = 
+         fetch("https://rickandmortyapi.com/api/character/?name=leader")
+   .then((response) => response.json())
+   .then( (data) => data.results[0]);
+
+const p3 = 
+      fetch("https://rickandmortyapi.com/api/character/?name=daron")
+.then( (response) => response.json())
+.then( (data) => data.results[0]);
+
+Promise
+  .all([p1, p2, p3])
+  .then((allData) => console.log(allData));
+```
+
+En `allData` tendremos un array con los datos devueltos por cada promesa. Esto es particularmente útil en aquellos casos en que los datos están relacionados y basta con que una promesa falle para que no obtengamos datos a la salida.
+
