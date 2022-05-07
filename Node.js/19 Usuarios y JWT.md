@@ -106,7 +106,7 @@ module.exports = User
 
 
 
-Como queremos tener en la colección denotas también vinculación al usuario que la escribió debemos actualizar el modelo:
+Como queremos tener en la colección de notas también vinculación al usuario que la escribió debemos actualizar el modelo:
 
 ```
 const mongoose = require('mongoose');
@@ -161,7 +161,7 @@ En la base de datos almacenamos el `passwordHash` que es el password encriptado 
 
 Utilizamos como herramienta **bcrypt** y se trata de una operación asincrónica ya que tarda cierto tiempo en completarse. Cuando mayor sea el valor de `saltRounds` más seguro será pero tardará más tiempo en generarse.
 
-Cuando retornamos el elemento creado no le estaremos mandando ese hash ya que en el modelo lo hemos eliminado del objeto que se retorna gracias a la transformación del método `toJSON`.
+Cuando retornamos el elemento creado no le estaremos mandando ese hash ya que en el modelo lo hemos eliminado del objeto que se retorna gracias a la transformación del método `toJSON` (ver mas adelante).
 
 > La página [haveibeenpwned](https://haveibeenpwned.com/) nos permite saber si un determinado correo tuvo filtraciones de sus passwords en algún servicio.
 
@@ -350,7 +350,7 @@ Una vez instalada, la importamos y con el método `jwt.sign()` firmamos el token
 El código completo nos queda así:
 
 ```js
-const const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const loginRouter = require('express').Router()
 const User = require('../models/User')

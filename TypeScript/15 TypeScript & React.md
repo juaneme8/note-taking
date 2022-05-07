@@ -1045,6 +1045,8 @@ Hemos puesto `const [subs, setSubs] = useState<Subscriptor[]>([]);` pero podría
 
 En ocasiones no conocemos el valor inicial de una variable de estado y la asignaremos luego. 
 
+**El hook `useState` usa genéricos siempre lo que haremos ahora será sobrescribir el valor por defecto indicándole que aunque usamos un valor inicial de un tipo también queremos que se adapte al que guardaremos en el futuro.**
+
 Supongamos que trabajamos con un componente `User.tsx` que cuenta también con dos botones de Login y Logut y queremos que al loguearnos se almacene en una variable de estado `user` los datos de un usuario de tipo `AuthUser` (un tipo que es un objeto con campos `name` y `mail`) 
 
 Como inicialmente no disponemos de estos datos le damos valor `null`
