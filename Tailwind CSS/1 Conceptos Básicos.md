@@ -1,5 +1,7 @@
 # Tailwind CSS
-Basado en playlist de [The Net Ninja](https://www.youtube.com/watch?v=bxmDnn7lrnk&list=PL4cUxeGkcC9gpXORlEHjc5bgnIi5HEGhw&ab_channel=TheNetNinja)
+Basado en [playlist](https://www.youtube.com/watch?v=bxmDnn7lrnk&list=PL4cUxeGkcC9gpXORlEHjc5bgnIi5HEGhw&ab_channel=TheNetNinja) de The Net Ninja y el [repositorio](https://github.com/iamshaunjp/tailwind-tutorial). 
+
+:warning:  El repositorio que había creado al escribir estas notas ya no está disponible debido a múltiples versiones nuevas que salieron de Tailwind y vulnerabilidades detectadas por Dependabot.
 
 ## Introducción
 Tailwind es un plugin de PostCSS y se trata de un framework de CSS que viene con clases de utilidades que nos permite lograr sitios visualmente atractivos. Es similar a Bootstrap y Materialize pero mucho más de bajo nivel (las clases que nos entrega sólo modifican una o dos cosas) ya que no cuenta con componentes, sino que nos da clases de utilidades.
