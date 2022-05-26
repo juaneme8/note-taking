@@ -26,9 +26,13 @@ Creamos una carpeta `src` en la cual creamos el código fuente comenzando por `i
 
 ## Instalación Dependencias
 
-## `eslint`
+## Linter
 
-Dado que este es un proyecto real, que está destinado a crecer con el tiempo, usaremos eslint desde el principio:s
+Dado que este es un proyecto real, que está destinado a crecer con el tiempo, usaremos eslint desde el principio:
+
+
+
+### Opción 1
 
 ```sh
 npm i -D eslint @typescript-eslint/eslint-plugin @typescript-eslint/parser
@@ -63,6 +67,31 @@ Creamos *.eslintrc* con el siguiente contenido:
   }
 }
 ```
+
+
+
+### Opción 2
+
+Si queremos instalar una única dependencia podemos usar `ts-standard` que es una guía de estilos de TypeScript basada en StandardJS.
+
+```
+npm i ts-standard -D
+```
+
+* En `package.json` agregamos un script `"lint":"ts-standard"`
+
+* En `package.json` agregamos:
+
+```
+"eslintConfig": {
+	"parserOptions": {
+    	"project": "./tsconfig.json"
+  	},
+  	"extends":["./node_modules/ts-standard/eslintrc.json"]
+}
+```
+
+> :warning: Es probable que necesitemos reiniciar el editor para visualizar los errores en la parte inferior.
 
 ### `typescript`
 
@@ -422,6 +451,8 @@ TypeScript incluye varios tipos de utilidades para facilitar transformaciones de
 ## Utilidad `Pick`
 
 En ocasiones tenemos un tipo y queremos usarlo para crear un nuevo tipo con algunos de sus campos. Esto puede ser útil cuando el tipo original contiene información sensible y queremos crear uno nuevo sin esos datos confidenciales. En esos casos utilizaremos la utilidad `Pick`.
+
+Recordemos que la premisa siempre es crear la menor cantidad de tipos y reutilizarlos siempre que sea posible.
 
 Supongamos que no queremos devolver el campo `comments` de `DiaryEntry`, en ese caso:
 
