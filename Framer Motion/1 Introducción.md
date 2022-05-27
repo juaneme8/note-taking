@@ -1,5 +1,9 @@
 # Framer Motion 
-> ==Al estudiarlo podemos basarnos en== [Tutorial de The Net Ninja](https://youtu.be/2V1WK-3HQNk?list=PL4cUxeGkcC9iHDnQfTHEVVceOEBsOf07i)
+> Basado en un stream de Goncy.
+>
+> Basado en el [video](https://youtu.be/GOuwOI-WSkE) de PedroTech.
+>
+> Basado en la [playlist](https://youtu.be/2V1WK-3HQNk?list=PL4cUxeGkcC9iHDnQfTHEVVceOEBsOf07i) de The Net Ninja (INCOMPLETO).
 
 Framer Motion es una librería para animaciones en React, nos permite realizar tanto animaciones y transiciones a elementos del DOM definidos en nuestros componentes React.
 
@@ -13,13 +17,52 @@ En la [documentación](https://www.framer.com/motion/) podemos encontrar varios 
 > Notar que al instalar Chakra-UI con los `npm i` que nos dice la documentación también estaremos instalando Framer Motion.
 
 ## Animaciones Básicas
-En primer lugar debemos importar `motion` y luego en cada elemento que queremos debemos modificar sus tags por ejemplo si queremos animar un `<h2>...</h2>` debemos poner `<motion.h2>...</motion.h2>`. Esto nos retorna un motion component que será un h2 con habilidades extra para animar.
-Luego agregamos la prop `animate` en la cual le pasamos un objeto con los valores finales que deseamos que tenga la animación.
+
+En primer lugar debemos importar `motion`
+
+```
+import {motion} from 'framer-motion'
+```
+
+Luego en cada elemento que queremos animar debemos modificar sus tags por ejemplo si queremos animar un `h2` debemos poner:
+
+```
+<motion.h2>...</motion.h2>
+```
+
+Esto nos retorna un motion component que será un `h2` con habilidades extra para animar.
+
+*  Con la prop `animate`  establecemos el **estado final** que deseamos que tenga la animación.
+
+```
+<motion.h2 animate={{}}>...</motion.h2>
+```
+
+* Con la prop `initial` establecemos el estado inicial que queremos que tenga la animación:
+
+```
+<motion.h2 animate={{x: 100, scale: 1}} initial={{scale:0}}>...</motion.h2>
+```
+
+
+
+## Propiedades
 
 ### `x` e `y`
-En cuanto a las traslaciones que hacemos con `x` e `y` debemos tener presente que representan el offset respecto a la posición actual. No son propiedades de CSS sino propiedades de framer-motion. 
+En cuanto a las traslaciones las hacemos con la propiedad `x` e `y`  representan el offset respecto a la posición inicial. 
 
-Si `x` es positivo será un desplazamiento hacia la derecha (y si es negativo a la izquierda) y si `y` es positivo irá hacia abajo (y hacia arriba si es negativo). `scale` también es una propiedad de framer-motion
+* Si `x > 0` :arrow_right: será un desplazamiento hacia la derecha (y si es negativo a la izquierda). 
+* Si `y > 0` :arrow_down:  será un desplazamiento hacia abajo (y hacia arriba si es negativo). 
+
+
+
+### `scale`
+
+`scale` como su nombrelo indica es una propiedad de framer motion que nos permite configurar la escala.
+
+
+
+## Unidades
 
 ### `px` y otras unidades
 A la hora de definir valores de las propiedades podemos ver que ponemos `fontSize: 50` sin especificar `px` y por default sabe que se trata de `px`. 
@@ -53,7 +96,10 @@ const Home = () => {
 
 export default Home;
 ```
+
+
 ## Initial State
+
 Así como con `animate` establecimos el estado final de la animación en ocasiones también vamos a querer definir el estado inicial y eso lo haremos con el atributo `initial`.
 Suponiendo que queremos animar un `div` de modo tal que pase de opacidad 0 a 1. Luego veremos que también es posible regular el tiempo en el cual hace dicha transición.
 ```jsx
@@ -82,7 +128,10 @@ const Home = () => {
 export default Home;
 ```
 
+
+
 ## Transition Options
+
 A la hora de controlar las características de la animación vamos a utilizar la prop `transition`, a esta le pasaremos un objeto `Transition` que define cómo animamos de un estado a otro.
 
 * con `type` definimos el tipo de animación entre los posibles valores: `Tween` (movimiento uniforme), `Spring` (movimiento con rebote) o `Inertia`. El valor default dependerá del tipo de animación que estemos haciendo.
@@ -124,7 +173,10 @@ export default Home;
   <h1>Pizza Joint</h1>
 </motion.div>
 ```
+
+
 ## Hover Animations
+
 Cuando queremos animar un elemento cuando el usuario le pasa el mouse por encima debemos utilizar el atributo `whileHover` y especificar los estilos que queremos que tenga en ese momento de similar a lo visto hacia ahora.
 
 Por ejemplo si queremos agregarle un cambio en la escala y un `textShadow` en las letras y `boxShadow` en el botón en sí:
@@ -159,10 +211,10 @@ También podemos utilizarlo si tenemos una lista de elementos uno arriba de otro
 ```
 > En este caso como tenemos varios elementos uno arriba de otro debemos especificar el origen de la transformación para que no se muevan los elementos al escalarlos.
 
-```jsx
-```
+
 
 ## Basado en Twitch Goncy (e-commerce)
+
 `import { motion, AnimatePresence, AnimateSharedLayout } from 'framer-motion';` 
 
 `AnimatePresence` nos permite animar la aparición y desaparición de un elemento.
@@ -183,7 +235,10 @@ Suponiendo que queremos agregar una animación una imagen que tenemos con este c
 </Grid>
 ```
 
+
+
 ## Variants
+
 En primer lugar nos permiten extraer `initial`, `animate` y `transition` en un objeto externo que luego referenciamos, logrando así un código más limpio. 
 
 En segundo lugar nos permiten los valores de `intial` y `animate` por todo el DOM resultando también un código más limpio.
@@ -465,6 +520,10 @@ Para que no resulta tan lento eliminamos el `delay: 0.5` y agregamos otras propi
 
 Con la propiedad `staggerChildren: 0.4` indicamos que queremos que las animaciones de los hijos sean escalonas con un tiempo de 0.4 segundos por lo que existirá ese tiempo entre el comienzo de la animación del `p` y la del `div` con la lista.
 
+
+
 ==VIDEO 8 COMPLETO==
+
+
 
 ## Keyframes
