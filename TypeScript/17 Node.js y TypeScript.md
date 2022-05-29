@@ -240,7 +240,7 @@ app.get('/ping',(req,res)=> {
 });
 ```
 
-Nos indicará que no hemos utilizado `req`, para evitar eso podemos renombrarlo a `_` o `_req` (lo cual es útil cuando estamos ignorando a más de uno).
+Nos indicará que no hemos utilizado `req`, para evitar eso podemos renombrarlo a `_` o `_req` (lo cual es útil cuando estamos ignorando a más de uno). En aquellos endpoints donde queramos usarlo dejamos `req`.
 
 
 
@@ -301,35 +301,11 @@ Podemos usar **ES modules** y luego será compilado a **CommonJS**.
 
 
 
-No escribiremos el código para las manipulaciones de datos reales en el router. En su lugar, crearemos un *service* que se encargue de la manipulación de datos. Es una práctica bastante común separar la "lógica empresarial o de negocios" del código del router en módulos denominados *service*. 
+## Tipos
 
-Entonces para aislar la logica de las rutas creamos una carpeta `services`:
+Como regla general debemos tratar de hacer la menor cantidad de tipos y reutilizarlos lo más que sea posible.
 
-* Creamos un archivo `diaryService.ts` en `services`.
-
-
-
-* Creamos un directorio `data` y en el un archivo `diaries.json` con un array de objetos estáticos pero en el futuro podrán ser  obtenidos a partir de un fetch a una API.
-
-
-
-:label: Como regla general debemos tratar de hacer la menor cantidad de tipos y reutilizarlos lo más que sea posible.
-
-
-
-En `services/diaryService.ts` importamos el JSON y exportamos los métodos necesarios para hacer un GET y a futuro un POST.
-
-> Para poder importar un JSON debemos agregar la propiedad`"resolveJsonModule": true` en `tsconfig.json`
-
-
-
-:warning: Por alguna razón, VSCode tiende a quejarse de que no puede encontrar el archivo *../../data/diaries.json* del servicio a pesar de que el archivo existe. Eso es un error en el editor y desaparece cuando se reinicia el editor.
-
-:warning: Con `"typescript:"^4.7.2""` obtengo un error **Error: Debug Failure. False expression: Non-string value passed to `ts.resolveTypeReferenceDirective`** que haciendo el downgrade a `"typescript": "4.6.4"` desaparece.
-
-
-
-Como algunos parámetros no puedne ser cualquier string, sino algunos determinados, en  `types.ts` definimos los siguientes tipos:
+Creamos un archivo en  en `src` llamado `types.ts` donde definimos todos los tipos. 
 
 ```tsx
 export type Weather = 'sunny' | 'rainy' | 'cloudy' | 'windy' | 'stormy'
@@ -347,6 +323,34 @@ export interface DiaryEntry {
 
 
 
+## Datos
+
+Creamos un directorio `data` y en el un archivo `diaries.json` con un array de objetos estáticos pero en el futuro podrán ser  obtenidos a partir de un fetch a una API.
+
+
+
+## Servicios
+
+No escribiremos el código para las manipulaciones de datos reales en el router. En su lugar, crearemos un *service* que se encargue de la manipulación de datos. Es una práctica bastante común separar la "lógica empresarial o de negocios" del código del router en módulos denominados *service*. 
+
+Entonces para aislar la logica de las rutas creamos una carpeta `services`:
+
+* Creamos un directorio `services` y en el un archivo `diaryService.ts` luego allí importamos el JSON y exportamos los métodos necesarios para hacer un GET y a futuro un POST.
+
+> Para poder importar un JSON debemos agregar la propiedad`"resolveJsonModule": true` en `tsconfig.json`
+
+* En el router podemos importar los métodos uno a uno con `import {getEntries} from '../services/diaryServices'` o importarlos a todos `import * as diaryServices from '../services/diaryServices'`. Esto último sería similar a si exportáramos con `export default {getEntries, addEntry}` que importaríamos con `import diaryServices from '../services/diaryServices'`
+
+## :warning:FAQ
+
+:warning: Por alguna razón, VSCode tiende a quejarse de que no puede encontrar el archivo *../../data/diaries.json* del servicio a pesar de que el archivo existe. Eso es un error en el editor y desaparece cuando se reinicia el editor.
+
+:warning: Con `"typescript:"^4.7.2""` obtengo un error **Error: Debug Failure. False expression: Non-string value passed to `ts.resolveTypeReferenceDirective`** que haciendo el downgrade a `"typescript": "4.6.4"` desaparece.
+
+
+
+
+
 Si luego en el servicio indicamos que los datos serán de tipo `DiaryEntry[]`:
 
 ```tsx
@@ -356,7 +360,7 @@ import { DiaryEntry } from '../../types';
 const diaries: Array<DiaryEntry> = diaryData;
 ```
 
-Obtendremos un error porque TypeScript ha inferido que weather es un string.
+Obtendremos un error porque TypeScript ha inferido que `weather` es un string.
 
 Podemos solucionar el problema haciendo una aserción de tipo. Si afirmamos que el tipo de la variable *diaryData* es *DiaryEntry* con la palabra clave *as*, todo debería funcionar:
 
@@ -390,7 +394,7 @@ export default diaryData;
 
 
 
-### Módulos de Node y JSON
+## Módulos de Node y JSON
 
 :warning: Copiado de FullStackOpen: [Enlace](https://fullstackopen.com/es/part9/escribiendo_la_aplicacion_express#modulos-de-node-y-json)
 
@@ -444,35 +448,44 @@ Para evitar errores, se recomienda que dentro de un directorio plano, cada archi
 
 
 
-# Tipos de Utilidades
+## Tipos de Utilidades
 
-TypeScript incluye varios tipos de utilidades para facilitar transformaciones de tipos. Encontrarmeos msa ifnromación al respecto en la [documentación](https://www.typescriptlang.org/docs/handbook/utility-types.html).
+TypeScript incluye varios tipos de utilidades para facilitar transformaciones de tipos. Encontraremos más información al respecto en la [documentación](https://www.typescriptlang.org/docs/handbook/utility-types.html).
 
-## Utilidad `Pick`
+**La premisa siempre es crear la menor cantidad de tipos y reutilizarlos siempre que sea posible**, de esta manera tendremos menos cosas que mantener y además una única fuente de verdad.
 
-En ocasiones tenemos un tipo y queremos usarlo para crear un nuevo tipo con algunos de sus campos. Esto puede ser útil cuando el tipo original contiene información sensible y queremos crear uno nuevo sin esos datos confidenciales. En esos casos utilizaremos la utilidad `Pick`.
+ 
 
-Recordemos que la premisa siempre es crear la menor cantidad de tipos y reutilizarlos siempre que sea posible.
+### Utilidad `Pick`
 
-Supongamos que no queremos devolver el campo `comments` de `DiaryEntry`, en ese caso:
+En ocasiones tenemos un tipo y queremos usarlo para crear un nuevo tipo con algunos de sus campos. Esto puede ser útil por ejemplo cuando el tipo original contiene información sensible y queremos crear uno nuevo sin esos datos confidenciales. 
 
-```
-const getNonSensitiveEntries =
-  (): Array<Pick<DiaryEntry, 'id' | 'date' | 'weather' | 'visibility'>> => {
-    // ...
-  }
-```
+Suponemos que tenemos el tipo `DiaryEntry`
 
-
-
-## Utilidad `Omit`
-
-Como queremos excluir solo un campo podemos utilizar el tipo de utilidad [Omit](http://www.typescriptlang.org/docs/handbook/utility-types.html#omittk), que podemos usar para declarar qué campos excluir:
-
-```js
-const getNonSensitiveEntries = (): Omit<DiaryEntry, 'comment'>[] => {
-  // ...
+```tsx
+export interface DiaryEntry {
+  id: number
+  date: string
+  weather: Weather
+  visibility: Visibility
+  comment: string
 }
+```
+
+Queremos crear el tipo `NonSensitiveInfoDiaryEntry` igual al anterior pero sin el campo `comment` y para ello utilizamos la utilidad `Pick` indicando los campos del origen que queremos que tenga.
+
+```tsx
+export type NonSensitiveDiaryEntry = Pick<DiaryEntry, 'id' | 'date' | 'weather' | 'visibility'>
+```
+
+
+
+### Utilidad `Omit`
+
+Como queremos excluir solo un campo podemos utilizar el tipo de utilidad `Omit` que podemos usar para declarar qué campos excluir:
+
+```tsx
+export type NonSensitiveDiaryEntry = Omit<DiaryEntry, 'comment'>
 ```
 
  
@@ -485,11 +498,12 @@ export type NonSensitiveDiaryEntry = Omit<DiaryEntry, 'comment'>;
 
 
 
-Entonces el código nos quedará:
+Entonces el código en el servicio nos quedará:
 
 ```tsx
 import diaries from '../../data/diaries';
 import { NonSensitiveDiaryEntry, DiaryEntry } from '../types';
+
 const getEntries = (): DiaryEntry[] => {
   return diaries;
 };
@@ -509,13 +523,11 @@ export default {
 };
 ```
 
-En `getNonSensitiveEntries` estamos devolviendo las entradas completas del diario, ¡y no se da ningún error a pesar de typing!
-
-Esto sucede porque [TypeScript solo verifica](http://www.typescriptlang.org/docs/handbook/type-compatibility.html) si tenemos todos los campos obligatorios o no, pero los campos en exceso no están prohibidos. En nuestro caso esto significa que *no está prohibido* devolver un objeto de tipo `DiaryEntry[]`, pero si intentáramos acceder al campo `comment`, no sería posible porque estaríamos accediendo a un campo que TypeScript desconoce incluso aunque existe.
+En `getNonSensitiveEntries` estamos devolviendo las entradas completas del diario, ¡y no se da ningún error a pesar del typing! Esto sucede porque TypeScript solo verifica si tenemos todos los campos obligatorios o no, pero los campos en exceso no están prohibidos. En nuestro caso esto significa que *no está prohibido* devolver un objeto de tipo `DiaryEntry[]`, pero si intentáramos acceder al campo `comment`, no sería posible porque estaríamos accediendo a un campo que TypeScript desconoce incluso aunque existe.
 
 Debido a que TypeScript no modifica los datos reales, sino solo su tipo, debemos excluir los campos nosotros mismos:
 
-```
+```tsx
 const getNonSensitiveEntries = (): NonSensitiveDiaryEntry [] => {
   return diaries.map(({ id, date, weather, visibility }) => ({
     id,
@@ -524,5 +536,41 @@ const getNonSensitiveEntries = (): NonSensitiveDiaryEntry [] => {
     visibility,
   }));
 };
+```
+
+
+
+Suponiendo que tenemos un método `findById` que recibe un id procedente de un parámetro del endpoint `diaryService.findById(+req.params.id)` y retorna el elemento con ese `id`.
+
+> Notar que usamos el *unary operator* para convertirlo a número, ya que el parámetro recibido es un string.
+
+
+
+```tsx
+export const findById = (id: number): NonSensitiveInfoDiaryEntry | undefined => {
+  const entry = diaries.find(d => d.id === id)
+
+  return entry
+}
+```
+
+Como estamos usando `filter()` y en caso de no encontrar ningún elemento devolverá `undefined`. Cuando invoquemos este método tendremos que usar chaining operator para referenciar los campos. Es decir tendremos ` const diary = diaryServices.findById(+req.params.id)` y el propio autocomplete nos ayudará a usar chaining operator al referenciar los campos como vemos a continuación:`console.log(diary?.weather)`.
+
+En el tipo de dato devuelto hemos indicado también que es posible que devolvamos `undefined`: `NonSensitiveInfoDiaryEntry | undefined`
+
+
+
+Sin embargo, en la implementación anterior estamos devolviendo el campo `coment`, para filtrarlo:
+
+```tsx
+export const findById = (id: number): NonSensitiveInfoDiaryEntry | undefined => {
+  const entry = diaries.find(d => d.id === id)
+  if (entry != null) {
+    const { comment, ...restOfDiary } = entry
+    return restOfDiary
+  }
+
+  return undefined
+}
 ```
 
