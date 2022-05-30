@@ -18,6 +18,12 @@ npm init -y
 
 
 
+## Comentario Inicial
+
+A la hora de trabajar con TypeScript debemos tener presente que funciona de manera estática, por lo que si en tiempo de ejecución le pasamos un tipo distinto al esperado no será capaz de detectarlo. Esto significa que tendremos que realizar las validaciones manualmente. 
+
+
+
 ## Estructura del Proyecto
 
 Creamos una carpeta `src` en la cual creamos el código fuente comenzando por `index.ts`, luego el código compilado estará en la carpeta `build` donde tendremos en este caso `index.js`.
@@ -458,7 +464,7 @@ TypeScript incluye varios tipos de utilidades para facilitar transformaciones de
 
 ### Utilidad `Pick`
 
-En ocasiones tenemos un tipo y queremos usarlo para crear un nuevo tipo con algunos de sus campos. Esto puede ser útil por ejemplo cuando el tipo original contiene información sensible y queremos crear uno nuevo sin esos datos confidenciales. 
+En ocasiones tenemos un tipo y queremos usarlo para crear un nuevo tipo con algunos de sus campos. Esto puede ser útil por ejemplo cuando el tipo original contiene información sensible y queremos crear uno nuevo sin esos datos confidenciales o cuando estamos creando un nuevo elemento de una lista y el `id` lo generaremos por otro medio.
 
 Suponemos que tenemos el tipo `DiaryEntry`
 
@@ -488,15 +494,9 @@ Como queremos excluir solo un campo podemos utilizar el tipo de utilidad `Omit` 
 export type NonSensitiveDiaryEntry = Omit<DiaryEntry, 'comment'>
 ```
 
- 
-
-Otra forma sería declarar un tipo completamente nuevo para *NonSensitiveDiaryEntry*:
-
-```js
-export type NonSensitiveDiaryEntry = Omit<DiaryEntry, 'comment'>;
-```
 
 
+## Implementación
 
 Entonces el código en el servicio nos quedará:
 
@@ -542,7 +542,7 @@ const getNonSensitiveEntries = (): NonSensitiveDiaryEntry [] => {
 
 Suponiendo que tenemos un método `findById` que recibe un id procedente de un parámetro del endpoint `diaryService.findById(+req.params.id)` y retorna el elemento con ese `id`.
 
-> Notar que usamos el *unary operator* para convertirlo a número, ya que el parámetro recibido es un string.
+:star2: Notar que usamos el *unary operator* para convertirlo a número, ya que el parámetro recibido es un string.
 
 
 
@@ -572,5 +572,159 @@ export const findById = (id: number): NonSensitiveInfoDiaryEntry | undefined => 
 
   return undefined
 }
+```
+
+:star2: Con `const { comment, ...restOfDiary } = entry` nos aseguramos tener en `restOfDiary` todo menos `comment`.
+
+:star2: El ` return undefined` lo colocamos para evitar el error propio del `noImplicitReturn` que tenemos en la configuración.
+
+
+
+## `id` incremental en Array
+
+Si sabemos que los elementos de una array tendrán un id que se irá incrementando por una unidad, antes de pushear un nuevo elemento podemos definir dicho valor de distintas formas.
+
+```
+const id = diaries.length + 1;
+```
+
+```
+const id = Math.max(...diaries.map(d => d.id)) + 1;
+```
+
+
+
+## Validaciones
+
+Como con TypeScript realizamos verificaciones estáticas, debemos validar igualmente que los tipos de datos recibidos sean los correctos y recién ahí agregar elementos nuevos.
+
+Como sabemos existen librerías como **express-validator** para tal fin pero lo haremos manualmente.
+
+## Utilidades
+
+Creamos un archivo `utils.ts` donde almacenamos las funciones que reutilizaremos.
+
+
+
+## Importancia de `enum`
+
+En ocasiones tendremos campos que sólo podrán tomar determinados valores, por ejemplo si recibimos un string y queremos validar que sea de uno de los valores esperados.
+
+Si tenemos definido un tipo de la siguiente forma:
+
+```tsx
+export type Weather = 'sunny' | 'rainy' | 'cloudy' | 'windy' | 'stormy'
+```
+
+Luego nos veríamos obligados a preguntar si el string es alguno de esos valores, con lo cual estaríamos duplicando código. Como **queremos tener una única fuente de  verdad** no queremos repetir las palabras contenidas en el tipo. En ese caso podemos recurrir a los `enum`.
+
+```tsx
+export enum Weather = {
+	Sunny = 'sunny',
+	Rainy = 'rainy',
+	Cloudy = 'cloudy',
+    Windy = 'windy',
+    Stormy = 'stormy',
+} 
+```
+
+>  Notar las diferencias que un enum tiene inicialmente comparado con un objeto: `=` en lugar de `:` al definir las propiedades.
+
+La diferencia radica en que esta estructura de datos la tendremos disponible en run-time, cuando se compile el código de TypeScript podremos acceder a un **objeto**con esta misma información.
+
+```tsx
+const isWeather = (string: any):boolean => {
+	return Object.values(weather).includes(string)
+}
+```
+
+Recordemos que `Object.values()` retorna un array con los valores de las propiedades, por lo que tendremos: `[ 'sunny', 'rainy', 'cloudy', 'windy', 'stormy' ]`
+
+:warning: Como este código se convierte a JavaScript no podemos llamar al archivo`types.d.ts` porque no son sólo definiciones,por lo que obtendríamos errores. En ese caso podríamos separar en dos archivos por un lado las definiciones en`types.d.ts` y por otro lado los enums en `enums.ts`
+
+
+
+Las validaciones completas nos quedarán como vemos a continuación.
+
+```tsx
+import { NewDiaryEntry } from './types'
+import { Weather, Visibility } from './enums'
+
+const parseComment = (commentFromRequest: any): string => {
+  if (!isString(commentFromRequest)) {
+    throw new Error('Incorrect or missing comment')
+  }
+
+  return commentFromRequest
+}
+
+const parseDate = (dateFromRequest: any): string => {
+  if (!isString(dateFromRequest) || !isDate(dateFromRequest)) {
+    throw new Error('Incorrect or missing date')
+  }
+
+  return dateFromRequest
+}
+
+const parseWeather = (weatherFromRequest: any): Weather => {
+  if (!isString(weatherFromRequest) || !isWeather(weatherFromRequest)) {
+    throw new Error('Incorrect or missing Weather')
+  }
+
+  return weatherFromRequest
+}
+
+const parseVisibility = (visibilityFromRequest: any): Visibility => {
+  if (!isString(visibilityFromRequest) || !isVisibility(visibilityFromRequest)) {
+    throw new Error('Incorrect or missing Visibility')
+  }
+
+  return visibilityFromRequest
+}
+
+const isWeather = (param: any): boolean => {
+  return Object.values(Weather).includes(param)
+}
+
+const isString = (string: string): boolean => {
+  return typeof string === 'string'
+}
+
+const isDate = (date: string): boolean => {
+  return Boolean(Date.parse(date))
+}
+
+const isVisibility = (param: any): boolean => {
+  return Object.values(Visibility).includes(param)
+}
+
+const toNewDiaryEntry = (object: any): NewDiaryEntry => {
+  const newEntry: NewDiaryEntry = {
+    comment: parseComment(object.comment),
+    date: parseDate(object.date),
+    weather: parseWeather(object.weather),
+    visibility: parseVisibility(object.visibility)
+  }
+
+  return newEntry
+}
+
+export default toNewDiaryEntry
+```
+
+A la hora de hacer un post en el router, llamaremos a `toNewDiaryEntry` que impulsará todas esas verificaciones, como lo hacemos dentro de un `try` los errores que levantemos en la validación serán devueltos al usuario junto con un status code de 400.
+
+```tsx
+router.post('/', (req, res) => {
+  try {
+    const newDiaryEntry = toNewDiaryEntry(req.body)
+
+    const addedDiaryEntry = diaryServices.addDiary(newDiaryEntry)
+
+    res.json(addedDiaryEntry)
+  } catch (e) {
+    res.status(400).send(e.message)
+  }
+})
 ```
 

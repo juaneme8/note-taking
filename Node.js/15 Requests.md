@@ -227,6 +227,12 @@ Insomnia es otra herramienta con la cual podremos probar nuestra API. Cuenta con
 
 
 
+## Thunder Client
+
+Es una opción para utilizar dentro de VS Code con una interfaz similar al a de Postman.
+
+
+
 ### REST Client
 
 REST Client es una extensión de Visual Studio Code que nos permite ejecutar requests dentro del editor. Además tiene la ventaja de que cualquier persona puede ver fácilmente cómo funciona nuestro código actuando a modo de documentación.

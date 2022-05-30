@@ -1,15 +1,33 @@
 # String
 
-## Creación
+## Formas de Creación
 A la hora de crear un string podemos hacerlo de dos formas distintas:
 La primera forma es utilizando un **String Primitive**
 `const message = 'Hello'`
 Si bien el string es un tipo primitivo, si escribimos `message.` veremos que tiene métodos y propiedades asociados. Lo que está sucediendo es que el motor de JavaScript wrapea el string primitive con un string object. Gracias a esto podemos a acceder a propiedades `message.length` o métodos como `message.toUppercase()`.
 
 La segunda forma es utilizando el **String Object**, se trata de un *built-in* object:
-`const another = new String('Hello')`.
+`const another = new String('Hello')`. Lo aconsejable es nunca utilizar esta forma.
 
 Se trata de dos tipos de strings y podemos chequear que con `typeof(message)` obtendremos `"string"` y con `typeof(another)` obtenemos `"object"`.
+
+
+
+### Análisis de Strings
+
+```javascript
+const msg = "Hola Mundo";
+const msg2 = new String("Hola Mundo");
+
+
+typeof msg; //string
+typeof msg2; //object
+
+msg instanceof String; //false
+msg instanceof String; //true
+```
+
+Esto que hemos detectado usando `instanceof` es interesante a la hora de hacer validaciones, porque algunos paquetes por algún motivo definen los strings de la segunda forma y si nosotros nos fiamos solo con`typeof parametro === 'string'` no sería suficiente.
 
 ## Inmutabilidad
 **Los tipos primitivos son inmutables**
