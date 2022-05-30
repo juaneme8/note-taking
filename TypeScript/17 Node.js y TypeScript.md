@@ -8,13 +8,13 @@
 
 
 
-```
+```bash
 mkdir md-node-ts
-```
-
-```
+cd md-node-ts
 npm init -y
 ```
+
+
 
 
 
@@ -180,14 +180,6 @@ En este momento nos creará un `tsconfig.json` el significado de cada propiedad 
 
 Actualmente, si ejecutamos eslint, también interpretará los archivos en el directorio build producto de la *compilación*. No queremos eso, ya que el código es generado por el compilador. Podemos evitar esto creando un archivo *.eslintignore*.
 
-### Script de Arranque
-
-Además del mencionado, debemos crear un script de arranque.
-
-```json
-"start":"node build/index.js",
-```
-
 
 
 ### Script de Desarrollo
@@ -198,9 +190,21 @@ Además del mencionado, debemos crear un script de arranque.
 
 
 
+### Script de Arranque
+
+Además del mencionado, debemos crear un script de arranque.
+
+```json
+"start":"node build/index.js",
+```
+
+
+
+
+
 ## Analisis `tsconfig.json`
 
-El bootcamp FSOpen recomienda la siguiente configuración:
+El Bootcamp FullStack Open recomienda la siguiente configuración:
 
 ```json
 {
