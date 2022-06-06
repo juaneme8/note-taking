@@ -54,8 +54,6 @@ web: npm start
 
 En el dashboard de Heroku establecemos las variables de entorno en `Settings -> Config Vars`
 
-Por ejemplo a la hora de setear el puerto con el cual escucharemos conexiones entrantes lo seteamos mediante variable de entorno. 
-
 
 
 # Deploy Node Application con Vercel
