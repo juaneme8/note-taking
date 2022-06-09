@@ -56,6 +56,14 @@ En el dashboard de Heroku establecemos las variables de entorno en `Settings -> 
 
 
 
+## Dyno sleeping
+
+Cuando utilizamos un `free` dyno contamos con 550 horas por mes en las que la aplicación está despierta. Cuando no recibe tráfico en un período de 30 minutos, se pondrá a dormir y no descontará esas horas.
+
+Sin embargo, en caso de tener un servidor express bastará con un request a un endpoint (que incluso puede no ser existente y devolver 404) para despertarlo. Es por eso que podemos utilizar cron jobs que a cierta hora envíen esa request. Una forma de hacerlo es utilizando https://cron-job.org/ de modo tal que en las horas que queremos que esté activa la aplicación enviemos un request garantizándos que a partir de él lo estará por al menos 30 minutos.
+
+
+
 # Deploy Node Application con Vercel
 
 1) Ir a [https://vercel.com/](https://vercel.com/), realizar login con GitHub.
