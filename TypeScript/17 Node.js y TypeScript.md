@@ -732,3 +732,52 @@ router.post('/', (req, res) => {
 })
 ```
 
+
+
+## Validación de Campos
+
+En ocasiones recibimos un parámetro por parte del usuario por ejemplo en un POST por lo que inicialmente será de tipo `any` y queremos chequear que sea del tipo esperado.
+
+Por ejemplo para validar el campo *comment*, debemos verificar que exista y asegurarnos de que sea del tipo *string*.
+
+La función debería verse así:
+
+```js
+const parseComment = (comment: any): string => {
+  if (!comment || !isString(comment)) {
+    throw new Error('Incorrect or missing comment: ' + comment);
+  }
+
+  return comment;
+}
+```
+
+La función obtiene un parámetro de tipo *any* y lo devuelve como tipo *string* si existe y es del tipo correcto.
+
+La función de validación de string se ve así
+
+```js
+const isString = (text: any): text is string => {
+  return typeof text === 'string' || text instanceof String;
+};
+```
+
+La función es un [tipo de protección](https://www.typescriptlang.org/docs/handbook/2/narrowing.html#using-type-predicates). Eso significa que es una función que devuelve un booleano *y* que tiene un *predicado* de tipo como tipo de retorno. En nuestro caso, el tipo de predicado es
+
+```js
+text is string
+```
+
+La forma general de un predicado de tipo es *parameterName is Type* donde el *parameterName* es el nombre del parámetro de función y *Type* es el tipo de destino.
+
+:warning: Si la función de protección de tipos devuelve verdadero, el compilador de TypeScript sabe que la variable probada tiene el tipo que se definió en el predicado de tipo.
+
+Antes de que se llame al tipo de protección, el tipo real de la variable *comment* no se conoce:
+
+![fullstack content](https://fullstackopen.com/static/e13ea2afa7dd8df1628a901d42a1b4e2/5a190/28e.png)
+
+
+
+Pero después de la llamada, si el código pasa de la excepción (es decir, el tipo guard devuelto verdadero), el compilador sabe que *comment* es del tipo *string*:
+
+![fullstack content](https://fullstackopen.com/static/18cf1ac37d9cee7ac1eb22a58e268045/5a190/29e.png)
