@@ -163,11 +163,11 @@ El primer script que queremos configurar es para ejecutar `tsc` (o `tsc --init` 
 "tsc":"tsc",
 ```
 
-* La primera vez vamos a ejecutar `npm run tsc -- --init` utilizamos el `--` para indicar que el parámetro `--init` queremos que le llegue a `tsc` y no al `npm run`. 
+* La primera vez vamos a ejecutar `npm run tsc -- --init` utilizamos el `--` para indicar que el parámetro `--init` queremos que le llegue a `tsc` y no al `npm run`. En este momento nos creará un `tsconfig.json` con un comentario sobre cada propiedad del JSON.
+
+  
 
 * Las sucesivas veces ejecutaremos `npm run tsc` directamente cada vez que efectuemos cambios.
-
-En este momento nos creará un `tsconfig.json` el significado de cada propiedad del JSON comentado.
 
 
 
@@ -178,7 +178,7 @@ En este momento nos creará un `tsconfig.json` el significado de cada propiedad 
 
 ```
 
-Actualmente, si ejecutamos eslint, también interpretará los archivos en el directorio build producto de la *compilación*. No queremos eso, ya que el código es generado por el compilador. Podemos evitar esto creando un archivo *.eslintignore*.
+Actualmente, si ejecutamos eslint, también interpretará los archivos en el directorio `build` producto de la *compilación*. No queremos eso, ya que el código es generado por el compilador. Podemos evitar esto creando un archivo *.eslintignore*.
 
 
 
@@ -202,7 +202,7 @@ Además del mencionado, debemos crear un script de arranque.
 
 
 
-## Analisis `tsconfig.json`
+## Análisis `tsconfig.json`
 
 El Bootcamp FullStack Open recomienda la siguiente configuración:
 
@@ -230,7 +230,7 @@ Repasemos cada configuración:
 
 * *module* le dice al compilador que queremos usar los módulos de *commonjs* en el código compilado. Esto significa que podemos usar *require* en lugar de *import*, que no es compatible con versiones anteriores de Node.js, como la versión 10.
 
-* *strict* es en realidad una abreviatura de varias opciones independientes: *noImplicitAny, noImplicitThis, alwaysStrict, strictBindCallApply, strictNullChecks, strictFunctionTypes y strictPropertyInitialization*. Estos guían nuestro estilo de codificación para usar las funciones de TypeScript de manera más estricta. Para nosotros quizás el más importante sea el que ya hemos visto [noImplicitAny](https://www.staging-typescript.org/tsconfig#noImplicitAny). Impide establecer implícitamente el tipo *any*, lo que puede suceder si no escribe los parámetros de una función, por ejemplo. 
+* *strict* es en realidad una abreviatura de varias opciones independientes: *noImplicitAny, noImplicitThis, alwaysStrict, strictBindCallApply, strictNullChecks, strictFunctionTypes y strictPropertyInitialization*. Estos guían nuestro estilo de codificación para usar las funciones de TypeScript de manera más estricta. Para nosotros quizás el más importante sea el que ya hemos visto [noImplicitAny](https://www.staging-typescript.org/tsconfig#noImplicitAny). Impide establecer implícitamente el tipo *any*, lo que puede suceder si no escribe los parámetros de una función por ejemplo. 
 
 * *noUnusedLocals* evita tener variables locales sin usar.
 
@@ -255,6 +255,8 @@ Nos indicará que no hemos utilizado `req`, para evitar eso podemos renombrarlo 
 
 
 ## Primeros Pasos
+
+En `src` creamos un archivo `index.ts` con el siguiente contenido:
 
 ```js
 import express from 'express';
