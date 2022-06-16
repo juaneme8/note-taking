@@ -139,13 +139,17 @@ npm i @types/express -D
 
 ### `ts-node-dev`
 
-Podríamos usar *nodemon* con *ts-node*, pero `ts-node-dev` hace exactamente lo mismo y podemos continuar usándolo. Estará atento a los cambios que hagamos y efectue la compilación de typescript a la vez que ejecuta el proceso node del archivo indicado.
+Podríamos usar *nodemon* con *ts-node*, pero `ts-node-dev` hace exactamente lo mismo que ellos. Estará atento a los cambios que hagamos y efectue la compilación de typescript a la vez que ejecuta el proceso node del archivo indicado.
 
 > Si no estuviéramos trabajando en desarrollo podríamos usar `ts-node`
 
 ```
 npm i ts-node-dev -D
 ```
+
+
+
+> Cuando usamos solamente ts-node se encarga de hacer una compilación en tiempo real y ejecutar el código inmediatamente.
 
 
 

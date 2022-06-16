@@ -1,6 +1,8 @@
 # Type Basics 
 Dijimos que una de las características principales de TypeScript es que utiliza **strict types** por lo que si declaramos `let age = 30` estamos diciendo que es un `number` y no podrá tomar más adelante el valor de un `string` u otro tipo de dato. 
 
+Las anotaciones de tipo en TypeScript son una forma de registrar el *contrato* previsto de una función o variable.
+
 TypeScript infiere qué tipo de variable será de acuerdo al valor asignado. Si queremos hacerlo de manera explícita podemos poner `let age: number;` con lo cual le indicamos que `age` deberá tener números como valor.
 
 ## Funciones
