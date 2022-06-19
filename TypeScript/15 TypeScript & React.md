@@ -27,6 +27,56 @@ Como aspectos negativos exige ingresar mucho más código y estar atentos a los 
 
 
 
+### @types/{npm_package}
+
+Al igual que npm, el mundo TypeScript también trabaja con código fuente abierto. La comunidad está activa y reacciona continuamente a las actualizaciones y cambios en los paquetes npm de uso común. Casi siempre puede encontrar las tipificaciones de paquetes npm, por lo que no tiene que crear tipificaciones para todas sus miles de dependencias.
+
+Es posible agregar los tipos relevantes a su proyecto instalando un paquete npm con el nombre de su paquete con el prefijo `@types/`, por ejemplo `npm install --save-dev @types/express`
+
+Los `@types/` son mantenidos por [Definitely typed](http://definitelytyped.org/), un proyecto comunitario con el objetivo de mantener tipos de todo en un solo lugar.
+
+Dado que las tipificaciones solo se usan antes de la compilación, estas no son necesarias en la compilación de producción y siempre deben estar en `devDependencies` del `package.json`.
+
+> Supongamos que tenemos una aplicación que a partir de dos números realiza una operación matemática. Sería interesante utilizar argumentos de línea de comandos en lugar de tener que cambiar siempre el código para realizar cálculos diferentes. En una aplicación Node normal lo haríamos accediendo a ellos con `process.argv`. Para hacerlo con TypeScript es necesario instalar `@types/node`. Luego podríamos ejecutar el programa con `npm run multiply 5 2` (creando un script `multiply: ts-node multiplier.ts`) y accediendo a los valores en el código como `Number(argv[2])` y `Number(argv[3])`.
+
+
+
+A continuación mostramos un ejemplo donde  validamos en `parseArguments` los datos recibidos como argumentos. Tener en cuenta que si nos envían un string como argumento `Number(argv[2])` será `NaN` y como `typeof(NaN)` es `number` esto ocasionaría que TypeScript no tomará conciencia de que algo no anda bien.
+
+```tsx
+interface MultiplyValues {
+  value1: number;
+  value2: number;
+}
+
+const parseArguments = (args: Array<string>): MultiplyValues => {
+  if (args.length < 4) throw new Error('Not enough arguments');
+  if (args.length > 4) throw new Error('Too many arguments');
+
+  if (!isNaN(Number(args[2])) && !isNaN(Number(args[3]))) {
+    return {
+      value1: Number(args[2]),
+      value2: Number(args[3])
+    }
+  } else {
+    throw new Error('Provided values were not numbers!');
+  }
+}
+
+const multiplicator = (a: number, b: number, printText: string) => {
+  console.log(printText,  a * b);
+}
+
+try {
+  const { value1, value2 } = parseArguments(process.argv);
+  multiplicator(value1, value2, `Multiplied ${value1} and ${value2}, the result is:`);
+} catch (e) {
+  console.log('Error, something bad happened, message: ', e.message);
+}
+```
+
+
+
 # Proyecto con TypeScript
 ## TypeScript y Create React App
 
@@ -222,11 +272,14 @@ const handleChange = (evt: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElem
 
 # `type` vs `interface`
 
-Es prácticamente indistinto utilizar `type` o `interface` para definir los tipos recibidos por Props. Sin embargo, hay quienes recomiendan usar `types` en aplicaciones y `interfaces` en bibliotecas. 
+Es prácticamente indistinto utilizar `type` o `interface` para definir los tipos recibidos por Props. 
+
+* Hay quienes recomiendan usar `types` en aplicaciones y `interfaces` en bibliotecas. 
+* La [documentación de TypeScript](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html) dice que la mayoría de las veces va a dependender de una decisión personal el hecho de usar una u otra opción, pero si queremos una heurística podemos usar `interface` a menos que necesitemos alguna funcionalidad propia de `type`.
 
 > :nerd_face: De los autores estudiados midudev y Goncy utilizan `interface` y Codevolution `type`.
 
-`interface` tiene la ventaja de que es extensible y además se puede poner dos veces la definición y se combinarán por lo que la mayoría de las veces será aconsejable utilizarlo en lugar de `type`.
+`interface` tiene la ventaja de que es extensible (con type se pueden hacer pero con otra sintaxis) y además se puede poner dos veces la definición y se combinarán. Con `types` se pueden hacer uniones, tuples y otras características.
 
 Algunas personas a las interfaces les ponen una `I`mayúscula al comienzo esto es algo que viene de otros lenguajes con tipado pero está desaconsejado en TS.
 

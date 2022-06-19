@@ -74,7 +74,7 @@ Creamos *.eslintrc* con el siguiente contenido:
 }
 ```
 
-
+En `package.json` agregamos un script `"lint":"eslint --ext .ts ."`
 
 ### Opción 2
 
@@ -131,6 +131,8 @@ En este caso tenemos que usar `@types/express` y queremos que sean dependencias 
 npm i @types/express -D
 ```
 
+:rotating_light: **Importante:** Si a la hora de utilizar express usamos `require` veremos que el compilador interpreta todo lo relacionado con express para que sea del tipo *any*. Mientras que si usamos `import` el editor conoce los tipos reales. **La declaración de importación que se utilizará depende del método de exportación utilizado en el paquete importado**.  :eyeglasses: Una buena regla general es intentar importar un módulo utilizando primero la declaración *import*. Si *import* no funciona, pruebe con un método combinado: *import ... = require('...')*.
+
 
 
 :link: [PackagePhobia](https://packagephobia.com/) es una pagina que nos muestra cuanto pesa cada paquete.
@@ -153,67 +155,18 @@ npm i ts-node-dev -D
 
 
 
-## Creación de Scripts
-
-En `package.json` como es habitual colocaremos todos los scripts que vamos a necesitar.
-
-
-
-### Script de Compilado
-
-El primer script que queremos configurar es para ejecutar `tsc` (o `tsc --init` si le pasamos ese parámetro de manera apropiada).
-
-```json
-"tsc":"tsc",
-```
-
-* La primera vez vamos a ejecutar `npm run tsc -- --init` utilizamos el `--` para indicar que el parámetro `--init` queremos que le llegue a `tsc` y no al `npm run`. En este momento nos creará un `tsconfig.json` con un comentario sobre cada propiedad del JSON.
-
-  
-
-* Las sucesivas veces ejecutaremos `npm run tsc` directamente cada vez que efectuemos cambios.
-
-
-
-### Script de Linteo
-
-```json
-"lint": "eslint --ext .ts ."
-
-```
-
-Actualmente, si ejecutamos eslint, también interpretará los archivos en el directorio `build` producto de la *compilación*. No queremos eso, ya que el código es generado por el compilador. Podemos evitar esto creando un archivo *.eslintignore*.
-
-
-
-### Script de Desarrollo
-
-```json
-"dev":"ts-node-dev src/index.ts"
-```
-
-
-
-### Script de Arranque
-
-Además del mencionado, debemos crear un script de arranque.
-
-```json
-"start":"node build/index.js",
-```
-
-
-
-
-
 ## Análisis `tsconfig.json`
+
+El archivo [tsconfig.json](https://www.typescriptlang.org/docs/handbook/tsconfig-json.html) contiene todas sus configuraciones principales sobre cómo desea que TypeScript funcione en su proyecto. Puede definir qué tan estrictamente desea que se inspeccione el código, qué archivos incluir y excluir (*node_modules* está excluido de forma predeterminada) y dónde se deben colocar los archivos compilados, etc.
+
+> En [esta página](https://www.staging-typescript.org/tsconfig) encontramos más información sobre cada una de las configuraciones.
 
 El Bootcamp FullStack Open recomienda la siguiente configuración:
 
 ```json
 {
   "compilerOptions": {
-    "target": "ES6",
+    "target": "ES2020",
     "outDir": "./build/",
     "module": "commonjs",
     "strict": true,
@@ -234,11 +187,13 @@ Repasemos cada configuración:
 
 * *module* le dice al compilador que queremos usar los módulos de *commonjs* en el código compilado. Esto significa que podemos usar *require* en lugar de *import*, que no es compatible con versiones anteriores de Node.js, como la versión 10.
 
-* *strict* es en realidad una abreviatura de varias opciones independientes: *noImplicitAny, noImplicitThis, alwaysStrict, strictBindCallApply, strictNullChecks, strictFunctionTypes y strictPropertyInitialization*. Estos guían nuestro estilo de codificación para usar las funciones de TypeScript de manera más estricta. Para nosotros quizás el más importante sea el que ya hemos visto [noImplicitAny](https://www.staging-typescript.org/tsconfig#noImplicitAny). Impide establecer implícitamente el tipo *any*, lo que puede suceder si no escribe los parámetros de una función por ejemplo. 
+* *strict* es en realidad una abreviatura de varias opciones independientes: *noImplicitAny, noImplicitThis, alwaysStrict, strictBindCallApply, strictNullChecks, strictFunctionTypes y strictPropertyInitialization*. Estos guían nuestro estilo de codificación para usar las funciones de TypeScript de manera más estricta. 
+
+  De esta lista el más importante es [noImplicitAny](https://www.staging-typescript.org/tsconfig#noImplicitAny). Impide establecer implícitamente el tipo *any* es decir que todas las variables deben tener un tipo definido. En aquellos casos aislados donde en serio no sepamos el tipo de variable tendremos que indicarlo explícitamente en el código.
 
 * *noUnusedLocals* evita tener variables locales sin usar.
 
-*  *noUnusedParameters* arroja un error si una función tiene parámetros sin usar.
+* *noUnusedParameters* arroja un error si una función tiene parámetros sin usar.
 
 * *noFallthroughCasesInSwitch* asegura que en un *switch case* cada caso termina con una declaración *return* o *break*.
 
@@ -255,6 +210,131 @@ app.get('/ping',(req,res)=> {
 ```
 
 Nos indicará que no hemos utilizado `req`, para evitar eso podemos renombrarlo a `_` o `_req` (lo cual es útil cuando estamos ignorando a más de uno). En aquellos endpoints donde queramos usarlo dejamos `req`.
+
+
+
+## eslint
+
+Cuando utilizamos Express veremos que a pesar de tener configurado *noImplicitAny* en `tsconfig.json` tenemos elementos con el tipo implicito *any* y no obtenemos quejas del compilador. La razón para que esto suceda es que `req.query`  y `req.body`son explícitamente tipados como any.
+
+
+
+Si quisiéramos evitar que los desarrolladores utilicen *any* podemos usar *eslint* para administrar nuestro código. Instalemos eslint y sus extensiones de typescript:
+
+> ```sh
+> npm install --save-dev eslint @typescript-eslint/eslint-plugin @typescript-eslint/parser
+> ```
+
+Configuraremos eslint para [no permitir any explicito](https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-explicit-any.md). Escriba las siguientes reglas en *.eslintrc*:
+
+```json
+{
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 11,
+    "sourceType": "module"
+  },
+  "plugins": ["@typescript-eslint"],
+  "rules": {
+    "@typescript-eslint/no-explicit-any": 2
+  }
+}
+```
+
+
+
+[@typescript-eslint](https://github.com/typescript-eslint/typescript-eslint) tiene un montón de reglas específicas eslint de TypeScript, pero también se puede utilizar todas las reglas básicas eslint en proyectos de TypeScript. Por ahora, probablemente deberíamos ir con la **configuración recomendada** y modificar las reglas a medida que avanzamos cada vez que encontramos algo que queremos que se comporte de manera diferente.
+
+Entonces usaremos el siguiente `\.eslintrc`
+
+```
+{
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking"
+  ],
+  "plugins": ["@typescript-eslint"],
+  "env": {
+    "node": true,
+    "es6": true
+  },
+  "rules": {
+    "@typescript-eslint/semi": ["error"],
+    "@typescript-eslint/no-explicit-any": 2,
+    "@typescript-eslint/explicit-function-return-type": 0,
+    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    "no-case-declarations": 0
+  },
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  }
+}
+```
+
+
+
+En situacioens puede que nos resulte beneficioso utilizar el tipo *any explícito* cuando manejemos por ejemplo datos en el cuerpo de una solicitud HTTP POST. Nuestra configuración de eslint evita esto, pero puede desarmar esta regla para una línea en particular insertando el siguiente comentario como la línea anterior:
+
+```js
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+```
+
+
+
+## Creación de Scripts
+
+En `package.json` como es habitual colocaremos todos los scripts que vamos a necesitar.
+
+
+
+### Script de Compilado
+
+Utilizaremos el compilador oficial de TypeScript que viene con el paquete npm de *typescript*. El compilador oficial genera y empaqueta archivos JavaScript a partir de los archivos .ts para que la *versión de producción* construida ya no contenga ningún código TypeScript. Este es el resultado exacto al que aspiramos, ya que TypeScript en sí no es ejecutable por navegadores o Node.
+
+
+
+El primer script que queremos configurar es para ejecutar `tsc` (o `tsc --init` si le pasamos ese parámetro de manera apropiada).
+
+```json
+"tsc":"tsc",
+```
+
+* La primera vez vamos a ejecutar `npm run tsc -- --init` utilizamos el `--` para indicar que el parámetro `--init` queremos que le llegue a `tsc` y no al `npm run`. En este momento nos creará un `tsconfig.json` con un comentario sobre cada propiedad del JSON.
+
+  
+
+* Las sucesivas veces ejecutaremos `npm run tsc` directamente cada vez que efectuemos cambios.
+
+> Notar que a partir de ese momento aparecerá el código en la carpeta de salida (por ejemplo `build`) cosa que no sucede cuando trabajabamos en desarrollo con `ts-node-dev`.
+
+### Script de Linteo
+
+```json
+"lint": "eslint --ext .ts ."
+
+```
+
+Actualmente, si ejecutamos eslint, también interpretará los archivos en el directorio `build` producto de la *compilación*. No queremos eso, ya que el código es generado por el compilador. Podemos evitar esto creando un archivo `.eslintignore`.
+
+
+
+### Script de Desarrollo
+
+```json
+"dev":"ts-node-dev src/index.ts"
+```
+
+
+
+### Script de Arranque
+
+Además del mencionado, debemos crear un script de arranque.
+
+```json
+"start":"node build/index.js",
+```
 
 
 
