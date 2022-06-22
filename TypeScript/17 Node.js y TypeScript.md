@@ -458,7 +458,7 @@ const diaries: Array<DiaryEntry> = diaryData;
 
 Obtendremos un error porque TypeScript ha inferido que `weather` es un string.
 
-Podemos solucionar el problema haciendo una aserción de tipo. Si afirmamos que el tipo de la variable *diaryData* es *DiaryEntry* con la palabra clave *as*, todo debería funcionar:
+Podemos solucionar el problema haciendo una aserción de tipo. Si afirmamos que el tipo de la variable `diaryData` es `Array<DiaryEntry>` con la palabra clave `as`, todo debería funcionar:
 
 
 
@@ -505,19 +505,19 @@ Es importante tomar nota de un problema que puede surgir al usar la opción tsco
 }
 ```
 
-De acuerdo con la documentación del nodo para los [módulos de archivo](https://nodejs.org/api/modules.html#modules_file_modules), node intentará resolver los módulos en orden de extensiones:
+Cuando trabajamos con *file modules*, node respetará el siguiente orden a la hora de evaluar los archivos de distintas extensiones:
 
 ```sh
  ["js", "json", "node"]
 ```
 
-Además de eso, de forma predeterminada, *ts-node* y *ts-node-dev* amplían la lista de posibles extensiones de módulo de node a:
+En nuestro caso como estamos usando *ts-node* y *ts-node-dev*, estos amplían la lista de posibles extensiones a:
 
 ```json
  ["js", "json", "node", "ts", "tsx"]
 ```
 
-> **NB**: La validez de los archivos *.js*, *.json* y *.node* como módulos en Typecript depende de la configuración del entorno, incluidas las opciones *tsconfig* como *allowJs* y *resolveJsonModule*.
+> La validez de los archivos *.js*, *.json* y *.node* como módulos en Typecript depende de la configuración del entorno, incluidas las opciones *tsconfig* como *allowJs* y *resolveJsonModule*.
 
 Considere una estructura de carpeta plana que contiene archivos:
 
@@ -526,7 +526,7 @@ Considere una estructura de carpeta plana que contiene archivos:
   └── myModule.ts
 ```
 
-En typescript, con la opción *resolveJsonModule* establecida en true, el archivo *myModule.json* se convierte en un módulo de nodo válido. Ahora, imagine un escenario en el que deseamos utilizar el archivo *myModule.ts*:
+En typescript, con la opción *resolveJsonModule* establecida en true, el archivo *myModule.json* se convierte en un válido. Ahora, imagine un escenario en el que deseamos utilizar el archivo *myModule.ts*:
 
 ```js
 import myModule from "./myModule";
@@ -540,7 +540,7 @@ Mirando de cerca el orden de las extensiones de módulo de node:
 
 Notamos que la extensión de archivo *.json* tiene prioridad sobre *.ts*, por lo que se importará *myModule.json* y no *myModule.ts*.
 
-Para evitar errores, se recomienda que dentro de un directorio plano, cada archivo con una extensión de módulo de node válida tenga un nombre de archivo único.
+**Para evitar errores, se recomienda que dentro de un directorio plano, cada archivo con una extensión de módulo de node válida tenga un nombre de archivo único.**
 
 
 
@@ -613,7 +613,7 @@ export default {
 };
 ```
 
-En `getNonSensitiveEntries` estamos devolviendo las entradas completas del diario, ¡y no se da ningún error a pesar del typing! Esto sucede porque TypeScript solo verifica si tenemos todos los campos obligatorios o no, pero los campos en exceso no están prohibidos. En nuestro caso esto significa que *no está prohibido* devolver un objeto de tipo `DiaryEntry[]`, pero si intentáramos acceder al campo `comment`, no sería posible porque estaríamos accediendo a un campo que TypeScript desconoce incluso aunque existe.
+En `getNonSensitiveEntries` estamos devolviendo las entradas completas del diario, ¡y no se da ningún error a pesar del typing! Esto sucede porque **TypeScript solo verifica si tenemos todos los campos obligatorios o no, pero los campos en exceso no están prohibidos**. En nuestro caso esto significa que *no está prohibido* devolver un objeto de tipo `DiaryEntry[]`, pero si intentáramos acceder al campo `comment`, no sería posible porque estaríamos accediendo a un campo que TypeScript desconoce incluso aunque existe.
 
 Debido a que TypeScript no modifica los datos reales, sino solo su tipo, debemos excluir los campos nosotros mismos:
 
