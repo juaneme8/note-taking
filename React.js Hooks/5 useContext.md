@@ -1,4 +1,6 @@
 # useContext
+> Agregados del [video](https://youtu.be/t9WmZFnE6Hg) de PedroTech
+
 Para entender la motivación detras del  `useContext` y cómo solían hacerse las cosas antes de la aparición de los hooks, recomendamos **volver a leer el capítulo de Context de React Basics**.
 
 Al igual que cuando estudiamos `Context API` planteamos una situación en la cual tenemos el *root component* `App` que es padre del `ComponentC` este lo es de `ComponentE` y este último de `ComponentF`. El objetivo es pasar la prop `username` desde `App` y lograr leerla en `ComponentF`. Si bien el planteo es idéntico, la solución abordada tiene algunas diferencias por lo que lo volvemos a hacer.
@@ -190,3 +192,65 @@ export default ComponentE;
 
 ```
 De esta manera podemos ver que el uso de hooks simplifica mucho el proceso de consumo del contexto.
+
+La ventajas del uso de Context API son:
+
+* Evitamos el prop drilling, es decir tener que pasarle a todos los hijos las props que necesitamos en uno de ellos probablemente  muy abajo en el árbol de componentes.
+* Evitamos re-renderizados innecesarios de componentes intermedios a raíz de cambios en alguna variable que pasan hacia componentes hijos.
+
+
+
+Como aspectos negativos:
+
+* Si cambia un valor del contexto se renderizan todos los componentes que utilizan dicho contexto aunque no utilicen el valor que cambió.
+
+  
+
+
+
+## Buenas Prácticas
+
+Se aconseja crear un componente para cada contexto por ejemplo si queremos almacenar datos del usuario podemos crear un componente `UserContextProvider` en un archivo `UserContext.js`. 
+
+En este componente crearemos el contexto `UserContex` y trabajamos con las props `children`.
+
+```jsx
+import React, { createContext, useState } from "react";
+
+export const UserContext = createContext(null);
+
+export const UserContextProvider = ({ children }) => {
+  const [userInfo, setUserInfo] = useState(null);
+  const [isAuth, setIsAuth] = useState(false);
+
+  const login = () => {
+    fetch("/login").then((res) => {
+      setIsAuth(true);
+      setUserInfo(res.user);
+    });
+  };
+
+  const logout = () => {
+    fetch("/logout").then((res) => {
+      setIsAuth(false);
+      setUserInfo(null);
+    });
+  };
+
+  const value = {
+    userInfo,
+    setUserInfo,
+    isAuth,
+    setIsAuth,
+    login,
+    logout,
+  };
+
+  return (
+    <UserContext.Provider value={value}> {children} </UserContext.Provider>
+  );
+};
+
+export default UserContext;
+```
+
