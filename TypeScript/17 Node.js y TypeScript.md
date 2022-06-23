@@ -313,7 +313,6 @@ El primer script que queremos configurar es para ejecutar `tsc` (o `tsc --init` 
 
 ```json
 "lint": "eslint --ext .ts ."
-
 ```
 
 Actualmente, si ejecutamos eslint, también interpretará los archivos en el directorio `build` producto de la *compilación*. No queremos eso, ya que el código es generado por el compilador. Podemos evitar esto creando un archivo `.eslintignore`.
