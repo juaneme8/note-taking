@@ -179,6 +179,8 @@ El Bootcamp FullStack Open recomienda la siguiente configuración:
 }
 ```
 
+> En `"rootDir"` no colocamos src y lo dejamos comentado tal cual está dado que en algunos casos vamos a querer acceder a archivos también por fuera de esa carpeta, por ejemplo `package.json`. 
+
 Repasemos cada configuración:
 
 * La configuración *target* le dice al compilador qué versión de ECMAScript usar para el JavaScript generado. ES6 es compatible con la mayoría de los navegadores y es una opción buena y bastante segura.
