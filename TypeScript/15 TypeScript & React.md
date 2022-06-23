@@ -20,7 +20,7 @@ Como aspectos negativos exige ingresar mucho más código y estar atentos a los 
 
 ## Observaciones 
 
-* La extensión de los componentes es `.tsx` y para aquellos archivos que no tenemos jsx usamos `.ts`
+* La extensión de los componentes es `.tsx` y para aquellos archivos que sólo tienen lógica y no renderizan nada es `.ts`
 * Si en `App.tsx` nos posicionamos sobre el componente (:sparkles: en TS el hover es fundamental :sparkles:) veremos `function App(): JSX.Element` esto básicamente nos  está diciendo que devuelve JSX. Esto se trata de una **inferencia de tipo**.
 * Si ejecutamos `npm run build` en la carpeta `build/static/js` veremos que tenemos el código compilado a JavaScript.
 * Muchas veces los errores de TS conviene leerlos de abajo hacia arriba, pues encontraremos el motivo de los mismos más rápidamente.
