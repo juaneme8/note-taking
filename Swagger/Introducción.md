@@ -227,13 +227,269 @@ app.listen(PORT, () => {
 >
 > Según el autor en algunos casos en lugar de `@swagger` usan `@openapi`.
 >
-> La indentación la podemos establecer con un espacio o con un TAB.
+> La indentación la podemos la realizamos primero con un espacio y luego con TABs.
 >
 > Con `tags` agrupamos los endpoints.
 
 
 
-> En cuanto a los POST Requests, en el [repositorio](https://github.com/TomDoesTech/REST-API-Tutorial-Updated/tree/main/src) del video puede verse una implementación en la cual además del archivo donde tiene los endpoints cuenta con un archivo con los schemas donde especificamos los campos con los que trabajaremos. Esto es importante ya que para un mismo endpoint tendremos comentarios de Swagger en dos lugares: [1](https://github.com/TomDoesTech/REST-API-Tutorial-Updated/blob/main/src/routes.ts) y [2](https://github.com/TomDoesTech/REST-API-Tutorial-Updated/blob/main/src/schema/user.schema.ts) y es interesante ver como los referenciamos.
+## Schemas Reutilizables
+
+Los componentes en swagger son porciones de código reutilizables, veremos su aplicación a la hora de definir schemas:
+
+```tsx
+/**
+ * @swagger
+ * components:
+ *  schemas:
+ *    Task:
+ *      type: object
+ *      properties:
+ *        id: 
+ *          type: string
+ *          description: the auto-generated id
+ *        name: 
+ *          type: string
+ *          description: the name of the task
+ *        description:
+ *          type: string
+ *          description: the description of the task
+ *      required:
+ *        - name
+ *        - description
+ *      example:
+ *        id: gQBOyGbxcQy6tEp0aZ78X
+ *        name: My first Task
+ *        description: I have to do Something
+ *         
+ *
+ */
+```
+
+Luego podremos importarlo en las rutas que queramos con `$ref: '#/components/schemas/Holiday'`
+
+Por ejemplo en el caso de un GET
+
+```tsx
+/**
+ * @openapi
+ * /tasks:
+ *  get:
+ *    tags:
+ *    - Tasks
+ *    summary: Get all tasks
+ *    description: Get all tasks
+ *    responses:
+ *      200:
+ *        description: List of tasks
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: array
+ *              items:
+ *                $ref: '#/components/schemas/Task'
+ */
+router.get("/tasks", getTasks);
+```
+
+
+
+> En el [repositorio](https://github.com/TomDoesTech/REST-API-Tutorial-Updated/tree/main/src) del video puede verse una implementación real donde además del archivo con los endpoints cuenta con un archivo con los schemas donde especificamos los campos con los que trabajaremos. Esto es importante ya que para un mismo endpoint tendremos comentarios de Swagger en dos lugares: [1](https://github.com/TomDoesTech/REST-API-Tutorial-Updated/blob/main/src/routes.ts) y [2](https://github.com/TomDoesTech/REST-API-Tutorial-Updated/blob/main/src/schema/user.schema.ts) y es interesante ver como los referenciamos.
+
+
+
+Es posible reutilizar  múltiples schemas como vemos a continuación:
+
+```tsx
+/**
+ * @swagger
+ * components:
+ *  schemas:
+ *    Task:
+ *      type: object
+ *      properties:
+ *        id:
+ *          type: string
+ *          description: the auto-generated id of task
+ *        name:
+ *          type: string
+ *          description: the name of the task
+ *        description:
+ *          type: string
+ *          description: the description of the task
+ *      required:
+ *        - name
+ *        - description
+ *      example:
+ *        id: gQBOyGbxcQy6tEp0aZ78X
+ *        name: My first Task
+ *        description: I have to do Something
+ *    TaskNotFound:
+ *      type: object
+ *      properties:
+ *        msg:
+ *          type: string
+ *          description: A message for the not found task
+ *      example:
+ *        msg: Task was not found
+ *
+ */
+```
+
+
+
+## Tags Reutilizables
+
+Los tags nos permiten agrupar rutas bajo un mismo nombre.  Una forma de hacerlo es con:
+
+```
+ *  tags:
+ *    - Tasks
+ *    summary: Get all tasks
+ *    description: Get all task
+```
+
+
+
+Sin embargo, como esto es algo que se repetirá bastante, podemos definirlo de este modo:
+
+```tsx
+/**
+ * @swagger
+ * tags:
+ *  name: Tasks
+ *  description: Tasks endpoint
+ */
+```
+
+
+
+Luego podremos reutilizarlo importándolo con `tags: [Tasks]`
+
+```tsx
+/**
+ * @swagger
+ * /tasks:
+ *  get:
+ *    summary: Returns a list of tasks
+ *    tags: [Tasks]
+ *    responses:
+ *      200:
+ *        description: the list of tasks
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: array
+ *              items:
+ *                $ref: '#/components/schemas/Task'
+ */
+
+router.get("/tasks", getTasks);
+```
+
+
+
+A continuación mostramos como trabajaríamos en un endpoint que devuelve `text/plain`:
+
+```tsx
+/**
+ * @swagger
+ * /tasks/count:
+ *  get:
+ *    summary: Get a task by Id
+ *    tags: [Tasks]
+ *    responses:
+ *      200:
+ *        description: the total number of tasks
+ *        content:
+ *          text/plain:
+ *            schema:
+ *              type: integer
+ *              example: 15
+ *
+ */
+router.get("/tasks/count", count);
+```
+
+
+
+## Parámetros Reutilizables
+
+De la misma manera que reutilizamos los schemas es posible reutilizar parámetros que recibe una función.
+
+```tsx
+/**
+ * @swagger
+ * components:
+ *  schemas:
+ *    Task:
+ *      type: object
+ *      properties:
+ *        id:
+ *          type: string
+ *          description: the auto-generated id of task
+ *        name:
+ *          type: string
+ *          description: the name of the task
+ *        description:
+ *          type: string
+ *          description: the description of the task
+ *      required:
+ *        - name
+ *        - description
+ *      example:
+ *        id: gQBOyGbxcQy6tEp0aZ78X
+ *        name: My first Task
+ *        description: I have to do Something
+ *    TaskNotFound:
+ *      type: object
+ *      properties:
+ *        msg:
+ *          type: string
+ *          description: A message for the not found task
+ *      example:
+ *        msg: Task was not found
+ *
+ *  parameters:
+ *    taskId:
+ *      in: path
+ *      name: id
+ *      required: true
+ *      schema:
+ *        type: string
+ *      description: the task id
+ */
+```
+
+Con `in: path` indicamos que el parámetro está en la url. Con `name: id` hacemos referencia al nombre que tiene en el endpoint.
+
+## Endpoint con parámetros
+
+```tsx
+/**
+ * @swagger
+ * /tasks/{id}:
+ *  get:
+ *    summary: get a task by Id
+ *    tags: [Tasks]
+ *    parameters:
+ *      - $ref: '#/components/parameters/taskId'
+ *    responses:
+ *      200:
+ *        description: The Found Task
+ *        content:
+ *          application/json:
+ *            schema:
+ *            $ref: '#/components/schemas/Task'
+ *      404:
+ *        description: the task was not found
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/TaskNotFound'
+ */
+router.get("/tasks/:id", getTask);
+```
 
 
 
