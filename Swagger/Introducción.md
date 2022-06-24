@@ -1,6 +1,8 @@
 # Swagger
 
 > :link: Basado en el [video de TomDoesTech](https://youtu.be/5aryMKiBEKY) - [Repositorio](https://github.com/TomDoesTech/REST-API-Tutorial-Updated)
+>
+> :link: Basado en el [video de Fazt Code](https://youtu.be/9bO0L1rfkvU) - [Repositorio](https://github.com/FaztWeb/typescript-swagger-lowdb)
 
 Swagger o OpenAPI es una herramienta Open Source que nos permite documentar APIs.
 
@@ -183,11 +185,12 @@ app.use(express.json());
 const PORT = 3000;
 
 /**
-   * @openapi
+   * @swagger
    * /ping:
    *  get:
    *     tags:
    *     - Healthcheck
+   *     summary: Returns pong
    *     description: Responds if the app is up and running
    *     responses:
    *       200:
@@ -198,11 +201,12 @@ app.get('/ping', (_req, res) => {
 });
 
 /**
-   * @openapi
+   * @swagger
    * /healthcheck:
    *  get:
    *     tags:
    *     - Healthcheck
+   *	 summary: Returns OK
    *     description: Responds if the app is up and running
    *     responses:
    *       200:
@@ -219,9 +223,13 @@ app.listen(PORT, () => {
 });
 ```
 
-> Con `tags` agrupamos los endpoints.
->
 > Notar que el comentario comienza con doble asterisco `/**` y eso hace que luego se autocompleten los asteriscos cada vez que cambiamos de línea.
+>
+> Según el autor en algunos casos en lugar de `@swagger` usan `@openapi`.
+>
+> La indentación la podemos establecer con un espacio o con un TAB.
+>
+> Con `tags` agrupamos los endpoints.
 
 
 
