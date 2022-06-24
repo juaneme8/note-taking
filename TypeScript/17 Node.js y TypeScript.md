@@ -155,6 +155,39 @@ npm i ts-node-dev -D
 
 
 
+#### Solución con ts-node + nodemon
+
+En lugar de utilizar ts-node-dev, plantamos una alternativa utilizando ts-node y nodemon. 
+
+```
+npm i nodemon ts-node -D
+```
+
+ 
+
+Crear un script `"dev": "nodemon"`.
+
+Crear un archivo `nodemon.json` en la raíz de nuestro proyecto.
+
+```json
+{
+  "watch": ["src"],
+  "ext": "ts,json",
+  "ignore": ["src/**/*.spec.ts"],
+  "exec": "ts-node ./src/index.ts"
+}
+```
+
+Con `watch` indicamos en qué directorio debe observar los cambios.
+
+Con `ext` la extensión de los archivos.
+
+Con `ignore` le decimos que no queremos que vigile los tests en caso de tenerlos.
+
+Con `exec` indicamos qué queremos que se ejecute ante un cambio.
+
+
+
 ## Análisis `tsconfig.json`
 
 El archivo [tsconfig.json](https://www.typescriptlang.org/docs/handbook/tsconfig-json.html) contiene todas sus configuraciones principales sobre cómo desea que TypeScript funcione en su proyecto. Puede definir qué tan estrictamente desea que se inspeccione el código, qué archivos incluir y excluir (*node_modules* está excluido de forma predeterminada) y dónde se deben colocar los archivos compilados, etc.
@@ -300,14 +333,14 @@ Utilizaremos el compilador oficial de TypeScript que viene con el paquete npm de
 El primer script que queremos configurar es para ejecutar `tsc` (o `tsc --init` si le pasamos ese parámetro de manera apropiada).
 
 ```json
-"tsc":"tsc",
+"build":"tsc",
 ```
 
-* La primera vez vamos a ejecutar `npm run tsc -- --init` utilizamos el `--` para indicar que el parámetro `--init` queremos que le llegue a `tsc` y no al `npm run`. En este momento nos creará un `tsconfig.json` con un comentario sobre cada propiedad del JSON.
+* La primera vez vamos a ejecutar `npm run build -- --init` utilizamos el `--` para indicar que el parámetro `--init` queremos que le llegue a `tsc` y no al `npm run`. En este momento nos creará un `tsconfig.json` con un comentario sobre cada propiedad del JSON.
 
   
 
-* Las sucesivas veces ejecutaremos `npm run tsc` directamente cada vez que efectuemos cambios.
+* Las sucesivas veces ejecutaremos `npm run build` directamente cada vez que efectuemos cambios.
 
 > Notar que a partir de ese momento aparecerá el código en la carpeta de salida (por ejemplo `build`) cosa que no sucede cuando trabajabamos en desarrollo con `ts-node-dev`.
 
@@ -361,6 +394,20 @@ app.listen(PORT, () => {
 });
 
 ```
+
+
+
+## `app.set()` y `app.get()`
+
+En lugar de trabajar con una variable normal donde almacenamos el puerto, podríamos haber trabajado con `app.set()` y `app.get()` que nos permiten almacenar una configuración y recuperarla respectivamente.
+
+```tsx
+app.set("port", 3000)
+
+app.listen(app.get("port"), () => )
+```
+
+Esto podría ser útil si tenemos un archivo `app.ts` donde exportamos `app` y luego en `index.ts` tenemos el `app.listen()` por lo que estaríamos accediendo a esta variable de manera simple.
 
 
 

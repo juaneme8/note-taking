@@ -77,17 +77,52 @@ En el directorio `utils` creamos un archivo `swagger.ts`
 ```tsx
 import { Express, Request, Response } from "express";
 
-import swaggerJsdoc from "swagger-jsdoc";
-import swaggerUi from "swagger-ui-express";
-import { version } from '../../package.json'
+import swaggerJSDoc from 'swagger-jsdoc';
+import swaggerUI from 'swagger-ui-express';
+import {version} from '../../package.json';
+
+const options: swaggerJSDoc.Options = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'REST API Docs',
+      version,
+      description: 'Using Swagger in Express Server',
+    },
+  },
+  apis: ['./src/index.ts'],
+};
+
+const specs = swaggerJSDoc(options);
+
+const swaggerDocs = (app: Express, port: number) => {
+  // Swagger page
+  app.use('/docs', swaggerUI.serve, swaggerUI.setup(specs));
+
+  // Docs in JSON format
+  app.get('/docs.json', (_req: Request, res: Response) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(specs);
+  });
+
+  console.log(`Docs available at http://localhost:${port}/docs`);
+};
+
+export default swaggerDocs;
+```
 
 
+
+En un caso mas complejo donde utilicemos autenticación:
+
+```tsx
 const options: swaggerJsdoc.Options = {
   definition: {
     openapi: '3.0.0',
     info: {
       title: 'REST API Docs',
-      version
+      version,
+      description: 'Using Swagger in Express Server',
     },
     components: {
       securitySchemas: {
@@ -106,23 +141,6 @@ const options: swaggerJsdoc.Options = {
   },
   apis:['./src/index.ts']
 }
-
-const swaggerSpec = swaggerJsdoc(options)
-
-const swaggerDocs = (app: Express, port: number) => {
-  // Swagger page
-  app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-
-  // Docs in JSON format
-  app.get("/docs.json", (_req: Request, res: Response) => {
-    res.setHeader("Content-Type", "application/json");
-    res.send(swaggerSpec);
-  });
-
-  console.log(`Docs available at http://localhost:${port}/docs`);
-}
-
-export default swaggerDocs;
 ```
 
 
@@ -143,10 +161,10 @@ app.get('/ping', (_req, res) => {
   res.send('pong');
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is listening on port ${PORT}`);
+swaggerDocs(app, port);
 
-  swaggerDocs(app, port);
+app.listen(PORT, () => {
+  console.log(`Server is listening on port ${PORT}`); 
 });
 ```
 
@@ -169,7 +187,7 @@ const PORT = 3000;
    * /ping:
    *  get:
    *     tags:
-   *     - Ping
+   *     - Healthcheck
    *     description: Responds if the app is up and running
    *     responses:
    *       200:
@@ -194,10 +212,10 @@ app.get('/healthcheck', (_req, res) => {
   res.sendStatus(200);
 });
 
+swaggerDocs(app, PORT);
+
 app.listen(PORT, () => {
   console.log(`Server is listening on port ${PORT}`);
-
-  swaggerDocs(app, PORT);
 });
 ```
 
