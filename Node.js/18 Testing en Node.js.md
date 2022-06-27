@@ -6,7 +6,7 @@ La forma más simple de entender el testing es pensando que nos permitirá compr
 
 Es importante que los tests sean predecibles, que no dependan de factores externos de modo tal que siempre que los ejecute obtenga el mismo resultado.
 
-A la hora de crear tests es importante verificar que fallan pues quizás nunca falle y eso lo convertiría en un test inútil.
+A la hora de crear tests es importante hacerlos fallar pues quizás nunca falle y eso lo convertiría en un test inútil.
 
 Supongamos que tenemos:
 
@@ -18,7 +18,7 @@ const suma = (a,b) => {
 
 Si bien en este caso podemos darnos cuenta fácilmente qué está mal, en ocasiones será mucho más difícil notarlo. 
 
-La importancia de los tests está no sólo en saber si nuestro método funciona o no, sino que también nos permite documentar estos métodos .
+La importancia de los tests está no sólo en saber si nuestro método funciona o no, sino que también **nos permite documentar estos métodos** .
 
 ## Test en RunJS
 
@@ -92,7 +92,7 @@ console.log(`${checks.length}` checks performed...);
 
 Si bien podríamos ampliar la información devuelta en el mensaje de error para aportar mas datos, esto no tiene sentido pues existen herramientas que se encargan de ejecutar una tanda de tests y entregarnos un error detallado que nos permita saber dónde están los fallos y solucionarlos.
 
-Estas herramientas redciben el nombre de testing framework que nos darán una serie de funciones y un test runner con el cual ejecutamos los tests y obtenemos un reporte de cuántos pasaron la prueba.
+Estas herramientas reciben el nombre de framework de testing que nos darán una serie de funciones y un test runner con el cual ejecutamos los tests y obtenemos un reporte de cuántos pasaron la prueba.
 Los frameworks mas conocidos son **Jasmine**, **Mocha** y **Jest** 
 
 
@@ -105,8 +105,8 @@ npm install jest -D
 ```
 
 > Mocha y AVA son otras alternativas que al igual que Jest son frameworks de testing que podríamos haber elegido.
->
-> 
+
+
 
 Como vamos a probar un método en concreto vamos a desarrollar lo que se conoce como **test unitario**. Esto es así cuando tenemos una entrada y una salida y no produce **side effects**, ni llama a otras funciones.
 
@@ -231,7 +231,7 @@ describe('absolute', () => {
 	});
 });
 ```
- Los tests nos permiten hacer refactoring con la confianza de que si la nueva implementación pasa todos los tests funcionará. Si no tuvieramos tests para esta función, realizar cambios sería más engorroso ya que tendríamos que ejecutar la aplicación y navegar hacia la parte de la aplicación donde se usa la función.
+Los tests nos permiten hacer refactoring con la confianza de que si la nueva implementación pasa todos los tests funcionará. Si no tuvieramos tests para esta función, realizar cambios sería más engorroso ya que tendríamos que ejecutar la aplicación y navegar hacia la parte de la aplicación donde se usa la función.
 
 
 
@@ -476,6 +476,7 @@ describe('applyDiscount', () => {
 ```
 Importamos el módulo db `const db = require('../db');` y luego dentro del test remplazamos la función `db.getCustomerSync()` por una versión falsa que no habla a una db.
 Al agregar esta función veremos que deja de aparecer el mensaje `'Reading a customer from MongoDB...'` y en cambio vemos `'Leyendo customer de mock function...'`
+
 ## Test de palindrome
 
 En primer lugar creamos el archivo `palindrome.test.js` en la carpeta `test`.
@@ -588,7 +589,7 @@ Podemos ver la lista completa de métodos en la [documentación](https://jestjs.
 
 Para evitar que el linter nos marque como errores el uso de `test()` y `expect() ` debemos modificar el la configuración de eslint.
 
-Es posible que lo tengamos en `package.json` y en ese caso debemos modificar el objeto `eslintConfig` **agregando** lo siguiente:
+Es posible que ESLint lo tengamos configurado en `package.json` y en ese caso debemos modificar el objeto `eslintConfig` **agregando** lo siguiente:
 
 ```json
 "eslintConfig":{
@@ -620,7 +621,7 @@ module.exports = {
 
 
 
-Como sabemos existen distintos tipos de tests: unitarios, de ingregración y *end to end*. 
+Como sabemos existen distintos tipos de tests: unitarios, de integración y *end to end*. 
 
 En este caso queremos testear una API REST y lo más importante es testear a los endpoints y el efecto que generan en la base de datos por lo tanto decimos que son **tests de integración** (incluso se podría decir que son *e2e*). No utilizamos **tests unitarios** pues estos nos servirían para testear de manera aislada un método.
 
@@ -739,7 +740,7 @@ afterAll(() => {
 
 
 
-> Con la versión de mongoose `6.0.9` tuve problemas para ejecutar los tests y con `--detectOpenHandles` obtenía **Jest has detected the following 1 open handle potentially keeping Jest from exiting: ●  Timeout**. Haciendo el downgrade a la versión `5.13.9` esto se soluciona.
+> Con la versión de mongoose `6.0.9` es posible tener problemas para ejecutar los tests y con `--detectOpenHandles` obtenía **Jest has detected the following 1 open handle potentially keeping Jest from exiting: ●  Timeout**. Haciendo el downgrade a la versión `5.13.9` esto se soluciona.
 
 
 
@@ -946,8 +947,8 @@ Cuando creamos una nota devolvemos un status code `201` que significa **created*
 ```js
 test('a new note should be added', async () => {
     const newNote = {
-    content: 'Notas de De La Mar',
-    important: false,
+    	content: 'Notas de De La Mar',
+    	important: false,
     };
 
     await api
@@ -976,7 +977,7 @@ Debemos chequear las condiciones de borde, por ejemplo que no sea posible agrega
 ```js
 test('an empty note should not be added', async () => {
     const newNote = {
-    important: false,
+    	important: false,
     };
     await api.post('/api/notes').send(newNote).expect(400);
 
@@ -995,7 +996,7 @@ Cuando eliminamos una nota devolvemos un status code `204` que significa **no co
 
 Los tests los agrupamos dentro de este bloque:
 
-```
+```js
 describe('DELETE /api/notes', () => {
 
 })
@@ -1003,7 +1004,9 @@ describe('DELETE /api/notes', () => {
 
 
 
-Por ejemplo para testear el borrado de una nota:
+Por ejemplo para testear el borrado de una nota.
+
+Veremos mas adelante que `getAllNotes` es un helper para obtener las notas.
 
 ```js
 test('a note should be deleted', async () => {
@@ -1223,7 +1226,7 @@ describe('creating a new user', () => {
 
 Inicialmente sabemos que deberíamos tener un único usuario dado que así lo hemos determinado en el `beforeEach`, no obstante verificamos esto con:
 
-```
+```js
 const usersAtStart = await getUsers()
 ```
 
@@ -1231,7 +1234,7 @@ const usersAtStart = await getUsers()
 
 Siendo `getUsers()` un helper con el siguiente contenido:
 
-```
+```js
 const getUsers = async () => {
 	const usersDB = await User.find({})
 	return usersDB.map(user => user.toJSON())
@@ -1248,7 +1251,7 @@ TDD son las siglas de *test driven development* que es una forma de desarrollo e
 
 Existen distintas formas de trabajo: Una forma sería ir paso a paso desde el comienzo creando tests y luego desarrollando las funcionalidades y otra forma es plantear directamente un caso de uso. 
 
-Por ejemplo siguiendo esta última forma de trabajo, puede que queramos testear la condición de borde de qué sucede si intentamos crear un usuario cuyo `username` ya existe. La idea sería crear el test, que nos de rojo, luego desarrollar el código hasta que no de veerde y finalmente refactorizar.
+Por ejemplo siguiendo esta última forma de trabajo, puede que queramos testear la condición de borde de qué sucede si intentamos crear un usuario cuyo `username` ya existe. La idea sería crear el test, que nos de rojo, luego desarrollar el código hasta que no de verde y finalmente refactorizar.
 
 ```js
 test('should not create user if username is already taken', async () => {
