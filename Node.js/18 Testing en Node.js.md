@@ -34,7 +34,9 @@ Sin embargo puede que para otras condiciones el método sí funcione, por ejempl
 
 ## Test en Node
 
-Para testear esto mismo también manualmente pero directo en el proyecto de Express creamos una carpeta `tests ` y un archivo `suma.test.js`.
+Para testear esto mismo también manualmente pero directo en el proyecto de Express creamos una carpeta `tests ` y un archivo `suma.test.js`. 
+
+> También podría ser `.spec.js`.
 
 Haremos uso del método `console.assert()` con el cual aseveramos que una cosa dará cierto valor y en caso de que no se cumpla mostraremos un mensaje de error. Si lo que le pasamos como primer parámetro es `false` saldrá el error que le pasemos como segundo parámetro.
 
@@ -126,6 +128,7 @@ module.exports = {
 ```
 
 ## Configuración Jest 
+
 En `package.json` debemos modificar el script `"test"` de modo que quede de la siguiente forma:
 
 ```json
@@ -149,6 +152,18 @@ Jest como dijimos anteriormente está pensado para trabajar por defecto en el cl
 > Otra opción sería colocarlo en `jest.config.js` pero lo ideal es tenerlo todo en un mismo lugar así es más fácil de encontrar y con menos archivos.
 
 > Es posible que en Windows experimentemos problemas si el nombre de la carpeta tiene espacios (por ejemplo si nuestro nombre de usuario los tiene).
+
+
+
+### Jest con ESModules
+
+Si queremos utilizar jest con import y export es probable que tengamos que configurar lo siguiente:
+
+```bash
+"test": "set NODE_OPTIONS=--experimental-vm-modules && jest"
+```
+
+En Linux directamente podremos ponerlo sin el `set` y sin el `&&`,  `NODE_OPTIONS=--experimental-vm-modules jest`
 
 
 
@@ -212,7 +227,10 @@ Supongamos que en el último test en vez de `expect(result).toBe(0);`tuvieramos 
 
 ## Agrupando Tests
 En la medida que el número de tests aumenta es importante tenerlos organizados para que el mantenimiento sea simple.
-La función `describe()` nos permite agrupar los tests relacionados (con lo cual podremos simplificar el nombre de cada test) y también podemos reemplazar `test()` por `it()` 
+La función `describe()` nos permite agrupar los tests relacionados (con lo cual podremos simplificar el nombre de cada test) y también podemos reemplazar `test()` por `it()` . 
+
+También es posible anidar bloques `describe`.
+
 > Si tuviéramos todo escrito en inglés veríamos `it('should return >0 if input >0')` es decir que lo veríamos como *plain english* "it should return..." 
 ```js
 const lib = require('../lib');
@@ -335,6 +353,8 @@ Nótese que no usamos `toBe()` ya que si pusiéramos `expect(result).toBe({id:1,
 
 Supongamos que `getProduct()` entrega varias propiedades además de `id` y `price`, en ese caso ya no puedo usar `expect(result).toEqual({ id: 1, price: 10 });` sino que tengo que cambiar `toEqual()` por `toMatchObject()`: `expect(result).toMatchObject({ id: 1, price: 10 });`
 Una tercera opción es usando la función `toHaveProperty(key,value)` tener presente que el *value* debe ser del tipo esperado en este caso `Number`.
+
+Para chequear si una propiedad está presente en la respuesta podríamos usar también `expect(result.body.id).toBeDefined();`
 
 ## Testing Exceptions
 Trabajamos con la función `registerUser()` podemos ver que si el `username` es *falsy* (`0`, `false`, `empty string`, `null`, `undefined`, `NaN`) tiramos una excepción en caso contrario retorna un objeto con las propiedades `id` y `username`. Tenemos dos *execution paths* por lo que necesitamos por lo menos dos unit tests.
@@ -623,7 +643,7 @@ module.exports = {
 
 Como sabemos existen distintos tipos de tests: unitarios, de integración y *end to end*. 
 
-En este caso queremos testear una API REST y lo más importante es testear a los endpoints y el efecto que generan en la base de datos por lo tanto decimos que son **tests de integración** (incluso se podría decir que son *e2e*). No utilizamos **tests unitarios** pues estos nos servirían para testear de manera aislada un método.
+En este caso queremos testear una API REST y lo más importante es testear a los endpoints y el efecto que generan en la base de datos por lo tanto decimos que son **tests de integración** (incluso se podría decir que son *e2e*). No utilizamos **tests unitarios** pues estos nos servirían para testear de manera aislada un método. Utilizando el paquete supertest haremos las peticiones http y luego jest se encargará de evaluar los resultados.
 
 
 
@@ -698,9 +718,9 @@ test('the result should be a json', async () => {
 
 
 
-> Notar que debemos exportar `app` en`index.js` como `module.exports = { app };`
+> Como debemos exportar `app` para luego importarlo en el test, quizás nos convenga trabajar con `app.js` con `module.exports = { app };` y con `index.js` que también importará este valor y ejecuta el `app.listen()`
 >
-> Notar que usamos una RegEx porque podemos recibir `application/json; charset=utf-8`
+> Notar que usamos una RegEx porque podemos recibir `application/json; charset=utf-8` Sino podríamos haber puesto `expect(res.header['content-type'].toBe('application/json'))`.
 
 
 
@@ -910,6 +930,12 @@ afterAll(() => {
     server.close()
     mongoose.connection.close();
 })
+```
+
+También podríamos haber verificado que devuelva un array con 
+
+```
+expect(res.body).toBeInstanceOf(Array);
 ```
 
 
