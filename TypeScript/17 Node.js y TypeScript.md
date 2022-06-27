@@ -407,7 +407,7 @@ app.set("port", 3000)
 app.listen(app.get("port"), () => )
 ```
 
-Esto podría ser útil si tenemos un archivo `app.ts` donde exportamos `app` y luego en `index.ts` tenemos el `app.listen()` por lo que estaríamos accediendo a esta variable de manera simple.
+Esto podría ser útil si tenemos un archivo `app.ts` donde exportamos `app` y luego en `index.ts` tenemos el `app.listen()` por lo que estaríamos accediendo a esta variable de manera simple. Este concepto también tiene sentido cuando estamos haciendo testing ya que al importar app estaremos importando sólo lo que necesitamos (que es `app` para hacer `supertest(app)` por ejemplo) y no todo lo demás que tiene index.
 
 
 
@@ -915,3 +915,17 @@ Antes de que se llame al tipo de protección, el tipo real de la variable *comme
 Pero después de la llamada, si el código pasa de la excepción (es decir, el tipo guard devuelto verdadero), el compilador sabe que *comment* es del tipo *string*:
 
 ![fullstack content](https://fullstackopen.com/static/18cf1ac37d9cee7ac1eb22a58e268045/5a190/29e.png)
+
+
+
+## MongoDB:
+
+> Basado en el [video de Fast sobre JWT](https://youtu.be/qVUr4YC6ZXA)
+
+Cuando estamos utilizando MongoDB con Mongoose y tenemos un modelo debemos poner:
+
+```
+model<User>('User', userSchema)
+```
+
+Siendo `User` la interface que define los datos almacenados en ese modelo.
