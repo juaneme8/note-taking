@@ -24,7 +24,7 @@ function foo(item, callback){
 }
 ```
 
-Siendo `callback()` por ejemplo la siguiente *function expression* `const callbck = () => {...}`
+Siendo `callback()` por ejemplo la siguiente *function expression* `const callback = () => {...}`
 
 ## Promesas
 Si bien el uso de *callbacks* permite ejecutar código de manera asincrónica, cuando tenemos una sucesión de eventos asincrónicos el código se vuelve bastante engorroso. Como solución a esto surgen las promesas y se trata de operaciones que van a terminar en el futuro. Esto es muy útil a la hora de consumir datos de una API.
