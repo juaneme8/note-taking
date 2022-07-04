@@ -19,7 +19,28 @@ Normalmente al desarrollar una **CRUD Application** tendremos una estructura sim
 |   PUT   |  localhost:3000/blogs/:id   |
 | DELETE  |  localhost:3000/blogs/:id   |
 
+
+
+## GET Requests
+
+### Healthcheck
+
+Es importante contar con un endpoint que llamamos **healthcheck** que nos permita tener conocimiento si la API está operativa y respondiendo solicitudes. 
+
+```
+app.get('/healthcheck', (req,res) => res.sendStatus(200))
+```
+
+Luego para probar este endpoint podremos ingresar a la url `localhost:3000/healthcheck` o ejecutar un curl `curl http://localhost:3000/healthcheck` que debería devolvernos un OK.
+
+
+
+> También es común encontrarnos con endpoints de prueba que al pegarle a `/ping` devuelven "pong".
+
+
+
 ## POST Requests
+
  A partir del contenido cargado en el formulario, al presionar submit queremos lanzar un post request con todos los datos que luego será manejado por el servidor para incorporar este nuevo elemento.
 
 El primer paso consiste en enviar el `POST` request desde el formulario y podrá ser realizado de dos maneras:
