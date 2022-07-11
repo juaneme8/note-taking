@@ -1,9 +1,15 @@
 # Introducción a la terminal y Línea de Comandos
-> Basado en el Curso de Platzi de Enrique Devars - VIDEOS 2 COMPLETO
+> :link: Basado en el Curso de Platzi de Enrique Devars - VIDEOS 2 COMPLETO
 >
-> Agregados sobre comandos de Linux de Ultimate Docker Course de Mosh Hamedani
+> :link: Basado en el video de [Learn Linux TV](https://www.youtube.com/watch?v=5EqL6Fc7NNw) sobre comandos `head` y `tail`.
 >
-> Agregados video [30 Comandos Linux para manejar tu Server](https://youtu.be/0BA4k3jweaE) del Pelado Nerd 
+> :link: Basado en el video de [Learn Linux TV](https://youtu.be/Tc_jntovCM0?list=PLT98CRl2KxKHKd_tH3ssq0HPrThx2hESW) sobre comand  `grep`.
+>
+> :link: Agregados sobre comandos de Linux de Ultimate Docker Course de Mosh Hamedani
+>
+> :link: Agregados video [30 Comandos Linux para manejar tu Server](https://youtu.be/0BA4k3jweaE) del Pelado Nerd 
+
+
 
 ## Motivaciones
 La terminal se caracteriza por brindarnos **flexibilidad** para realizar todo tipo de tareas con unos pocos comandos, **velocidad** a la hora de realizarlos y es **fundamental a la hora de trabajar con servidores remotos** es la única opción ya que no contamos con una interfaz gráfica.
@@ -760,19 +766,35 @@ Con la tecla `SPACE` podremos avanzar una página a a la vez.
 
 ### Comando `head`
 
-El comando `head` nos permite mostrar las primeras líneas de un archivo.
+El comando `head` nos permite mostrar las primeras diez líneas de un archivo.
 
 ```
 head /etc/adduser.conf
 ```
 
-Si queremos especificar la cantidad de líneas que queremos mostrar: `head -n 10 /etc/adduser.conf`
+Si queremos especificar la cantidad de líneas que queremos mostrar: `head -n 12 /etc/adduser.conf`
+
+
+
+> A la hora de revisar logs en sistemas Ubuntu trabajaremos con `/var/log/syslog` por lo que probablemente nos será de utilidad el comando `tail /var/log/syslog`
+
+
+
+### Comando `wc`
+
+El comando `wc` significa word count y nos permite por ejemplo contar la cantidad de líneas devueltas por un comando cuya salida se la pasamos como entrada mediante un pipe.
+
+```
+head /var/log/syslog | wc -l
+```
+
+Cuando hacemos esto decimos *we piped the head command into the word count command*.
 
 
 
 ### Comando `tail`
 
-El comando `tail` nos permite mostrar las últimas líneas de un archivo.
+El comando `tail` nos permite mostrar las últimas 10 líneas de un archivo.
 
 ```
 tail /etc/adduser.conf
@@ -780,7 +802,56 @@ tail /etc/adduser.conf
 
 > Si queremos especificar la cantidad de líneas que queremos mostrar: `tail -n 10 /etc/adduser.conf` o `tail -2 /etc/adduser.conf`
 
-> Si queremos ver un archivo en tiempo real `tail -f /var/log/syslog`
+
+
+
+
+El comando `tail` es capaz de recibir la opción `-f` con la cual haremos un seguimiento a los logs, es decir que veremos el contenido casi en tiempo real:
+
+```
+tail -f /var/log/syslog
+```
+
+> Veremos que al ejecutarlo no retorna al command prompt sino tenemos el cursor parpareando. En ese caso podremos ejecutar varios ENTER para así separar la última información de lo que venga después. Por ejemplo si ejecutamos `sudo systemctl restart ssh` veremos una serie de logs nuevos.
+
+
+
+#### Comentario sobre Logs
+
+* `/var/log/syslog`
+
+En `syslog` contiene todos los logs del sistema todo menos los mensajes relacionados con temas de autenticación.
+
+Este archivo puede tener miles de líneas lo cual nos lleva a tener una serie de precauciones por un lado para evitar que se llene (utilizando técnicas como log rotation y compresión de archivos) y también a la hora de trabajar con él no hacerlo directamente sino utilizando copias.
+
+Si queremos conocer la cantidad de líneas que tiene este archivo:
+
+```
+cat /var/log/syslog | wc -l
+```
+
+Si queremos ver los primeros 10 logs que utilizan la palabra ssh:
+
+```
+cat /var/log/syslog | grep ssh | head
+```
+
+> Podremos la cantidad recibida con `cat /var/log/syslog | grep ssh | head | wc -l`
+
+
+
+* `/var/log/auth.log`
+
+En `auth.log` vemos los intentos de logueo que han tenido los usuarios. Para simular esta situación en la que un usuario que intenta loguearse, lo hacemos de la misma máquina pero simularía que es otro host, ejecutamos:
+
+```
+ssh localhost
+```
+
+
+Si a continuación ingresamos mal el password se agregarán nuevos logs reportando esta situación.
+
+
 
 ### Comando `rm`
 
@@ -894,71 +965,91 @@ grep hello file.txt
 
 
 
-Si queremos filtrar todas las líneas que no dicen "hello"
+##### Invert Match
 
-```bash
+En lugar de obtener todas las líneas que tienen una determinada cadena, podemos obtener las que no la tienen.
+
+```
 grep -v hello file.txt
 ```
 
+En lugar de `-v` podemos usar `--invert-match`
 
 
-Si queremos mostrar los archivos que cumplen con un filtro:
+
+##### Ignore Case
+
+Como todo en Linux, la búsqueda es case sensitive, para hacerlo case insentitive debemos agregar la opción `-i`
 
 ```
-grep -l hello file.txt
-```
-
-> Esto tendrá sentido si estamos haciendo una búsqueda en un directorio por ejemplo con`grep -rl hello .`
-
-
-
-Recordemos que como todo en Linux la búsqueda es case sensitive, para hacerlo case insentitive debemos agregar `-i`
-
-```bash
 grep -i hello file.txt
 ```
 
+En lugar de `-i` podremos usar  `--ignore-case`.
+
+
+
+##### Búsqueda recursiva
+
+Utilizando la opción `-r` podemos buscar texto en los archivos de un determinado directorio (y todos sus subdirectorios)
+
 ```bash
-grep -i root /etc/passwd
+grep -r hello /etc
 ```
 
+En lugar de `-r` podemos usar `--recursive`
 
 
-Búsqueda de texto en múltiples archivos especificados uno a uno:
+
+##### Filtrar Archivos
+
+Utilizando la opción `-l` (junto con `-r`) es posible filtrar todos los archivos de un directorio que contienen una determinada cadena.
+
+```
+grep -rl hello .
+```
+
+En lugar de `-l` podemos usar `--files-with-matches`
+
+
+
+##### Búsqueda en múltiples archivos
+
+La forma más simple de buscar en múltiples archivos es especificándolos uno a uno.
 
 ```bash
 grep -i hello file1.txt file2.txt
 ```
 
-Búsqueda de texto en múltiples archivos especificados mediante un patrón:
+
+
+Otra forma es especificarlos mediante un patrón:
 
 ```bash
 grep -i hello file*
 ```
 
-Búsqueda texto en los archivos de un determinado directorio, pero para eso debemos usar también la opción `-r` de recursiva (para hacer una búsqueda en el directorio y todos su subdirectorios):
 
-```bash
-grep -i -r hello /etc
+
+##### Cantidad de Líneas devueltas
+
+```
+grep -A 5 hello file.txt
 ```
 
-O lo que es lo mismo combinando opciones:
+Con `-A 5` (de after) mostramos las 5 líneas siguientes a la aparición de la cadena "hello". 
 
-```bash
-grep -ir hello /etc
-```
+Con `-B 5` (de before) mostramos las 5 líneas previas a la aparición de la cadena "hello". 
 
-Si queremos buscar en el directorio actual:
-
-```bash
-grep -ir hello .
-```
+Con `-C 5` mostramos las 5 líneas previas y las 5 siguientes a la aparición de la cadena "hello". 
 
 
 
-> Si queremos buscar los scripts que tenemos en un determinado proyecto con Node podemos hacer lo siguiente `cat package.json | grep -A 5 scripts`.
->
-> Con `-A 5` (de after) indicamos que queremos mostrar también las 5 líneas siguientes a la aparición de la cadena "scripts". Si queremos ver `5` líneas hacia arriba y hacia abajo podemos ejecutar `-5` o `-C 5`
+##### Utilizando Pipes
+
+Si queremos buscar los scripts que tenemos en un determinado proyecto con Node podemos hacer lo siguiente `cat package.json | grep -A 5 scripts`.
+
+
 
 
 
