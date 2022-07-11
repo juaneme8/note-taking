@@ -5,6 +5,8 @@
 >
 > :link: Basado en el video de [Learn Linux TV](https://youtu.be/Tc_jntovCM0?list=PLT98CRl2KxKHKd_tH3ssq0HPrThx2hESW) sobre comand  `grep`.
 >
+> :link: Basado en el video de [Learn Linux TV](:link: Basado en el video de [Learn Linux TV](https://youtu.be/Tc_jntovCM0?list=PLT98CRl2KxKHKd_tH3ssq0HPrThx2hESW) sobre comand  `grep`.) sobre comand  `ping`.
+>
 > :link: Agregados sobre comandos de Linux de Ultimate Docker Course de Mosh Hamedani
 >
 > :link: Agregados video [30 Comandos Linux para manejar tu Server](https://youtu.be/0BA4k3jweaE) del Pelado Nerd 
@@ -957,7 +959,7 @@ ls -l /etc > list.txt
 
 ### Comando `grep`
 
-El comando `grep` (*global regular expression print*) nos permite buscar texto en un archivo, por ejemplo si queremos buscar la cadena "hello" en el archivo `file.txt`:
+El comando `grep` (*global regular expression print*) nos permite buscar texto en un archivo, por ejemplo si queremos buscar la cadena "hello" en el archivo `file.txt`
 
 ```bash
 grep hello file.txt
@@ -989,6 +991,56 @@ En lugar de `-i` podremos usar  `--ignore-case`.
 
 
 
+##### Obtener Número de Línea
+
+Utilizando la opción `-n`
+
+```
+grep -n hello file.txt
+```
+
+En lugar de `-n` podremos usar  `--line-number`.
+
+
+
+##### Contar líneas
+
+Con la opción `-c` podremos contar la cantidad de líneas en que encontramos la cadena indicada.
+
+```
+grep -c hello file.txt
+```
+
+> No importa que la palabra esté n veces en una misma línea, veremos como resultado 1.
+
+
+
+#####  Búsqueda en múltiples archivos
+
+La forma más simple de buscar en múltiples archivos es especificándolos uno a uno.
+
+```bash
+grep -i hello file1.txt file2.txt
+```
+
+
+
+Si queremos buscar en todos los archivos en la ruta en la que nos encontramos actualmente:
+
+```
+grep hello *
+```
+
+
+
+Otra forma es especificarlos mediante un patrón:
+
+```bash
+grep -i hello file*
+```
+
+
+
 ##### Búsqueda recursiva
 
 Utilizando la opción `-r` podemos buscar texto en los archivos de un determinado directorio (y todos sus subdirectorios)
@@ -1013,24 +1065,6 @@ En lugar de `-l` podemos usar `--files-with-matches`
 
 
 
-##### Búsqueda en múltiples archivos
-
-La forma más simple de buscar en múltiples archivos es especificándolos uno a uno.
-
-```bash
-grep -i hello file1.txt file2.txt
-```
-
-
-
-Otra forma es especificarlos mediante un patrón:
-
-```bash
-grep -i hello file*
-```
-
-
-
 ##### Cantidad de Líneas devueltas
 
 ```
@@ -1047,9 +1081,15 @@ Con `-C 5` mostramos las 5 líneas previas y las 5 siguientes a la aparición de
 
 ##### Utilizando Pipes
 
-Si queremos buscar los scripts que tenemos en un determinado proyecto con Node podemos hacer lo siguiente `cat package.json | grep -A 5 scripts`.
+Si bien es un poco redundante, en ocasiones se suele utilizar el comando `cat` en conjunto con `grep` utilizando pipes.
 
+Por ejemplo si queremos buscar los scripts que tenemos en un determinado proyecto con Node.js podemos hacerlo con
 
+```
+cat package.json | grep scripts
+```
+
+Aunque podríamos haber hecho directamente `grep scripts package.json`
 
 
 
@@ -1918,6 +1958,64 @@ neststat -nr
 ### Comando `cmatrix`
 
 Si ejecutamos `cmatrix` veremos un fondo de pantalla con caracteres estilo Matrix.
+
+
+
+### Comando `ping`
+
+El comando `ping` nos permite saber si un servidor se encuentra online y en caso de estarlo responderá con un nuevo ping.
+
+Es posible hacerle un ping a un host name, domain name, ip, etc
+
+```
+ping google.com
+```
+
+
+
+##### Tráfico de Red
+
+El tipo de tráfico de red que vemos con este comando se conoce como **icmp** (internet control message protocol).  Le estamos enviando un *icmp echo request* a la espera de que nos envíe un *icmp echo reply*.
+
+Cuando un administrador implementa un firewall puede bloquear el tráfico icmp.
+
+
+
+##### Cantidad de Pings
+
+A diferencia de lo que ocurre en Windows donde al realizar el ping obtenemos cuatro pings y luego se detiene, en Linux por defecto continúa ejecutándose permanentemente por lo que podremos detenerlo con `CTRL+C`.
+
+Sin embargo, esto puede configurarse utilizando la opción `-c`.
+
+```
+ping -c 3 google.com
+```
+
+
+
+##### Network Troubleshooting
+
+Podemos pensar al comando `ping` como una utilidad básica de solución de problemas, ya que aporta datos como el tiempo que transcurrió entre la solicitud hasta obtener una respuesta (lo cual puede ser indicador de latencia), la cantidad de paquetes que se pierden, etc. Si bien estos datos no nos darán la causa en caso de tener un problema de red, pueden servirnos para tener una noción del estado de la misma.
+
+
+
+###### Determinar Conexión a Internet
+
+Es posible utilizar el comando `ping` para saber si tenemos conexión a internet en especial en servidores donde no contamos con un navegador (o aun teniendo un navegador puede que sea problema de DNS)
+
+```
+ping 8.8.8.8
+```
+
+
+
+Siendo `8.8.8.8` uno de los servidores de DNS de Google por lo que si obtenemos respuesta significará que estamos online. En caso de tener respuesta y continuar con problemas podrá deberse a problemas con el servidor de  dns local , servidor dhcp, etc
+
+
+
+##### Reinicio Servidor
+
+Cuando realizamos tareas de mantenimiento en un servidor y tenemos que reiniciarlo habrá un tiempo durante el cual no podremos conectarnos por ssh. Si bien podríamos intentar conectarnos hasta que eventualmente nos deje, otra forma es hacer ping a la ip del server sabiendo que cuando este vuelva a estar operativo obtendremos respuesta y ahí sí podremos conectarnos por ssh.
 
 
 
