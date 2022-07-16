@@ -641,3 +641,5 @@ De acuerdo a **la relación entre las transiciones de estado**: si no están rel
 De acuerdo a **la lógica de negocios de las transiciones de estado**: si no requiere lógica `useState` si requiere lógica compleja `useReducer`. De esta manera la lógica estará en el `reducer` y tendremos una buena separación de intereses, logrando así un código de más fácil lectura y mantenimiento.
 
 De acuerdo a si necesitamos un **estado global o local** si necesitamos un estado local a nivel componente `useState` es una buena opción mientras que si queremos un estado global que pueda ser alterado por componentes anidados en el árbol de componentes `useReducer` es una mejor opción. Usa esto debido a que con `useReducer` tiene la ventaja de que sólo tendremos que pasar al árbol de componentes el `dispatch` mientras que con `useState` tendríamos que pasar múltiples update functions.
+
+Si estamos manejando tres variables de estado mediante `useState` y queremos manipularlas desde un componente hijo tendremos que pasarle 6 props.
