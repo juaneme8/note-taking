@@ -530,6 +530,7 @@ export default UserForm;
 
 Luego tenemos que crear un *custom hook* que encapsule al comportamiento de  *controlled component* del `input`
 Esto lo hacemos creando primero `useInput`
+
 ```jsx
 import { useState } from 'react';
 
@@ -587,4 +588,4 @@ function UserForm() {
 export default UserForm;
 
 ```
-Notar el uso del *spread operator*por estar trabajando con los atributos. 
+Notar el uso del *spread operator* por estar trabajando con los atributos. 

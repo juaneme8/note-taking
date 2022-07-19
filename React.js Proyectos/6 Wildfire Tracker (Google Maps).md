@@ -38,6 +38,12 @@ No olvidar agregar al archivo `.gitignore` al archivo `.env`
 
 Debemos tener presente que no existe forma segura de almacenar secretos en una aplicación cliente corriendo en un navegador. Aun en caso de utilizar variables de entorno el contenido podrá ser descubierto. Las variables son embebidas durante el *build time* por lo que estarán en el bundle estático de HTML/CSS/JS producido por CRA.
 
+
+
+The canonical way to use a third party API key is for your client side app to send a request to your backend API. Your backend API then formats the request as per the third-party API, adds the key and makes the call to the third-party API. Once it receives the response, it can either unpack it and translate it into domain objects which your front-end app would understand or send the raw response back to the front-end app. In this way, the API key stays at the backend and is never sent to the client-side.
+
+
+
 # defaultProps
 En determinadas ocasiones queremos que aunque el padre no le pase al hijo cierta prop esta no valga `undefined` sino que adquiera un valor default, en ese caso podremos realizar lo siguiente:
 ```jsx
