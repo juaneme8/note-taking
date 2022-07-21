@@ -177,9 +177,12 @@ Por lo tanto estos serán los nombres que tendremos que darle a nuestras claves 
 
 > Las llaves públicas y privadas también serán creadas en este mismo directorio `.ssh` en el home `~` del usuario. 
 >
-> 
+
+
 
 ## Agregar la clave al ssh-agent
+
+:skull: Probar nuevamente porque en su momento no funcionó.
 
 Para evitar tener que escribir el passphrase cada vez que hacemos un push o pull, debemos agregar la llave privada al `ssh-agent`. 
 
@@ -279,7 +282,7 @@ A continuación indicamos la *passphrase* y con `ls ~/.ssh` chequeamos que se ha
 
 ## Agregar clave a GitLab
 https://docs.gitlab.com/ee/ssh/#add-an-ssh-key-to-your-gitlab-account
-Ir a Preferences y  dentro de la barra de **Ajustes de Usuario** ir a **Claves SSH** y pegar el contenido de la clave pública asignarle un nombre descriptivo del equipo.
+Ir a **Settings** y  luego a **SSH Keys** y pegar el contenido de la clave pública asignarle un nombre descriptivo del equipo.
 
 ## Verificar que podemos conectarnos
 `ssh -T git@gitlab.com`

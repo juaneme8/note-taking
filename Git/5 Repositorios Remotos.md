@@ -1,5 +1,9 @@
 # Repositorios Remotos
-Cuando trabajamos de manera colaborativa con otras personas, debemos contar con un servidor o repositorio remoto donde esté almacenada la versión unificada del trabajo de todos ellos. Los ejemplos mas comunes son GitHub, GitLab (GitLab tiene la ventaja de contar con una herramienta llamada GitLab CI que combinada con el uso de ramas nos permite automatizar muchas cosas), BitBucket, o incluso un servidor montado manualmente. Los desarrolladores obtienen los datos de este servidor, luego trabajan localmente y por último mandan datos para que sean visibles por todos.
+Cuando trabajamos de manera colaborativa con otras personas, debemos contar un repositorio remoto donde esté almacenada la versión unificada del trabajo de todos ellos. Los ejemplos mas comunes de servidores de repositorios en la nube son GitHub, GitLab pero también es posible montar un servidor propio. 
+
+> GitLab tiene la ventaja de contar con una herramienta llamada GitLab CI que combinada con el uso de ramas nos permite automatizar muchas cosas
+
+Los desarrolladores obtienen los datos de este servidor, luego trabajan localmente y por último mandan datos para que sean visibles por todos.
 
 # GitHub
 GitHub es un servicio de **hosting para almacenar repositorios remotos**. Además cuenta con otros servicios como ser hosting para páginas web estáticas, manejo de issues del código, mecanismos para compartir snippets de código, etc. 
@@ -48,6 +52,12 @@ Para evitar poner la dirección cada vez podemos crear un alias `git remote add 
 > Como buena práctica antes de hacer un push, debemos hacer un pull para traernos la última versión del código.
 > Cuando sólo tengo un lugar no haría falta colocar `git push origin master` (aunque es una buena práctica hacerlo) sino que puedo poner directamente `git push`. Esto será útil por ejemplo si acabo de clonar un repositorio y estoy trabajando en `master`
 
+ 
+
+
+
+
+
 # `git pull`
 El comando `git pull` nos permite traer código de un repositorio remoto.
 
@@ -71,7 +81,7 @@ Con `git remote set-url git@github.com:user/repo.git` cambiamos la dirección de
 
 > Es posible tener múltiples remotes. 
 
-# Trabajo Colaborativo:
+# Trabajo Colaborativo
 Para poder trabajar en un repositorio de manera colaborativa, asumimos que el dueño del repositorio nos añadió como **Collatorators** del proyecto. También veremos que es posible aportar en un proyecto sin ser un **Collaborator** mediante el **Fork**.
 
 En el mundo profesional la rama `main` es la que se va a subir al **servidor de producción**, es por esto que no suele mergearse la rama en la que estemos trabajando a `main` y luego pushearlo, ya que puede que otros desarrolladores no estén de acuerdo con los cambios introducidos. Debemos en cambio, trabajar con otras ramas, solicitar un pull request (o merge request en GitLab) y luego será sometido a un *code review* donde el líder del equipo o del administrador del entorno de desarrollo (DevOps) decide si realiza el merge. 

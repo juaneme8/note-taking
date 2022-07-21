@@ -217,9 +217,13 @@ Con `git push origin features` enviamos la rama `features` al repositorio remoto
 
 
 
-**Lo habitual es tener nombres como `feature/new-table` o `bugfix/new-table`.**
+## Naming
 
+Además de `main` tendremos una rama `dev` que es código testeado candidato para le próximo **realease**, está listo para producción.
 
+Para el desarrollo de nuevas funcionalidades o solución de bugs lo habitual es tener nombres como `feature/new-table` o `bugfix/new-table`. Es aconsejable tener features pequeños que no lleven mucho tiempo de desarrollo con lo cual será potencialmente menos conflictivo a la hora de realizar el merge.
+
+Cuando se trabaja por sprints luego del tiempo establecido el contenido de los branchs de feature y bugfix son mergeados a `dev` y al finalizar el sprint serán mergeados a `main`.
 
 # Merge
 Se conoce como merge al proceso de unir o fusionar los cambios de una rama con otra rama. Por ejemplo si tenemos la `main` y detectamos un bug, creamos un branch `hotfix` luego efectuamos en esa rama los commits que sean necesarios y finalmente cuando estamos satisfechos con el resultado mergeamos esos cambios en `main` donde tenemos el código de producción.
