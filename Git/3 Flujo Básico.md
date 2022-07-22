@@ -44,7 +44,7 @@ El comando `git commit` nos permite agregar el contenido del staging area al rep
 > En este caso estamos poniendo `commit -m "Mensaje asociado"` pero podríamos poner directamente `git commit` y nos abrirá el editor de código por defecto donde podremos ponerlo, luego guardar y cerrar el archivo.
 > Si no establecimos ningún editor con `git config --global core.editor "code --wait" ` abriremos el archivo en Vim. En ese caso presionando `i` pasaremos al modo insertar y luego de ingresar el mensaje deseado presionamos `ESC` `SHIFT+Z` `SHIFT+Z` para guardar y cerrar Vim.
 > Si tenemos establecido el Visual Studio Code como editor nos abrirá ese editor para ingresar allí el mensaje que podrá ser multilínea y una vez concluido guardamos dicho archivo `CTRL+S` y cerramos la ventana `CTRL+W`
-> Podemos pensar al commit más reciente como la cabecera y lo veremos como `HEAD`, es un apuntador a la rama en la cual nos encontramos trabajando.
+> Podemos pensar al commit más reciente como la cabecera y lo veremos como `HEAD`, es un apuntador al último commit a la rama en la cual nos encontramos trabajando.
 
 > Si queremos condensar los comandos de add y commit en uno sólo podemos poner `git add . && git commit -m "Mensaje"`
 
@@ -56,6 +56,8 @@ Como queremos agregar también un mensaje en línea agregamos el parámetro `-m`
 
 ## `git commit --amend`
 Cuando realizo un commit y luego me doy cuenta que me hubiera gustado agregarle más cambios a ese commit, puedo realizar dichos cambios localmente y luego agregar ese archivo al staging area `git add file.txt` y por último ejecutar `git commit --amend`, luego me preguntará si quiero cambiar el mensaje del commit. De esta manera los cambios realizados los pegará en el commit anterior sin realizar uno nuevo.
+
+Esto también es útil cuando me equivoqué al escribir el mensaje del commit y quiero cambiarlo. En ese caso también bastará con ingresar `git commit --amend -m "nuevo mensaje"`
 
 
 

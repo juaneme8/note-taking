@@ -185,18 +185,3 @@ https://dev.to/rhymu8354/git-renaming-the-master-branch-137b
 
 
 
-## Eliminar `node_modules` una vez pusheado
-
-https://techstacker.com/remove-node_modules-after-adding-gitignore/
-
-```
-git rm -r --cached node_modules
-```
-
-```
-git commit -m "Removed node_modules"
-```
-
-```bash
-git push origin master
-```

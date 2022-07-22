@@ -71,7 +71,14 @@ Git almacena el **estado** de todos los archivos que maneja y lo hace a través 
 > Si ejecutamos `mkdir temp` y luego ejecutamos `git status` veremos que nos dirá *nothing to commit*, esto se debe a que **git versiona archivos, no carpetas**. Es por esto que si una cierta tecnología nos obliga a tener carpetas vacías, la convención es crear un archivo vacío adentro llamado `.gitkeep` cosa que hacemos con `touch .gitkeep`. Por tratarse de un archivo cuando lo agreguemos al sistema de control de versiones, tendremos la carpeta también.
 
 ## `.gitignore`
-No todos los archivos con los que trabajamos deben ir al repositorio. Por ejemplo si estamos trabajando con archivos que contienen contraseñas o API keys no queremos que estas vayan al repositorio ya que podrían ser vistos por alguien más (sobre todo en proyectos  open-source donde el repositorio es público).
+No todos los archivos con los que trabajamos deben ir al repositorio. 
+
+* Archivos que contienen contraseñas o API keys no queremos que estas vayan al repositorio ya que podrían ser vistos por alguien más (sobre todo en proyectos  open-source donde el repositorio es público). 
+* Build folders
+* Carpetas de configuración del editor de código
+* Carpeta `node_modules` ya que queremos que todos los usuarios instalen la aplicación localmente basado en el `package.json`.
+
+
 
 Para evitar que un archivo se agregado al repositorio debemos colocarlo en un archivo `.gitignore` que creamos en la raíz del proyecto y donde colocamos la lista de todos los archivos a ignorar.
 
@@ -80,6 +87,33 @@ Supongamos que tenemos un archivo `app.log` que no queremos que forme parte del 
 > Recordemos que no es una buena práctica incluir archivos binarios en el repositorio. Las imágenes por ejemplo no deberían ser incluidas y deberíamos buscar otra alternativa como CDN (*content delivery network*), hosting externo (como imgur), rsync, etc. Si quisiéramos evitar la presencia de imágenes `.jpg` en el repositorio podríamos poner `*.jpg`.
 > Es posible poner comentarios en el `.gitignore` con `#`
 > Es posible generar excepciones sobre los archivos a ignorar con `!` por ejemplo si queremos ignorar todos los archivos del directorio `content` menos uno llamado `file1.txt` podemos poner `content/*` y luego `!content/file1.txt`.
+
+
+
+
+
+### Eliminar `node_modules` una vez pusheado
+
+En ocasiones agregamos al repositorio carpetas o archivos accidentalmente que no queremos que estén allí. Podría ser el caso de `node_modules` o un archivo `.env` subidos por error y no queremos que git siga trackeando sus cambios sino que queremos eliminarlo del repositorio conservándolo en el working directory.
+
+https://techstacker.com/remove-node_modules-after-adding-gitignore/
+
+```
+git rm -r --cached node_modules
+```
+Con `-r` indicamos que queremos que sea recursivo por tratarse de un directorio.
+
+
+
+```
+git commit -m "removed node_modules from repo"
+```
+
+```bash
+git push origin master
+```
+
+
 
 # `readme.md`
  El archivo `readme.md` tiene el propósito de describir de qué se trata el repositorio. Es un archivo `.md`, es decir del lenguaje de marcado Markdown que nos permite formatear archivos de texto plano. Este archivo está ubicado en la raíz del repositorio.

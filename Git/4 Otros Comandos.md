@@ -217,15 +217,26 @@ Con `git push origin features` enviamos la rama `features` al repositorio remoto
 
 
 
-## Naming
+## Eliminar Ramas
+
+Cuando mergeamos a la rama principal, desde la interfaz de GitLab tendremos la opción de eliminar la rama o conservarla. Hay equipos que deciden conservarla en caso de que surja algún inconveniente que exija algún cambio pero lo más adecuado sería borrarla y si hay algun problema crean una nueva rama porque sino acabaríamos con muchas ramas sin saber cuál está activa.
+
+Si queremos eliminar una rama remota podemos hacerlo desde la interfaz gráfica y luego localmente con `git branch -d feature/database-connection`
+
+
+
+## Naming Branches
 
 Además de `main` tendremos una rama `dev` que es código testeado candidato para le próximo **realease**, está listo para producción.
 
 Para el desarrollo de nuevas funcionalidades o solución de bugs lo habitual es tener nombres como `feature/new-table` o `bugfix/new-table`. Es aconsejable tener features pequeños que no lleven mucho tiempo de desarrollo con lo cual será potencialmente menos conflictivo a la hora de realizar el merge.
 
-Cuando se trabaja por sprints luego del tiempo establecido el contenido de los branchs de feature y bugfix son mergeados a `dev` y al finalizar el sprint serán mergeados a `main`.
+* Cuando se trabaja por **sprints** el contenido de los branchs de features y bugfixs son mergeados a `dev` y luego del tiempo establecido del sprint serán probados y mergeados a `main`. Esto ocasiona a veces que en la rama `dev` tengamos cosas a medias lo que demanda una mayor atención a la hora de mergear a `main`.
+
+* Cuando desarrollamos con **CI/CD** siguiendo las buenas prácticas de DevOps debemos usar sólo una rama `main` .  En la medida que terminamos un feature o bugfix realizamos un pull request o merge request, luego la persona de realizar el code review podrá **aprobarlo** y luego **mergear** a `main` y esto dispara el pipeline que ejecuta las etapas de test, build y deploy al servidor de staging lo que se conoce como CD.
 
 # Merge
+
 Se conoce como merge al proceso de unir o fusionar los cambios de una rama con otra rama. Por ejemplo si tenemos la `main` y detectamos un bug, creamos un branch `hotfix` luego efectuamos en esa rama los commits que sean necesarios y finalmente cuando estamos satisfechos con el resultado mergeamos esos cambios en `main` donde tenemos el código de producción.
 
 ## `git merge`
@@ -276,7 +287,25 @@ Lo cual nos da la pauta que ese commit fue producto de un merge entre los commit
 > Notar que no estamos viendo el hash completo y esto es así porque cuando el proyecto no es muy grande podremos utilizar solo una parte del id y seguirá siendo único.
 
 
+
+## Evitar Merge Branch Commit
+
+Supongamos que estamos trabajando con otras personas de un equipo en unamisma rama. Realizamos cambios, creamos el commit y en el momento de intentar pushear, si otras personas ya pushearon cambios a la rama remota obtendremos un error.  Veremos **failed to push some refs to git@gitlab.com....**. Normalmente nosotros haríamos `git pull` para traernos esos cambios pero esto ocasionaría un "merge commit". Como esto sucederá frecuentemente y estos commits lo único que indican es que hicimos un pull de los cambios para poder hacer un push, se considera una buena práctica evitarlos.
+
+```
+git pull --rebase
+```
+
+O lo que es lo mismo `git pull -r`
+
+
+
+En caso de que hubiera conflictos luego de solucionarnos si ingresamos `git status` veremos que podemos continuar con `git rebase --continue`
+
+
+
 # Alias
+
 Es posible crear alias a nivel global como así también alias utilizando Git.
 
 ## Alias Globales
@@ -309,7 +338,15 @@ Con `git tag -d dormido` podemos para eliminar el tag deseado. Luego tendremos q
 Existen distintas técnicas para revertir cambios que hayamos realizado en nuestro historial, estas serán más o menos seguras.
 
 ## 1 `git checkout`
-Con el comando `git checkout` podremos realizar técnica menos peligrosa para revertir cambios. Nos permite ver el código en un cierto punto (*detach from main branch*) cuando hicimos el commit. Es read-only por lo que no podré arruinar el historial de cambios. Una vez que terminamos de ver y queremos volver al punto actual lo hacemos con `git checkout main` (*reatach to main branch*).
+Con el comando `git checkout` podremos realizar técnica menos peligrosa para revertir cambios. Nos permite ver el código en un cierto punto (*detach from main branch*) cuando hicimos el commit. Es read-only por lo que no podré arruinar el historial de cambios. Una vez que terminamos de ver y queremos volver al punto actual lo hacemos con `git checkout main` (*reatach to main branch*) o el nombre del branch en el cual estemos.
+
+
+
+Es posible crear un branch a partir de este contenido.
+
+> Notar que si tuviéramos cambios realizados cuando queremos ejecutar `git checkout` no nos dejaría por lo que podríamos guardarlos en el stash con `git stash`
+
+
 
 ### `git checkout -- .`
 El comando `git checkout -- .` nos permite revertir los cambios que tengamos en el *working directory* (es decir aquellos que no están en *staging area*).
@@ -318,24 +355,40 @@ El comando `git checkout -- .` nos permite revertir los cambios que tengamos en 
 > Si queremos revertir los cambios de un archivo en particular podemos ejecutar `git checkout -- index.html`
 
 ## 2 `git revert`
-Con el comando `git revert` podremos deshacer un commit en particular, es como si lo elimináramos pero no lo estamos borrando en realidad sino que añadimos un nuevo commit que revierte aquello que en él sucedía. 
+Con el comando `git revert <commit hash>` (**el hash será del commit que queremos revertir**) podremos deshacer un commit en particular, es como si lo elimináramos pero no lo estamos borrando en realidad sino que añadimos un nuevo commit que revierte aquello que en él sucedía. 
 
 > Luego de ingresar este comnando tendremos que colocar un mensaje del nuevo commit.
 
+Esto es utilizado habitualmente en `master` o `dev` donde no es conveniente utilizar `git reset` ya que esto perjudicaría a los otros desarrolladores que ya hayan hecho un pull del repo con esos commits.
+
 ## 3 `git reset`
-Con el comando `git reset` eliminamos de manera permanente los commits que le sucedieron.
+Cuando tenemos commits que queremos eliminar, podemos utilizar el comando `git reset` .
 
 El comando `git reset` nos ayuda a volver en el tiempo. Pero no como `git checkout` que nos deja ir, mirar, pasear y volver. Con `git reset` volvemos al pasado sin la posibilidad de volver al futuro. Borramos la historia y la debemos sobreescribir. 
 
 Este comando es muy peligroso y debemos usarlo solo en caso de emergencia. Recuerda que debemos usar alguna de estas dos opciones:
 
-- `git reset af6b84`: Viajamos hasta ese commit y lo que los cambios de los commits que estamos rebobinando siguen disponibles en el working directory, por lo que podríamos ponerlo en el staging area y hacer un commit. Este comando es útil para unir todo los commits y ponerlos en uno sólo. El working directory retiene los cambios.
-- `git reset --soft`: Borramos todo el historial y los registros de Git pero guardamos los cambios que tengamos en Staging, así podemos aplicar las últimas actualizaciones a un nuevo commit.
-- `git reset --hard`: Borra toda la información de los commits y del área de staging se borra del historial. Los commits posteriores serán eliminados de manera permanente, es por eso que debemos usarlo con cuidado.
--   `git reset` o `git reset HEAD` ambos comandos sirven para sacar archivos del área de *staging*. Tendremos los archivos en el directorio de trabajo y si queremeos volver a agregarlos a *staging* podremos hacerlo con `git add`. 
-Con `git reset file.txt` o `git reset HEAD file.txt` sólo quitamos el archivo `file.txt` del staging dejando el resto en caso de tener más de uno.
-- `git reset --hard` no sólo quita todo del staging sino que también elimina los archivos modificados (los trackeados). Si hacemos `git reset --hard origin/master` volveremos al estado que tenemos en el repositorio remoto.
-- Con `git reset --soft HEAD~1` podremos deshacer el último commit preservando los cambios que en él introdujimos en el working directory.
+- `git reset --soft`: Borramos los commits pero guardamos los cambios que estos producían en el directorio de trabajo (y también guardamos los que estaba en staging en el directorio de trabajo), así podemos aplicar las últimas actualizaciones a un nuevo commit.
+
+- `git reset --hard`: Borra toda la información de los commits y lo que tengamos en staging se borra. Los commits posteriores serán eliminados de manera permanente, es por eso que debemos usarlo con cuidado. No sólo quita todo del staging sino que también elimina los cambios de los archivos trackeados que tengamos en el working directory.
+
+  
+
+- Con `git reset HEAD~1` o lo que es lo mismo `git reset --soft HEAD~1` podremos deshacer el último commit preservando los cambios que en él introdujimos en el working directory.
+- `git reset af6b84`: Viajamos hasta ese commit y los cambios de los commits que estamos rebobinando siguen disponibles en el working directory, por lo que podríamos ponerlo en el staging area y hacer un commit. Este comando es útil para unir todo los commits y ponerlos en uno sólo. El working directory retiene los cambios.
+- Con `git reset --hard HEAD~1` podremos deshacer el último commit y descartar los cambios que introducía. 
+- Con `git reset --hard origin/master` volveremos al estado que tenemos en el repositorio remoto. 
+
+- `git reset` o `git reset HEAD` ambos comandos sirven para sacar archivos del área de *staging*. Tendremos los archivos en el directorio de trabajo y si queremeos volver a agregarlos a *staging* podremos hacerlo con `git add`. 
+  Con `git reset file.txt` o `git reset HEAD file.txt` sólo quitamos el archivo `file.txt` del staging dejando el resto en caso de tener más de uno.
+
+  
+
+
+
+**Importante**: Si los commits los tenemos localmente y realizamos el reset no habrá problemas al pushear **mientras que si ya los teníamos esos cambios en el servidor** tendremos que ejecutar `git push --force`. Sin embargo nunca debemos hacer esto en `master` o `dev` o ramas donde trabajemos con otras personas sino que debemos hacerlo en aquellas donde trabajamos nosotros sólos. Si eliminamos un commit y esos colaboradores habian hecho un pull anteriormente con ese commit, al intentar pushear obtendrán error de las referencias. Si bien puede solucionarse demandará un esfuerzo de parte de ellos.En estos casos en cambio tendremos que utilizar `git revert`
+
+
 
 ## `git reset` vs `git rm`
 `git reset` y `git rm` son comandos con utilidades muy diferentes, pero aún así se confunden muy fácilmente.
@@ -370,14 +423,12 @@ En caso de querer suspender el rebase podríamos ejecutar `git rebase --abort` p
 rebase también nos permite aplastar commits en uno sólo de modo de limpiar un poco el historial.
 
 # `git stash`
-Con el comando `git stash` nos permite guardar los cambios que tengo en el working directory en un lugar temporal. 
+Con el comando `git stash` nos permite guardar el *work in progress* es decir los cambios que tengo en el working directory en un lugar temporal.
 
 Esto puede ser útil si tenemos en dos escenarios:
-* Cuando tengo una serie de cambios en mi directorio de trabajo en la rama `main` y quiero moverme a una rama `footer` para revisar algo y después volver. En ese caso con `git status` vería mis cambios, luego ejecuto `git stash` y ahí con `git status` no veré ya esos cambios. A continuación con  `git checkout footer` cambio de rama sin problemas, reviso lo que tengo que revisar, vuelvo a la rama principal con `git checkout main` y luego `git stash pop` para recuperar esos cambios.
-
+* Cuando tengo una serie de cambios en mi directorio de trabajo en la rama `main` y quiero moverme a una rama `footer` para revisar algo y después volver. Si intentamos hacerlo no nos lo permitirá diciendo **"Please commit your changes or stash them before you switch branches"**.  En ese caso con `git status` vería mis cambios, luego ejecuto `git stash` y ahí con `git status` no veré ya esos cambios. A continuación con  `git checkout footer` me permitirá cambiar de rama sin problemas, reviso lo que tengo que revisar, vuelvo a la rama principal con `git checkout main` y luego `git stash pop` para recuperar esos cambios.
 * Cuando tengo cambios en el directorio de trabajo y queremos crear una nueva rama con esos cambios. Con `git stash branch feature` creamos un branch `feature` con el contenido del stash y nos movemos a ella. Con `git status` me aparecerán los archivos que tenía modificados anteriormente.
-
-* Cuando tengo cambios en el directorio de trabajo y quiero deshacerme de ellos ejecuto `git stash` para volver al último commit y `git stash drop` para eliminar el stash.
+* Cuando tengo cambios en el directorio de trabajo y quizás algo no está saliendo como espero por lo que quiero deshacerme de ellos, para probar con el estado anterior. En ese caso primero ejecuto `git stash` para volver al último commit y si decido luego eliminar el stash puedo hacerlo con  `git stash drop` .
 
 Con `git stash` guardo el WIP (*work in progress*) en stash.
 Con `git stash list` podré ver las cosas que tengo en stash (si no devuelve nada como respuesta es que no tengo nada).
