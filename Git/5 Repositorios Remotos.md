@@ -143,12 +143,23 @@ El desarrollador  dueño del proyecto recibirá una notificación y revisará es
 
 Luego si el dueño del proyecto realiza cambios en un futuro, la persona que quiere aportar al proyecto deberá traérselos a su propio Fork. Esto lo podrá notar desde GitHub ya que verá un cartel **This branch is X commits behind repoOwner:main**. Si queremos resolverlo desde la página vamos a Compare, luego invertimos la dirección de comparación y creamos un pull request del original al nuestro. Luego bastará con aceptarlo y realizar el merge. Luego localmente deberemos hacer un pull de esos cambios.
 
-Esto mismo desde la consola  se puede realizar creando otra fuente para hacer pull. Con `git remote -v` veremos que sólo tenemos `origin` que hace referencia a nuestro repositorio (que forkeamos). Para agregar como fuente el repositorio original, primero debemos copiar el link del proyecto original y crear una nueva fuente `git remote add upstream https://github.com/.../blabla.git`. Luego con `git remote -v` veremos que hay una nueva fuente de datos además de `origin`.
+Esto mismo desde la consola  se puede realizar creando otra fuente para hacer pull. Con `git remote -v` veremos que sólo tenemos `origin` que hace referencia a nuestro repositorio (el que fue creado cuando forkeamos). Para agregar como fuente el repositorio original, primero debemos copiar el link del proyecto original y crear una nueva fuente `git remote add upstream https://github.com/.../blabla.git`. Luego con `git remote -v` veremos que hay una nueva fuente de datos además de `origin`.
 
-> El nombre `upstream` es opcional, podríamos haberle puesto cualquier otro.
+> El nombre `upstream` es el que suele usarse pero de más está decir que podríamos haberle puesto cualquier otro.
 > `upstream` es un apuntador al repositorio maestro. 
 
-A continuación ejecutamos `git pull upstream main` para traernos todos los cambios del repositorio original y `git push origin main` para empujar los cambios a nuestro repositorio remoto. En ese momento nos aparecerá un mensaje **This branch is even with repoOwner:main**
+Después ejecutamos `git pull upstream main` (o `git fetch upstream`) para traernos todos los cambios del repositorio original.
+
+A continuación si queremos mergear los cambios efectuados en la rama dev en nuestra rama dev debemos ejecutar `git merge upstream/dev dev`.
+
+Por último `git push origin main` para empujar los cambios a nuestro repositorio remoto. En ese momento nos aparecerá un mensaje **This branch is even with repoOwner:main**
+
+Si queremos cambiar a una rama presente en ambos remotes o fuentes de datos como por ejemplo `git checkout master` nos preguntará si queremos la de origin o la de upstream. En ese caso podremos indicar `git checkout origin/master` (o `git checkout upstream/master`) o bien si queremos que siempre tome por default a origin cuando cambiamos a master o dev `git checkout --track origin/master`. Cuando sea una rama distinta de master nos lo volverá a preguntar.
+Si queremos evitar esta pregunta `git config --edit` y debajo de `[core] ....` agregar:
+```
+[checkout]
+  defaultRemote = origin
+```
 
 > Tener presente que el repositorio deberá ser público para poder hacer un Fork.
 > Fork al igual que Pull-request es una característica de GitHub
