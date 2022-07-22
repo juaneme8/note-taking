@@ -19,6 +19,6 @@ La comunicación entre operations y development tiene el objetivo de que cuando 
 
 
 
-## 22 23 24 25 26 27 28 29:ok: 
+## 22 23 24 25 26 27 28 29 30 31 32 33 34 35:ok: 
 
 CI (continuos integration) o Integración Continua hace referencia a integrar los cambios del código frecuentemente, de esta manera si pusheamos y pulleamos regularmente es menos probable que nos enfrentemos a *merge conflicts* difíciles de resolver.
