@@ -240,7 +240,7 @@ Para el desarrollo de nuevas funcionalidades o solución de bugs lo habitual es 
 Se conoce como merge al proceso de unir o fusionar los cambios de una rama con otra rama. Por ejemplo si tenemos la `main` y detectamos un bug, creamos un branch `hotfix` luego efectuamos en esa rama los commits que sean necesarios y finalmente cuando estamos satisfechos con el resultado mergeamos esos cambios en `main` donde tenemos el código de producción.
 
 ## `git merge`
-Con el comando `git merge hotfix` realizamos el merge del branch `hotfix` en el branch en el cual nos encontremos actualmente.
+Con el comando `git merge hotfix` realizamos el merge del branch `hotfix` en el branch en el cual nos encontremos actualmente. Esto podemos hacerlo también desde la UI de GitLab o GitHub.
 
 > Antes debemos hacer `git checkout main` para switchear al branch en el cual queremos unir con `hotfix`. Pero tener presente que el merge puede realizarse en ambos sentidos, no necesariamente siempre hacia el `main`.
 
@@ -288,7 +288,7 @@ Lo cual nos da la pauta que ese commit fue producto de un merge entre los commit
 
 
 
-## Evitar Merge Branch Commit
+### Evitar Merge Branch Commit
 
 Supongamos que estamos trabajando con otras personas de un equipo en unamisma rama. Realizamos cambios, creamos el commit y en el momento de intentar pushear, si otras personas ya pushearon cambios a la rama remota obtendremos un error.  Veremos **failed to push some refs to git@gitlab.com....**. Normalmente nosotros haríamos `git pull` para traernos esos cambios pero esto ocasionaría un "merge commit". Como esto sucederá frecuentemente y estos commits lo único que indican es que hicimos un pull de los cambios para poder hacer un push, se considera una buena práctica evitarlos.
 
@@ -301,6 +301,18 @@ O lo que es lo mismo `git pull -r`
 
 
 En caso de que hubiera conflictos luego de solucionarnos si ingresamos `git status` veremos que podemos continuar con `git rebase --continue`
+
+
+
+### Merge para actualizar rama cuando cambia master
+
+En ocasiones estamos trabajando en una rama solucionando un bug o desarrollando una nueva funcionalidad y mientras tanto la rama `master` evoluciona con nuevos commits. Queremos traernos esos commits a la rama en la cual estamos trabajando.
+
+Por ejemplo desde la rama `bugfix/uuser-auth-error` ejecutamos:
+
+```
+git merge master
+```
 
 
 
