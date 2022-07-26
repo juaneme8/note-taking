@@ -212,3 +212,49 @@ SQL = structured query language
 * normalized. Si queremos almacenar comentarios no almacenamos cada comentario acompañado de muchos del usuario sino que tenemos una tabla usuario y una tabla comentario y en esta última indicamos el id `userId`. Evitamos tener datos duplicados de esta forma.
 * ACID: atomicity, consistency, isolation, durability. cuando hay una transacción como actualizar datos la consistencia y validez de datos es garantizada, sin importar los inconvenientes tecnicos que sucedan (network, hardware, software). No tendremos cambios a medias en la db o se aplican todos o ninguno de ellos. 
 * Útil en aplicaciones bancarias o financieras. Si tengo que actualizar 10 tablas y tras las primeras 5 hay problemas de conexión de red, no se actualizará ninguna, haciendo en dicho caso un *rollback*.
+* Son díficiles de escalar. Ejecutarlas en entornos distribuidos como contenedores, clusters. Sin embargo existen alternativas modernas como Cockroach DB que solucionan estos inconvenientes.
+* Son tan populares que a la hora de comparar bases de datos hablamos de SQL vs NO-SQL.
+
+
+
+### Graph Databases
+
+Las Graph Databases son útiles cuando tenemos relaciones muy complejas many to many (que requieren de muchos joins o una tabla intermediaria). 
+
+Ejemplos de esto podría ser Reddit donde un usuario puede estar en muchos grupos y un grupo puede tener además múltiples usuarios o Youtube donde un usuario puede estar suscripto a múltiples canales y estos tener múltiples suscriptores.
+
+
+
+* Neo4j
+* Dgraph
+
+
+
+* Conexión directa de entidades
+* Nodes and edges.
+* Edges are the relationships
+* Queries más simples comparadas con lo que haria falta en una db relacional.
+* Son recomendadas para detectar patterns en los datos de una aplicación, relaciones entre records y recomendaciones.
+
+
+
+### Search Database
+
+Search Databases se encargan de buscar datos en cantidades enormes de información.
+
+
+
+* ElasticSearch
+
+* Solr
+
+  
+
+* Ofrecen full text search de manera eficiente y rápida.
+* Son similares a las bases de datos basadas en documentos ya que los datos son objetos pero la diferencia es que analizan todo el texto del objeto de datos  y crean un índice de cada una de las palabras. De manera similar a un índice de un libro, cuando el usuario realiza una búsqueda solo otendremos que fijarnos el índice de los resultados relevantes en lugar de buscar en todos los documentos de la db.
+
+
+
+## Conclusión
+
+La elección de la db dependerá de la aplicación y también es posible utilizar también una combinación de distintas bases de datos por ejemplo una relacional para la mayoría de los datos y una de tipo Search Engine para manejar búsquedas rápidas o manejar cace con key value.
