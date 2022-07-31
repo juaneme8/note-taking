@@ -169,6 +169,25 @@ echo Hola >/dev/null 2>&1
 
 
 
+> Si queremos agregar contenido "append to a file" debemos usar el redirection operator `>>`
+>
+> ```
+> touch file.txt
+> echo Hola > file.txt
+> echo Chau >> file.txt
+> ```
+>
+> El contenido del archivo será:
+>
+> ```
+> Hola
+> Chau
+> ```
+>
+> Si usáramos `>` en la última línea el contenido del archivo sería sólo Chau.
+
+
+
 # Nano
 
 Nano es un editor de texto, muy simple de usar y por eso normalmente elegido por los principiantes. En muchas distribuciones ya viene instalado, lo cual podemos chequear con:
