@@ -643,3 +643,29 @@ De acuerdo a **la lógica de negocios de las transiciones de estado**: si no req
 De acuerdo a si necesitamos un **estado global o local** si necesitamos un estado local a nivel componente `useState` es una buena opción mientras que si queremos un estado global que pueda ser alterado por componentes anidados en el árbol de componentes `useReducer` es una mejor opción. Usa esto debido a que con `useReducer` tiene la ventaja de que sólo tendremos que pasar al árbol de componentes el `dispatch` mientras que con `useState` tendríamos que pasar múltiples update functions.
 
 Si estamos manejando tres variables de estado mediante `useState` y queremos manipularlas desde un componente hijo tendremos que pasarle 6 props.
+
+
+
+## Casos de Uso
+
+Un caso de uso interesante de `useReducer` es cuando el estado a almacenar es un objeto complejo donde su propiedades no tienen un único tipo, lo cual hará que las actualizaciones no puedan realizarse de manera limpia en un lugar.
+
+> Si tuvieramos sólo campos strings por ejemplo podríamos hacer `setProduct({...product, [e.target.name]=e.target.value}`)
+
+
+
+```
+title:""
+desc:""
+price: 0,
+category:""
+tags:[],
+images:{
+	sm:""
+	md:"",
+	lg:""
+},
+quantity:0
+```
+
+  

@@ -61,6 +61,7 @@ Notar que en `onClick={() => setCount(count + 1)` usamos *arrow function* ya que
 
 ## `useState()`  con valor previo
 Si bien lo implementado en el contador anterior funciona de manera correcta, veremos que cuando trabajamos con el estado basándonos en el valor anterior tenemos que implementar una técnica para evitar un comportamiento indeseado.
+
 Pará empezar a entender esto supongamos que queremos crear un nuevo contador `HookCounterTwo` pero queremos que este tenga un botón para incrementar, un botón para decrementar y uno para resetear la cuenta. Lo implementamos como vimos hasta ahora. 
 
 ```jsx
@@ -83,6 +84,9 @@ export default HookCounterTwo;
 ```
 
 Si bien esto funciona, al igual que funcionaba lo que hicimos en `HookCounter` no es un modo seguro de modificar a `count`. Si tuviéramos un botón que incrementa en cinco unidades y lo hace llamando cinco veces a `setCount(count+1)` veríamos que el UI no se actualiza con el valor esperado. 
+
+
+
 ```jsx
 import React, { useState } from 'react';
 
@@ -143,7 +147,40 @@ export default HookCounterTwo;
 
 ```
 
+
+
+Esta actualización se conoce como **UseState Functional Update** y también será de utilidad cuando el estado sea actualizado luego de una operación asincrónica. De esta manera nos aseguraremos que al momento de actualizar tengamos el valor real y no uno desactualizado.
+
+Por ejemplo supongamos que tenemos dos botones que incrementan y uno lo hace de manera instantánea y otro que lo hace asincrónicamente después de dos segundos. En ese caso si presionamos el botón asincrónico y luego una o varias veces el instantáneo, después de 2 segundos a la hora de actualizar el valor mostraría algo incorrecto si no tuvieramos una arrow function para ctualizar.
+
+```jsx
+function anotherCounter() {
+    
+const increaseAsync = () => {
+	setNumber(number+1)
+}
+
+const increaseAsync = () => {
+	setTimeout(()=> {
+		setNumber(current => current+1)
+	}, 2000)
+}
+
+return (
+		<div>
+			Count: {count}
+		</div>
+	);
+}
+
+export default anotherCounter;
+
+```
+
+
+
 Esto tiene un equivalente en los componentes de clase (que fue estudiado oportunamente) y que mostramos a continuación:
+
 ```jsx
 import React, { Component } from 'react';
 
