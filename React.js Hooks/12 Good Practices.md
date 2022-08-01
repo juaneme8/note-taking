@@ -10,7 +10,7 @@ Una vez que tenemos el id hacemos un filtro para quedarnos con el contador en pa
 
 ## Multiples Promises
 
-Cuando tenemos un array de elementos y queremos llamar a un endpoint por cada uno de ellos, una opción sería usar `for of` (ya que `forEach` no funciona con operaciones asincrónicas). Otra opción es utilizando `await Promise.all([p1,p2,p3])` con una implementación con `map`
+Cuando tenemos un array de elementos y queremos llamar a un endpoint por cada uno de ellos, una opción sería usar `for of` (ya que `forEach` no funciona con async/await). Otra opción es utilizando `await Promise.all([p1,p2,p3])` con una implementación con `map` que aunque no podremos trabajar del modo habitual con async await dentro, al ser una async devolverá una promesa.
 
 ```jsx
 const homeworldUrl = await Promise.all(
