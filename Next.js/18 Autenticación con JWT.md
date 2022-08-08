@@ -19,18 +19,101 @@ Si bien a modo de ejemplo utilizaremos un backend provisto por Next.js podríamo
 ## Dependencias Proyecto
 
 ```
-npm i jsonwebtoken
-npm i cookie
-npm i jose
+npm i axios jsonwebtoken jose cookie  
+```
+
+* axios
+* jsonwebtoken
+* jose
+* cookie
+
+
+
+## Página Principal
+
+En `pages/index.js` mostraremos la página princiupal. Esta ruta luego será protegida.
+
+
+
+## Página de Dashboard
+
+En `pages/dashboard.js` mostraremos dashboard. Esta ruta también será protegida.
+
+
+
+## Página de Login
+
+En `pages/login.js` colocamos un formulario básico de ingreso de email y contraseña. Al momento de presionar el botón enviar realizamos un POST con dicha información a `/api/auth/login`.
+
+```jsx
+import axios from 'axios';
+import React, { useState } from 'react'
+
+function LoginPage() {
+  const [credentials, setCredentials] = useState({
+    email: '',
+    password:''
+  })
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post('/api/auth/login', credentials)
+      console.log(res.data)
+    }
+    catch (error) {
+      if (error.response) {
+        console.log(error.response.data)
+      }
+      else {
+        console.error(error)
+      }
+    }
+  }
+
+  const handleChange = (e) => {
+    setCredentials({...credentials, [e.target.name]:e.target.value})
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input name="email" type="email" placeholder="Email" onChange={handleChange} />
+      <input name="password" type="password" placeholder="Password" onChange={handleChange} />
+      <button type="submit">Login</button>
+    </form>
+  )
+}
+
+export default LoginPage
 ```
 
 
+
+# Login en Backend
+
+En `pages/auth/login.js` 
 
 
 
 ## Verificación de Datos
 
-Una vez que el usuario ingresa los datos en el formulario. Los recibimos en el backend y lo primero qeu hacemos será chequear que estos sean correctos.
+Una vez que el usuario ingresa los datos en el formulario. Los recibimos en el backend y lo primero que hacemos será chequear que estos sean correctos.
+
+* En una situación real nos fijaremos en la base de datos que la contraseña y el correo sean los esperados.
+
+* En caso de que los datos sean incorrecto enviamos un 401 y el mensaje de error apropiado. 
+
+```jsx
+import { sign } from 'jsonwebtoken'
+
+export default function loginHandler(req, res) {
+  const { email, password } = req.body;
+  if (email === 'email@example.com' && password === 'admin') {
+   
+  }
+  return res.status(401).json({ error: 'invalid email or password' })
+}
+```
 
 
 
@@ -54,6 +137,28 @@ const token = jwt.sign({
 
 Luego podemos enviarlo en el cuerpo de la respuesta con `res.json({token})` pero esto obligaría al frontend a almacenarlo (por ejemplo en Local Storage).
 
+```jsx
+import { sign } from 'jsonwebtoken'
+
+export default function loginHandler(req, res) {
+  const { email, password } = req.body;
+
+  if (email === 'email@example.com' && password === 'admin') {
+    const token = sign({
+      exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30,
+      email,
+      username: 'jnm'
+    }, 'secret');
+
+    return res.json(token)
+  }
+  return res.status(401).json({ error: 'invalid email or password' })
+
+}
+```
+
+> Con a partir del token recibido en el frontend podremos ingresar a jwt.io y verificar que el payload es el esperado.
+
 
 
 ## Headers y Cookies
@@ -66,27 +171,174 @@ Vamos a enviar el token en un **header** (cabecera con información extra) con `
 
 ```jsx
 const serialized = serialize('myTokenName', token, {
-	httpOnly: true,
-	secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict'
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 60 * 60 * 24 * 30,
+      path: "/"
 });
-setHeader('Set-Cookie', serialized)
-return res.json('login successfully')
+res.setHeader('Set-Cookie', serialized)
+return res.status(200).json({
+    message: "Login successful",
+})
 ```
 
 * Con `httpOnly: true` indicamos que será accedida mediante HTTP, lo que significa que en producción no será mostrada la cookie por el navegador en la consola utilizando las herramientas de desarrollo (si veremos el valor en el apartado Application/Cookies).
-
 * Con `secure` indicamos que tiene que ser enviado por HTTPS (en desarrollo no tenemos un servidor con SSL, por lo que realizamos una configuración dependiente del entorno.
-
 * `sameSite: 'strict'` como estamos trabajando con Next.js estamos en el mismo dominio, si tuviéramos un backend externo tendríamos que utilizar otra configuración como `sameSite: 'none'`.
-
-* Con `maxAge: 1000*60*60*24*30` establezco el tiempo de expiración en segundos, en este caso de  30 días.
-
+* Con `maxAge: 1000*60*60*24*30` establezco el tiempo de expiración en **segundos**, en este caso de  30 días.
 * Con `path: '/'` establezco la ruta desde la cual será entregada la cookie.
 
-  
 
-Notar que esto lo vamos a querer hacer sólo si los datos de autenticación son correctos, en caso contrario simplemente `return res.status(401).json({error: 'invalid email or password'})`.
+
+
+> En desarrolo `process.env.NODE_ENV` será `development` por lo tanto `secure: false`
+
+
+
+```jsx
+import { sign } from 'jsonwebtoken'
+import { serialize } from 'cookie'
+
+export default function loginHandler(req, res) {
+  const { email, password } = req.body;
+
+  if (email === 'email@example.com' && password === 'admin') {
+    const token = sign({
+      exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30,
+      email,
+      username: 'jnm'
+    }, 'secret');
+
+    const serialized = serialize('myTokenName', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 60 * 60 * 24 * 30,
+      path: "/"
+    });
+    res.setHeader('Set-Cookie', serialized)
+    return res.json({
+      message: "Login successful",
+    });
+
+  }
+  return res.status(401).json({ error: 'invalid email or password' })
+
+}
+```
+
+:pushpin: En caso de éxito retornamos un json con el campo `message` y en caso de error uno con el campo `error`.
+
+En las DevTools en Expires/Max-Age podremos verificar que la fecha mostrada sea coherente con lo que configuramos.
+
+
+
+## Manejo de Erorres Axios
+
+Queremos mostrar el mensaje devuelto por el backend a través del catch y como ya dijimos es un json con un campo `error`.  Como no es un 200 lo recibiremos a través del catch del front.
+
+En este caso tendremos la información deseada en `error.response.data.error`. Sin embargo habrá casos en que no vamos a tener el campo `response` por lo que tendremos que chequear primero que lo tenemos y sólo en ese caso podremos mostrar el campo.
+
+```jsx
+try {
+      const res = await axios.get('/api/profile')
+      console.log(res.data)
+}
+    
+catch (error) {
+	if (error.response) {
+		console.log(error.response.data)
+	}
+	else {
+		console.error(error)
+	}
+}
+```
+
+
+
+### Caso de uso completo
+
+```jsx
+try{
+    
+}
+catch(error) {
+    if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        // console.log(error.response.data);
+        // console.log(error.response.status);
+        // console.log(error.response.headers);
+    } else if (error.request) {
+        // The request was made but no response was received
+        // `error.request` is an instance of XMLHttpRequest in the 
+        // browser and an instance of
+        // http.ClientRequest in node.js
+        console.log(error.request);
+    } else {
+        // Something happened in setting up the request that triggered an Error
+        console.log('Error', error.message);
+    }
+    console.log(error.config);
+}
+```
+
+
+
+## Redireccionamiento después de Login
+
+Si en el frontend recibimos un 200 redireccionamos a `/dashboard` (para ello creamos un componente para tal fin)
+
+```jsx
+import axios from 'axios';
+import React, { useState } from 'react'
+import {useRouter} from 'next/router'
+
+function LoginPage() {
+  const router = useRouter()
+
+  const [credentials, setCredentials] = useState({
+    email: '',
+    password:''
+  })
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post('/api/auth/login', credentials)
+
+      if (res.status === 200) {
+        router.push("/dashboard");
+      }
+
+    }
+    catch (error) {
+      if (error.response) {
+        console.log(error.response.data)
+      }
+      else {
+        console.error(error)
+      }
+    }
+  }
+
+  const handleChange = (e) => {
+    setCredentials({...credentials, [e.target.name]:e.target.value})
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input name="email" type="email" placeholder="Email" onChange={handleChange} />
+      <input name="password" type="password" placeholder="Password" onChange={handleChange} />
+      <button type="submit">Login</button>
+    </form>
+  )
+}
+
+export default LoginPage
+```
 
 
 
@@ -96,25 +348,30 @@ En las DevTools podremos verificar el token obtenido en el apartado Application/
 
 Como la cookie con el token ya está almacenada en el navegador en las subsiguientes peticiones la utilizaremos y podremos validarla desde el backend (la vamos a recibir en `req.cookies`). 
 
-* En `pages` creamos un archivo `dashboard.js` y en el un componente `Dashboard` con un botón que al hacer click hará un get a `/api/profile`.
-* En `pages/api` creamos un archivo `profile.js` donde vamos a verificar que hemos recibido el deseado en la cokie.
+* En el `Dashboard` agregamos un botón que al hacer click hará un get a `/api/profile`.
+
+  
+
+* En `pages/api` creamos un archivo `profile.js` donde vamos a verificar que hemos recibido el token deseado en la cokie. No sólo queremos chequear que recibimos una cookie con el nombre esperado sino que esta haya sido generada con nuestro secreto, si no lo fue nos tirará error por lo que ubicamos la comprobación en un bloque try catch.
 
 ```jsx
-const {myTokenName} = req.cookies;
+import { verify } from "jsonwebtoken";
 
-if(!myTokenName){
-    return res.status(401).json({error: 'no token'});
-}
+export default function profileHandler(req, res) {
+  const { myTokenName } = req.cookies;
 
-try{
-	const user = verify(myTokenName, 'secret')
-	console.log(user)
-    return res.json({email: user.email, username: user.username})
-}
-catch(error){
-	return res.status(401).json({error: 'invalid token'})
-}
+  if (!myTokenName) {
+    return res.status(401).json({ error: 'no token' })
+  }
+  try {
+    const user = verify(myTokenName, 'secret')
+    return res.json({ email: user.email, username: user.username })
+  }
 
+  catch (error) {
+    return res.status(401).json({ error: 'invalid token' })
+  }
+}
 ```
 
 > La función `verify` funciona de manera asíncrona cuando proporcionamos una callback o de manera síncrona cuando no lo hacemos.
@@ -123,62 +380,147 @@ catch(error){
 
 
 
+## Mostrar Info Perfil en Dashboard
+
+Creamos una variable de estado `user` y mostramos esa información cuando hace click en el botón Get Profile:
+
+```jsx
+import React, { useState } from 'react'
+import axios from 'axios'
+
+function Dashboard() {
+  const [user, setUser] = useState({
+    email: '',
+    username: ''
+  })
+  
+  const getProfile = async () => {
+    try {
+      const res = await axios.get('/api/profile')
+      setUser(res.data)
+    }
+    catch (error) {
+      if (error.response) {
+        console.log(error.response.data)
+      }
+      else {
+        console.error(error)
+      }
+    }
+  }
+  
+  return (
+    <>
+      <div>Dashboard</div>
+      <div>{JSON.stringify(user)}</div>
+      <button onClick={getProfile}>Get Profile</button>
+    </>
+  )
+}
+
+export default Dashboard
+```
+
+
+
 ## Cerrar Sesión
 
 Una forma de cerrar sesión desde las DevTools es yendo a Application/Cookies y sobre http://localhost:3000 hacer click derecho y elegir Clear.
 
-Queremos incorporar un botón de Logout
+Queremos incorporar un botón de Logout.
 
-Lo que hacemos es establecer la misma cookie pero con un valor de tiempo de expiración de 0 y con un valor nulo.
+```jsx
+import React, { useState } from 'react'
+import axios from 'axios'
+import { useRouter } from 'next/router'
 
-En este caso a la hora de usar la función verify no me interesa extraer el email y username sino que el simple hecho de que no haya fallado (y por ende entrar al catch) ya me da la pauta de que fue verificado como correcto.
+function Dashboard() {
+  const router = useRouter();
+  const [user, setUser] = useState({
+    email: '',
+    username: ''
+  })
+  const getProfile = async () => {
+    try {
+      const res = await axios.get('/api/profile')
+      setUser(res.data)
+    }
+    catch (error) {
+      if (error.response) {
+        console.log(error.response.data)
+      }
+      else {
+        console.error(error)
+      }
+    }
+  }
+  const logout = async () => {
+    try {
+      const res = await axios.get('/api/auth/logout')
+    }
+    catch (error) {
+      console.error(error)
+    }
+    router.push('/login')
+  }
+
+  return (
+    <>
+      <div>Dashboard</div>
+      <div>{JSON.stringify(user)}</div>
+      <button onClick={getProfile}>Profile</button>
+      <button onClick={logout}>Logout</button>
+    </>
+  )
+}
+
+export default Dashboard
+```
+
+
 
 En `pages/api` creamos un archivo `logout.js`
 
+Lo que hacemos es establecer la misma cookie pero con un valor de tiempo de expiración de 0 y con un valor nulo.
+
+> En este caso a la hora de usar la función verify no me interesa extraer el email y username sino que el simple hecho de que no haya fallado (y por ende entrar al catch) ya me da la pauta de que fue verificado como correcto.
+
 ```jsx
-import { serialize } from "cookie";
+import { serialize } from "cookie"
 
 export default function logoutHandler(req, res) {
+
   const { myTokenName } = req.cookies;
+
   if (!myTokenName) {
-    return res.status(401).json({ error: "Not logged in" });
+    return res.status(401).json({ error: 'Not logged in' })
   }
-  try{
-    verify(myTokenName, 'secret')
-      
-	const serialized = serialize("myTokenName", null, {
+
+  const serialized = serialize('myTokenName', null, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
     maxAge: 0,
-    path: "/",
-    });
-
-    res.setHeader("Set-Cookie", serialized);
-    return res.status(200).json({
-    	message: "Logout successful",
-    });
-  }
-  catch(error){
-	return res.status(401).json({error: 'invalid token'});
-  }
-
+    path: "/"
+  });
+  res.setHeader('Set-Cookie', serialized)
+  return res.status(200).json({
+    message: "Logout successful",
+  })
 }
 ```
 
 
 
-## Redireccionamiento
+## Redireccionamientos
 
 Queremos que al hacer logout nos redireccione a la página principal y lo hacemos con `useRouter`.
 
+* En el caso de que nos estemos logueando  solo debemos redireccionar a `/dashboard` si devolvió un 200.
 
+* En el caso de que estemos haciendo logout quremos que redireccione a `/login`. Debemos colocar el post dentro de un `try/catch` y manejar el error pero en ambos casos (éxito y fracaso) redireccionar.
 
-En el caso de que estemos haciendo logout quremos que redireccione a /login. Debemos colocar el post dentro de un try catch y manejar el error pero en ambos casos (éxito y fracaso) redireccionar.
-
-En el caso de que nos estemos logueando  solo debemos redireccionar a /dashboard si devolvió un 200.
-
-Cuando trabajemos con una **biblioteca de manejo de estado** como ContextAPI o Redux tendremos las funciones para login y logout dentro de él y podríamos guardar los datos del perfil de usuario y si está autenticado o no.
+Cuando trabajemos con una **biblioteca de manejo de estado** como ContextAPI o Redux tendremos las funciones para `login` y `logout` dentro de él y podríamos guardar los datos del perfil de usuario y si está autenticado o no.
 
 
 
@@ -204,9 +546,9 @@ export async funcion middleware(request){
 	console.log(request.url); 
     console.log(request.nextUrl.pathname) 
 	
-    const jwt = request.cookies.get('myTokenName'); 
-    
     if(request.nextUrl.pathname.includes('/dashboard')){
+        const jwt = request.cookies.get('myTokenName'); 
+        
         if(jwt === undefined){
             return NextResponse.redirect(new URL('/login', request.url))
         }
@@ -249,43 +591,36 @@ Si bien podríamos utilizar un arreglo con las rutas a proteger, Next.js dispone
 
 
 ```jsx
-import {NextResponse} from 'next/server'
-import {jwtVerify} from 'jose'
+import { jwtVerify } from 'jose';
+import { NextResponse } from 'next/server'
 
-export async funcion middleware(request){
-	console.log(request.url); 
-    console.log(request.nextUrl.pathname) 
-	
-    const jwt = request.cookies.get('myTokenName'); 
-    
-    
-    if(jwt === undefined){
-    return NextResponse.redirect(new URL('/login', request.url))
-    }
-    try{
-    const {payload} = await jwtVerify(jwt, new TextEncoder().encode('secret')
-    console.log(payload)
+export async function middleware(req) {
+  const jwt = request.cookies.get('myTokenName');
+
+  if (!jwt) {
+    return NextResponse.redirect(new URL('/login', req.url))
+  }
+  try {
+    const { payload } = await jwtVerify(jwt, new TextEncoder().encode('secret'))
+    console.log(payload);
     return NextResponse.next();
-    }
-    catch(error){
+  }
+  catch (error) {
     console.error(error)
     return NextResponse.redirect(new URL('/login', request.url))
-    }
-    
-    
-	return NextResponse.next()
+  }
 }
 
 export const config = {
-    matcher: ['/dashboard', '/']
+  matcher: ['/dashboard', '/']
 }
 ```
 
 
 
-Si quiero proteger sólo una ruta puedo hacerlo con:
+Si quiero proteger **sólo una ruta** puedo hacerlo con:
 
-```
+```jsx
 export const config = {
     matcher: '/dashboard'
 }
@@ -293,7 +628,7 @@ export const config = {
 
 Si quiero proteger también `/admin/profile` y `/admin/user` no hace falta que ingrese ambas páginas en el listado sino que puedo poner directamente `/admin/:path*` y representará a todas las subrutas.
 
-```
+```jsx
 export const config = {
     matcher: ['/dashboard', '/admin/:path*']
 }
