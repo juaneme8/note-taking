@@ -539,31 +539,28 @@ El código que coloquemos allí dentro se ejecutará cada vez que el navegador s
 
 
 ```jsx
-import {NextResponse} from 'next/server'
-import {jwtVerify} from 'jose'
+import { jwtVerify } from 'jose';
+import { NextResponse } from 'next/server'
 
-export async funcion middleware(request){
-	console.log(request.url); 
-    console.log(request.nextUrl.pathname) 
-	
-    if(request.nextUrl.pathname.includes('/dashboard')){
-        const jwt = request.cookies.get('myTokenName'); 
-        
-        if(jwt === undefined){
-            return NextResponse.redirect(new URL('/login', request.url))
-        }
-		try{
-        	const {payload} = await jwtVerify(jwt, new TextEncoder().encode('secret')
-			console.log(payload)
-            return NextResponse.next();
-    	}
-        catch(error){
-            console.error(error)
-            return NextResponse.redirect(new URL('/login', request.url))
-        }
-    }
-    
-	return NextResponse.next()
+export async function middleware(req) {
+  const jwt = req.cookies.get('myTokenName');
+
+  if (!jwt) {
+    return NextResponse.redirect(new URL('/login', req.url))
+  }
+  try {
+    const { payload } = await jwtVerify(jwt, new TextEncoder().encode('secret'))
+    console.log(payload);
+    return NextResponse.next();
+  }
+  catch (error) {
+    console.error(error)
+    return NextResponse.redirect(new URL('/login', req.url))
+  }
+}
+
+export const config = {
+  matcher: ['/dashboard', '/']
 }
 ```
 
@@ -595,7 +592,7 @@ import { jwtVerify } from 'jose';
 import { NextResponse } from 'next/server'
 
 export async function middleware(req) {
-  const jwt = request.cookies.get('myTokenName');
+  const jwt = req.cookies.get('myTokenName');
 
   if (!jwt) {
     return NextResponse.redirect(new URL('/login', req.url))
@@ -607,7 +604,7 @@ export async function middleware(req) {
   }
   catch (error) {
     console.error(error)
-    return NextResponse.redirect(new URL('/login', request.url))
+    return NextResponse.redirect(new URL('/login', req.url))
   }
 }
 
