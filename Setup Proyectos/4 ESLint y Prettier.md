@@ -562,12 +562,17 @@ module.exports = {
 `'plugin:prettier/recommended'`
 
 Por lo que nos queda:
+
+```
  extends: [
     "plugin:react/recommended",
     "standard",
     "plugin:@typescript-eslint/recommended",
     "plugin:prettier/recommended",
   ],
+```
+
+
 
 17. En `.eslintrc.json` pegar el objeto `rules` que generamos en la configuración sin TypeScript.
 ```json
@@ -673,3 +678,16 @@ Agregamos estas reglas relacionadas con hooks
 "@typescript-eslint/no-use-before-define": ["error"]
 ```
 
+
+
+# EsLint con Vite
+
+Se aplican criterios prácticamente idénticos a los realizados con Next.js
+
+
+
+
+
+# Troubleshooting
+
+Ante un comportamiento inesperado podemos fijarnos en el apartado OUTPUT seleccionando ESLint que es lo que está sucediendo. Ante alguna incoherencia (mensaje que dice que no tenemos algo que sí tenemos) podemos ejecutar el comando: **ESLint: Restart ESLint Server**
