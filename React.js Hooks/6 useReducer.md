@@ -1,31 +1,59 @@
 # useReducer
+
 `useReducer` es un hook que se utiliza para el manejo de estado como alternativa a `useState` . De hecho, podemos decir que `useReducer` es un hook más primitivo puesto que `useState` está hecho con `useReducer`.
-Más adelante veremos cuándo conviene usar uno por sobre el otro. 
+
+## Casos de Uso
+
+Conviene utilizarlo cuando actualizamos múltiples estados en una única función, por ejemplo si tenemos una llamada a API en lugar de hacer muchos cambios de estado en una misma función. El caso típico es cuando hacemos un fetching de datos y manejamos variables de `loading`, `error`, `data`.
+
+Otro caso de uso es cuando el estado a almacenar es un objeto complejo donde su propiedades no tienen un único tipo, lo cual hará que las actualizaciones no puedan realizarse de manera limpia en un único lugar.
+
+> Si tuvieramos sólo campos strings por ejemplo podríamos hacer `setProduct({...product, [e.target.name]=e.target.value}`)
+
+
+
+```json
+title:""
+desc:""
+price: 0,
+category:""
+tags:[],
+images:{
+	sm:""
+	md:"",
+	lg:""
+},
+quantity:0
+```
+
+  
+
+## Introducción
+
 Así como `useState` está relacionado con estado, `useEffect` está relacionado con efectos secundarios, `useContext` está relacionado con Context API, el hook `useReducer` está relacionado con **reducers**.
 
+
+
 En JavaScript el método `reduce()` ejecuta una función **reductora** sobre cada elemento de un array, devolviendo como resultado un único valor.
+
 ```js
 const array1 = [1, 2, 3, 4];
-const reducer = (accumulator, currentValue) => accumulator + currentValue;
 
-// 1 + 2 + 3 + 4
-console.log(array1.reduce(reducer));
-// expected output: 10
+const reducer = (prev, current) => prev + current;
+const INITIAL_VALUE = 5;
 
-// 5 + 1 + 2 + 3 + 4
-console.log(array1.reduce(reducer, 5));
+const total = array1.reduce(reducer, INITIAL_VALUE)
 // expected output: 15
-
 ```
-Podemos ver que la segunda forma de `reduce()` acepta dos parámetros, siendo este último un valor inicial para el acumulador.
+
 
 Existe una gran similitud entre este método y el hook `useReducer`:
 
-1. `useReducer(reducer, initialState)`
+1. `const reducer = (state, action) => {}` Siendo `action` lo que dicta la transición del estado.
 
-2. `newState = reducer(currentState, action)` Siendo `action` lo que dicta la transición entre `currentState` y `newState`.
+2. `const [state, dispatch] = useReducer(reducer, INITIAL_STATE)` 
 
-3. `useReducer` retorna un par de valores `[newState, dispatch]` Siendo `dispatch` un método que se usa para especificar la `action`
+   Retorna un par de valores, siendo `dispatch` un método que se usa para especificar la `action`
 
 Resumiendo:
 ```js
@@ -646,26 +674,3 @@ Si estamos manejando tres variables de estado mediante `useState` y queremos man
 
 
 
-## Casos de Uso
-
-Un caso de uso interesante de `useReducer` es cuando el estado a almacenar es un objeto complejo donde su propiedades no tienen un único tipo, lo cual hará que las actualizaciones no puedan realizarse de manera limpia en un lugar.
-
-> Si tuvieramos sólo campos strings por ejemplo podríamos hacer `setProduct({...product, [e.target.name]=e.target.value}`)
-
-
-
-```
-title:""
-desc:""
-price: 0,
-category:""
-tags:[],
-images:{
-	sm:""
-	md:"",
-	lg:""
-},
-quantity:0
-```
-
-  
