@@ -1,5 +1,7 @@
 # useReducer
 
+> :link: Basado en el [video de Lama Dev](https://youtu.be/RZPAQV7JvNU) 
+
 `useReducer` es un hook que se utiliza para el manejo de estado como alternativa a `useState` . De hecho, podemos decir que `useReducer` es un hook más primitivo puesto que `useState` está hecho con `useReducer`.
 
 ## Casos de Uso
@@ -61,7 +63,10 @@ useReducer(reducer, initialState);
 reducer(currentState, action)
 ```
 
+
+
 ## Simple State & Action
+
 Creamos un contador `CounterOne` (que sea capaz de incrementar, decrementar y resetear) para luego compararlo con el implementado anteriormente usando `useState`
 
 En primer lugar en el `jsx` creamos los tres botones y como queremos mostrar el valor de `count` es que requerimos el uso del hook `useReducer`
@@ -113,7 +118,7 @@ Con `dispatch` vamos a poder ejecutar el código para una `action` en particular
 
 Cuando presionamos el botón el state cambia y se produce el re-renderizado
 
-En este caso decimos que esstamos usando `useReducer` con `state` y `action` simples, ya que el `state` es un valor numérico (y no un objeto) y el `action` un string (y no un objeto con la propiedad `type`)
+En este caso decimos que estamos usando `useReducer` con `state` y `action` simples, ya que el `state` es un valor numérico (y no un objeto) y el `action` un string (y no un objeto con la propiedad `type`)
 
 ```js
 import React, { useReducer } from 'react';
@@ -204,7 +209,7 @@ export default CounterTwo;
 ```
 
 ## Ventajas de que `action` sea un objeto
-Un posible caso donde se aprovecharían las ventajas del patrón, en particular el hecho de que `action` sea un objeto sería si el contador no sólo vamos a querer incrementarlo por una unidad sino por un valor distinto. Esto es simple como `action` es un objeto podremos agregarle una propiedad `value` a dicho objeto.
+Un posible caso donde se aprovecharían las ventajas del patrón, en particular el hecho de que `action` sea un objeto sería que **podremos incrementar el contador distintos valores**. Esto es simple como `action` es un objeto podremos agregarle una propiedad `value` a dicho objeto.
 Trabajamos con el componente `CounterTwoi`
 
 En primer lugar a los botones iniciales les colocamos aparte de `type`, `value: 1`
@@ -344,7 +349,7 @@ export default CounterTwoii;
 ## Múltiples `useReducer`
 Si bien en la sección anterior trabajamos con un objeto de `state` para trabajar con dos contadores colocando distintos `cases` en el `switch`. Una alternativa más simple sería usar múltiples hooks `useReducer` como veremos a continuación.
 Trabajamos con el componente `CounterThree` y tomamos como punto de partida del código de `CounterOne` que es el contador base con **simple state & action**
-Como el segundo contador tendrá las mismas transiciones de estado (increment, decrement, reset) podemos crear múltiples `useReducer` con el mismo `reducer`.
+Como el segundo contador tendrá las mismas transiciones de estado (increment, decrement, reset) podemos crear múltiples `useReducer` :warning: **con el mismo** `reducer` :warning:.
 
 ```js
 const [count, dispatch] = useReducer(reducer, initialState);
@@ -393,7 +398,7 @@ function CounterThree() {
 export default CounterThree;
 
 ```
-De esta manera evitamos tener que hacer el merge con el *spread operator* (en caso de que el state sea un objeto) y también evitamos tener código duplicado dentro del `reducer`
+De esta manera evitamos tener que hacer el merge con el *spread operator* (en caso de que el state sea un objeto) y también **evitamos tener código duplicado dentro del `reducer`**
 
 
 # `useReducer` con `useContext`
@@ -660,7 +665,7 @@ export default DataFetchingTwo;
 # `useReducer` vs `useState`
 Como dijimos tanto `useReducer` como `useState` nos permiten realizar un manejo de estado, pero todavía no definimos cuando es conveniente utilizar una opción frente a la otra.
 
-De acuerdo al **tipo de variable de estado**: si tenemos que manejar primitive types (Number, String o Boolean) `useState` es la mejor opción mientras que si tenemos que trabajar con Object o Array `useReducer`. Si usamos useState con objetos tendremos que usar el *spread operator*
+De acuerdo al **tipo de variable de estado**: si tenemos que manejar primitive types (Number, String o Boolean) `useState` es la mejor opción mientras que si tenemos que trabajar con Object o Array `useReducer`. Si usamos `useState` con objetos tendremos que usar el *spread operator*
 
 De acuerdo al **número de transiciones de estado**: si tenemos que hacer una o dos conviene `useState` mientras que si tenemos que hacer muchas `useReducer`. Esto hace que nuestras transiciones sean predecibles ya que todas actualizaremos muchas cosas en un único lugar.
 
@@ -670,7 +675,7 @@ De acuerdo a **la lógica de negocios de las transiciones de estado**: si no req
 
 De acuerdo a si necesitamos un **estado global o local** si necesitamos un estado local a nivel componente `useState` es una buena opción mientras que si queremos un estado global que pueda ser alterado por componentes anidados en el árbol de componentes `useReducer` es una mejor opción. Usa esto debido a que con `useReducer` tiene la ventaja de que sólo tendremos que pasar al árbol de componentes el `dispatch` mientras que con `useState` tendríamos que pasar múltiples update functions.
 
-Si estamos manejando tres variables de estado mediante `useState` y queremos manipularlas desde un componente hijo tendremos que pasarle 6 props.
+**Si estamos manejando tres variables de estado mediante `useState` y queremos manipularlas desde un componente hijo tendremos que pasarle 6 props.**
 
 
 
