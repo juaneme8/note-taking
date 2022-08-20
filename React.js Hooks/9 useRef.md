@@ -1,10 +1,14 @@
 # `useRef`
 Este hook nos permite guardar en un objeto una referencia que no va a cambiar en los distintos renderizados que sufra ese componente. 
 
-El hook useRef nos permite acceder a nodos del DOM de manera directa desde componentes funcionales. Un ejemplo donde lo podríamos utilizar es si queremos trabajar con el método`focus()`en un `input` de texto. También podríamos querer utilizar esta referencia para obtener carac su tamaño con clientWidth o escuchar un evento (no es la forma correcta pero puede que nos veamos forzados a hacerlo por algún motivo)
+El hook `useRef` nos permite acceder a nodos del DOM de manera directa desde componentes funcionales. 
+
+## Casos de Uso
+
+Un ejemplo donde lo podríamos utilizar es si queremos trabajar con el método`focus()`en un `input` de texto. También podríamos querer utilizar esta referencia para obtener las características del navegador como su tamaño con `clientWidth` o escuchar un evento (no es la forma correcta de hacerlo pero puede que nos veamos forzados a hacerlo por algún motivo).
 
 # Ejemplo 1
-Supongamos que tenemos un formulario de Login en el cual queremos que cuando carga la página obtener el foco puesto en el campo `username`.
+Supongamos que tenemos un formulario de login en el cual queremos que cuando carga la página obtener el foco puesto en el campo `username`.
 
 Creamos un componente `FocusInput`
 1. Importamos `{useRef}` con `import React, { useEffect, useRef } from 'react';`

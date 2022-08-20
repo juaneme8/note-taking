@@ -287,7 +287,7 @@ export default Form;
 
 
 ## Ejemplo `useDocumentTitle`
- El propósito es crear un *custom hook* que actualice el título del documento con el valor de un contador de clics de un botón. Primero lo haremos sin utilizar *custom hooks* y luego extraeremos la lógica usando uno. Comenzamos con `DocTitleOne`
+El propósito es crear un *custom hook* que actualice el título del documento con el valor de un contador de clics de un botón. Primero lo haremos sin utilizar *custom hooks* y luego extraeremos la lógica usando uno. Comenzamos con `DocTitleOne`
 ```jsx
 import React, { useState, useEffect } from 'react';
 

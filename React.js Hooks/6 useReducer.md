@@ -674,3 +674,226 @@ Si estamos manejando tres variables de estado mediante `useState` y queremos man
 
 
 
+## Ejemplo Fetching de Datos
+
+En este ejemplo trabajamos con variables de estado `loading`, `error` y `data` y queremos actualizarlas conforme realizamos el fetching de los datos de una API. 
+
+```jsx
+import { useReducer } from "react";
+
+const ACTION_TYPES = {
+  FETCH_START: "FETCH_START",
+  FETCH_SUCCESS: "FETCH_SUCCESS",
+  FETCH_ERROR: "FETCH_ERROR"
+};
+
+const INITIAL_STATE = {
+  loading: false,
+  post: {},
+  error: false
+};
+
+const reducer = (state, action) => {
+  switch (action.type) {
+    case "FETCH_START":
+      return { loading: true, post: {}, error: false };
+
+    case "FETCH_SUCCESS":
+      return { ...state, loading: false, post: action.payload };
+
+    case "FETCH_ERROR":
+      return { loading: false, post: {}, error: true };
+
+    default:
+      return state;
+  }
+};
+
+const PostReducer = () => {
+  const [state, dispatch] = useReducer(reducer, INITIAL_STATE);
+
+  const handleFetch = () => {
+    dispatch({ type: ACTION_TYPES.FETCH_START });
+    fetch("https://jsonplaceholder.typicode.com/todos/1")
+      .then((res) => {
+        return res.json();
+      })
+      .then((data) => {
+        dispatch({ type: ACTION_TYPES.FETCH_SUCCESS, payload: data });
+      })
+      .catch((error) => {
+        dispatch({ type: ACTION_TYPES.FETCH_ERROR });
+      });
+  };
+
+  return (
+    <div className="App">
+      <h1>useReducer</h1>
+      <button onClick={handleFetch}>
+        {!state.loading ? "Get Posts" : "Loading..."}
+      </button>
+      {state.error && "Something went wrong!"}
+      <p>{state.post?.title}</p>
+    </div>
+  );
+};
+
+export default PostReducer;
+
+```
+
+
+
+## Ejemplo Formulario con Datos Complejos
+
+Consideramos una aplicación que cuenta con un formulario que maneja un estado en el que conviven distintos tipos de datos. Esto hace que la actualización de los mismos no pueda realizarse de un único modo sino que deberían implementarse distintos handlers.
+
+```jsx
+import React, { useReducer, useRef } from "react";
+
+const INITIAL_STATE = {
+  title: "",
+  desc: "",
+  price: 0,
+  category: "",
+  tags: [],
+  images: {
+    sm: "",
+    md: "",
+    lg: ""
+  },
+  quantity: 0
+};
+
+const reducer = (state, action) => {
+  switch (action.type) {
+    case "CHANGE_INPUT":
+      return { ...state, [action.payload.name]: action.payload.value };
+    case "ADD_TAG":
+      return { ...state, tags: [...state.tags, action.payload] };
+    case "REMOVE_TAG":
+      return {
+        ...state,
+        tags: state.tags.filter((tag) => tag !== action.payload)
+      };
+    case "INCREASE":
+      return { ...state, quantity: state.quantity + 1 };
+    case "DECREASE":
+      return { ...state, quantity: state.quantity - 1 };
+    default:
+      return state;
+  }
+};
+
+const Form = () => {
+  const [state, dispatch] = useReducer(reducer, INITIAL_STATE);
+
+  const handleChange = (e) => {
+    dispatch({
+      type: "CHANGE_INPUT",
+      payload: { name: e.target.name, value: e.target.value }
+    });
+  };
+
+  const tagRef = useRef();
+
+  const handleTags = () => {
+    const tags = tagRef.current.value.split(",");
+    tags.forEach((tag) => {
+      dispatch({ type: "ADD_TAG", payload: tag });
+    });
+  };
+
+  const handleRemoveTag = (tag) => {
+    dispatch({ type: "REMOVE_TAG", payload: tag });
+  };
+
+  const handleIncrease = () => {
+    dispatch({ type: "INCREASE" });
+  };
+
+  const handleDecrease = () => {
+    dispatch({ type: "DECREASE" });
+  };
+
+  return (
+    <div>
+      <form>
+        <input
+          type="text"
+          name="title"
+          onChange={handleChange}
+          placeholder="Title"
+          value={state.title}
+        />
+        <input
+          type="text"
+          name="desc"
+          onChange={handleChange}
+          placeholder="Desc"
+          value={state.desc}
+        />
+        <input
+          type="number"
+          name="price"
+          onChange={handleChange}
+          placeholder="Price"
+          value={state.price}
+        />
+        <p>Category:</p>
+        <select name="category" id="category" onChange={handleChange}>
+          <option value="sneakers">Sneakers</option>
+          <option value="tshirts">T-shirts</option>
+          <option value="jeans">Jeans</option>
+        </select>
+        <p>Tags:</p>
+        <textarea
+          ref={tagRef}
+          placeholder="Seperate tags with commas..."
+        ></textarea>
+        <button type="button" onClick={handleTags}>
+          Add Tags
+        </button>
+        <div className="tags">
+          {state.tags.map((tag) => (
+            <small key={tag} onClick={() => handleRemoveTag(tag)}>
+              {tag}
+            </small>
+          ))}
+        </div>
+        <div className="quantity">
+          <button type="button" onClick={handleDecrease}>
+            -
+          </button>
+          <span>Quantity ({state.quantity})</span>
+          <button type="button" onClick={handleIncrease}>
+            +
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+export default Form;
+
+```
+
+
+
+## Buenas Prácticas
+
+* Crear archivo `formReducer.js` con `INITIAL_STATE` y `reducer`.
+
+* Crear archivo `formActionTypes` para que en lugar de invocar al dispatcher con un string lo cual es propenso a que sucedan errores indetectables por el editor, usemos un objeto con propiedades de idéntico nombre.
+
+```jsx
+export const ACTION_TYPES = {
+  CHANGE_INPUT: "CHANGE_INPUT",
+  ADD_TAG: "ADD_TAG",
+  REMOVE_TAG: "REMOVE_TAG",
+  DECREASE: "DECREASE",
+  INCREASE: "INCREASE"
+};
+```
+
