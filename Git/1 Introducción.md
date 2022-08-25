@@ -687,7 +687,7 @@ Con `git checkout features` cambiamos al branch `features`.
 Con `git checkout -b features2` creamos el branch `features2` y saltamos a él a la vez.
 
 Con `git show-branch` mostramos las ramas locales y sus cambios.
-Con `git show-branch -all` mostramos las ramas locales y remotas y sus cambios.
+Con `git show-branch --all` mostramos las ramas locales y remotas y sus cambios.
 
 Con `gitk` abrimos un entorno gráfico en el cual podemos ver la historia (debemos estar en Git Bash para poder hacerlo).
 
