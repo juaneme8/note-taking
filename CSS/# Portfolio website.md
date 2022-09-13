@@ -4,9 +4,10 @@
 > Los archivos de este proyecto podemos encontrarlos en la carpeta `md-portfolio`
 
 ## Fuentes Utilizadas
-Utilizaremos las fuente de Google
-Source Code Pro 400,900 (regular y black)
-Sourse Sans Pro 300,900 (ligth y black)
+Utilizaremos las fuente de Google:
+
+* Source Code Pro 400,900 (regular y black).
+* Sourse Sans Pro 300,900 (ligth y black).
 
 Lo que se traduce en:
 ```html
@@ -34,10 +35,17 @@ img {
 ```
 ## Custom Properties
 A la hora de definir las variables relacionadas con las fuentes las llamamos `-ff-primary` y `--ff-secondary` para hacerlo lo más genérico posible, quizás podríamos haberlo llamado `--ff-sans` y `--ff-mono`
+
 Los tamaños de las fuentes los pensamos en función del diseño en AdobeXD.
+
 Utilizamos un *media querie* para que cuando la pantalla es superior a cierto tamaño, las fuentes sean más grandes por lo que redefinimos el valor de las variables.
-Tomando como ejemplo `--fs-h1` veremos que va de `3rem` a `4.5rem` para pantallas más grandes. En el proyecto de **Landing Page** usamos la regla `font-size: clamp(3rem, 5vw + 1rem, 4.5rem);` para los títulos con lo cual nos ahorramos esa media querie extra.
+
+Tomando como ejemplo `--fs-h1` veremos que va de `3rem` a `4.5rem` para pantallas más grandes. 
+
+En el proyecto de **Landing Page** usamos la regla `font-size: clamp(3rem, 5vw + 1rem, 4.5rem);` para los títulos con lo cual nos ahorramos esa media querie extra.
+
 Como queremos usar una *box-shadow* en más de un lugar creamos la custom propertie `--bs` para incrementar el realismo (material design por ejemplo tiene 2 o 3 sombras) utilizamos dos niveles de sombras colocando primero la más grande y luego la más pequeña.
+
 ```css
 :root {
     --ff-primary: 'Source Sans Pro', sans-serif;
@@ -302,6 +310,7 @@ El valor por default de align-self es `align-self: stretch` esto hace que el sub
 En cuanto al posicionamiento del subtítulo ponemos `grid-column: -1/1` (ya que queremos que ocupe todo el ancho) y `grid-row: 2` ya que sino iría debajo de la imagen para evitar el *overlap*.
 Para lograr que la línea verde del subtítulo sobresalga hacia la izquierda, podríamos recurrir a `position: absolute;` pero como qen ocasiones es mejor evitarlo, utilizamos `position:relative;` `left: -1.5em;`y como eso generará un corrimiento hacia la izquierda, para que vuelva a la posición original le ampliamos el ancho con `width: calc(100% + 1.5em);`
 Para lograr que la imagen se ubique por encima de todo `position: relative` y `z-index: 2`
+
 ```css
 /*  Intro section  */
 .intro {
