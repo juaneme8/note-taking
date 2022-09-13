@@ -1,9 +1,9 @@
 # Landing Page
-> Basado en el video de Kevin Powell -  [Built a Modern Landing Page Website](https://www.youtube.com/watch?v=X1dz0xRbSJc)
+> Basado en el video de Kevin Powell -  [Build a Modern Landing Page Website](https://www.youtube.com/watch?v=X1dz0xRbSJc)
 > Los archivos de este proyecto podemos encontrarlos en la carpeta `md-landing`
 
 El propósito de esta sección es recopilar algunos lineamientos para desarrollar una landing page con la metodología *mobile first*.
-Tener presente que **este proyecto utiliza SASS** y la herramienta*.
+Tener presente que **este proyecto utiliza SASS**.
 
 ## Maquetado
 La página cuenta con las siguientes secciones:
@@ -47,6 +47,7 @@ Si quisiéramos centrar esta imagen podríamos hacerlo con `margin: 0 auto` (pre
 Al trabajar con diseño de imágenes responsive normalmente también tendremos `height:  auto;` pero en este caso no hace falta ya que no hemos establecido la altura de las imágenes explícitamente en el html.
 
 `display: block` lo ponemos para evitar que aparezcan píxeles en blanco debajo de la imagen. 
+
 > Este espacio en blanco extra (de aproximadamente 3px) aparece siempre que agregamos una imagen a un div. Ocurre debido a que como las imágenes son inline el navegador agrega espacio debajo de la *baseline* para ajustar otros elementos inline.
 
 
@@ -54,8 +55,9 @@ Al trabajar con diseño de imágenes responsive normalmente también tendremos `
 Como utilizaremos la implementación mobile first lo primero que hacemos es en las DevTools pasar a un tamaño de dispositivo móvil (en Firefox `Control+Shift+M`) para empezar trabajar.
 
 ## `.container`
-Comenzaremos a las clases que utilizamos varias veces en el proyecto.
+Comenzaremos con las clases que utilizamos varias veces en el proyecto.
 En la clase `.container` establecemos el ancho con `width: 85%` con lo cual evitamos tener que trabajar con padding y el `max-width: 65em` (65x16px = 1040px)
+
 ```css
 .container{
 	width: 85%;
@@ -200,7 +202,7 @@ Esto nos permitirá tener un espaciado uniforme, **recordemos que previamente he
 </section>
 ```
 ## `.split`
-Recordemos que `.split` es la clase del div que tiene los tres *featured products*. 
+`.split` es la clase del div que tiene los tres *featured products*. 
 
 Queremos tener estos elementos apilados para resoluciones chicas y uno al lado del otro para resoluciones grandes. Como **no queremos recurrir al uso de media queries** para esto, hacemos lo siguiente:
 * Para resoluciones chicas: `flex-wrap: wrap;` y luego en los *flex-items* tenemos  `flex-basis: 30%;` y `min-width: 15em;` con lo cual decimos que el ancho ideal es del 30% pero que como mínimo tiene que ser de `15em` es decir `240px`.
@@ -300,12 +302,12 @@ En el `background` establecemos un gradiente radial con variables css y luego un
 
 En este caso como el contenedor es más grande utilizamos un `boder-radius` mas grande.
 
-Notar que al realziar el gradiente radial tenemos un color interno que llamamos `---clr-inner` y uno externo `--clr-outer`
+Notar que al realizar el gradiente radial tenemos un color interno que llamamos `---clr-inner` y uno externo `--clr-outer`
 
 Queremos que en pantallas chicas la imagen del producto aparezca más arriba, es por eso que ponemos `margin: -5em 0 0 0;` para la clase `.product__image`
 
-Utilizaremos media queries, lo cual no lo hacemos a una medida determinada sino de acuerdo al sitio donde el diseño lo demanda por ejemplo prestando atención a cuandos e vuelven demasiado largas las líneas de texto, lo cual invitaría a tener columnas de dos elementos. En este caso eso lo observamos cerca de los 750px (750/16 = 46.875) es por eso que ponemos `@media (min-width: 45em)`.
-Es importante por otra parte limitar la cantidad de media queries lo cual es beneficioso en términos de mantenimiento del sitio.
+Utilizaremos media queries, lo cual no lo hacemos a una medida determinada sino de acuerdo al sitio donde el diseño lo demanda por ejemplo prestando atención a cuando se vuelven demasiado largas las líneas de texto, lo cual invitaría a tener columnas de dos elementos. En este caso eso lo observamos cerca de los 750px (750/16 = 46.875) es por eso que ponemos `@media (min-width: 45em)`.
+**Es importante limitar la cantidad de media queries lo cual es beneficioso en términos de mantenimiento del sitio.**
 
 Usaremos **floats** si bien es algo que no se utiliza mucho en la actualidad, recordemos que su propósito es para tener texto alrededor de cosas y es justamente lo que haremos. Establecemos `float: rigth` y `width: 65%;`
 Como queremos que el texto se acerque a la imagen y no al rectángulo que la contiene colocamos `shape-outside: url(../img/shoe-1.png);` y  para dar un cierto margen `shape-margin: 1em;`. En el caso de las zapatillas donde en una imagen apunta para un lado y en otra apunta para el otro, no podremos usar la misma `url()`. 
