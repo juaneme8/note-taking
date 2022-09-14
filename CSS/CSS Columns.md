@@ -16,7 +16,7 @@ En caso de utilizar ambas propiedades `column-count` indica la cantidad máxima 
 
 Si tengo `columns: 300px 2` pero la pantalla mide 500px voy a tener una sóla columna.
 
-Un ejemplo simple de uso de **columns** podría ser el siguiente:Notar que estar reglas se aplican o bien sobre el contenedor que quiero dividir o sobre el padre.
+Un ejemplo simple de uso de **columns** podría ser el siguiente:Notar que estar reglas se aplican o bien sobre el contenedor que quiero dividir.
 ```html
 <p class="lorem">
 	...

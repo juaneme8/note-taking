@@ -1,9 +1,11 @@
 # CSS Flexbox
-> Página con ejercicios interactivos para practicar: flexboxfroggy.com
->
-> Con `flexbox` podremos alinear los elementos en un eje horizontal y en un eje vertical (cosa que antes no era posible). Podremos modificar el orden y la dirección en que aparecen los elementos alterando la posición respecto del flujo.
+> Página con ejercicios interactivos para practicar: [flexboxfroggy](https://flexboxfroggy.com/)
 
-A la hora de utilizar flex, si bien podemos usarlo todas las veces que haga falta si por ejemplo tenemos: un elemento `<p>` y un `<h1..6>` y queremos que estos queden uno arriba del otro. Podríamos estar tentados a poner un contenedor y en el establecer `display: flex; flex-direction: column`. Sin embargo, como estos elementos tienen por default `display: block` esto no será necesario ya que se ubicarán uno debajo del otro ocupando el todo el ancho de manera inicial.
+
+
+Con `flexbox` podremos alinear los elementos en un eje horizontal y en un eje vertical (cosa que antes no era posible). Podremos modificar el orden y la dirección en que aparecen los elementos alterando la posición respecto del flujo.
+
+
 
 A la hora de establecer `display: flex` o `display:inline-flex` lo que hacemos es definir al elemento como **contenedor flexible** y todos sus "hijos" como **elementos flexibles**. 
 
@@ -51,7 +53,7 @@ Cuando establecemos el `width` en flex items si tenemos `flex-wrap: nowrap` en e
 ## `justify-content`
 Alinea los elementos respecto al eje principal. Se coloca en el contenedor y el valor por defecto es `flex-start`
 
-`justify-content: flex-start|flex-end|center|space-between|space-around|initial|inherit;`
+`justify-content: flex-start|flex-end|center|space-between|space-around|space-evenly|initial|inherit;`
 
 ## `align-items`
 Alinea los elementos respecto al eje secundario. Se coloca en el contenedor y el valor por defecto es `stretch`
@@ -139,7 +141,7 @@ div:nth-of-type(3) {flex-grow:  1;}
 
 Notar que al primero y al tercero les asigno el valor 1 porque con 0 su ancho será el del contenido y no de `1/5` del total como es deseado.
 
-### Ejemplo definiendolo sólo para uno:
+### Ejemplo definiéndolo sólo para uno:
 Suponiendo que tengo dos elementos y quiero que uno ocupe todo el espacio disponible menos el espacio del segundo.
 ```html
 <div class="parent">
@@ -212,7 +214,7 @@ Del ejemplo anterior podremos ver lo siguiente:
 ## `flex`
 La propiedad `flex` es el shorthand de `flex-grow` `flex-shrink` y `flex-basis`. 
 
-Si sólo especificamos el valor de `flex-basis` por ejemplo poniendo `flex: 250px` debemos tener en cuentra lo siguiente. Si bien el valor default de `flex-grow` es 0 y el de `flex-shrink` es 1 cuando utilizamos el shorthand el `flex-grow` es 1 y el `flex-shrink` también es 1.
+Si sólo especificamos el valor de `flex-basis` por ejemplo poniendo `flex: 250px` debemos tener en cuenta lo siguiente. Si bien el valor default de `flex-grow` es 0 y el de `flex-shrink` es 1 cuando utilizamos el shorthand el `flex-grow` es 1 y el `flex-shrink` también es 1.
 
 Si especificamos `flex: 1 250px` estaremos indicando el `flex-grow`
 Si especificamos `flex: 2 2` estaremos indicando `flex-grow` y luego `flex-shrink`
