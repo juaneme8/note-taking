@@ -187,9 +187,16 @@ Podemos crear un alias agregándolo en `~/.zshrc` y luego recargando dicho archi
 
 En GitHub si vamos al apartado Settings :arrow_right: Actions :arrow_right: Runners :arrow_right: **New self-hosted runner** podremos descargar, configurar y ejecutar el runner que estará escuchando a los eventos relacionados con GitHub de acuerdo al archivo de configuración recien creado.
 
-Ejecutamos uno a uno los comandos indicados por GitHub en ese apartado.
+Ejecutamos uno a uno los comandos indicados por GitHub en ese apartado hasta completar los tres pasos antes mencionados.
 
-Nos preguntará que nombre queremos darle al directorio y nos subiere `_work` (podemos cambiarlo a `frontend`).
+Nos hará una serie de preguntas con respecto al runner que podemos dejar los valores por defecto o bien cambiarle el nombre al runner o al directorio de trabajo que por defecto sugiere `_work` (podemos cambiarlo a `frontend`).
 
-A raiz de esto en el repositorio del proyecto nos aparecerá un circulito en amarillo que indica que estamos trabajando con GitHub Actions.
+En este momento en el repositorio del proyecto nos indicará que estamos usando GitHub Actions con un circulito. Por ahora estará en  color amarillo y en el apartado de Runners lo veremos como **Offline**.
 
+Si luego ejecutamos `./run.sh` como nos indica en el tercer paso en el apartado de runners lo veremos como **Active**.
+
+ 
+
+:penguin:Instalación de bat 
+
+bat es una alternativa a cat.
