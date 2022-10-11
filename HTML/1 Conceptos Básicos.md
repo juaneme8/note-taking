@@ -9,6 +9,40 @@ HTML (*HyperTex Markup Language*), no es un lenguaje de programación sino un le
 
 Para iniciar un documento html en Visual Studio Code ponemos `html:5 + TAB` si bien hay varias formas esta es la única que incluye `<!DOCTYPE html>`
 
+
+
+# Motores de Renderizado
+
+Los **motores de renderizado** son componentes de los navegadores web que tienen a cargo tomar archivos de marcado (HTML, imagenes, etc) junto con archivos de estilos (CSS) y mostrar la pantalla formateada para que pueda ser vista por el usuario.
+
+
+
+Cada navegador tiene un motor en particular:
+
+- Chrome --> Blink
+
+- Edge --> Edge HTML
+
+- Safari --> Webkit
+
+- Firefox --> Gecko
+
+  
+
+El motores de renderizado lleva a cabo 5 pasos:
+
+1. Convierte el HTML en objetos comprensibles por el navegador (DOM).
+
+2. Calcula el estilo de cada nodo del DOM.
+
+3. Calcula las dimensiones y ubicación de cada nodo. 
+
+4. Pinta las cajas.
+
+5. Toma las capas y las convierte en una imagen para mostrar en pantalla.
+
+   
+
 # Estructura HTML
 ```html
 <!DOCKTYPE html>
@@ -25,9 +59,9 @@ Para iniciar un documento html en Visual Studio Code ponemos `html:5 + TAB` si b
 En el `<head>`incluimos información para los robots de búsqueda y vinculación con css.
 
 ## DOCTYPE:
-El docktype es la declaración del tipo de documento, con lo cual indicamos al navegador que nuestro documento sigue la **estructura de un DTD** (*Document Type Definition*) concreto indicando con ello qué versión de html vamos a utilizar.
+El doctype es la declaración del tipo de documento, con lo cual indicamos al navegador que nuestro documento sigue la **estructura de un DTD** (*Document Type Definition*) concreto indicando con ello qué versión de html vamos a utilizar.
 Es obligatorio y fundamental para la correcta interpretación de las etiquetas que utilicemos.
-El docktype fue mutando en las distitnas versiones, logrando simplificarse notablemente en html5 donde basta con poner `<!DOCKTYPE html>`, la estructura inicial será:
+El docktype fue mutando en las distintas versiones, logrando simplificarse notablemente en html5 donde basta con poner `<!DOCKTYPE html>`.
 
 
 ## `<meta>`
