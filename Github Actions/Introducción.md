@@ -2,7 +2,7 @@
 
 > Basado de el curso de Platzi dictado por Oscar Barajas (gndx)
 
-[GitHub Actions](https://github.com/features/actions) es una herramienta que nos permitirá automatizar los pasos previos para llevar nuestra aplicación a producción. Podremos crear un flujo de CI/CD logrando pasar por las etapas de Build, Test y Deploy desde GitHub.
+[GitHub Actions](https://github.com/features/actions) es una herramienta que nos permitirá automatizar los pasos previos para llevar nuestra aplicación a prod ucción. Podremos crear un flujo de CI/CD logrando pasar por las etapas de Build, Test y Deploy desde GitHub.
 
 Es una herramienta que cuenta con un plan gratuito.
 
@@ -24,7 +24,7 @@ VIDEO 1 COMPLETO
 
 ## :rocket: Despliegue de Aplicaciones
 
-> Basado en el [directo de Fazt Code](https://youtu.be/azzRDem_p5k)
+> Basado en el [directo de Fazt Code](https://youtu.be/azzRDem_p5k) :ok_hand:
 
 GitHub Actions nos proporciona un runner (un programa que corre en segundo plano) que instalamos en el servidor Linux que estará escuchando eventos. Como consecuencia de esto cuando hagamos un push a GitHub, recibirá este evento y ejecutará tareas en el servidor. 
 
@@ -86,7 +86,21 @@ Vamos a personalizar a Zsh con Oh My Zsh [de acuerdo a lo indicado en su página
 
 # Workflow Configuration
 
-Es aconsejable tener un archivo de configuración en el cual especifiquemos las tareas que queremos que sean ejecutadas en el servidor. Podemos hacerlo de manera automática haciendo click en el botón **Actions** ubicado en la barra central y donde dice Workflows podremos ver una serie de configuraciones rápidas para el lenguaje que usemos. 
+Vamos a crear un archivo de configuración en el cual especificamos las tareas que queremos que sean ejecutadas en el servidor. 
+
+Para hacerlo de manera manual podremos crear un directorio `.github/workflows/`
+
+```
+mkdir -p .github/workflows
+```
+
+> Usamos el `-p` ya que queremos crear un directorio y un subdirectorio a la vez.
+
+Luego creamos un archivo con la configuración en sí que puede tener cualquier nombre pero debe tener la extensión `.yml`, por ejemplo `push.yml`
+
+
+
+Podemos hacerlo de manera automática haciendo click en el botón **Actions** ubicado en la barra central y donde dice Workflows podremos ver una serie de configuraciones rápidas para el lenguaje que usemos. 
 
 En  nuestro caso como como se trata de un proyecto de Node debemos buscar "Node.js" y presionamos Configure. Nos creará una carpeta `.github/workflows/node.js.yml` una práctica habitual podría ser cambiarle el nombre al mismo nombre de la rama (en nuestro caso `main.yml`).
 
@@ -139,11 +153,13 @@ A continuación creamos desde la interfaz gráfica un commit con este archivo. L
 
 ## :penguin: Linux User
 
-Si estamos trabajando con root (cosa que podremos verificar con `whoami`, o al ver que nos aparece un # en el prompt o al ejecutar `pwd` y ver estamos en la carpeta /root), esto no es una buena práctica y debemos crear un usuario distinto menos privilegiado.
+Cuando creamos un Droplet (VM de Linux) en DigitalOcean y nos conectamos por ssh, lo haremos con el comando `ssh root@<direccion_ip>` esto significa que estaremos trabajando con el usuario root. Como sabemos esto no es una buena práctica y debemos crear un usuario distinto menos privilegiado.
 
 ```
 adduser juaneme
 ```
+
+> Podremos verificar el usuario que estamos usando con `whoami`, o al ver que nos aparece un # en el prompt o al ejecutar `pwd` y ver estamos en la carpeta /root.
 
 
 
@@ -163,7 +179,7 @@ su - juaneme
 
 ## :penguin: Instalación exa
 
-Exa es una alternativa al comando `ls` escrita en Rust con algunas opciones adicionales.
+Exa es una alternativa al comando `ls` **escrita en Rust** con algunas opciones adicionales.
 
 ```
 sudo apt install exa
@@ -177,9 +193,16 @@ exa --icons
 
 
 
-### :penguin:Creación de Alias
+## :penguin: Alias en ZSH
 
-Podemos crear un alias agregándolo en `~/.zshrc` y luego recargando dicho archivo con `source ~/.zshrc`
+Podemos crear un alias agregándolo en `~/.zshrc`.
+
+```
+alias l='exa -1 --icons'
+alias cat='batcat'
+```
+
+ Podremos **recargar la configuración** de dicho archivo con `source ~/.zshrc`.
 
 
 
@@ -193,10 +216,104 @@ Nos hará una serie de preguntas con respecto al runner que podemos dejar los va
 
 En este momento en el repositorio del proyecto nos indicará que estamos usando GitHub Actions con un circulito. Por ahora estará en  color amarillo y en el apartado de Runners lo veremos como **Offline**.
 
-Si luego ejecutamos `./run.sh` como nos indica en el tercer paso en el apartado de runners lo veremos como **Active**.
+Si luego ejecutamos `./run.sh` como nos indica en el tercer paso en el apartado de runners lo veremos como **Active**. Sin embargo si cerramos esta ventana ya no estará escuchando.
 
- 
+ En cambio debemos ejecutar `sudo ./svc.sh install` y luego `sudo ./svc.sh start` y quedará corriendo de fondo.
 
-:penguin:Instalación de bat 
+A partir de ahora que tenemos el runner corriendo cada vez que hagamos cambios en el código y los pushiemos al repositorio los veremos reflejados localmente en el servidor y si tenemos un webserver que sirva el contenido de nuestra carpeta `dist` podremos tener una página web que se actualiza automáticamente como veremos a continuación.
 
-bat es una alternativa a cat.
+
+
+### :penguin:Instalación de bat 
+
+bat es una alternativa a cat **escrita en Rust** para mostrar el contenido de un archivo de texto con un formato un poco mas claro en el que se verá un recuadro, números de línea, un formateo con colores, etc.
+
+```
+sudo apt install bat
+```
+
+
+
+## Webserver con Nginx
+
+Queremos que al visitar la IP nos muestre el contenido de nuestra aplicación frontend, entonces debemos configurar un webserver. Vamos a utilizar Nginx.
+
+```
+sudo apt install nginx
+```
+
+
+
+```
+sudo systemctl status nginx
+```
+
+
+
+```
+sudo vim /etc/nginx/sites-available/default     
+```
+
+Modificar  la línea `root /var/www/html` colocando la ruta de nuestro proyecto ya buildeado `/home/fazt/actions-runner/frontend/twitch-gha/twitch-gha/dist;`
+
+
+
+Verificar que no haya errores con
+
+```
+sudo nginx -t
+```
+
+
+
+Reiniciamos nginx
+
+```
+sudo systemctl restart nginx
+```
+
+Veremos el estado con
+
+```
+sudo systemctl status nginx
+```
+
+> :no_entry: Si vemos un **404** esto se debe a que nginx no tiene permisos de lectura de la carpeta en la cual tenemos el proyecto buildeado. Debemos asignarle permisos `chmod /home/fazt`
+
+
+
+
+
+## Variables de Entorno
+
+Como podemos ver en la [documentación](https://vitejs.dev/guide/env-and-mode.html) de Vite para crear variables de entorno debemos crear un archivo `.env.local` (con esto además logramos que sea ignorado por git cosa que con un `.env` habría que añadirlo al `.gitignore`) y dentro de el las variables de entorno que queremos tener:
+
+```
+VITE_APP_TITLE=My App
+VITE_APP_API=https://jsonplaceholder.typicode.com/users
+```
+
+Luego en el código podremos acceder a estos datos por ejemplo con `import.meta.env.VITE_APP_API`.
+
+
+
+Para configurar los valores que queremos que tengan las variables de entorno para producción lo hacemos desde el apartado Settings :arrow_right: Secrets :arrow_right: Actions y luego hacemos click en New Repository Secret. Supongamos que le damos el nombre `ViteAppApi`
+
+
+
+Luego en el `workflow` modificamos agregando la variable de entorno:
+
+```yaml
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - run: npm i
+    - run: npm run build --if-present
+      env:
+           VITE_APP_API: ${{ secrets.ViteAppApi }}
+```
+
