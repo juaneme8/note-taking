@@ -79,7 +79,7 @@ Cuando necesitamos escalar el pod se crean copias del mismo (pensarlo como unida
 
 La arquitectura de Kubernetes está conformada por dos grandes partes: los nodos master (que controlan el estado) y lo nodos de trabajo (minions). 
 
-![image-20221019105339445](C:\Users\juan.lauria\Documents\Code\note-taking\Kubernetes\Introducción.assets\image-20221019105339445.png)
+![image-20221019105636702](Introducción.assets/image-20221019105636702.png)
 
 Podemos interactuar con Kubernetes de dos maneras: a través de la API o mediante la interfaz de usuario ya sea el Kubernetes Dashboard o la línea de comandos kubctl (algunos lo llaman kube-control o kube-cuttle). Las UI se comunican con la API a través de métodos que pueden ser imperativos (por ejemplo kubectl run para correr un contenedor) o declarativos (que es a lo que apunta kubernetes donde le digo el estado deseado del cluster y entra en un ciclo de reconciliación constante hasta alcanzarlo).
 
@@ -91,7 +91,7 @@ En caso de no haber nodo master no puedo enviarle comandos al cluster (crear ser
 
 
 
-![image-20221019105238119](C:\Users\juan.lauria\Documents\Code\note-taking\Kubernetes\Introducción.assets\image-20221019105238119.png)
+![image-20221019105723019](Introducción.assets/image-20221019105723019.png)
 
 
 
