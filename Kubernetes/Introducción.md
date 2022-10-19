@@ -99,11 +99,42 @@ En caso de no haber nodo master no puedo enviarle comandos al cluster (crear ser
 
 * API Server
 * Scheduler
-* Controller Manager
+* Controller Manager: están en un loop constante de reconciliación intentando alcanzar el estado deseado (en materia de réplicas, etc)
 * etcd
 
 
 
-## Nodos
+## Nodos (Minions)
 
-Container Runtime
+Están todos conectados a la misma red física y es aconsejable que tengan visibilidad.
+
+<img src="Introducción.assets/image-20221019112059551.png" alt="image-20221019112059551" style="zoom:150%;" />
+
+* Container Runtime
+* kubelet agente de kubernetes. monitorea los pods para saber si está vivo y se comunica con el API server.
+* kube proxy es el componente del clúster que ante un paquete TCP/IP define a qué pod y contenedor debe ir.
+
+
+
+# Declarativo vs Imperativo
+
+Kubernetes hace énfasis en ser un sistema declarativo. 
+
+Un sistema imperativo está compuesto por una serie de pasos que deben ser seguidos *a rajatabla*. Ante una interrupción o si el clúster se muere se debe comenzar devuelta pues no tengo el contexto.
+
+```
+kubctl run
+kubctl deploy
+```
+
+
+
+En un sistema declarativo las tareas ante una interrupción es posible conocer dónde nos quedamos e intentar que converja al estado deseado. El objetivo es que sea observable y computable (actual vs deseado).
+
+A partir de una especificación mediante un archivo .yaml indico el estado deseado.
+
+Existe una metodología llamada GitOps que propone que versione todas estas especificaciones y luego las tome Kubernetes de manera automática.
+
+
+
+VER VIDEO 4 Y 5 DEVUELTA Y COMPLETAR NOTAS.
