@@ -1,6 +1,6 @@
 # Kubernetes
 
-> Basado en el [curso de Platzi de Marcos Lilljedahl](https://platzi.com/cursos/k8s/) - VIDEO 3 COMPLETO - 11 minutos.
+> Basado en el [curso de Platzi de Marcos Lilljedahl](https://platzi.com/cursos/k8s/) - VIDEO 3 COMPLETO.
 
 Kubernetes es la plataforma de orquestación con mayor éxito en el mercado. Es una herramienta que por debajo utiliza Docker.
 
@@ -63,4 +63,47 @@ Kubernetes es la plataforma más extensiva para la orquestación de servicios e 
 
 
 
-Un pod es la únidad atómica de orquetación es un grupo de contenedores que vive en el nodo. A diferencia de Docker Swarm podemos tener un pod de un único contenedor o de múltiples. En una aplicación muchas veces no tenemos una única pieza de código que hace una única funcionalidad sino que necesitamos de un side car que monitoree que todo esté bien o extrayendo datos para enviarlos a otro lado. 
+Un pod es la únidad atómica de orquetación que vive en un nodo y es un grupo de contenedores. 
+
+> A diferencia de lo que ocurre en Docker Swarm, en Kubernetes podemos tener un pod de un único contenedor o de múltiples. En una aplicación muchas veces no tenemos una única pieza de código que hace una única funcionalidad sino que necesitamos de un side car que monitoree que todo esté bien o extrayendo datos para enviarlos a otro lado. 
+
+
+
+Todos los contenedores que viven dentro de un pod comparten el mismo namespace de red (dirección IP) y se ven como procesos que están corriendo dentro del mismo sandbox.
+
+Cuando necesitamos escalar el pod se crean copias del mismo (pensarlo como unidad atómica) y cuando se destruye deja de vivir (no se repetirá ese mismo id cuando creemos uno nuevo). 
+
+
+
+## Arquitectura de Kubernetes
+
+La arquitectura de Kubernetes está conformada por dos grandes partes: los nodos master (que controlan el estado) y lo nodos de trabajo (minions). 
+
+![image-20221019105339445](C:\Users\juan.lauria\Documents\Code\note-taking\Kubernetes\Introducción.assets\image-20221019105339445.png)
+
+Podemos interactuar con Kubernetes de dos maneras: a través de la API o mediante la interfaz de usuario ya sea el Kubernetes Dashboard o la línea de comandos kubctl (algunos lo llaman kube-control o kube-cuttle). Las UI se comunican con la API a través de métodos que pueden ser imperativos (por ejemplo kubectl run para correr un contenedor) o declarativos (que es a lo que apunta kubernetes donde le digo el estado deseado del cluster y entra en un ciclo de reconciliación constante hasta alcanzarlo).
+
+Los nodos de trabajo son los que están registrados en nuestro cluster y están encargados de ejecutar nuestro trabajo. 
+
+Cuando en un clúster un nodo master contamos con dos mecanismos que nos ayudarán a sobrellevarlo. En primer lugar Kubernetes se fundamenta en el algoritmo llamado *raft consensus*, *leader election* o consenso de arbitraje. Esto nos permite tener varios master redundantes en el clúster y cuando uno no responde, otro tomará el leadership del clúster y poder seguir ejecutando comandos. Otra opción sería levantarlo mediante un backup y volver a meterlo al clúster.
+
+En caso de no haber nodo master no puedo enviarle comandos al cluster (crear servicios) pero el resto de la arquitectura va a seguir funcionando. 
+
+
+
+![image-20221019105238119](C:\Users\juan.lauria\Documents\Code\note-taking\Kubernetes\Introducción.assets\image-20221019105238119.png)
+
+
+
+## Nodo Master
+
+* API Server
+* Scheduler
+* Controller Manager
+* etcd
+
+
+
+## Nodos
+
+Container Runtime
