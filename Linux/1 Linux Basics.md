@@ -401,3 +401,70 @@ Instalar version específica
 yum install ansible-2.4.2.0
 ```
 
+
+
+## :penguin: Instalación exa
+
+Exa es una alternativa al comando `ls` **escrita en Rust** con algunas opciones adicionales.
+
+```
+sudo apt install exa
+```
+
+Una de sus [características](https://the.exa.website/features/icons) principales es la posibilidad de mostrar íconos a la salida.
+
+```
+exa --icons
+```
+
+
+
+## :penguin:Instalación de bat 
+
+bat es una alternativa a cat **escrita en Rust** para mostrar el contenido de un archivo de texto con un formato un poco mas claro en el que se verá un recuadro, números de línea, un formateo con colores, etc.
+
+```
+sudo apt install bat
+```
+
+
+
+# Zsh
+
+### :penguin: Instalación Zsh
+
+Vamos a instalar el shell zsh. Recordemos que los shells son programas que nos permiten interactuar con el sistema operativo sin la necesidad de utilizar interfaces gráficas.
+
+Para la instalación de zsh nos basamos en el [siguiente instructivo](https://github.com/ohmyzsh/ohmyzsh/wiki/Installing-ZSH).
+
+En Windows abrimos WSL2 o Ubuntu y ejecutamos `sudo apt update` y `sudo apt upgrade`.
+
+1. Ejecutar `sudo apt install zsh`
+
+2. Verificar que la instalación se haya efectuado correctamente con `zsh --version` 
+3. Convertir a Zsh en el shell por defecto `chsh -s $(which zsh)`.
+4. Desloguearnos y volver a loguearnos. Cuando iniciemos nos aparecerá un mensaje de configuración de del archivo de arranque de Z Shell, elegimos la opción 2.
+5. Verificar que haya funcionado con `echo $SHELL` que nos arroja algo como `/usr/bin/zsh`.
+6. Verificar con `$SHELL --version` que nos arroja algo como `zsh 5.8 (x86_64-ubuntu-linux-gnu)`.
+
+
+
+### :penguin: Instalación Oh My Zsh
+
+Vamos a personalizar a Zsh con Oh My Zsh [de acuerdo a lo indicado en su página web](https://ohmyz.sh/#install)
+
+
+
+### :penguin: Alias en ZSH
+
+Podemos crear un alias agregándolo en `~/.zshrc`.
+
+```
+alias l='exa -1 --icons'
+alias cat='batcat'
+```
+
+ Podremos **recargar la configuración** de dicho archivo con `source ~/.zshrc`.
+
+
+

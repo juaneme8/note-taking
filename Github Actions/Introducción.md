@@ -1,6 +1,10 @@
 # GitHub Actions
 
-> Basado de el curso de Platzi dictado por Oscar Barajas (gndx)
+> :link: Basado de el curso de Platzi dictado por Oscar Barajas (gndx) :writing_hand: - VIDEO 1 COMPLETO.
+>
+> :link: Basado en el [directo de Fazt Code](https://youtu.be/azzRDem_p5k) :ok_hand:
+>
+> En el video se abordan temas de Instalación de exa (alternativa a ls), bat (alternativa a cat), Zsh, Oh My Zsh cuyas notas fueron agregadas a la carpeta de Linux.
 
 [GitHub Actions](https://github.com/features/actions) es una herramienta que nos permitirá automatizar los pasos previos para llevar nuestra aplicación a prod ucción. Podremos crear un flujo de CI/CD logrando pasar por las etapas de Build, Test y Deploy desde GitHub.
 
@@ -18,13 +22,7 @@ Es una herramienta que cuenta con un plan gratuito.
 
 
 
-VIDEO 1 COMPLETO
-
-
-
 ## :rocket: Despliegue de Aplicaciones
-
-> Basado en el [directo de Fazt Code](https://youtu.be/azzRDem_p5k) :ok_hand:
 
 GitHub Actions nos proporciona un runner (un programa que corre en segundo plano) que instalamos en el servidor Linux que estará escuchando eventos. Como consecuencia de esto cuando hagamos un push a GitHub, recibirá este evento y ejecutará tareas en el servidor. 
 
@@ -50,45 +48,79 @@ Luego vamos http://127.0.0.1:5173/ y veremos el programa de ejemplo de Vite.
 
 > Con `npm run build` convertiremos el código para producción y nos creará la carpeta `dist`.
 
-A continuación vamos a desplegar este proyecto, para eso lo primero que hacemos será crear un repositorio y subir el código a GitHub de la manera habitual.
+
+
+### Creación de Repositorio
+
+Creamos un repositorio en GitHub y pusheamos a el los cambios de la manera habitual.
 
 
 
-### Servidor
+### Creación VPS 
 
-Es posible que utilizar un servidor propio o un servicio en la nube como Digital Ocean, AWS, Google Cloud Platflorm, etc. Por ejemplo podemos crear un Droplet en DO y conectarnos por ssh. 
+Es posible que utilizar un servidor propio o un servicio en la nube como Digital Ocean, AWS, Google Cloud Platform, etc. 
 
-
-
-### :penguin: IInstalación Zsh 
-
-Vamos a instalar el shell zsh. Recordemos que los shells son programas que nos permiten interactuar con el sistema operativo sin la necesidad de utilizar interfaces gráficas.
-
-Para la instalación de zsh nos basamos en el [siguiente instructivo](https://github.com/ohmyzsh/ohmyzsh/wiki/Installing-ZSH).
-
-En Windows abrimos WSL2 o Ubuntu y ejecutamos `sudo apt update` y `sudo apt upgrade`.
-
-1. Ejecutar `sudo apt install zsh`
-
-2. Verificar que la instalación se haya efectuado correctamente con `zsh --version` 
-3. Convertir a Zsh en el shell por defecto `chsh -s $(which zsh)`.
-4. Desloguearnos y volver a loguearnos. Cuando iniciemos nos aparecerá un mensaje de configuración de del archivo de arranque de Z Shell, elegimos la opción 2.
-5. Verificar que haya funcionado con `echo $SHELL` que nos arroja algo como `/usr/bin/zsh`.
-6. Verificar con `$SHELL --version` que nos arroja algo como `zsh 5.8 (x86_64-ubuntu-linux-gnu)`.
+En Digital Ocean primero vamos a crear un proyecto que podría agrupar varios servidores  para ellos vamos  a New Project le damos un nombre (luego le daremos un nombre al server en sí), una descripción y por  último vamos a Create -> Droplet. A continuación elegimos el Data Center mas cercano a nuestra ubicación, la versión de Linux, el monto mensual a destinar según la CPU elegida (por ser un proyecto de Next.js se recomienda mínimo 1GB / 1CPU).
 
 
 
-### :penguin: IInstalación Oh My Zsh
+### Creación de Llave SSH
 
-Vamos a personalizar a Zsh con Oh My Zsh [de acuerdo a lo indicado en su página web](https://ohmyz.sh/#install)
+Creamos la llave SSH de acuerdo a las instrucciones que nos aparecen en esa sección y cargamos el valor de la llave pública (`id_rsa.pub`) y le asignamos un nombre.
 
 
 
-# Workflow Configuration
+### Conexión a Servidor
 
-Vamos a crear un archivo de configuración en el cual especificamos las tareas que queremos que sean ejecutadas en el servidor. 
+ Nos conectamos por SSH a la dirección IP provista por Digital Ocean. Como ya hemos establecido la llave pública podremos conectarnos sin la necesidad de colocar contraseñas.
 
-Para hacerlo de manera manual podremos crear un directorio `.github/workflows/`
+```
+ssh root@<direccion_ip>
+```
+
+
+
+### Actualizar Servidor
+
+```
+sudo apt update && sudo apt upgrade -y
+```
+
+
+
+## :penguin: Usuario No Root
+
+En ocasiones al conectarnos por SSH estaremos trabajando con el usuario root. Como sabemos esto no es una buena práctica y debemos crear un usuario distinto menos privilegiado.
+
+```
+adduser juaneme
+```
+
+> Podremos verificar el usuario que estamos usando con `whoami`, o al ver que nos aparece un # en el prompt o al ejecutar `pwd` y ver estamos en la carpeta /root.
+
+
+
+Luego modificamos el usuario para agregarlo al grupo sudo:
+
+```
+usermod -aG sudo juaneme
+```
+
+
+
+Luego podemos cambiar a este usuario con el comando:
+
+```
+su - juaneme
+```
+
+
+
+# Creación Workflow
+
+Vamos a crear un archivo de configuración en el cual especificamos los eventos que queremos escuchar en el servidor y las tareas que queremos que sean ejecutadas cuando esto suceda. 
+
+Esto podemos hacerlo de manera manual o automática. Para hacerlo **de manera manual** tenemos que crear un directorio `.github/workflows/` y adentro el archivo yml.
 
 ```
 mkdir -p .github/workflows
@@ -100,24 +132,28 @@ Luego creamos un archivo con la configuración en sí que puede tener cualquier 
 
 
 
-Podemos hacerlo de manera automática haciendo click en el botón **Actions** ubicado en la barra central y donde dice Workflows podremos ver una serie de configuraciones rápidas para el lenguaje que usemos. 
+Si queremos hacerlo **de manera automática** debemos hacer click en el botón **Actions** ubicado en la barra central y donde dice Workflows podremos ver una serie de configuraciones rápidas para el lenguaje que usemos. 
 
-En  nuestro caso como como se trata de un proyecto de Node debemos buscar "Node.js" y presionamos Configure. Nos creará una carpeta `.github/workflows/node.js.yml` una práctica habitual podría ser cambiarle el nombre al mismo nombre de la rama (en nuestro caso `main.yml`).
+En  nuestro caso como como se trata de un proyecto de Node debemos buscar **"Node.js"** y presionamos **Configure**. Nos creará una carpeta `.github/workflows/node.js.yml` una práctica habitual podría ser cambiarle el nombre al mismo nombre de la rama (en nuestro caso `main.yml`).
 
 
 
 Al archivo autogenerado le hacemos algunos cambios:
 
 * Modificamos el `name: Frontend CI`
-* Dejamos sólo el on push.
-* En `node-version: [14.x, 16.x, 18.x]` como no queremos que lo ejecute en todas las versiones dejamos solo`[16.x]`.
-* En el `runs-on: ubuntu-latest` nos da la pauta de que se va a crear un contenedor Ubuntu y allí va a ejecutar el proyecto. Pero en nuestro caso como queremos simplificarlo ponemos `runs-on: self-hosted` ya que queremos que ejecute los comandos directamnete.
-* En la parte de run modificamos `npm ci` por `npm i` y quitamos `npm test` (podemos comentarlo con un `#`)
+* Edtamos el archivo de manera tal que sólo estemos escuchando push y quitamos la escucha de pull requests.
+
+```
+on:
+  push:
+    branches: [ "main" ]
+```
+
+* En `node-version: [14.x, 16.x, 18.x]` con lo cual indicamos que queremos que sea probado en distintas versiones de Node y como no queremos que lo ejecute en todas las versiones dejamos solo`[16.x]`.
+* En el `runs-on: ubuntu-latest` nos da la pauta de que se va a crear un contenedor Ubuntu y allí va a ejecutar el proyecto. Pero en nuestro caso queremos que los comandos se ejecuten en el servidor por lo que ponemos  `runs-on: self-hosted` .
+* En la parte de run modificamos `npm ci` por `npm i` y quitamos `npm test` (podemos comentarlo con un `#`) ya que por el momento no tenemos tests.
 
 ```yaml
-# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
-
 name: Frontend CI
 
 on:
@@ -147,62 +183,7 @@ jobs:
 
 
 
-A continuación creamos desde la interfaz gráfica un commit con este archivo. Luego hacemos un pull desde la máquina de desarrollo.
-
-
-
-## :penguin: Linux User
-
-Cuando creamos un Droplet (VM de Linux) en DigitalOcean y nos conectamos por ssh, lo haremos con el comando `ssh root@<direccion_ip>` esto significa que estaremos trabajando con el usuario root. Como sabemos esto no es una buena práctica y debemos crear un usuario distinto menos privilegiado.
-
-```
-adduser juaneme
-```
-
-> Podremos verificar el usuario que estamos usando con `whoami`, o al ver que nos aparece un # en el prompt o al ejecutar `pwd` y ver estamos en la carpeta /root.
-
-
-
-Luego modificamos el usuario para agregarlo al grupo sudo:
-
-```
-usermod -aG sudo juaneme
-```
-
-
-
-Luego iniciamos como este usuario con el comando:
-
-su - juaneme
-
-
-
-## :penguin: Instalación exa
-
-Exa es una alternativa al comando `ls` **escrita en Rust** con algunas opciones adicionales.
-
-```
-sudo apt install exa
-```
-
-Una de sus [características](https://the.exa.website/features/icons) principales es la posibilidad de mostrar íconos a la salida.
-
-```
-exa --icons
-```
-
-
-
-## :penguin: Alias en ZSH
-
-Podemos crear un alias agregándolo en `~/.zshrc`.
-
-```
-alias l='exa -1 --icons'
-alias cat='batcat'
-```
-
- Podremos **recargar la configuración** de dicho archivo con `source ~/.zshrc`.
+A continuación creamos desde la interfaz gráfica un commit con este archivo haciendo click en **Start commit**. Luego hacemos un pull desde la máquina de desarrollo para traernos estos cambios. 
 
 
 
@@ -210,11 +191,13 @@ alias cat='batcat'
 
 En GitHub si vamos al apartado Settings :arrow_right: Actions :arrow_right: Runners :arrow_right: **New self-hosted runner** podremos descargar, configurar y ejecutar el runner que estará escuchando a los eventos relacionados con GitHub de acuerdo al archivo de configuración recien creado.
 
-Ejecutamos uno a uno los comandos indicados por GitHub en ese apartado hasta completar los tres pasos antes mencionados.
+Elegimos Linux como sistema operativo y vamos ingresando uno a uno los comandos indicados por GitHub en ese apartado. 
 
-Nos hará una serie de preguntas con respecto al runner que podemos dejar los valores por defecto o bien cambiarle el nombre al runner o al directorio de trabajo que por defecto sugiere `_work` (podemos cambiarlo a `frontend`).
+Cuando llegamos a la parte de ejecutar `./config.sh` nos hará una serie de preguntas con respecto al runner que podemos dejar los valores por defecto o bien cambiarlos. Nos preguntará por ejemplo si queremos agregar este runner a un grupo, el nombre que queremos darle, tags, etc.
 
-En este momento en el repositorio del proyecto nos indicará que estamos usando GitHub Actions con un circulito. Por ahora estará en  color amarillo y en el apartado de Runners lo veremos como **Offline**.
+Por último nos preguntará si queremos que la carpeta de trabajo se llame  `_work` (lo ideal es cambiarlo por el nombre del proyecto, ejemplo a `frontend`). Es en esa carpeta donde clonará el repositorio.
+
+> En este momento en el repositorio del proyecto nos indicará que estamos usando GitHub Actions con un circulito. Por ahora estará en  color amarillo y en el apartado de Runners lo veremos como **Offline**.
 
 Si luego ejecutamos `./run.sh` como nos indica en el tercer paso en el apartado de runners lo veremos como **Active**. Sin embargo si cerramos esta ventana ya no estará escuchando.
 
@@ -223,14 +206,6 @@ Si luego ejecutamos `./run.sh` como nos indica en el tercer paso en el apartado 
 A partir de ahora que tenemos el runner corriendo cada vez que hagamos cambios en el código y los pushiemos al repositorio los veremos reflejados localmente en el servidor y si tenemos un webserver que sirva el contenido de nuestra carpeta `dist` podremos tener una página web que se actualiza automáticamente como veremos a continuación.
 
 
-
-### :penguin:Instalación de bat 
-
-bat es una alternativa a cat **escrita en Rust** para mostrar el contenido de un archivo de texto con un formato un poco mas claro en el que se verá un recuadro, números de línea, un formateo con colores, etc.
-
-```
-sudo apt install bat
-```
 
 
 

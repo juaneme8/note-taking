@@ -29,6 +29,10 @@ En nuestro ordenador creamos una llave pública y una privada, luego le enviamos
 
 
 
+:rotating_light: **Nota**: Tener en cuenta que podríamos utilizar la llave para mas de un servicio, para eso bastará con utilizar el contenido de la llave pública y quizás esto nos ahorre algunos de los inconvenientes descriptos en estas notas sobre la solicitud de clave permanentemente ya que el agente no sabe a qué llave estamos haciendo referencia.
+
+
+
 ## Verificar Cliente OpenSSH
 
 Las distribuciones de Linux por lo general tienen instalado OpenSSH por default, pero podemos verificarlo con:
@@ -329,7 +333,7 @@ Luego nos preguntará si queremos agregar la *fingerprint* del servidor a la lis
 SSH utiliza por defecto el puerto 22, sin embargo es posible cambiarlo:
 
 ```
-nano /etc/ssh/sshd_config
+nano /etc/ssh/sshd_config 
 ```
 
 Luego donde dice `#Port 22` lo descomentamos y colocamos por ejemplo `Port 2222`.
