@@ -143,13 +143,13 @@ Al archivo autogenerado le hacemos algunos cambios:
 * Modificamos el `name: Frontend CI`
 * Edtamos el archivo de manera tal que sólo estemos escuchando push y quitamos la escucha de pull requests.
 
-```
+```yaml
 on:
   push:
     branches: [ "main" ]
 ```
 
-* En `node-version: [14.x, 16.x, 18.x]` con lo cual indicamos que queremos que sea probado en distintas versiones de Node y como no queremos que lo ejecute en todas las versiones dejamos solo`[16.x]`.
+* En `node-version: [14.x, 16.x, 18.x]` con lo cual indicamos que queremos que sea probado en distintas versiones de Node y como no queremos que lo ejecute en todas las versiones dejamos solo`[16.x]`. Tener presente que al momento de escribir este tutorial [la versión 16 es la LTS](https://nodejs.org/en/).
 * En el `runs-on: ubuntu-latest` nos da la pauta de que se va a crear un contenedor Ubuntu y allí va a ejecutar el proyecto. Pero en nuestro caso queremos que los comandos se ejecuten en el servidor por lo que ponemos  `runs-on: self-hosted` .
 * En la parte de run modificamos `npm ci` por `npm i` y quitamos `npm test` (podemos comentarlo con un `#`) ya que por el momento no tenemos tests.
 
@@ -167,7 +167,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [14.x, 16.x, 18.x]
+        node-version: [16.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
@@ -185,8 +185,6 @@ jobs:
 
 A continuación creamos desde la interfaz gráfica un commit con este archivo haciendo click en **Start commit**. Luego hacemos un pull desde la máquina de desarrollo para traernos estos cambios. 
 
-
-
 # Runner
 
 En GitHub si vamos al apartado Settings :arrow_right: Actions :arrow_right: Runners :arrow_right: **New self-hosted runner** podremos descargar, configurar y ejecutar el runner que estará escuchando a los eventos relacionados con GitHub de acuerdo al archivo de configuración recien creado.
@@ -197,15 +195,49 @@ Cuando llegamos a la parte de ejecutar `./config.sh` nos hará una serie de preg
 
 Por último nos preguntará si queremos que la carpeta de trabajo se llame  `_work` (lo ideal es cambiarlo por el nombre del proyecto, ejemplo a `frontend`). Es en esa carpeta donde clonará el repositorio.
 
+> Nuestro código estará luego del clonado en `actions-runner/_work/nombreRepo/nombreRepo`
+
 > En este momento en el repositorio del proyecto nos indicará que estamos usando GitHub Actions con un circulito. Por ahora estará en  color amarillo y en el apartado de Runners lo veremos como **Offline**.
 
 Si luego ejecutamos `./run.sh` como nos indica en el tercer paso en el apartado de runners lo veremos como **Active**. Sin embargo si cerramos esta ventana ya no estará escuchando.
 
- En cambio debemos ejecutar `sudo ./svc.sh install` y luego `sudo ./svc.sh start` y quedará corriendo de fondo.
+## Ejecución Permanente
 
-A partir de ahora que tenemos el runner corriendo cada vez que hagamos cambios en el código y los pushiemos al repositorio los veremos reflejados localmente en el servidor y si tenemos un webserver que sirva el contenido de nuestra carpeta `dist` podremos tener una página web que se actualiza automáticamente como veremos a continuación.
+Para lograr que el runner se mantenga escuchando eventos de manera permanente debemos ejecutar:
 
+```bash
+./svc.sh
+```
 
+Nos aparecerá un mensaje "Must run as sudo" por lo que ejecutamos:
+
+```bash
+sudo ./svc.sh
+```
+
+ En ese momento nos dirá que los comandos que puede instalar son `install`, `start`, `stop`, `status` y `uninstall` por queremos conocer su estado:
+
+```bash
+sudo ./svc.sh status
+```
+
+En se momento veremos "not installed" por lo que lo instalamos:
+
+```bash
+sudo ./svc.sh install
+```
+
+Si verificamos su estado con `sudo ./svc.sh status` nos aparecerá como "inactive", por lo que vamos a iniciarlo:
+
+```bash
+sudo ./svc.sh start
+```
+
+A partir de ahora quedará corriendo de fondo en GitHub lo veremos como "Idle" mientras que si ejecutamos `sudo ./svc.sh stop` lo veremos como "Offline".
+
+## Conclusión
+
+Tenemos el runner corriendo cada vez que hagamos cambios en el código y los pushiemos al repositorio los veremos reflejados localmente en el servidor y si tenemos un webserver que sirva el contenido de nuestra carpeta `dist` podremos tener una página web que se actualiza automáticamente como veremos a continuación.
 
 
 
