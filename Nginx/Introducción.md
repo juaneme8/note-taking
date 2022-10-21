@@ -80,7 +80,7 @@ Funcionando como **servidor web** expone un puerto (generalmente el 80 y el 443)
 A la hora de trabajar con Nginx una de las alterrnativas es instalarlo en el host, para ello si estamos utilizando una distribución Ubuntu podemos instalarlo con el siguiente comando:
 
 ```
-apt-get install nginx
+sudo apt install nginx
 ```
 
 Una vez instalado en Ubuntu se inicia automáticamente. Si navegamos a la `http://localhost:8080` veremos una página de bienvenida de nginx que nos hará dar cuenta que la instalación fue exitosa.

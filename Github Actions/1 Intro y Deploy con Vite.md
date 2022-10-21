@@ -32,6 +32,8 @@ En el repositorio debemos añadir un archivo de configuración con la extensión
 
 ## Creación de Proyecto
 
+<img src="1 Intro y Deploy con Vite.assets/image-20221021083653960.png" alt="image-20221021083653960" style="zoom:50%;" />
+
 ```
 npm create vite
 ```
@@ -243,25 +245,41 @@ Tenemos el runner corriendo cada vez que hagamos cambios en el código y los pus
 
 ## Webserver con Nginx
 
+> Ver Parte 2 para su funcionamiento como servidor proxy.
+
 Queremos que al visitar la IP nos muestre el contenido de nuestra aplicación frontend, entonces debemos configurar un webserver. Vamos a utilizar Nginx.
+
+Para instalar nginx ejecutamos:
 
 ```
 sudo apt install nginx
 ```
 
+Para verificar el estado:
 
+```
+sudo service nginx status
+```
 
 ```
 sudo systemctl status nginx
 ```
 
+En este momento veremos que nginx está activo por lo que si entramos con el navegador a la dirección IP del servidor, nos aparecerá la página de bienvenida.
 
+
+
+## Servir Archivos Estáticos
+
+Anteriormente hemos realizado el build de nuestra aplicación de Vite y ahora queremos que nos muestre ese contenido en lugar de la página de bienvenida. Para ello debemos modificar el siguiente archivo:
 
 ```
 sudo vim /etc/nginx/sites-available/default     
 ```
 
-Modificar  la línea `root /var/www/html` colocando la ruta de nuestro proyecto ya buildeado `/home/fazt/actions-runner/frontend/twitch-gha/twitch-gha/dist;`
+
+
+Cambiar la línea `root /var/www/html` colocando la ruta de nuestro proyecto ya buildeado `/home/fazt/actions-runner/frontend/twitch-gha/twitch-gha/dist;`
 
 
 
@@ -285,7 +303,13 @@ Veremos el estado con
 sudo systemctl status nginx
 ```
 
-> :no_entry: Si vemos un **404** esto se debe a que nginx no tiene permisos de lectura de la carpeta en la cual tenemos el proyecto buildeado. Debemos asignarle permisos `chmod /home/fazt`
+> :no_entry: Si vemos un **404** esto se debe a que nginx no tiene permisos de lectura de la carpeta en la cual tenemos el proyecto buildeado. Debemos asignarle permisos cosa que hacemos con:
+>
+> ```
+> chmod 755 /home/fazt
+> ```
+>
+> 
 
 
 
