@@ -1,8 +1,10 @@
 # Docker
 
-> Ultimate Docker Course de Mosh Hamedani (COMPLETO)
+> :link: Ultimate Docker Course de Mosh Hamedani :ok_hand:
 >
-> [Docker 2021 de Pelado Nerd](https://www.youtube.com/watch?v=CV_Uf3Dq-EU) (40 MIN)
+> :link: [Docker 2021 de Pelado Nerd](https://www.youtube.com/watch?v=CV_Uf3Dq-EU) (40 MIN)
+>
+> :link: Basado en [YAML Tutorial de TechWorld with Nana](https://youtu.be/1uFVr15xDGg) :ok_hand:
 
 # ¿Qué es Docker?
 
@@ -1983,55 +1985,135 @@ Antes de analizar el archivo `docker-compose.yml` profundizaremos acerca de los 
 
 
 
-## Formato `JSON` y `YAML`
+# `YAML`
 
-El formato `.json` es un lenguaje para representar datos de una manera humanamente lejible, como por ejemplo:
+* YAML significa YAML Ain't Markup Language.
+* Archivos de configuración fáciles de leer e intuitivos. Los archivos `JSON` en cambio se usan habitualmente para intercambiar datos entre cliente y servidor.
+* Es un poco más lento de parsear comparado con `JSON`. Como los strings no van entre comillas, si ingresamos `149` para determinar si algo es un string o un número por lo que deberá leer todo como un string y luego evaluarlo.
+* Admite la extensión  `.yml` o`.yaml`.
 
-```json
-{
-	"name": "The Ultimate Docker Course",
-	"price": 149,
-	"is_published": true,
-	"tags": ["software","devops"],
-	"author":{
-		"first_name":"Mosh",
-		"last_name":"Hamedani"
-	}
-}
-```
+* Utilizado en herramientas como Docker Compose, Kubernetes, Ansible, Prometheus.
+
+* Lenguaje de serialización de datos es decir un formato standard que puede ser usado por aplicaciones de distintas tecnologías y lenguajes para transferir datos entre ellas, de manera similar al XML o JSON.
+* YAML es un superset de JSON.
+* Las estructuras de datos se definen mediante separación de líneas e indentación con espacios.
 
 
 
-El formato `YML` (es posible utilizar la extensión `.yml` o`.yaml`) también nos permite representar datos pero de una manera áun más simple de leer:
+## Sintaxis
 
-> Utilizamos `---` en la parte superior
->
-> Utilizamos indentación (mediante espacios) para indicar jerarquía
->
-> No utilizamos comillas
->
-> No utilizamos comas para separar pares key/value
->
-> Para representar elementos de un array utilizamos guiones e indentación
+* Indentación (mediante espacios) para indicar jerarquía.
+
+* Es aconsejable utilizar [herramientas de validación](https://onlineyamltools.com/highlight-yaml) ya que es muy sensible respecto a la indentación.
+
+* Cuando trabajamos con strings no estamos obligados a encerrarlos entre comillas salvo que tengamos que usar caracteres especiales.
+
+* Separación de componentes de un mismo archivo yaml con  `--- `.
+
+* Objetos creados mediante indentación.
+
+  ```yaml
+  microservice:
+    app: user-authentication
+    port: 9000
+    version: 1.7
+  ```
+
+* Lista simple
+
+  ```yaml
+  tags: 
+    - software
+    - devops
+  versions:
+  - 1.0
+  - 1.1
+  ```
+
+> Notar que a la hora de crear elementos de una lista es válido tanto tener indentación o estar al mismo nivel del atributo padre.
+
+
+
+En el caso de una lista de primitivos podremos utilizar también una notación con corchetes:
 
 ```yaml
----
-name: The Ultimate Docker Course
-price: 149
-is_published: true
-tags: 
-	- software
-	- devops
-author:
-	first_name: Mosh
-	last_name: Hamedani
+tags: [software, devops]
 ```
 
-Como podemos ver el formato `YAML` es mas simple de leer pero tiene la contra de que es un poco más lento de parsear que el formato `JSON`. Por ejemplo no sabe a priori si `149` algo es un string o un número por lo que deberá leer todo como un string y luego evaluarlo.
-
-Los archivos `JSON` se usan habitualmente para intercambiar datos entre cliente y servidor y los `YAML` para archivos de configuración.
 
 
+* Lista de objetos
+
+  ```yaml
+  microservice:
+    - app: user-authentication
+      port: 9000
+      version: 1.7
+    - app: shopping-cart
+      port: 9002
+      version: 1.9  
+  ```
+
+* Lista adentro de una lista
+
+```yaml
+microservice:
+  - app: user-authentication
+    port: 9000
+    version: 1.7
+  - app: shopping-cart
+    port: 9002
+    versions: 
+    - 1.9
+    - 2.0
+    - 2.1
+```
+
+
+
+* Comentarios con `#`
+
+* Expresiones booleanas con `true`/ `false`  pero también con `yes`/ `no` y `on`/`off`.
+
+* String multilínea con `| ` pipe symbol
+
+  ```yaml
+  multilineString: | 
+    this is a multiline string
+    and another line
+  ```
+
+Un caso de uso interesante del pipe es con un shell script como veremos a continuación:
+
+```yaml
+command:
+  - sh
+  - -c
+  - |
+    #!/usr/bin/env bash -e
+    http () {
+      local path="${1}"
+      set -- -XGET -s --fail
+      # some more stuff here
+      curl -k "$@" "http://localhost:5601${path}"
+    }
+    http "/app/kibana"
+```
+
+Queremos mostrar los line carriages y a su vez que yaml lo interprete como multi-linea.
+
+* String largo de una línea pero dividido en varias para simplificar la lectura con `>` greater than.
+
+  ```yaml
+  longString: >
+    this is a single line stirng,
+    that should be all on one line.
+  ```
+
+  Queremos mostrar los line carriages pero queremos también que yaml lo interprete como una unica linea.
+
+* Variables de entorno con signo `$`
+* Placeholders con llaves dobles `{{ }}`
 
 ## Archivo `docker-compose.yml`
 

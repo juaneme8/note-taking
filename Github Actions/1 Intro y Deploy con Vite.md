@@ -4,23 +4,41 @@
 >
 > :link: Basado en el [directo de Fazt Code](https://youtu.be/azzRDem_p5k) :ok_hand:
 >
+> :link: Basado en el video de [TechWorld with Nana](https://youtu.be/R8_veQiYBjI) :writing_hand:
+>
 > En el video se abordan temas de Instalación de exa (alternativa a ls), bat (alternativa a cat), Zsh, Oh My Zsh cuyas notas fueron agregadas a la carpeta de Linux.
 
-[GitHub Actions](https://github.com/features/actions) es una herramienta que nos permitirá automatizar los pasos previos para llevar nuestra aplicación a prod ucción. Podremos crear un flujo de CI/CD logrando pasar por las etapas de Build, Test y Deploy desde GitHub.
-
-Es una herramienta que cuenta con un plan gratuito.
+[GitHub Actions](https://github.com/features/actions) es una herramienta que nos  permitirá automatizar development workflows. 
 
 
+
+## Más que CI/CD
+
+Si bien el ejemplo más común de proceso a automatizar es un pipeline de CI/CD automatizando los pasos previos para llevar nuestra aplicación a producción pasando por las etapas de Test, Build, (también puede haber un push a un storage) y Deploy, debemos tener en cuenta que GitHub Actions nos permite hacer muchas mas cosas.
+
+Como *maintainers* de un repositorio OpenSource vamos a querer automatizar la mayor parte de las tareas tediosas y repetitivas para poder concentrarnos en la programación en sí y en el desarrollo de nuevas funcionalidades. Un ejemplo de workflow podría ser en el caso de una aplicación que saca un nuevo release y los usuarios detectan un bug, por lo que crean un issue. A partir de este momento tendremos que analizar si es urgente, si es reproducible, etc. Se le asigna a un *contributer* logra solucionarlo, crea un pull-request. Luego analizamos el pull-request, que el bug efectivamente haya sido solucionado y recién ahí realizamos un merge al master branch para que forme parte del próximo release. A continuación debemos iniciar el build pipeline que consistirá en Test, Build y Deploy. Además creación de notas del release y actualizar el número de versión.
+
+Con GitHub Actions cada vez que algo sucede con (ó a) el repositorio podemos configurar acciones que sean ejecutadas en respuesta. Esto que sucede con (o a) el repositorio se conoce como evento. Ejemplos de eventos podrían ser:
+
+* Creación de PR
+* Contributer que se une
+* Creación de un issue: podríamos tener un workflow formado por todas las acciones individuales de ordenarlo, etiquetarlo, asignarlo a un contribuidor, intentar reproducirlo, etc.
+* PR mergeado a master branch
 
 ## Características
-
-* Ejecutar un flujo ante cualquier evento de GitHub (push a una rama en particular, creación de un issue, nuevo release, pull request, etc).
 
 * Probar aplicación en distintos sistemas operativos.
 
 * Flujos de trabajo provistos por la comunidad.
 
 
+
+## Ventajas GitHub Actions
+
+* Si ya estamos hosteando nuestro código en GitHub, podremos utilizar la misma heramienta en lugar de tener que instalar otra neuva. 
+
+* Es una herramienta simple de utilizar pensada para desarrolladores de modo que no se necesite una persona encargada de DevOps que mantenga el pipeline CI/CD.
+* A diferencia de Jenkins es más sencillo de utilizar ya que en lugar de tener que instalar plugins por ejemplo de Node, Docker, AWS o las múltiples combinaciones posibles de Pipelines que podemos tener, buscaremos un entorno que reúna las características deseadas. 
 
 ## :rocket: Despliegue de Aplicaciones
 
@@ -134,7 +152,71 @@ Luego creamos un archivo con la configuración en sí que puede tener cualquier 
 
 
 
-Si queremos hacerlo **de manera automática** debemos hacer click en el botón **Actions** ubicado en la barra central y donde dice Workflows podremos ver una serie de configuraciones rápidas para el lenguaje que usemos. 
+Si queremos hacerlo **de manera automática** aprovechando alguno de los templates provistos por GitHub debemos hacer click en el botón **Actions** ubicado en la barra central y donde dice Workflows podremos ver una serie de configuraciones rápidas para el lenguaje que usemos. 
+
+### Tipos de Workflows
+
+Los workflows propuestos están divididos en tres categorías en Deployment, Continuous integration (Java with Gradle), Automate Every Step (por ejemplo Greetings para saludar a un nuevo contribuidor, Labeler para ponerle una etiqueta al issue, etc).
+
+
+
+### Sintaxis Workflow
+
+Tomamos como ejemplo el template de Java with Gradle.
+
+En primer lugar nos podemos encontrar con el nombre del Workflow (opcional)
+
+```yaml
+name: Java CI with Gradle
+```
+
+Luego el evento que estamos escuchando y dispara el workflow. 
+Si queremos que el workflow se ejecute cuando alguien haga un push o un PR a la rama main.
+
+> Podemos encontrar en la [documentación](https://docs.github.com/es/actions/using-workflows/events-that-trigger-workflows) la lista completa de eventos.
+
+```yaml
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+```
+
+
+
+Luego nos encontramos las acciones que serán ejecutadas cuando suceda dicho evento.
+
+* `jobs`. 
+
+* El job en sí se llamará `build`.
+* * Con `runs-on: ubuntu-latest` específicamos que queremos que se ejecute en los servidores de GitHub con Ubuntu.
+  * con `steps` especificamos los pasos que componen ese job.
+
+Por ejemplo si queremos tener un job que tenga el nombre `build` haremos lo siguiente:
+
+```yaml
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+    - name: Build with Gradle
+      uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
+      with:
+        arguments: build
+```
+
+
+
+### Node.js Workflow
 
 En  nuestro caso como como se trata de un proyecto de Node debemos buscar **"Node.js"** y presionamos **Configure**. Nos creará una carpeta `.github/workflows/node.js.yml` una práctica habitual podría ser cambiarle el nombre al mismo nombre de la rama (en nuestro caso `main.yml`).
 
@@ -142,8 +224,14 @@ En  nuestro caso como como se trata de un proyecto de Node debemos buscar **"Nod
 
 Al archivo autogenerado le hacemos algunos cambios:
 
+* Cuando tenemos `runs-on: ubuntu-latest` El código podrá ser ejecutado en servidores de GitHub (aunque también podremos correrlo self-hosted en nuestro propio servidor)
+
+  > La ejecución de los distintos jobs será en paralelo por lo que debemos especificar `needs: build` si necesitamos que se haya completado ese paso.
+
+  
+
 * Modificamos el `name: Frontend CI`
-* Edtamos el archivo de manera tal que sólo estemos escuchando push y quitamos la escucha de pull requests.
+* Editamos el archivo de manera tal que sólo estemos escuchando push y quitamos la escucha de pull requests.
 
 ```yaml
 on:

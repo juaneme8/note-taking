@@ -1,6 +1,6 @@
 # CI/CD con Next.js
 
-> :link: Basado en el [video de Fazt](https://youtu.be/pgoZFKgoiDk)
+> :link: Basado en el [video de Fazt](https://youtu.be/pgoZFKgoiDk) :ok_hand:
 
 ## Esquema del Proyecto
 
