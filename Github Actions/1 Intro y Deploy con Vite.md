@@ -162,7 +162,7 @@ Los workflows propuestos están divididos en tres categorías en Deployment, Con
 
 ### Sintaxis Archivo YAML
 
-Ver [Docker > 1 Introducción.md](..\Docker\1 Introducción.md)
+Ver [Docker > 1 Introducción](../Docker/1 Introducción.md)
 
 
 
