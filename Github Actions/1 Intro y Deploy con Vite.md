@@ -4,7 +4,7 @@
 >
 > :link: Basado en el [directo de Fazt Code](https://youtu.be/azzRDem_p5k) :ok_hand:
 >
-> :link: Basado en el video de [TechWorld with Nana](https://youtu.be/R8_veQiYBjI) :writing_hand:
+> :link: Basado en el video de [TechWorld with Nana](https://youtu.be/R8_veQiYBjI) :ok_hand:
 >
 > En el video se abordan temas de Instalación de exa (alternativa a ls), bat (alternativa a cat), Zsh, Oh My Zsh cuyas notas fueron agregadas a la carpeta de Linux.
 
