@@ -191,13 +191,17 @@ on:
 
 
 
-Luego nos encontramos las acciones que serán ejecutadas cuando suceda dicho evento.
+Luego nos encontramos las acciones que serán ejecutadas cuando suceda dicho evento. Utilizamos el atributo `jobs` que es un objeto que dentro tiene propiedades con el nombre de las tareas: `build` en nuestro caso:
 
-* `jobs`. 
+* * Con `runs-on: ubuntu-latest` específicamos que queremos que se ejecute en los servidores de GitHub con Ubuntu (además es posible como veremos más adelante hostearlo nosotros mismos).
 
-* El job en sí se llamará `build`.
-* * Con `runs-on: ubuntu-latest` específicamos que queremos que se ejecute en los servidores de GitHub con Ubuntu.
   * con `steps` especificamos los pasos que componen ese job.
+
+    * Con `uses` seleccionamos una acción. 
+
+      Puede ser de las [prefefinidas de GitHub](https://github.com/actions) como `uses: actions/checkout@v3` para obtener el código del repositorio. Podremos entrar al [repositorio de esa acción](https://github.com/actions/checkout) y ver el archivo `action.yml` para ver lo que realiza.
+
+    * Con `run: chmod +x gradlew` estamos haciendo referencia a un comando que queremos ejecutar.
 
 Por ejemplo si queremos tener un job que tenga el nombre `build` haremos lo siguiente:
 
@@ -209,15 +213,144 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    
     - name: Set up JDK 11
       uses: actions/setup-java@v3
       with:
         java-version: '11'
         distribution: 'temurin'
+        
     - name: Build with Gradle
       uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
       with:
         arguments: build
+```
+
+A la hora de hacer commit al archivo lo podemos llamar por ejemplo `ci.yml`.
+
+
+
+### Atributo `needs`
+
+Cada vez que ejecutemos un job este comienza con un entorno virtual limpio y por defecto cada uno de ellos lo hará en paralelo. Supongamos que tenemos dos tareas una `build` y la otra `publish` vamos a querer que  esperar a que el primero se ejecute exitosamente antes de pasar al segundo. En ese caso debemos utilizar el atributo `needs`
+
+```yaml
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+        
+    - name: Build with Gradle
+      uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
+      with:
+        arguments: build
+        
+  publish:
+    needs: build
+```
+
+
+
+### Atributo `strategy`
+
+De manera similar a como indicamos que queríamos que fuera ejecutado el workflow en Ubuntu con `runs-on: ubuntu-latest`, es posible ejecutarlo en distintos sistemas operativos:
+
+```yaml
+runs-on: ${{matrix.os}}
+strategy:
+  matrix:
+    os: [ubuntu-latest, windows-latest, macOS-latest]
+```
+
+
+
+
+
+## Docker Build and Push
+
+En primer lugar queremos crear una imagen Docker y luego publicarla en DockerHub.
+
+Podremos indicar los comandos a ejecutar (docker login con credenciales, docker build, docker tag, docker push, etc) utilizar una acción:
+
+```yaml
+- name: Build and push Docker image
+  run: |
+    docker login cred
+    docker build...
+```
+
+En el entorno de Linux ya tenemos Docker pre instalado por lo que podremos ejecutar los comando directamente.
+
+
+
+Nos basaremos en la [documentación de Docker](https://docs.docker.com/ci-cd/github-actions/) ya que la acción propuesta por Nana ya no se encuentra disponible.
+
+
+
+```yaml
+--- 
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+    
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps: 
+      - 
+        name: Checkout
+        uses: actions/checkout@v3
+      - 
+        name: "Login to Docker Hub"
+        uses: docker/login-action@v2
+        with: 
+          password: "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}"
+          username: "${{ secrets.DOCKER_HUB_USERNAME }}"
+      - 
+        name: "Set up Docker Buildx"
+        uses: docker/setup-buildx-action@v2
+      - 
+        name: "Build and push"
+        uses: docker/build-push-action@v3
+        with: 
+          context: "."
+          file: ./Dockerfile
+          push: true
+          tags: "${{ secrets.DOCKER_HUB_USERNAME }}/simplewhale:latest"
+```
+
+
+
+### Creación de Secretos
+
+Como podemos ver en el Workflow hacemos referencia a dos secretos: `DOCKER_HUB_USERNAME` y `DOCKER_HUB_ACCESS_TOKEN`.
+
+Para crealos en el repositorio vamos a Settings, luego en Security a Secrets :arrow_right:  Actions. Por último en New repository secret.
+
+
+
+### Generación Access Token Dockerhub
+
+El access token de Dockerhub lo debemos generar en DockerHub yendo a Security :arrow_right: New Access Token.
+
+
+
+### Creación de `Dockerfile`
+
+Creamos un `Dockerfile` simple para que no nos falle el flujo y logre subir una imagen a Dockerhub.
+
+```
+FROM node:14.16.0-alpine3.13
 ```
 
 
