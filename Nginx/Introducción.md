@@ -23,6 +23,8 @@
 * Información sobre el achivo de configuración
 
   https://docs.nginx.com/nginx/admin-guide/basic-functionality/managing-configuration-files/
+  
+  :link: [Video de Traversy Media](https://youtu.be/X3F3El_yvFg)
 
 ## Introducción
 
@@ -135,7 +137,7 @@ sc config w3svc start= disabled
 
 Como dijimos anteriormente el modo en que nginx funciona está determinado en su archivo de configuración `nginx.conf` y dependiendo del sistema de paquetes usado para instalar nginx podrá estar en:
 
-* `/etc/nginx`
+* `/etc/nginx` (este es el caso en Ubuntu)
 * `/usr/local/nginx/conf`
 * `/usr/local/etc/nginx`
 
@@ -263,7 +265,7 @@ Si ahora vamos a `sites-enabled` veremos un **link simbólico**, es decir un pun
 La forma de crear links simbólicos es:
 
 ```
-ln -s /ruta/origen/archivo /ruta/destino/archivo
+ln -s /ruta/origen/archivo /ruta/destino/
 ```
 
 
@@ -423,7 +425,7 @@ Ahora hacemos repetimos todo lo mismo para Docker2 (correr imagen pero usando el
 
 #### Chequear flujo de trabajo en Windows Reverse Proxy
 
-En lugar de manejarnos con `sites-enabled` y `sites-available`, por practicidad para no hacer una estrucutura espcial para Windows editamos en principio el archivo `nginx.conf` ubicado en el directorio `conf`, agregando lo siguiente:
+En lugar de manejarnos con `sites-enabled` y `sites-available`, por practicidad para no hacer una estructura especial para Windows editamos en principio el archivo `nginx.conf` ubicado en el directorio `conf`, agregando lo siguiente:
 
 ```
  server{
