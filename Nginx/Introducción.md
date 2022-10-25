@@ -461,3 +461,61 @@ En el `C:\Windows\System32\drivers\etc` buscamos el archivo `hosts` y con privil
 ```
 181... docker1.jnm.com docker2.jnm.com
 ```
+
+
+
+## Firewall
+
+Supongamos que tenemos una aplicación que trabaja con el puerto 3000. No queremos que el usuario tenga que poner http://mi-sitio-web:3000 sino que queremos que base con que ponga mi-sitio-web. 
+
+En primer lugar lo que haremos será deshabilitar por firewall el acceso mediante el puerto.
+
+
+
+Para verificar el estado
+
+```
+sudo ufw status
+```
+
+
+
+Para habilitar el Firewall
+
+```
+sudo ufw enable
+```
+
+
+
+Para habilitar SSH
+
+```
+sudo ufw allow ssh
+```
+
+
+
+Para habilitar Nginx tanto para HTTP como para HTTPS:
+
+```
+sudo ufw allow 'Nginx Full'
+```
+
+
+
+Si quisieramos habilitar el puerto 3000 y probar que nos vuelve a dejar entrar con http://mi-sitio-web:3000
+
+```
+sudo ufw allow 3000
+```
+
+
+
+```
+sudo ufw deny 3000
+```
+
+
+
+Con `sudo ufw status` vemos el estado del firewall.
