@@ -25,13 +25,7 @@ Grafana Cloud es una alternativa para evitar tener que hacer varios de estos pro
 
 > Basado en la [documentación de una versión anterior](https://grafana.com/docs/grafana/v9.0/setup-grafana/configure-docker/) donde encontramos información sobre configuraciones de la imagen de Docker. 
 
-En la medida que no designemos una ubicación para almacenar la información, todos los datos de Grafana desaparecerán al detener el contenedor, es por eso que es aconsejable contar con un almacenamiento persistente para guardar esa información.
-
-```bash
-docker volume create grafana-storage
-```
-
-
+En la medida que no designemos una ubicación para almacenar la información, todos los datos de Grafana desaparecerán con el contenedor, es por eso que es aconsejable contar con un almacenamiento persistente para guardar esa información.
 
 ```bash
 docker run -d
@@ -41,7 +35,7 @@ docker run -d
 grafana/grafana-oss
 ```
 
-
+Con `docker volume ls` podemos ver que el volumen fue creado exitosamente.
 
 ## Instalar Plugins
 
@@ -57,11 +51,7 @@ Podemos ejecutarlo en el contenedor que está corriendo con `docker exec -it <co
 
 
 
-Como podemos ver en la [documentación](https://grafana.com/docs/grafana/latest/setup-grafana/installation/docker/#install-official-and-community-grafana-plugins) a la hora de instalar plugins: 
-
-
-
-Pass the plugins you want installed to Docker with the `GF_INSTALL_PLUGINS` environment variable as a comma-separated list. This sends each plugin name to `grafana-cli plugins install ${plugin}` and installs them when Grafana starts.
+Como podemos ver en la [documentación](https://grafana.com/docs/grafana/latest/setup-grafana/installation/docker/#install-official-and-community-grafana-plugins) a la hora de instalar plugins debemos usar la variable de entorno `GF_INSTALL_PLUGINS` pasándole los elementos separados por comas. Esto ejecutará para cada plugin el comando `grafana-cli plugins install ${plugin}` y los instalará cuando Grafana inicie.
 
 ```bash
 docker run -d 
@@ -70,8 +60,6 @@ docker run -d
 --name=grafana 
 grafana/grafana-oss
 ```
-
-> **Note:** If you need to specify the version of a plugin, then you can add it to the `GF_INSTALL_PLUGINS` environment variable. Otherwise, the latest is used. For example: `-e "GF_INSTALL_PLUGINS=grafana-clock-panel 1.0.1,grafana-simple-json-datasource 1.3.5"`.
 
 
 
@@ -85,8 +73,6 @@ docker run -d
 --name=grafana
 grafana/grafana-oss
 ```
-
-
 
 
 
@@ -104,45 +90,71 @@ Luego vamos a http://localhost:3000 y nos pedirá el nombre de usuario y contras
 
 
 
+## Crear Dashboard
+
+Supongamos que tenemos en un datasheet con datos de los errores que fueron arrojando nuestros servidores como vemos a continuación:
+
+|       Time       | Server       | Error Code | Path       |
+| :--------------: | ------------ | ---------- | ---------- |
+| 2022-10-05 10:30 | srv-front-01 | 404        | /files.txt |
+| 2022-10-05 10:32 | srv-db-02    | 404        | /.env      |
+
+Queremos obtener un **gráfico de tortas** que muestre la cantidad de errores que ha tenido cada servidor y que al hacer click en cada uno de estas porciones nos muestre un deglose de qué tipo de errores ha tenido.
+
+
+
 ### Agregar data source
 
-Vamos a Configuration :arrow_forward: Add Data Source y elegimos Google Sheets.
+#### Google Sheets
 
-Tendremos que completar el apartado API Key para eso seguimos las siguientes instrucciones que nos aparecen en la misma UI:
+Vamos a **Configuration** :arrow_right:  **Add Data Source** y buscamos **Google Sheets**.
 
-#### Generate an API key
+#### API Key Google
 
-1. Open the [Credentials page](https://console.developers.google.com/apis/credentials) in the Google API Console.
-2. Click **Create Credentials** and then click **API key**.
-3. Copy the key and paste it in the API Key field above. The file contents are encrypted and saved in the Grafana database.
+Tendremos que completar el apartado **API Key** para eso seguimos las siguientes instrucciones que nos aparecen en la misma UI:
 
-
-
-Luego de hacerlo si creamos un nuevo Dashboard y vinculamos un Google Sheet nos mostrará:
-
-```
-googleapi: Error 403: Google Sheets API has not been used in project 842066866158 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/sheets.googleapis.com/overview?project=842066866158
-```
+1. Ir a la [página de  credenciales](https://console.developers.google.com/apis/credentials) en Google API Console.
+2. Hacer click en **Create Credentials** y luego en **API key**.
+3. Copiar la clave y pegarla en el campo API Key, los contenidos serán encriptados y guardados en la base de datos de Grafana.
+3. Presionamos **Save & test** y nos aparecerá **Success**.
 
 
 
-:rotating_light: Si visitamos ese enlace de console.cloud.google.com nos preguntará si queremos habilitar la API de Google Sheets. Sin embargo al aceptar sigue apareciendo el mismo mensaje. **Probar si dejando pasar unos minutos después de cargar la API key este error desaparece solo (sin entrar al enlace).**
+### Nuevo Dashboard
 
-
-
-Luego vamos a **Dashboards**:arrow_forward: **New Dashboard** y a continuación a **Add new Panel** donde veremos que ya nos aparece como data source Google Sheets.
+Luego vamos a **Dashboards**:arrow_right: **New Dashboard** y a continuación a **Add new Panel** donde veremos que ya nos aparece como data source Google Sheets.
 
 * **SpreadsheetID**: colocamos el id de la URL de Google Sheet. 
 
-  Por ejemplo 1TZlZX67Y0s4CvRro_3pCYqRCKuXer81oFp_xcsjPpe8
+  > Por ejemplo 1TZlZX67Y0s4CvRro_3pCYqRCKuXer81oFp_xcsjPpe8
 
   
 
 * **Range**: especificamos las celdas desde y hasta donde queremos trabajar. 
 
-  Por ejemplo: A1:D13
+  > Por ejemplo: A1:D13
 
+> Si luego de hacerlo si creamos un nuevo Dashboard y vinculamos un Google Sheet nos mostrará:
+>
+> ```
+> googleapi: Error 403: Google Sheets API has not been used in project 842066866158 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/sheets.googleapis.com/overview?project=842066866158
+> ```
+>
+> Debemos visitar ese enlace y nos preguntará si queremos habilitar la API de Google Sheets. 
+>
+> :rotating_light: De todos modos probar si dejando pasar unos minutos después de cargar la API key este error desaparece solo (sin entrar al enlace).
 
+* En el desplegable de los distintos tipos de gráficos elegimos Pie Chart
+
+* En el apartado de Transform elegimos las transformaciones que queremos realizar a los datos:
+
+  **Add transformation** :arrow_right: **Group by**
+
+  * Con la variable "Server" elegimos Group By
+
+  * Con la variable "Error Code" elegimos Calculate :arrow_right: Count
+
+  
 
 # Alertas
 
