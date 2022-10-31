@@ -92,14 +92,27 @@ Luego vamos a http://localhost:3000 y nos pedirá el nombre de usuario y contras
 
 ## Crear Dashboard
 
-Supongamos que tenemos en un datasheet con datos de los errores que fueron arrojando nuestros servidores como vemos a continuación:
+Supongamos que tenemos en un datasheet con datos de los errores que fueron arrojando nuestros servidores como vemos a continuación (no es exactamente igual al mostrado en el video pero a los fines didácticos sirve).
 
-|       Time       | Server       | Error Code | Path       |
-| :--------------: | ------------ | ---------- | ---------- |
-| 2022-10-05 10:30 | srv-front-01 | 404        | /files.txt |
-| 2022-10-05 10:32 | srv-db-02    | 404        | /.env      |
+|       Time       |    Server    | Error code |    Path    |
+| :--------------: | :----------: | :--------: | :--------: |
+| 2022-10-05 10:30 | srv-front-01 |    404     | /files.txt |
+| 2022-10-05 10:31 | srv-front-01 |    503     | /files.txt |
+| 2022-10-05 10:32 |  srv-db-02   |    404     |   /.env    |
+| 2022-10-05 10:33 | srv-back-03  |    503     |     /      |
+| 2022-10-05 10:34 | srv-back-03  |    503     |   /.env    |
+| 2022-10-05 10:35 |  srv-db-02   |    404     | /files.txt |
+| 2022-10-05 10:36 | srv-front-02 |    404     | /files.txt |
+| 2022-10-05 10:37 | srv-front-01 |    503     |     /      |
+| 2022-10-05 10:38 |  srv-db-02   |    404     |   /.env    |
+| 2022-10-05 10:39 | srv-back-02  |    503     |     /      |
+| 2022-10-05 10:40 | srv-back-03  |    503     |   /.env    |
+| 2022-10-05 10:41 |  srv-db-02   |    404     | /files.txt |
+| 2022-10-05 10:42 | srv-front-01 |    404     | /files.txt |
 
-Queremos obtener un **gráfico de tortas** que muestre la cantidad de errores que ha tenido cada servidor y que al hacer click en cada uno de estas porciones nos muestre un deglose de qué tipo de errores ha tenido.
+Queremos obtener un **gráfico de tortas** que muestre la cantidad de errores que ha tenido cada servidor 
+
+:warning: En el video se plantea que además al hacer click en cada uno de estas porciones nos muestre un deglose de qué tipo de errores ha tenido para lo cual se utilizan variables pero :rotating_light: **esto no es posible utilizando datos provenientes de google sheets.* *:rotating_light: 
 
 
 
@@ -146,15 +159,69 @@ Luego vamos a **Dashboards**:arrow_right: **New Dashboard** y a continuación a 
 
 * En el desplegable de los distintos tipos de gráficos elegimos Pie Chart
 
+  ![image-20221031112203698](Introducción.assets/image-20221031112203698.png)
+
+
+
+> Además el switch Table View nos permitirá pasar a una vista en modo de tabla.
+
+
+
 * En el apartado de Transform elegimos las transformaciones que queremos realizar a los datos:
 
   **Add transformation** :arrow_right: **Group by**
 
   * Con la variable "Server" elegimos Group By
-
   * Con la variable "Error Code" elegimos Calculate :arrow_right: Count
 
-  
+
+<img src="Introducción.assets/image-20221031112438692.png" alt="image-20221031112438692" style="zoom:67%;" />
+
+
+
+* Por último dentro de la configuración del Pie chart en Show elegimos **All values**.
+
+<img src="Introducción.assets/image-20221031112329637.png" alt="image-20221031112329637" style="zoom: 67%;" />
+
+
+
+Con algunos ajustes de las leyendas nos quedará:
+
+<img src="Introducción.assets/image-20221031113725492.png" alt="image-20221031113725492" style="zoom:50%;" />
+
+
+
+
+
+### Agregar Variables
+
+Ahora queremos que al hacer click en una zona del gráfico nos muestre el detalle de en qué consistieron esos errores. Para eso tendremos que hacer uso de una variable.
+
+En primer hacemos click en **Dashboard Settings** (engranaje de la imagen de abajo) :arrow_right: **Variables** y luego **New variable**.
+
+![image-20221031114633843](Introducción.assets/image-20221031114633843.png)
+
+En cuanto al **Type** elegimos **Text box** pero podríamos elegir por ejemplo query y determinar que sean todos los valores DISTINCT de nombre de servidor.
+
+<img src="Introducción.assets/image-20221031114321788.png" alt="image-20221031114321788" style="zoom: 67%;" />
+
+
+
+Ahora en la parte superior veremos el valor de la variable:
+
+<img src="Introducción.assets/image-20221031114405783.png" alt="image-20221031114405783" style="zoom:67%;" />
+
+
+
+### Agregar nuevo panel
+
+![image-20221031114609387](Introducción.assets/image-20221031114609387.png)
+
+
+
+Luego configuramos el mismo Spreadsheet ID, Range
+
+A continuación configuramos la siguiente transformación:
 
 # Alertas
 
