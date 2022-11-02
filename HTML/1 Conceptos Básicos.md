@@ -1,7 +1,7 @@
 # Introducción
-Tim Berners Lee fue el creador de HTML en 1991 y fundador de W3C (*World Wide Web Consortium*) en 1994 que supervisa el desarrollo continuo de la web.
+Tim Berners Lee fue el creador de HTML en 1991 y fundador de **W3C** (*World Wide Web Consortium*) en 1994 que supervisa el desarrollo continuo de la web.
 
-WHATWG (*web hypertext application technology working group*) fue fundado en 2004 a raíz de un desacuerdo en un meeting de W3C al recibir el anuncio de la decisión de centrarse en XHTML como evolución del HTML. Fue formado por organizaciones como Apple, la Fundación Mozilla y Opera Software.
+**WHATWG** (*web hypertext application technology working group*) fue fundado en 2004 a raíz de un desacuerdo en un meeting de W3C al recibir el anuncio de la decisión de centrarse en XHTML como evolución del HTML. Fue formado por organizaciones como Apple, la Fundación Mozilla y Opera Software.
 
 La W3C y WHATWG  se encargan de fijar standards de lenguajes y trabajaron de manera conjunta en HTML5. Seguir estos standards nos permitirá crear sitios profesionales y accesibles.
 
