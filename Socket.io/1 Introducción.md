@@ -1,26 +1,38 @@
-# WebSockets
+# Socket.io
 
-> Basado en el [video](https://www.youtube.com/watch?v=jD7FnbI76Hg) y el [repositorio](https://github.com/bradtraversy/chatcord/blob/master/public/js/main.js) de Traversy Media.
+> :link: Basado en el [video](https://www.youtube.com/watch?v=jD7FnbI76Hg) y el [repositorio](https://github.com/bradtraversy/chatcord/blob/master/public/js/main.js) de Traversy Media.
 
 Los websockets son un modo de comunicación entre servidor y cliente. Ofrecen **comunicación bidireccional** y permiten un flujo de datos en **tiempo real**. La transferencia de datos ocurre sin usar ningún tipo de requests.
 
 
 
+## Introducción
+
 Vamos a implementar un chat en tiempo real con salas privadas.
 
+**:red_circle:Servidor**
+
+Express.js
 
 
-Utilizamos la biblioteca socket.io tanto en el frontend como en el backend
 
-```
-npm install socket.io
-```
+:red_circle:**Cliente**
+
+ Vanilla JS
+
+
+
+# Project Setup
 
 
 
 ## Lado Servidor
 
 Creamos un servidor express y queremos servir los archivos ubicados dentro de la carpeta `public` de modo que cuando desde el navegador entremos en `localhost:3000` veremos el contenido de `index.html`.
+
+```
+npm install express socket.io
+```
 
 En este caso queremos enviar un mensaje ante distintos eventos generados por el cliente `joinRoom`, `chatMessage`, `disconnect`. El concepto de room nos permite unirnos `socket.join(user.room)` y enviar mensajes a todos los clientes que formen parte de esa sala.
 
