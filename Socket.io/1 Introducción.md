@@ -28,7 +28,7 @@ En este caso queremos enviar un mensaje ante distintos eventos generados por el 
 - `io.emit` envía un mensaje a todos los clientes incluyendo al emisor
 - `socket.broadcast.emit` envía un mensaje a todos los clientes excepto el emisor
 
-```
+```jsx
 const path = require('path');
 const http = require('http');
 const express = require('express');
@@ -107,7 +107,7 @@ server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 Luego en el cliente por ejemplo en `index.html` importamos el siguiente script
 
-```
+```jsx
 <script src="/socket.io/socket.io.js"></script>
 ```
 
@@ -119,7 +119,7 @@ Con `socket.emit('joinRoom', { username, room });` emitimos un mensaje de tipo `
 
 Con `socket.on('message', (message) => {});` obtenemos un mensaje `message` del servidor.
 
-```
+```jsx
 
 const chatForm = document.getElementById('chat-form');
 const chatMessages = document.querySelector('.chat-messages');
