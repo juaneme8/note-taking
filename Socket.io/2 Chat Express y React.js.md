@@ -522,15 +522,61 @@ Queremos presentar los mensajes en pantalla, para eso vamos a trabajar con una v
 
 La idea será actualizar esto tanto cuando el usuario hace submit de un nuevo mensaje como cuando recibimos un mensaje de otro cliente. Si bien cuando se trate de nuevos mensajes podremos poner `from: socket.id` cuando sea mensajes que recibimos debemos conocer el id.  
 
+> Notar que los nuevos mensajes son agregados al comienzo del array `messages`.
+>
+> :warning: En el array de dependencias tenemos que agregar `messages`.
+
+```jsx
+import io from 'socket.io-client'
+import { useState } from 'react'
+import { useEffect } from 'react'
+
+const socket = io('http://localhost:4000')
 
 
-:rotating_light: 
+function App() {
+  const [message, setMessage] = useState('')
+  const [messages, setMessages] = useState([])
 
-# PENDIENTE FRONT
+  useEffect(() => {
+    socket.on('message', (data) => {
+      setMessages([data, ...messages])
+    })
 
+    return () => {
+      socket.off('message')
+    };
+  }, [messages])
 
+  const handleSubmit = e => {
+    e.preventDefault();
+    socket.emit('message', message)
+    setMessages([{ from: "me", body: message }, ...messages])
+    setMessage('')
+  }
 
-Para saber quién ha enviado el mensaje debemos modificar el valor entregado por el servidor de modo tal que agregue este dato.
+  return (
+    <div>
+      <h1>Chat</h1>
+      <form onSubmit={handleSubmit}>
+        <input type="text" onChange={e => setMessage(e.target.value)} value={message} />
+        <button>Enviar</button>
+      </form>
+      {messages.map(({ from, body }, index) => (
+        <div key={index}>
+          <span>{from}:</span>
+          <span>{body}</span>
+        </div>
+      ))}
+    </div>
+
+  )
+}
+
+export default App
+```
+
+Desde el cliente emitimos el mensaje como un campo de texto, pero como después vamos a querer saber quién ha enviado el mensaje al hacer el broadcast agregamos el id del socket emisor y enviamos un objeto.
 
 ```jsx
 io.on('connection', (socket) => {
@@ -543,3 +589,6 @@ io.on('connection', (socket) => {
 })
 ```
 
+
+
+> Hasta minuto 42 (falta Tailwind y Despligue en Heroku)
