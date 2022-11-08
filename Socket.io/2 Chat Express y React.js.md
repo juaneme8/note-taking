@@ -227,7 +227,7 @@ En `App.js`
 Con `socket` vamos a escuchar lo que nos manda el backend y enviarle también datos.
 
 ```jsx
-import {io} from 'socket.io-client'
+import io from 'socket.io-client'
 
 const socket = io('http://localhost:4000')
 ```
@@ -315,7 +315,7 @@ Vamos a crear un formulario con un campo de texto de modo que al presionar un bo
 
 ```jsx
 import { useState } from 'react'
-import {io} from 'socket.io-client'
+import io from 'socket.io-client'
 
 const socket = io('http://localhost:4000')
 
