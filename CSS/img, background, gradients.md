@@ -1,13 +1,13 @@
 # Imágenes:
 ## Centrado de Imágenes
-Como las imágenes se comportan como elementos de línea bloque para centrarlos una forma es convertirlos en elementos de bloque y luego `margin: auto`.
+Como las imágenes se comportan como elementos de línea bloque para centrarlos una forma es convertirlos en elementos de bloque con `display:block;` y luego `margin: auto`.
 
 ## Reseteos para Imágenes
 ```css
 img{
+  display:block;
 	max-width: 100%;
 	height: auto; /*cuando están dentro de un div c/ altura definida*/
-	display:block;
 }
 ```
 

@@ -104,6 +104,7 @@ Notar que no sólo trabajo con `:hover` sino también con `:focus` esto hará qu
 ```
 
 # Tipografía Responsive
+
 A la hora de establecer el tamaño de letra, primero ponemos `font-size: 4rem` para que nos sirva como default para aquellos navegadores que no soportan `clamp()` y luego lo establecimos utilizando esta función con `font-size: clamp(3rem, 5vw + 1rem, 4.5rem);` Notar que como segundo parámetro pusimos `5vw + 1rem` como indica la documentación sin el uso de `calc()`, pero en caso de utilizar LiveSass puede que nos tire error y haya que agregarlo.
 ```css
 .primary-title {
