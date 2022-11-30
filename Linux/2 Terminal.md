@@ -1671,6 +1671,16 @@ Decimos que es más interactivo por todos los datos que nos solicita y como con 
 
 
 
+### Comando `getent`
+
+El comando `getent` nos permite obtener un listado de todos los usuarios que forman parte de un grupo.
+
+```
+getent group sudo
+```
+
+
+
 ## Manejo de Grupos
 
 El uso de grupos posibilita que todos los miembros de dichos grupos tengan los mismos permisos.
