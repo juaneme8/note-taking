@@ -8,7 +8,7 @@ El propósito es conectarnos a un servidor mediante SSH y ejecutar en el algún 
 
 Utilizaremos [esta acción](https://github.com/marketplace/actions/ssh-remote-commands), en la propia documentación de la acción nos encontramos con un snippet de ejemplo.
 
-> Con la última versión disponible al momento de escribir estas notas, obteníamos múltiples líneas con mensajes de salida (err:, out:). Para solucionarlo debemos cambiar lo siguiente respecto a lo indicado en la documentación: `uses: appleboy/ssh-action@dce9d565de8d876c11d93fa4fe677c0285a66d78`
+> Con la última versión disponible al momento de escribir estas notas v0.1.15, obteníamos múltiples líneas con mensajes de salida (err:, out:). Para solucionarlo debemos cambiar lo siguiente respecto a lo indicado en la documentación: `uses: appleboy/ssh-action@dce9d565de8d876c11d93fa4fe677c0285a66d78` como se sugiere en el [issue](https://github.com/appleboy/ssh-action/issues/174)
 
 ```yaml
 name: remote ssh command
