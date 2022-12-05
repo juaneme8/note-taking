@@ -52,3 +52,126 @@ Es el encargado de recolectar toda la información de las métricas y almacenarl
 ### grafana
 
 Herramienta que utilizaremos para visualizar los datos monitoreados.
+
+
+
+## `docker-compose.yml`
+
+```
+version: "3.7"
+
+volumes:
+  grafana-data:
+  prometheus-data:    
+
+services:
+  grafana:
+    image: grafana/grafana:8.0.6
+    container_name: grafana
+    restart: unless-stopped
+    volumes:
+    - grafana-data:/var/lib/grafana
+    ports:
+    - 3000:3000
+
+  prometheus:
+    image: prom/prometheus:v2.28.1
+    container_name: prometheus
+    restart: unless-stopped
+    volumes:
+    - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    - prometheus-data:/prometheus
+    ports:
+    - 9090:9090
+    command:
+    - '--config.file=/etc/prometheus/prometheus.yml'
+    - '--storage.tsdb.path=/prometheus'
+    - '--storage.tsdb.retention.time=1y'
+    - '--web.enable-lifecycle'
+
+  node_exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    container_name: node_exporter
+    restart: unless-stopped
+    ports:
+    - 9100:9100
+    ###### linux
+    # command:
+    # - '--path.rootfs=/host'
+    # pid: host
+    # volumes:
+    # - '/:/host:ro,rslave'
+    ###### windows
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+    command: 
+      - '--path.procfs=/host/proc' 
+      - '--path.sysfs=/host/sys'
+      - --collector.filesystem.ignored-mount-points
+      - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
+        
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    restart: unless-stopped
+    expose:
+    - 8080
+    volumes:
+    - /:/rootfs:ro
+    - /var/run:/var/run:rw
+    - /sys:/sys:ro
+    - /var/lib/docker/:/var/lib/docker:ro
+    
+  app_example:
+    image: quay.io/brancz/prometheus-example-app:v0.3.0
+    container_name: app_example
+    restart: unless-stopped
+    ports:
+    - 80:8080
+```
+
+
+
+## `prometheus.yml`
+
+```
+global:
+  scrape_interval:     15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+    - targets: ['prometheus:9090']
+    
+  - job_name: 'cadvisor'
+    static_configs:
+    - targets: ['cadvisor:8080']
+
+  - job_name: 'node_exporter'
+    static_configs:
+    - targets: ['node_exporter:9100']    
+
+  - job_name: 'app_example'
+    static_configs:
+    - targets: ['app_example:8080'] 
+    #metrics_path: '/metrics'
+    #metrics_path: '/prometheus'
+```
+
+
+
+Descargamos las imagenes
+
+```
+docker-compose pull
+```
+
+Levantamos los servicios con:
+
+```
+docker-compose up -d
+```
+
+Luego ingresamos a localhost y veremos: **Hello from example application.**
