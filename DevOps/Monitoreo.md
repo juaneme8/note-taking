@@ -29,25 +29,17 @@ Vamos a centralizar todo esto en Grafana. Tendremos un servidor central que usam
 
 Nos permite obtener las métricas del consumo de recursos (ram, cpu, disco) a nivel servidor. Herramienta creada por los creadores de Prometheus.
 
-
-
 ### cAdvisor
 
 Nos permite obtener las métricas del consumo de recursos (ram, cpu, disco, networking) a nivel contenedores. Herramienta creada por Google.
-
-
 
 ### app_example
 
 Aplicación de ejemplo con el endpoint de Prometheus activado. Importando una librería de modo que dentro de la aplicación exista un endpoint que devuelve info.
 
-
-
 ### prometheus
 
 Es el encargado de recolectar toda la información de las métricas y almacenarla en la base de datos. Desde Prometheus me conecto a los otros tres contenedores que expondrán un endpoint en el cual publicarán sus métricas y almacenamos ese diferencial.
-
-
 
 ### grafana
 
@@ -176,4 +168,39 @@ docker-compose up -d
 
 Con `docker ps` o con `docker-compose ps` (desde el directorio donde tenemos el `docker-compose.yml`) podremos ver los contenedores corriendo.
 
-Luego ingresamos a localhost y veremos: **Hello from example application.**
+* En http://localhost y veremos: **Hello from example application.**
+
+* En http://localhost/metrics y veremos unas métricas de la aplicación.
+
+* En http://localhost:9090/targets veremos todos los jobs que está monitoreando Prometheus.
+
+* En http://localhost:9100/metrics veremos las métricas de node_exporter.
+
+* En http://localhost:3000/ accedemos a Grafana y vamos a Configuration -> Datasources. Add data source y elegimos Prometheus. En la URL podemos poner simplemente **prometheus:9090** por estar dentro del mismo compose lo resuelve con el DNS interno de Docker. Presionamos por último **Save & test**. Luego vamos a **Explore** y hacemos click en **Metrics browser**.
+
+  Aparecerá un desplegable **1. Select a metric** con todas las métricas disponibles.
+
+  En el panel **2. Select labels to search in** podremos ingresar "job" y luego nos filtrará las métricas de esa tarea.
+
+  Luego elegir de elegir la deseada hacemos click en **Use query**.
+
+
+
+## Dashboards 
+
+En [grafana.com/grafana/dashboards](https://grafana.com/grafana/dashboards/) encontramos Dashboards creados por la comunidad si escribimos por ejemplo "node exporter" nos aparecen algunos como:
+
+**Para Node Exporter:**
+
+* 1 Node Exporter for Prometheus Dashboard EN v20201010.
+*  Node Exporter Full.
+
+**Para cAdvisor:**
+
+* Docker-cAdvisor.
+
+  
+
+Veremos que nos ofrece el id de esos dashboard y los copiamos para luego importarlos. 
+
+Luego haciendo click en el signo + luego en **Import** veremos un input **Import via grafana.com** donde pegamos ese id, nos cargará toda la info y nos pedirá que indiquemos qué Prometheus estamos utilizando (elegimos nuestro datasource).
