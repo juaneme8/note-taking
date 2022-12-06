@@ -174,4 +174,6 @@ Levantamos los servicios con:
 docker-compose up -d
 ```
 
+Con `docker ps` o con `docker-compose ps` (desde el directorio donde tenemos el `docker-compose.yml`) podremos ver los contenedores corriendo.
+
 Luego ingresamos a localhost y veremos: **Hello from example application.**
