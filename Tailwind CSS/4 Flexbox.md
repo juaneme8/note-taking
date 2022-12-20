@@ -1,7 +1,7 @@
 # Flexbox
 https://tailwindcss.com/docs/flex
 
-# Alineación en Main Axis
+### Alineación en Main Axis
 Supongamos que queremos utilizar flexbox de modo tal que botones que digan `Log in` y `Sign up` estén ubicados a la derecha de la página uno al lado del otro  lo hacemos con `flex` y `justify-end`:
 ```html
 <div>
@@ -17,7 +17,7 @@ Podemos hacerlo de este modo:
 </div>
 ```
 
-# Alineación en Cross Axis
+### Alineación en Cross Axis
 Supongamos ahora que tenemos tres cajas flexibles y queremos que se aliñen en el centro respecto del eje y, lo hacemos con `flex` y `items-center`
 ```html
 <div class="flex items-center">
