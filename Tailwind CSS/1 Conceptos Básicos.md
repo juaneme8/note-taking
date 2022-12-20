@@ -21,16 +21,7 @@ Implementaremos la configuración necesaria para Tailwind en un proyecto de Vain
 
 En la [documentación](https://tailwindcss.com/docs/installation) vemos las distintas formas de instalación que ofrece Tailwind. Una de ellas es mediante Tailwind CLI que será ideal para casos en que trabajemos con Vanilla JS pero podremos encontrar apartados para cada Framework (Tailwind, Vite, etc)
 
-A continuación queremos utilizar Tailwind para procesarlo y entregar un archivo `public/css/styles.css` en Vanilla CSS  que será referenciado por el html. 
-
-Creamos un script con el comando indicado para iniciar el buildeo del CSS:
-
-```json
-"scripts": {
-		"build": "tailwindcss -i ./src/input.css -o ./dist/output.css --watch"
-	},
-```
-Luego al ejecutar `npm run build` logramos que Tailwind procese el archivo que acabamos de crear, que da como resultado el archivo de salida en `public` con todas las clases de utilidades que luego podemos utilizar en el HTML.
+> En la última parte veremos que con el comando `npx tailwindcss -i ./src/input.css -o ./dist/output.css --watch` con el cual realizamos el buildeo, es aconsejable incorporar esto al`package.json` como un script llamado `build` que luego correríamos como `npm run build`.
 
 ### Live Server
 Instalamos el paquete **LiveServer** con el comando:
@@ -47,7 +38,7 @@ live-server public
 
 ### Conclusión Personal
 
-Lo ideal es repasar cada uno de los conceptos de CSS y luego trabajar con la documación en mano ya que a excepción de algunos temas que se verán (como ser `@apply`), tailwind no aporta muchas cosas nuevas sino que nos da clases para lograr lo mismo que haríamos en Vainilla CSS
+Lo ideal es repasar cada uno de los conceptos de CSS y luego trabajar con la documación en mano ya que a excepción de algunos temas que se verán (como ser `@apply`), Tailwind no aporta muchas cosas nuevas sino que nos da clases para lograr lo mismo que haríamos en Vainilla CSS
 
 
 
