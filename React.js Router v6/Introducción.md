@@ -1,10 +1,26 @@
 ## React Router v6
 
-> :link: Basado en el [video de freeCodeCamp](https://youtu.be/59IXY5IDrBA).
+:link: Basado en el [video de freeCodeCamp](https://youtu.be/59IXY5IDrBA).
 
-React Router es una biblioteca para crear SPA con las cuales a diferencia de las aplicaciones tradicionales multipágina no haremos una solicitud al servidor para cada página. En cambio, tendremos un único div con todo  el código y esto traerá como consecuencia una navegación instantánea.
+:link: Basado en la [playlist](https://www.youtube.com/watch?v=OMQ2QARHPo0&list=PL4cUxeGkcC9iVKmtNuCeIswnQ97in2GGf&ab_channel=TheNetNinja) de The Net Ninja.
 
-Como React no tiene una solución de ruteo incorporada utilizaremos esta librería que de hecho es la más popular para tal fin.
+## Introducción
+
+React Router es una biblioteca para crear SPA con las cuales a diferencia de las aplicaciones tradicionales multipágina no haremos una solicitud al servidor para cada página.
+
+Cuando hacemos sitios utilizando React normalmente estaremos creando SPAs (single page applications). Como consecuencia de esto, cuando navegamos a la aplicación, el servidor nos devolverá el HTML y JavaScript necesario para mostrar los distintos componentes de la página. Luego cuando intentamos navegar hacia otra sección, esta petición no llegará al servidor sino que será manejada mediante el navegador y es aquí donde podemos utilizar React Router. 
+
+Tendremos un único div con todo  el código y esto traerá como consecuencia una navegación instantánea.
+
+Como React no tiene una solución de ruteo incorporada por defecto utilizaremos esta librería que es la más popular para tal fin.
+
+![image-20230105075625371](Introducción.assets/image-20230105075625371.png)
+
+Cuando hacemos click para dirigirnos a una página diferente del sitio, React Router intercepta esta petición impidiendo que llegue al servidor y cambia el contenido dependiendo de qué fue lo que solicitamos.
+
+
+
+
 
 
 
