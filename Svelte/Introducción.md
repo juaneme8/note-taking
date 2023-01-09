@@ -790,71 +790,53 @@ En ocasiones vamos a querer iterar todos los elementos de una lista y mostrarlos
 
 # Fetching de Datos
 
-Para el fetching de datos utilizaremos [OMDb API  - The Open Movie Database](http://www.omdbapi.com/) que debe usarse de la siguiente forma `http://www.omdbapi.com/?apikey=[yourkey]&s=` seguido del título de la película que queremos buscar.
+La mayoría de las aplicaciones deben lidiar con datos asincrónicos en algún punto. Svelte nos permite incorporar el await de promesas directamente en el marcado.
 
-Queremos que cada vez que se ingresa un caracter en el input se actualice el valor del estado `input` y esto lo hacemos mediante el evento `on:input`. Además queremos que la solicitud a la API sólo se realice cuando la cantidad de caracteres ingresados sea mayor a 2.
+Supongamos que tenemos una aplicación que cada vez que hacemos click en un botón se dirige a https://svelte.dev/tutorial/random-number a fin de obtener un número random.
 
 ```vue
 <script>
-  let value = ''
-  let response = []
-  
-  const handleInput = (event) => value = event.target.value
-  
-  $: if (value.length > 2) {
-    fetch(`https://www.omdbapi.com/?s=${value}&apikey=422350ff`)
-      .then(res => res.json())
-      .then(apiResponse => {
-        response = apiResponse.Search || []
-      })
-  }
-    
+	async function getRandomNumber() {
+		const res = await fetch(
+			`https://svelte.dev/tutorial/random-number`
+		);
+		const text = await res.text();
+
+		if (res.ok) {
+			return text;
+		} else {
+			throw new Error(text);
+		}
+	}
+
+	let promise = getRandomNumber();
+
+	function handleClick() {
+		promise = getRandomNumber();
+	}
 </script>
 
-<input value={value} on:input={handleInput} />
+<button on:click={handleClick}> generate random number </button>
+
+{#await promise}
+	<p>...waiting</p>
+{:then number}
+	<p>The number is {number}</p>
+{:catch error}
+	<p style="color: red">{error.message}</p>
+{/await}
+
 ```
 
-> Hemos colocado `apiResponse.Search || []` debido a que en ocasiones la API no devuelve el campo `Search` por ejemplos si no encontró ninguna película.
 
 
-
-## `{#await}`
-
-Lo implementado anteriormente usando promesas puede reemplazarse haciendo uso del `{#await}`.
+Si sabemos que la promesa no puede ser rechazada, podemos omitir el bloque `catch` . También podemos omitir el primer bloque si no queremos mostrar nada hasta que se resuelva la promesa.
 
 ```vue
-</script>
-$: if (value.length > 2) {
-	response = fetch(`https://www.omdbapi.com/?s=${value}&apikey=422350ff`)
-	.then(res => !res.ok() && new Error('Something bad happened with the fetching of movies'))
-	.then(res => res.json())
-	.then(apiResponse => {
-		return apiResponse.Search || []
-	})
-}
-</script>
-
-{#await response}
-  <strong>Loading...</strong>
-{:then movies}
-  {#each movies as {Title, Poster, Year}, index}
-    <Movie
-      index={index}
-      title={Title}
-      poster={Poster}
-      year={Year}
-    />
-  {:else}
-    <strong>No hay resultados</strong>
-  {/each}
-{:catch error}
-  <p>❌ There has been an error</p>
+{#await promise then number}
+	<p>The number is {number}</p>
 {/await}
 ```
-
-> Notar que en este caso en `response` en lugar de asignarle el resltado, guardamos la promesa (notar el agregado del `return`) y con `await` esperamos a que se complete y mientras tanto mostramos el **Loading...** sin la necesidad de manejar un estado para tal fin.
->
-> En caso de que hubiera un error en la API o en la API Key, con `!res.ok()` revisamos que el status code devuelto no sea de 200 o similar y en ese caso tiramos un error que luego con el bloque `{:catch}` mostraremos en pantalla.
 
 
 
