@@ -1220,6 +1220,27 @@ const handleSubmit = (e) => {
 
 
 
+## `on:mousemove`
+
+Queremos crear una aplicación que al pasar el mouse por encima de un div nos diga sus coordenadas:
+
+```vue
+<script>
+	let m = { x: 0, y: 0 };
+
+	function handleMousemove(e) {
+		m.x = e.clientX;
+		m.y = e.clientY;
+	}
+</script>
+
+<div on:mousemove={handleMousemove}>
+	The mouse position is {m.x} x {m.y}
+</div>
+```
+
+
+
 # Event Forwading 
 
 Cuando queremos propagar hacia arriba un evento, es decir desde desde el componente hijo hacia el padre debemos hacer uso de lo que se conoce como *event forwading*.
