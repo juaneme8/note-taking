@@ -792,6 +792,10 @@ En ocasiones vamos a querer iterar todos los elementos de una lista y mostrarlos
 
 La mayoría de las aplicaciones deben lidiar con datos asincrónicos en algún punto. Svelte nos permite incorporar el await de promesas directamente en el marcado.
 
+
+
+## Bloque `#await`
+
 Supongamos que tenemos una aplicación que cada vez que hacemos click en un botón se dirige a https://svelte.dev/tutorial/random-number a fin de obtener un número random.
 
 ```vue
@@ -1080,7 +1084,9 @@ La forma de trabajar con eventos en Svelte es colocando `on:` seguido del nombre
 
 
 
-## `on:click`
+## Tipos de Eventos
+
+### `on:click`
 
 Si queremos tener un contador que al hacer click en un botón aumente su valor, "we need to wire up an event handler" que en este caso es handle
 
@@ -1136,7 +1142,7 @@ También podemos hacerlo mediante una función aparte:
 
 
 
-## `on:input`
+### `on:input`
 ```vue
 <script>
   let text = ''
@@ -1151,7 +1157,7 @@ También podemos hacerlo mediante una función aparte:
 
 
 
-## `on:change`
+### `on:change`
 
 ```vue
 <script>
@@ -1186,7 +1192,7 @@ También podemos hacerlo mediante una función aparte:
 
 
 
-## `on:submit`
+### `on:submit`
 
 ```vue
 <script>
@@ -1220,7 +1226,7 @@ const handleSubmit = (e) => {
 
 
 
-## `on:mousemove`
+### `on:mousemove`
 
 Queremos crear una aplicación que al pasar el mouse por encima de un div nos diga sus coordenadas:
 
@@ -1241,13 +1247,158 @@ Queremos crear una aplicación que al pasar el mouse por encima de un div nos di
 
 
 
+## Inline Handlers
+
+Es posible realizar lo mismo que vimos anteriormente pero utilizando handlers en línea.
+
+```jsx
+<div on:mousemove={e => m = {x : event.clientX,y : event.clientY}}>
+	The mouse position is {m.x} x {m.y}
+</div>
+```
+
+En este caso retornamos un objeto `m` con las propiedades deseadas y luego lo usamos en el marcado.
+
+:thumbsup: A diferencia de lo que ocurre en algunos frameworks donde se recomienda evitarlos por razones de performance en particular dentro de loops, esto no aplica para Svelte.
+
+
+
+# Event Modifiers
+
+Los *event modifiers* como su nombre lo indica son modificadores que agregamos al final de los eventos, por ejemplo donde tenemos `on:click` usando un modificador podríamos pasar a tener `on:click|preventDefault`.
+
+
+
+## Tipos de modificadores
+
+Existen distintos tipos de modificadores y los mas comunes son: `once`, `preventDefault` y `self`. Además es posible encadenar modificadores.
+
+### `once` 
+
+El modificador de eventos `once` nos permite aseguramos que el evento sólo se dispare una vez, eliminando el handler luego de que se ejecuta por primera vez.
+
+Supongamos que queremos contar con un botón que al presionarlo muestre una alerta y sólo lo haga en una oportunidad:
+
+```jsx
+<script>
+	function handleClick() {
+		alert('clicked');
+	}
+</script>
+
+<button on:click={handleClick}> Click me </button>
+```
+
+
+
+### `preventDefault`
+
+`preventDefault`  llama a `e.preventDefault()` antes de ejecutar el handler es decir que nos permite impedir la acción por default al hacer submit de un formulario que ocasionaría la recarga de la página.
+
+Cuando trabajamos con formularios en lugar de poner  `<form on:submit={handleSubmit}>` y luego en `handleSubmit` evitar la acción default con `e.preventDefault()` podemos usar un *event modifier*. De esta forma el código nos quedaría `<form on:submit|preventDefault={handleSubmit}>` y no habría que realizar nada en `handleSubmit`.
+
+```jsx
+<script>
+const handleSubmit = () => {
+    if(text.trim().length > min) {
+      const newFeedback = {
+        id: uuidv4(),
+        text,
+        rating: +rating
+      }
+      
+      text = ''
+    }
+  }
+</script>
+
+
+<form on:submit|preventDefault={handleSubmit}>
+
+</form>
+```
+
+
+
+### `self`
+
+El modificador `self` hace que el handler solo se ejecute si el elemento clickeado (`event.target`) es el propio elemento (y no uno de sus hijos).
+
+Un ejemplo de uso sería si tenemos un modal que consiste en el `backdrop` (la parte de la pantalla que se pone en gris) y por encima de esto tenemos un div con el contenido del modal en sí.
+
+```vue
+<script>
+	function handleClick() {
+		alert('Cierro Modal')
+	}
+</script>
+
+<div class="backdrop" on:click={handleClick}>
+	<div class="modal">
+		
+	</div>
+</div>
+```
+
+Queremos que al hacer click en la parte gris se cierre el modal. Sin embargo, como lo hemos escrito hasta ahora el modal se cerrará aun si hacemos click dentro del contenido del mismo (debido a que aunque hago click en el div interno se propagará el evento hacia afuera).
+
+Para solucionarlo:
+
+```vue
+<script>
+	function handleClick() {
+		alert('Cierro Modal')
+	}
+</script>
+
+<div class="backdrop" on:click|self={handleClick}>
+	<div class="modal">
+		
+	</div>
+</div>
+```
+
+
+
+### `stopPropagation`
+
+El modificador `stopPropagation` llama a `e.stopPropagation()` impidiendo que el evento alcance al siguiente elemento.
+
+### `passive`
+
+El modificador `passive` mejora la performance al scrollear con eventos de touch o wheel. Svelte lo agregará automáticamente cuando sea conveniente.
+
+## `nonpassive`
+
+El modificador `nonpassive` setea explícitamente `passive: false`
+
+### `capture`
+
+El modificador `capture` dispara el handler en la *capture phase* (desde el menos anidado propagándose hacia abajo) en lugar de la *bubbling phase* (desde el mas anidado hacia arriba)
+
+### `trusted`
+
+El modificador `trusted` sólo dispara el handler si `event.isTrusted` es `true` (por ejemplo si fue disparado por una acción de un usuario).
+
+
+
+## Encadenar modificadores
+
+Es posible encadenar modificadores de eventos:
+
+```jsx
+on:click|once|capture={...}
+```
+
+
+
 # Event Forwading 
 
 Cuando queremos propagar hacia arriba un evento, es decir desde desde el componente hijo hacia el padre debemos hacer uso de lo que se conoce como *event forwading*.
 
 Un ejemplo típico de uso de event forwading es cuando queremos mostrar y ocultar un modal. Por ejemplo si tenemos un componente padre que llama a un componente hijo `Modal`. El padre tiene un botón para mostrar el modal y el hijo debe ocultarlo al presionar en cualquier parte de la pantalla.
 
-Si la directiva `on:` es usada sin un valor, como por ejemplo `on:click` se producirá la propagación de ese evento hacia arriba en el árbol de componentes, lo que se conoce como *event forwading*. Luego será el `Modal` quien emitirá este evento por lo que el consumidor del componente podrá escucharlo `<Modal on:click={toggleModal}/>`
+Si la directiva `on:` es usada sin un valor, como por ejemplo `on:click` (y no `on:click={handle...}`) se producirá la propagación de ese evento hacia arriba en el árbol de componentes, lo que se conoce como *event forwading*. Luego será el `Modal` quien emitirá este evento por lo que el consumidor del componente podrá escucharlo `<Modal on:click={toggleModal}/>`
 
 
 
@@ -1293,84 +1444,117 @@ Esto será útil en la medida que no tengamos que pasar datos del hijo hacia el 
 
 
 
-# Event Modifiers
+# Components Events  / Dispatch Custom Event
 
-Los *event modifiers* como su nombre lo indica son modificadores que agregamos al final de los eventos, por ejemplo donde tenemos `on:click` usando un modificador podríamos pasar a tener `on:click|preventDefault`.
+Los componentes también son capaces de emitir eventos, para hacerlo deben contar con un event dispatcher.
 
-Existen distintos tipos de modificadores y los mas comunes son: `once`, `preventDefault` y `self`. Además es posible encadenar modificadores.
+## Ejemplo 1
 
-## `once` 
+Suponemos un caso en el que tenemos un componente `Inner` con un botón que al presionarlo evite un evento y será recibido por su padre `App`.
 
-El modificador de eventos `once` nos permite aseguramos que el evento sólo se dispare una vez.
-
-
-
-## `preventDefault`
-
-`preventDefault` nos permite impedir la acción por default de la misma manera que lo hacemos con `e.preventDefault()`.
-
-Cuando trabajamos con formularios en lugar de poner  `<form on:submit={handleSubmit}>` y luego en `handleSubmit` evitar la acción default con `e.preventDefault()` podemos usar un *event modifier*. De esta forma el código nos quedaría `<form on:submit|preventDefault={handleSubmit}>` y no habría que realizar nada en `handleSubmit`.
-
-```jsx
-<script>
-const handleSubmit = () => {
-    if(text.trim().length > min) {
-      const newFeedback = {
-        id: uuidv4(),
-        text,
-        rating: +rating
-      }
-      
-      text = ''
-    }
-  }
-</script>
-
-
-<form on:submit|preventDefault={handleSubmit}>
-
-</form>
-```
-
-
-
-## `self`
-
-El modificador `self` hace que el evento sólo se dispare si el elemento clickeado es el target propiamente (y no uno de sus hijos).
-
-Un ejemplo de uso sería si tenemos un modal que consiste en el `backdrop` (la parte de la pantalla que se pone en gris) y por encima de esto tenemos un div con el contenido del modal en sí.
+En `inner.svelte`
 
 ```vue
 <script>
-	function handleClick() {
-		alert('Cierro Modal')
-	}
+ import {createEventDispatcher} from 'svelte'
+
+ const dispatch = createEventDispatcher();
+
+ function sayHello(){
+	 dispatch('message', {
+		 text: 'Hello'
+	 })
+ }
 </script>
 
-<div class="backdrop" on:click={handleClick}>
-	<div class="modal">
-		
-	</div>
-</div>
+<button on:click={sayHello}>
+	Click to say hello
+</button>
 ```
 
-Queremos que al hacer click en la parte gris se cierre el modal. Sin embargo, como lo hemos escrito hasta ahora el modal se cerrará aun si hacemos click dentro del contenido del mismo (debido a que aunque hago click en el div interno se propagará el evento hacia afuera).
+> `createEventDispatcher` debe ser llamado cuando el componente es inicializado y no puede hacerlo luego (en un callback de `setTimeout` por ejemplo) ya que vincula un dispatch a una instancia de componente.
 
-Para solucionarlo:
+
+
+En `App.svelte`
 
 ```vue
 <script>
-	function handleClick() {
-		alert('Cierro Modal')
+	import Inner from './Inner.svelte';
+
+	function handleMessage(event) {
+		alert(event.detail.text);
 	}
 </script>
 
-<div class="backdrop" on:click|self={handleClick}>
-	<div class="modal">
-		
-	</div>
-</div>
+<Inner on:message={handleMessage} />
 ```
+
+
+
+## Ejemplo 2
+
+Ahora que tenemos un componente principal `App` con un array de elementos y se los pasamos como props a un componente `List` que a su vez llama a un componente `Item` por cada uno de ellos.
+
+En este caso tendremos tanto el dispatch de un custom event (en `Item`) como el Event Propagation (en `List`)
+
+Además suponemos que ese elemento tiene una cruz con la cual podrá eliminar de la lista. Necesitamos de alguna forma que esto llegue hasta el componete `App` que tiene dicho array.
+
+
+
+En `Item.svelte`
+
+```vue
+<script>
+import {createEventDispatcher} from 'svelte'
+
+const dispatch = createEventDispatcher();
+
+const handleDelete = (itemId) => {
+	dispatch('delete-feedback',itemId)
+}
+</script>
+
+<button class="close" on:click={() => handleDelete(item.id)}>X</button>
+```
+
+Con `const dispatch = createEventDispatcher();` creamos una función `dispatch`. Esta función la usaremos para emitir un *custom event*.
+
+En lugar de `itemId`  en `dispatch('delete-feedback',itemId)` podríamos utilizar un objeto con múltiples propiedades.
+
+> :warning: Aunque aca usamos *kebab-case* en los videos de The Net Ninja utiliza *camelCase* para los nombres de los *custom events*.
+
+
+
+En `List.svelte` veremos que como es `Item` quien emite el custom event `delete-feedback` ponemos un listener para dicho evento y hacemos *event forwading*. 
+
+```vue
+<#each feedback as fb (fb.id)>
+<Item item={fb} on:delete-feedback />
+</each>
+```
+
+> Como en `List` tampoco tenemos acceso al array queremos que sea enviado hacia arriba a `App`.
+
+
+
+En `App.svelte`
+
+```vue
+<script>
+	const deleteFeedback= (e) => {
+		//console.log(e.detail)
+		const itemId = e.detail;
+		feedback = feedback.filter(item => item.id!== itemId)
+	}
+</script>
+
+<List on:delete-feedback={deleteFeedback} />
+```
+
+> Por defecto recibimos el evento `e` y en la propiedad `detail` recibimos el id del elemento a eliminar de la lista.
+>
+> Notar que estamos reasignando `feedback`
 
 
 
@@ -1436,68 +1620,6 @@ Luego en `Card.svelte`
 El contenido mostrado será: "This is the title" y "Some text" en rojo y abajo "This is the subtitle".
 
 Un aspecto interesante de los named slots es que nos permiten cambiar el orden en que mostramos los elementos que recibimos.
-
-
-
-# Dispatch Custom Event
-
-Supongamos que tenemos un componente principal `App` con un array de elementos y se los pasamos como props a un componente `List` que a su vez llama a un componente `Item` por cada uno de ellos.
-
-Además suponemos que ese elemento tiene una cruz con la cual podrá eliminar de la lista. Necesitamos de alguna forma que esto llegue hasta el componete `App` que tiene dicho array.
-
-
-
-En `Item.svelte`
-
-```vue
-</script>
-import {createEventDispatcher} from 'svelte'
-
-const dispatch = createEventDispatcher();
-
-const handleDelete = (itemId) => {
-	dispatch('delete-feedback',itemId)
-}
-</script>
-
-<button class="close" on:click={() => handleDelete(item.id)}>X</button>
-```
-
-> Con `const dispatch = createEventDispatcher();` creamos una función `dispatch`. Esta función la usaremos para emitir un *custom event*.
->
-> En lugar de `itemId`  en `dispatch('delete-feedback',itemId)` podríamos utilizar un objeto con múltiples propiedades.
->
-> :warning: Aunque aca usamos *kebab-case* en los videos de The Net Ninja utiliza *camelCase* para los nombres de los *custom events*.
-
-En `List.svelte` veremos que como es `Item` quien emite el custom event `delete-feedback` ponemos un listener para dicho evento y hacemos *event forwading*. 
-
-```
-<#each feedback as fb (fb.id)>
-<Item item={fb} on:delete-feedback />
-</each>
-```
-
-> Como en `List` tampoco tenemos acceso al array queremos que sea enviado hacia arriba a `App`.
-
-
-
-En `App.svelte`
-
-```
-<script>
-	const deleteFeedback= (e) => {
-		//console.log(e.detail)
-		const itemId = e.detail;
-		feedback = feedback.filter(item => item.id!== itemId)
-	}
-</script>
-
-<List on:delete-feedback={deleteFeedback} />
-```
-
-> Por defecto recibimos el evento `e` y en la propiedad `detail` recibimos el id del elemento a eliminar de la lista.
->
-> Notar que estamos reasignando `feedback`
 
 
 
