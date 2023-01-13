@@ -875,7 +875,13 @@ Cada vez que mostremos u ocultemos el componente aparecerán esos mensajes.
 
 # Binding de Datos
 
+Como regla general en Svelte los datos fluyen de arriba hacia abajo, un componente padre puede setear las props en un componente hijo y un componente puede setear atributos de un elemento, pero no al revés.
+
+En ocasiones vamos a querer romper esta regla como veremos a continuación. 
+
 ### One way data binding
+
+Por ejemplo tomemos el caso de un elemento `<input>` en el cual escuchamos a un evento input y ejecutamos un handler `handleInput` que actualiza el valor de la variable.
 
 ```vue
 <script>
@@ -886,11 +892,7 @@ Cada vez que mostremos u ocultemos el componente aparecerán esos mensajes.
   }
 </script>
 
-<input 
-       type="text" 
-       on:input={handleInput} 
-       placeholder="Tell us something"
->
+<input type="text" on:input={handleInput} placeholder="Tell us something">
 ```
 
 Esta técnica se conoce como *one way binding* dado que si cambiamos `text` de otro modo que no sea con el `input` el valor mostrado por ese input quedará desactualizado.
@@ -944,17 +946,25 @@ En cambio utilizando *two way binding* como veremos a continuación, agregando `
 
 #### Forma reducida
 
-Existe una forma reducida de actualizar el valor de `text` y de asegurarnos el two way binding. Es decir que estas dos líneas:
+La técnica implementada decimos que es un poco *boilderplatey* por lo que existe una forma reducida de actualizar el valor de `text` y de asegurarnos el two way binding. Es decir que estas dos líneas:
 
-```vue
-on:input={handleInput} 
-value = {text} 
+```jsx
+<input 
+       type="text" 
+       on:input={handleInput} 
+       value = {text} 
+       placeholder="Tell us something"
+>
 ```
 
 y la función `handleInput` pueden ser reemplazadas por
 
 ```vue
-bind:value={text}
+<input 
+       type="text" 
+       bind:value={text}
+       placeholder="Tell us something"
+>
 ```
 
 Como veremos a continuación:
@@ -974,13 +984,15 @@ Como veremos a continuación:
 
 
 
-## `type="number"` o `type="text"`
+## `type="number"` y `type="range"`
 
+En el DOM todo es un string, esto no nos ayuda mucho si estamos lidiando con inputs numéricos de tipo `type="number"` o `type="range".`
 
+### Ejemplo 1:
 
 Supongamos que queremos tener un componente con dos inputs asociados a los valores `a` y `b`. Esto lo hacemos colocando `bind:value={a}` de esta manera cuando cambiamos el valor de uno de los inputs será cambiado el valor de dicha variable.
 
-```
+```vue
 <script>
 	let a = 1;
 	let b = 2;
@@ -1015,9 +1027,56 @@ Esto puede resultar particularmente útil cuando tenemos que trabajar con formul
 
 
 
+### Ejemplo 2:
+
+Supongamos que tenemos la misma situación de generar ambos sumandos pero cada uno se puede obtener tanto por un input `type="number"` o bien por uno de `type="range"` .
+
+```
+<script>
+	let a = 1;
+	let b = 2;
+</script>
+
+<label>
+	<input
+		type="number"
+		bind:value={a}
+		min="0"
+		max="10"
+	/>
+
+	<input
+		type="range"
+		bind:value={a}
+		min="0"
+		max="10"
+	/>
+</label>
+
+<label>
+	<input
+		type="number"
+		bind:value={b}
+		min="0"
+		max="10"
+	/>
+
+	<input
+		type="range"
+		bind:value={b}
+		min="0"
+		max="10"
+	/>
+</label>
+
+<p>{a} + {b} = {a + b}</p>
+```
+
+
+
 ## `type="checkbox"`
 
-A la hora de trabajar con inputs de tipo checkbox podemos hacerlo de dos formas. 
+A la hora de trabajar con inputs de `type="checkbox` podemos hacerlo de dos formas. 
 
 La primera es usando `bind:checked` y creando una variable para cada checkbox que inicia en `false` y  que se pondrá en `true` cuando seleccionemos ese elemento. 
 
@@ -1444,6 +1503,36 @@ Esto será útil en la medida que no tengamos que pasar datos del hijo hacia el 
 
 
 
+## Event Forwading con DOM Events
+
+En ocasiones vamos a querer ser notificados sobre eventos del DOM que ocurran en componentes hijos.
+
+Por ejemplo si en `App.svelte` utilizamos un componente `CustomButton` que cuenta con un botón y queremos enterarnos cuando se hace click en el, podremos hacerlo dejando el `on:click` sin asociar a un valor.
+
+En `CustomButton.svelte`
+
+```vue
+<button on:click>Click me</button>
+```
+
+
+
+En `App.svelte` recibimos este evento y lo asociamos a `handleClick`.
+
+```vue
+<script>
+	import CustomButton from './CustomButton.svelte';
+
+	function handleClick() {
+		alert('Button Clicked');
+	}
+</script>
+
+<CustomButton on:click={handleClick} />
+```
+
+
+
 # Components Events  / Dispatch Custom Event
 
 Los componentes también son capaces de emitir eventos, para hacerlo deben contar con un event dispatcher.
@@ -1496,7 +1585,9 @@ En `App.svelte`
 
 Ahora que tenemos un componente principal `App` con un array de elementos y se los pasamos como props a un componente `List` que a su vez llama a un componente `Item` por cada uno de ellos.
 
-En este caso tendremos tanto el dispatch de un custom event (en `Item`) como el Event Propagation (en `List`)
+A diferencia de los eventos del DOM **los eventos de los componentes no cuentan con el *bubble* por lo que si queremos escuchar un evento de un componente anidado más profundamente, los componentes intermedios deben hacer el event forwading**.
+
+En este caso tendremos tanto el dispatch de un custom event (en `Item`) como el event forwading (en `List`). 
 
 Además suponemos que ese elemento tiene una cruz con la cual podrá eliminar de la lista. Necesitamos de alguna forma que esto llegue hasta el componete `App` que tiene dicho array.
 
@@ -1527,6 +1618,8 @@ En lugar de `itemId`  en `dispatch('delete-feedback',itemId)` podríamos utiliza
 
 
 En `List.svelte` veremos que como es `Item` quien emite el custom event `delete-feedback` ponemos un listener para dicho evento y hacemos *event forwading*. 
+
+**Otra opción con mucho más código sería crear un dispatcher también aca y enviar un evento con el mismo nombre, de hecho decimos que lo que hicimos es el shorthand de esa técnica.**
 
 ```vue
 <#each feedback as fb (fb.id)>

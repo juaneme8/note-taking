@@ -1131,7 +1131,7 @@ find -type f
 
 
 
-* Si queremos filtrar todos los archivos cuyo nombre comienza con "f"
+* Si queremos filtrar todos los archivos cuyo nombre comienza con "f" agregamos la opción `-name 'f*'`
 
 ```
 find -type f -name "f*"
@@ -1139,7 +1139,7 @@ find -type f -name "f*"
 
 
 
-* Si queremos filtrar los archivos cuyo nombre comienza con "f" o con "F"
+* Si queremos filtrar los archivos cuyo nombre comienza con "f" o con "f" agregamos la opción `-iname "f*"`
 
 ```
 find -type f -iname "f*"
@@ -1147,7 +1147,7 @@ find -type f -iname "f*"
 
 
 
-* Si queremos filtrar todos los archivos `.py` y grabar un archivo de texto con ese listado
+* Si queremos filtrar desde el root todos los archivos `.py` y grabar un archivo de texto con ese listado
 
 ```
 find / -type f -name "*.py" > python-files.txt
@@ -1157,7 +1157,7 @@ find / -type f -name "*.py" > python-files.txt
 
 
 
-* Si queremos buscar los archivos en el directorio en el que estoy con fecha de modificación mayor a 5 días:
+* Si queremos buscar los archivos en el directorio actual con fecha de modificación mayor a 5 días:
 
 ```
 find . -mtime + 5
@@ -1968,6 +1968,22 @@ neststat -nr
 ### Comando `cmatrix`
 
 Si ejecutamos `cmatrix` veremos un fondo de pantalla con caracteres estilo Matrix.
+
+
+
+### Comando `tldr`
+
+El comando `tldr` nos permite obtener ejemplos prácticos de cómo utilizar otros comandos.
+
+```
+sudo apt intall tldr
+```
+
+Luego si queremos obtener ejemplos sobre cómo utilizar el comando `find` podríamos poner:
+
+```
+tldr find
+```
 
 
 
