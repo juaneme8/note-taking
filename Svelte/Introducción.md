@@ -846,32 +846,169 @@ Si sabemos que la promesa no puede ser rechazada, podemos omitir el bloque `catc
 
 # Life Cycle Methods
 
-En Svelte los componentes tienen métodos del ciclo de vida.
+En Svelte los componentes tienen un ciclo de vida que inicia cuando son creados y termina cuando son destruídos. Existen funciones que nos permiten ejecutar código en momentos clave de ese ciclo.
 
-`onMount` sucede cuando el componente es montado en el DOM y es donde haremos peticiones externas a una API o DB.
+## `onMount`
 
-`onDestroy` sucede cuando el componente es eliminado del DOM y es donde nos desuscribiremos de stores por ejemplo.
-
- 
+El método `onMount` es el que usaremos más frecuentemente y se ejecuta luego de que el componente es renderizado en el DOM y es donde haremos peticiones a APIs externas.
 
 ```jsx
-import {onMount, onDestroy} from 'svelte'
+<script>
+	import { onMount } from 'svelte';
 
-onMount(()=> {
-	console.log('mounted')
-	//http requests para obtener data de backend
-})
+	let photos = [];
 
-onDestroy(()=> {
-	console.log('destroy')
-})
+	onMount(async () => {
+		const res = await fetch(`https://jsonplaceholder.typicode.com/photos?_limit=20`);
+		photos = await res.json();
+	});
+</script>
 ```
 
-Cada vez que mostremos u ocultemos el componente aparecerán esos mensajes.
+Las funciones de ciclo de vida **deben ser llamadas durante la inicialización del componente** de modo que los callbacks estén atados a la instancia del componente (no debemos hacerlo en un `setTimeout`)
+
+Si el *callback* de `onMount` retorna una función esta será ejecutada cuando el componente es destruído.
+
+## `onDestroy` 
+
+El método `onDestroy` se ejecuta cuando el componente es eliminado del DOM y es donde nos desuscribiremos de timers o de stores por ejemplo.
+
+Supongamos que queremos tener un timer generado con `setInterval` que se actualice cada un segundo mostrando el valor de cuenta en pantalla . Con el método `onDestroy` realizamos la limpieza de ese timer cuando no lo necesitamos mas. De esta manera evitamos **memory leaks**.
+
+```vue
+<script>
+	import { onDestroy } from 'svelte';
+
+	let counter = 0;
+	const interval = setInterval(() => counter += 1, 1000);
+
+	onDestroy(() => clearInterval(interval));
+</script>
+
+{counter}
+```
 
 
 
+**Es importante llamar a las lifecycle functions durante la inicialización del componente** pero no importa desde donde las llamemos. En esa dirección es posible abstraer la lógica a un helper llamado `utils.js` (:warning: notar la extensión  `.js` y no `.svelte`)
 
+```jsx
+import { onDestroy } from 'svelte';
+
+export function onInterval(callback, milliseconds) {
+	const interval = setInterval(callback, milliseconds);
+
+	onDestroy(() => {
+		clearInterval(interval)
+	});
+}
+```
+
+Esta función será invocada por el componente `Timer.svelte`
+
+```jsx
+<script>
+	import { onInterval } from './utils.js';
+
+	export let callback;
+	export let interval = 1000;
+
+	onInterval(callback, interval);
+</script>
+
+<p>This component executes a callback every {interval} ms</p>
+```
+
+Por último `Timer` es invocado en `App.svelte`
+
+```jsx
+<script>
+	import Timer from './Timer.svelte';
+
+	let open = false;
+	let seconds = 0;
+
+	const toggle = () => (open = !open);
+	const handleTick = () => (seconds += 1);
+</script>
+
+<div>
+	<button on:click={toggle}
+		>{open ? 'Close' : 'Open'} Timer</button
+	>
+	<p>
+		The Timer component has been open for
+		{seconds}
+		{seconds === 1 ? 'second' : 'seconds'}
+	</p>
+	{#if open}
+		<Timer callback={handleTick} />
+	{/if}
+</div>
+```
+
+Cuando cerramos el modal estaríamos destruyendo el componente del DOM (esto se pone de manifiesto en el renderizado condicional), es por eso que para evitar pérdidas de memoria debemos desuscribirnos al timer. En caso de no eliminar los timers seguiría llamando a `handleTick` aunque el componente no esté en pantalla resultando en un aumento de `seconds` distinto al real y un aumento de la carga de CPU.
+
+
+
+## `beforeUpdate`
+
+La función `beforeUpdate` nos permite programar tareas para ejecutarse inmediatamente **antes** de que el DOM sea actualizado.
+
+Notar que `beforeUpdate` será ejecutado la primera vez antes de que el componente sea montado por lo que tendremos que chequear la existencia de los elementos antes de leer sus propiedades.
+
+## `afterUpdate`
+
+La función `afterUpdate` en cambio nos permite programar tareas para ejecutarse **después** de que el DOM está en sync con los datos.
+
+Tanto `beforeUpdate` como `afterUpdate` se utilizan para lograr cosas imperativas que sería dificil de lograr basándonos puramente en un modo *state-driven* como por ejemplo actualizar la posición de scroll de un elemento.
+
+## `tick`
+
+La función `tick` se diferencia de todas las otras en que la podemos llamar en cualquier momento (no únicamente cuando al inicializar el componente). 
+
+Retorna una promesa que se resuelve tan pronto como los cambios de estado pendientes se hayan aplicado al DOM (o inmediatamente si no hay ningún estado pendiente de cambios).
+
+Cuando modificamos el estado de un componente en Svelte no se actualiza el DOM de manera inmediata, sino que espera al siguiente *microtask* para determinar si hay otros cambios que deban ser aplicados, incluyendo otros componentes. De esta manera evita trabajo innecesario y le permite al navegador agrupar cosas de manera efectiva.
+
+Por ejemplo supongamos que tenemos un `textarea` y queremos que al seleccionar determinada porción de texto, este si está en minúsculas se cambie a mayúsculas y viceversa.
+
+
+
+```jsx
+<script>
+	import { tick } from 'svelte';
+
+	let text = `Select some text and hit the tab key to toggle uppercase`;
+
+	async function handleKeydown(event) {
+		if (event.key !== 'Tab') return;
+		event.preventDefault();
+		const {selectionStart,selectionEnd,value} = this;
+		const selection = value.slice(selectionStart,		selectionEnd);
+
+		const replacement = /[a-z]/.test(selection)
+			? selection.toUpperCase()
+			: selection.toLowerCase();
+
+		text =
+			value.slice(0, selectionStart) +
+			replacement +
+			value.slice(selectionEnd);
+
+		// this has no effect, because the DOM hasn't updated yet
+		await tick();
+		this.selectionStart = selectionStart;
+		this.selectionEnd = selectionEnd;
+	}
+</script>
+
+<textarea value={text} on:keydown={handleKeydown}/>
+```
+
+Si no tuvieramos el `await tick();` cuando presionamos TAB como el value del textarea cambia perderíamos la selección y el cursor se iría al final del texto.
+
+En cuanto a `this` si lo imprimiéramos en consola veríamos algo como **<textarea class="s-mYoR_1q3v4Bg"></textarea>**
 
 # Binding de Datos
 
@@ -1099,7 +1236,7 @@ La segunda es usando `bind:group={array}` y al seleccionar cada elemento será a
 <input type="checkbox" bind:checked={node}/>node<br>
 ```
 
-Esta alternativa puede ser muy confusa si tenemos muchos checkboxes ya que necesitaremos una variable para cada uno de ellos.
+Esta alternativa puede ser muy confusa si tenemos muchos checkboxes asociados al mismo valor ya que necesitaremos una variable para cada uno de ellos.
 
 
 
@@ -1120,18 +1257,142 @@ En este caso además del `bind:group={}` es necesario usar el atributo `value` y
 
 
 
-## `Select`
+Consideremos un ejemplo en el cual `value` provenga de un array que recorremos:
 
-A la hora de trabajar con `<select>` hacemos un `bind:value`
+```vue
+<script>
+let menu = ['Cookies and cream', 'Mint choc chip', 'Raspberry ripple'];
+</script>
+{#each menu as flavour}
+	<label>
+		<input type=checkbox bind:group={flavours} name="flavours" value={flavour}>
+		{flavour}
+	</label>
+{/each}
+```
+
+
+
+## `type="radio"`
+
+Los elementos de tipo radio del mismo grupo son mutuamente excluyentes, es decir que solo puedo tener uno seleccionado.
+
+```vue
+<script>
+	let scoops = 1;
+</script>
+
+<h2>Size</h2>
+
+<label>
+<input type=radio bind:group={scoops} name="scoops" value={1}>One scoop
+</label>
+
+<label>
+  <input type=radio bind:group={scoops} name="scoops" value={2}>Two scoops
+</label>
+
+<label>
+  <input type=radio bind:group={scoops} name="scoops" value={3}>Three scoops
+</label>
+```
+
+Notar que en este caso el valor inicial es 1 por lo que estará seleccionado el primer elemento.
+
+## `type="textarea"`
+
+El input `type="textarea"` es muy similar al input de texto, tendremos que usar `bind:value`
+
+```vue
+<script>
+	import { marked } from 'marked';
+	let value = `Some words are *italic*, some are **bold**`;
+</script>
+
+{@html marked(value)}
+
+<textarea bind:value={value}></textarea>
+```
+
+Como en este caso tenemos `bind:value={value}` podemos reemplazarlo por la forma abreviada: `bind:value` (este criterio aplica a todos los bindings)
+
+## `select`
+
+A la hora de trabajar con `<select>` también podemos usar un `bind:value`.
+
+### Single value
 
 ```jsx
 <script>
 	let gender="";
+  $:console.log(gender)
 </script>
 
 <select bind:value={gender}>
 	<option value="male">Male</option>
 	<option value="female">Female</option>
+</select>
+```
+
+
+
+:bulb: Tener en cuenta que en los `<option>` es posible utilizar también `value` que sea un objeto en lugar de string.
+
+```vue
+<script>
+	let questions = [
+		{id: 1,text: `Where did you go to school?`},
+		{id: 2,text: `What is your mother's name?`},
+		{id: 3,text: `What is another personal fact that an attacker could easily find with Google?`}
+	];
+	let selected;
+</script>
+
+<h2>Insecurity questions</h2>
+<form on:submit|preventDefault={handleSubmit}>
+	<select
+		bind:value={selected}
+		on:change={() => (answer = '')}
+	>
+		{#each questions as question}
+			<option value={question}>
+				{question.text}
+			</option>
+		{/each}
+	</select>
+</form>
+
+<p>
+	selected question: {selected
+		? selected.id
+		: 'none'}
+</p>
+```
+
+:bulb: Como no le dimos un valor inicial a `selected`, el binding lo seteará al valor default (que es el primer elemento de la lista) de manera automática. Pero debemos tener cuidado ya que hasta que se produzca el binding, `selected` será `undefined` por lo que no podremos referenciar a ciegas por ejemplo a `selected.id` en el template.
+
+
+
+### Multiple value
+
+Un `select` puede tener también el atributo `multiple` en cuyo caso completará un array en lugar de elegir un único valor.
+
+```vue
+<script>
+	let flavours = ['Mint choc chip'];
+  let menu = [
+		'Cookies and cream',
+		'Mint choc chip',
+		'Raspberry ripple'
+	];
+  $:console.log(flavours)
+</script>
+<select multiple bind:value={flavours}>
+	{#each menu as flavour}
+		<option value={flavour}>
+			{flavour}
+		</option>
+	{/each}
 </select>
 ```
 
@@ -1427,7 +1688,7 @@ El modificador `stopPropagation` llama a `e.stopPropagation()` impidiendo que el
 
 El modificador `passive` mejora la performance al scrollear con eventos de touch o wheel. Svelte lo agregará automáticamente cuando sea conveniente.
 
-## `nonpassive`
+### `nonpassive`
 
 El modificador `nonpassive` setea explícitamente `passive: false`
 
@@ -1791,33 +2052,27 @@ Si queremos mostrar en la consola el valor actualizado con todos los puntos inte
 
 # Stores
 
-El uso de stores nos permite almacenar datos de manera centralizada para no tener que *dispatch custom events* para pasar datos hacia arriba en el árbol de componentes. Esto es particularmente útil en aplicaciones de magnitud.
+En una aplicación además del estado que podemos manejar a nivel jerarquías de componentes, tenemos valores que deben ser accedidos por componentes que no tienen relación entre sí.
 
-Cada vez que modifiquemos un store los componentes que están suscriptos a ella obtendrán los datos actualizados.
+En Svelte hacemos esto mediante el uso de stores que son objetos con un método `suscribe` que permite a las partes involucradas ser notificadas cuando el valor cambia donde los componentes que están suscriptos a ella obtendrán los datos actualizados.
+
+Los stores pueden ser `readable` o `writable` (aquellos casos donde podemos leer y escribir).
+
+> Los stores nos permiten almacenar datos de manera centralizada para no tener que hacer *dispatch* de *custom events* para pasar datos hacia arriba en el árbol de componentes. Esto es particularmente útil en aplicaciones de magnitud.
+
+## Writable stores
+
+Los *writable stores* cuentan con métodos de `set` y `update` además del `suscribe` 
 
 Creamos una carpeta `stores` en `src` y un archivo archivo `FeedbackStore.js`
-
-
 
 ```javascript
 import { writable } from 'svelte/store'
 
 const FeedbackStore = writable([
-  {
-    id: 1,
-    rating: 10,
-    text: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. consequuntur vel vitae commodi alias voluptatem est voluptatum ipsa quae.',
-  },
-  {
-    id: 2,
-    rating: 9,
-    text: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. consequuntur vel vitae commodi alias voluptatem est voluptatum ipsa quae.',
-  },
-  {
-    id: 3,
-    rating: 8,
-    text: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. consequuntur vel vitae commodi alias voluptatem est voluptatum ipsa quae.',
-  },
+  {id: 1,rating: 10,text: 'Lorem'},
+  {id: 2,rating: 9,text: 'Lorem ipsum.'},
+  {id: 3,rating: 8,text: 'Lorem ipsum dolor'},
 ]);
 
 export default FeedBackStore
@@ -1827,9 +2082,6 @@ export default FeedBackStore
 >
 > El store lo creamos con `const FeedbackStore = writable();` y en nuestro caso además le pasamos datos iniciales.
 >
-> Los stores pueden ser `readable` o `writable` (aquellos casos donde podemos leer y escribir).
->
-> Exportamos `FeedbackStore` para luego importarlo cuando usemos el store.
 
 
 
@@ -1840,6 +2092,7 @@ En lugar de tener la lista hardcodeada en `App` la tenemos en un store.
 Una forma de obtener los datos del store es suscribirnos y desuscribirnos en el método `onDestroy` del ciclo de vida.
 
 ```vue
+<script>
 import FeedbackStore from '../stores/FeedbackStore.js'
 let feedback = []
 
@@ -1848,6 +2101,7 @@ const unsuscribe = FeedbackStore.suscribe(data => feedback=data)
 onDestroy(()=> {
 	unsuscribe();
 })
+</script>
 
 {#each feedback as fb (fb.id)}
 <div in:scale out:fade="{{ duration: 500 }}">
@@ -1859,8 +2113,6 @@ onDestroy(()=> {
 Al suscribirnos nos aseguramos que los datos se mantengan actualizados y se producirá un rerender cada vez que haya cambios.
 
 Es importante que nos desuscribamos al store al desmontar el componente pues de lo contrario nos estaremos suscribiendo cada vez que mostremos el componente y esto podría ocasionar *memory leaks*.
-
-
 
 Otra forma más simple (la desuscripción será automática cuando el componente se elimine del DOM) y no nos hará falta una variable local.
 
