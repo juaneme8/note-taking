@@ -2064,6 +2064,123 @@ Los stores pueden ser `readable` o `writable` (aquellos casos donde podemos leer
 
 Los *writable stores* cuentan con métodos de `set` y `update` además del `suscribe` 
 
+### Ejemplo 1 con number
+
+Supongamos que tenemos un contador cuyo valor queremos almacenar en un store y contamos con tres botones (aislados en componentes) capaces de aumentar, disminuir o resetear el valor de cuenta.
+
+```
+stores.js
+App.svelte
+Incrementer.svelte
+Decrementer.svelte
+Resetter.svelte
+```
+
+
+
+En `App.svelte` nos suscribimos al store para mostar el valor de cuenta y los tres componentes:
+
+```jsx
+<script>
+  import { onDestroy } from 'svelte';
+	import { count } from './stores.js';
+	import Incrementer from './Incrementer.svelte';
+	import Decrementer from './Decrementer.svelte';
+	import Resetter from './Resetter.svelte';
+
+	let count_value;
+  
+	const unsuscribe = count.subscribe((value) => {
+		count_value = value;
+	});
+  onDestroy(unsubscribe);
+</script>
+
+<h1>The count is {count_value}</h1>
+<Incrementer />
+<Decrementer />
+<Resetter />
+```
+
+Notar que al llamar al método `suscribe` nos retorna una función `unsuscribe` y la llamamos en `onDestroy`.
+
+En `stores.js` definimos `count` con un valor inicial de 0.
+
+```
+import { writable } from 'svelte/store';
+
+export const count = writable(0);
+```
+
+En `Decrementer.svelte`
+
+```jsx
+<script>
+	import { count } from './stores.js';
+
+	function decrement() {
+		count.update(n => n-1)
+	}
+</script>
+
+<button on:click={decrement}> - </button>
+```
+
+En `Incrementer.svelte`
+
+```jsx
+<script>
+	import { count } from './stores.js';
+
+	function increment() {
+		count.update(n => n+1)
+	}
+</script>
+
+<button on:click={increment}> + </button>
+```
+
+En `Resetter.svelte`
+
+```jsx
+<script>
+	import { count } from './stores.js';
+
+	function reset() {
+		count.set(0)
+	}
+</script>
+
+<button on:click={reset}> reset </button>
+```
+
+
+
+#### Auto-subscriptions -> Reducir Boilerplate
+
+El proceso de suscripción y desuscripción en `onDestroy` es bastante repetitivo especialmente si nuestro componente se suscribe a múltiples stores, en ese caso podemos aplicar un truco que ofrece Svelte de referenciar el valor del store colocando el prefijo `$` al nombre del store.
+
+Por lo tanto `App.svelte` pasaría  a ser:
+
+```jsx
+<script>
+	import { count } from './stores.js';
+	import Incrementer from './Incrementer.svelte';
+	import Decrementer from './Decrementer.svelte';
+	import Resetter from './Resetter.svelte';
+
+</script>
+
+<h1>The count is {$count}</h1>
+<Incrementer />
+<Decrementer />
+<Resetter />
+```
+
+No estamos limitados a usar `$count` dentro del marcado, sino que podríamos usarlo dentro del `<script>`.
+
+### Ejemplo 2 con array de objetos
+
 Creamos una carpeta `stores` en `src` y un archivo archivo `FeedbackStore.js`
 
 ```javascript
@@ -2085,11 +2202,7 @@ export default FeedBackStore
 
 
 
-En lugar de tener la lista hardcodeada en `App` la tenemos en un store.
-
-
-
-Una forma de obtener los datos del store es suscribirnos y desuscribirnos en el método `onDestroy` del ciclo de vida.
+Una forma de obtener los datos del store es suscribirnos al inicializar el componente y luego desuscribirnos en el método `onDestroy` del ciclo de vida.
 
 ```vue
 <script>
@@ -2114,9 +2227,15 @@ Al suscribirnos nos aseguramos que los datos se mantengan actualizados y se prod
 
 Es importante que nos desuscribamos al store al desmontar el componente pues de lo contrario nos estaremos suscribiendo cada vez que mostremos el componente y esto podría ocasionar *memory leaks*.
 
-Otra forma más simple (la desuscripción será automática cuando el componente se elimine del DOM) y no nos hará falta una variable local.
+
+
+A continuación escribimos lo mismo nuevamente utilizando la **Auto-subscriptions** , de modo que la desuscripción será automática cuando el componente se elimine del DOM y no nos hará falta una variable local.
 
 ```vue
+<script>
+import FeedbackStore from '../stores/FeedbackStore.js'
+</script>
+
 {#each $FeedbackStore as fb (fb.id)}
 <div in:scale out:fade="{{ duration: 500 }}">
   <FeedbackItem item={fb} />
@@ -2124,26 +2243,27 @@ Otra forma más simple (la desuscripción será automática cuando el componente
 {/each}
 ```
 
-## Agregar Items a Store
+
+
+#### Agregar Items a Store
 
 Una forma de hacerlo es con eventos custom y pasando las props hacia arriba hasta llegar a `App` que tiene el array de elementos. Sin embargo, utilizando stores esto es mucho mas simple y podemos hacerlo desde el formulario en el cual tengamos el elemento a agregar.
 
-```vue
-  const handleSubmit = () => {
-    if(text.trim().length > min) {
-      const newFeedback = {
-        id: uuidv4(),
-        text,
-        rating: +rating
-      }
-
-      FeedbackStore.update((currentFeedback) => {
-        return [newFeedback, ...currentFeedback]
-      })
-
-      text = ''
-    }
-  }
+```jsx
+<script>
+const handleSubmit = () => {
+	if(text.trim().length > min) {
+  	const newFeedback = {
+  		id: uuidv4(),
+  		text,
+  		rating: +rating
+  	}
+		FeedbackStore.update((currentFeedback) => {
+  		return [newFeedback, ...currentFeedback]
+  	})
+		text = ''
+	}
+}
 </script>
 
 <form on:submit|preventDefault={handleSubmit}>
@@ -2153,7 +2273,7 @@ Una forma de hacerlo es con eventos custom y pasando las props hacia arriba hast
 
 
 
-## Eliminar Items de Store
+#### Eliminar Items de Store
 
 Anteriormente vimos que para eliminar un elemento de la lista debíamos usar custom events para elevar las props.
 
@@ -2162,20 +2282,28 @@ Ahora esto no será necsario y podremos alterar el store desde el `Item`
 ```vue
 <script>
 const handleDelete = (itemId) => {
-    FeedbackStore.update((currentFeedback) => {
-      return currentFeedback.filter(item => item.id != itemId)
-    })
-  }
+	FeedbackStore.update((currentFeedback) => {
+		return currentFeedback.filter(item => item.id != itemId)
+	})
+}
 </script>
 
-<button class="close" on:click={() => handleDelete(item.id)}>X</button>
+<button class="close" on:click={() => handleDelete(item.id)}>
+  X
+</button>
 ```
 
 
 
-> Veremos que `List.svelte` y `App.svelte` nos quedan ahora mucho mas limpios sin el `on:delete-feedback`
+## Readable stores
 
+Los *readable stores* existen debido a que en ocasiones no vamos a querer que cualquiera que tenga referencia a un store sea capaz de escribir en él como sucede en los *writable stores*. Por ejemplo puede que tengamos un store representando la posición del mouse o la geolocalización de un usuario y no tiene sentido que estos valores puedan ser seteados desde "afuera".
 
+:pen:
+
+* El primer argumento es el valor inicial que puede ser `null` o `undefined` si todavía no tenemos uno definido. 
+
+* El segundo argumento es una función `start` que recibe un callback `set` y retorna una función `stop`. La función de `start` es llamada cuando el store obtiene su primer suscriptor y la de `stop` cuando el último suscriptor se desuscribe.
 
 # Componentes UI
 
