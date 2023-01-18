@@ -71,3 +71,15 @@ console.log(`%clabo-remito v: ${LIB_VERSION}`, consoleFormat);
 ```
 
 Con `%c` logramos aplicar las reglas de css establecidas en el segundo parámetro.
+
+
+
+## Ver versión en Cmder
+
+Normalmente vamos a querer ver la versión que estamos trabajando desde Cmder al navegar hacia el directorio:
+
+```
+C:\Users\...\Documents\Code\my-app (master -> origin) (my-app@0.1.4)
+```
+
+Sin embargo si esto no lo vemos puede ser porque en `package.json` tenemos `private: true`.

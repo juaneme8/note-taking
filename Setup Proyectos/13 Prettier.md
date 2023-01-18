@@ -3,7 +3,8 @@
 > :link: Basado en el video de [Web Dev Simplified](https://youtu.be/DqfQ4DPnRqI)
 
 ```bash
-npm i --save-exact prettier 
+npm install --save-dev --save-exact prettier
+
 ```
 
 Queremos que en el `package.json` nos quede fija la versión de modo que no corramos el riesgo de que ante una instalación futura utilicemos una versión posterior que pudiera introducir cambios no deseados.
@@ -62,6 +63,7 @@ Para ignorar el formateo en determinados archivos, debemos crear un archivo `.pr
 
 ```
 node_modules
+.next
 ```
 
 
@@ -142,3 +144,12 @@ En este caso la regla de ESlint llamada `indent` tiene conflicto con Prettier, p
 npx eslint-config-prettier script.js
 ```
 
+
+
+Crear script:
+
+```
+"format": "npx prettier --write ."
+```
+
+Lo ejecutamos con `npm run format`
