@@ -2297,13 +2297,154 @@ const handleDelete = (itemId) => {
 
 ## Readable stores
 
-Los *readable stores* existen debido a que en ocasiones no vamos a querer que cualquiera que tenga referencia a un store sea capaz de escribir en él como sucede en los *writable stores*. Por ejemplo puede que tengamos un store representando la posición del mouse o la geolocalización de un usuario y no tiene sentido que estos valores puedan ser seteados desde "afuera".
+Los ***readable stores*** existen debido a que en ocasiones no vamos a querer que cualquiera que tenga referencia a un store sea capaz de escribir en él como sucede en los *writable stores*. Por ejemplo puede que tengamos un store representando la posición del mouse o la geolocalización de un usuario y no tiene sentido que estos valores puedan ser seteados desde "afuera".
 
-:pen:
+Supongamos que queremos crear un readable store que cada un segundo actualiza la fecha actual.
 
 * El primer argumento es el valor inicial que puede ser `null` o `undefined` si todavía no tenemos uno definido. 
-
 * El segundo argumento es una función `start` que recibe un callback `set` y retorna una función `stop`. La función de `start` es llamada cuando el store obtiene su primer suscriptor y la de `stop` cuando el último suscriptor se desuscribe.
+
+
+
+En `stores.js`
+
+```jsx
+<script>
+import { readable } from 'svelte/store';
+  
+export const time = readable(new Date(), function start (set){
+	const interval = setInterval(() => {
+		set(new Date());
+	}, 1000);
+
+	return function stop() {
+		clearInterval(interval);
+	};
+});
+</script>
+
+```
+
+Luego en el componete que queremos utilizarlo:
+
+```
+<script>
+	import { time } from './stores.js';
+</script>
+
+<h1>The time is {$time}</h1>
+```
+
+
+
+## Derived stores
+
+Es posible crear un store cuyo valor se base en uno o más stores.
+
+Si quisiéramos crear un store que calcule el tiempo que la página estuvo abierta, podemos hacerlo con:
+
+```jsx
+<script>
+import { readable, derived } from 'svelte/store';
+
+export const time = readable(new Date(), function start(set){
+	const interval = setInterval(() => {
+		set(new Date());
+	}, 1000);
+
+	return function stop() {
+		clearInterval(interval);
+	};
+});
+
+const start = new Date();
+
+export const elapsed = derived(time, ($time) => Math.round(($time - start) / 1000));
+</script>
+
+```
+
+
+
+## Custom stores
+
+Bastará con tener un objeto que implemente de manera correcta el método `subscribe` para que sea considerado un store. Esto significa que es posible crear stores personalizados con la lógica deseada.
+
+Suponiendo que tenemos un store `count` podemos incluir los métodos increment, decrement, reset sin exponer los métodos `set` y `update`.
+
+En `stores.js`
+
+```jsx
+import { writable } from 'svelte/store';
+
+function createCount() {
+	const { subscribe, set, update } = writable(0);
+
+	return {
+		subscribe,
+		increment: () => update((n) => n + 1),
+		decrement: () => update((n) => n - 1),
+		reset: () => set(0)
+	};
+}
+
+export const count = createCount();
+```
+
+Luego en `App.svelte`
+
+```jsx
+<script>
+	import { count } from './stores.js';
+</script>
+
+<h1>The count is {$count}</h1>
+
+<button on:click={count.increment}>+</button>
+<button on:click={count.decrement}>-</button>
+<button on:click={count.reset}>reset</button>
+```
+
+
+
+## Store bindings
+
+Si se trata de writable stores es posible hacer un bind a su valor como haríamos con el estado local de un componente.
+
+Por ejemplo si tenemos un writable store `name` y un derived store `greeting` es posible asociarlo a un input de modo tal que cambie `name` y sus dependientes.
+
+En `store.js` tenemos el *writable store* (name) y el *derived store* (greeting).
+
+```jsx
+import { writable, derived } from 'svelte/store';
+
+export const name = writable('world');
+
+export const greeting = derived(name, ($name) => `Hello ${$name}!`);
+```
+
+En `App.svelte` utilizamos el store y lo bindeamos al input de modo que al modificar el input se modificará `name` y `greeting`.
+
+```jsx
+<script>
+	import { name, greeting } from './stores.js';
+</script>
+
+<h1>{$greeting}</h1>
+<input bind:value={$name} />
+```
+
+
+
+También es posible asignar valores a un store dentro de un componente:
+
+```
+<button on:click="{() => $name += '!'}">
+	Add exclamation mark!
+</button>
+```
+
+En este caso la asignación `$name += '!'` es equivalente a `name.set($name + '!')`.
 
 # Componentes UI
 
@@ -2317,7 +2458,7 @@ A continuación mostramos un ejemplo de un componente `Button.svelte` (que ubica
 </script>
 
 <button class:flat={flat} class:inverse={inverse} class={type} on:click>
-  <slot></slot>
+<slot></slot>
 </button>
 
 <style>
@@ -2427,22 +2568,16 @@ Tener presente que esta validación no bloquea el botón de submit aunque no se 
 
 
 
-# :warning: Concepto Referencias y `find()`
+# SvelteKit
 
-Recordar que `find()` devuelve un valor pero este valor podrá ser un primitivo o una referencia. Si tenemos un array de objetos `copiedPolls` y con `find()` obtenemos un objeto deseado y luego modificamos sus propiedades, estaremos modificando un elemento del al array original.
+SvelteKit es un *app framework* (mientras que Svelte es un *component framework*) encargado de crear aplicaciones de alta performance que soluciona los aspectos engorrosos de crear aplicaciones productivas.
 
-```javascript
-let copiedPolls = [...polls];
-let upvotedPoll = copiedPolls.find(poll => poll.id==id);
-
-if(option ==='a'){
-	upvotedPoll.votesA++;
-}
-
-if(option ==='a'){
-	upvotedPoll.votesA++;
-}
-
-polls = copiedPolls;
-```
-
+* Routing
+* SSR
+* Data fetching
+* Service workers
+* TypeScript integration
+* SPA
+* Library packaging
+* Optimised production builds
+* Deploying a hosting providers
