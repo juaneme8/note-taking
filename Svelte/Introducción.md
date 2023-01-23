@@ -2570,7 +2570,7 @@ Tener presente que esta validación no bloquea el botón de submit aunque no se 
 
 # SvelteKit
 
-SvelteKit es un *app framework* (mientras que Svelte es un *component framework*) encargado de crear aplicaciones de alta performance que soluciona los aspectos engorrosos de crear aplicaciones productivas.
+SvelteKit es un *app framework* (mientras que Svelte es un *component framework*) encargado de crear aplicaciones de alta performance que soluciona los aspectos engorrosos a los que nos enfrentamos al crear aplicaciones productivas.
 
 * Routing
 * SSR
