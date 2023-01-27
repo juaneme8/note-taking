@@ -217,7 +217,7 @@ Con las Redux DevTools podremos ver lo siguiente:
 
 
 
-## Creación de Tareas
+# Creación de Tareas
 
 Creamos el componente `src/components/TaskForm.jsx` que contendrá un formulario simple con un un input de texto y un textarea en los cuales tendremos que ingresar el título y la descripción de la nueva tarea. Al presionar el botón Save por el momento se mostrará la variable de estado en pantalla. 
 
@@ -227,7 +227,8 @@ import React, { useState } from 'react'
 function TaskForm() {
   const [task, setTask] = useState({
     title: '',
-    description:''
+    description:'',
+    completed: false
   })
   const handleChange = e => {
     setTask({...task, [e.target.name]:e.target.value})
@@ -259,4 +260,217 @@ En las React DevTools podremos ver el valor que va tomando el estado en cada mom
 
 ## Modificación Slice
 
-Como en última instancia lo que queremos hacer es agregar este elemento al store, debemos modificar `tasksSlice`
+Como en última instancia lo que queremos hacer es agregar este elemento al store, debemos modificar `tasksSlice` de manera tal que podamos agregar tareas.
+
+Esto lo hacemos en dos pasos primero creando un reducer `addTask` y luego exportándolo desde `taskSlice.actions`.
+
+```jsx
+import { createSlice } from '@reduxjs/toolkit'
+
+const initialState = [
+  {
+    id: 1,
+    title: "Task 1", 
+    description: "Task 1 description",
+    completed: false
+  }, 
+  {
+    id: 2,
+    title: "Task 2", 
+    description: "Task 2 description",
+    completed: false
+  }
+]
+
+export const taskSlice = createSlice({
+  name: 'task',
+  initialState,
+  reducers: {
+    addTask: (state, action) => {
+      console.log(state,action)
+    }
+  },
+})
+
+export const { addTask } = taskSlice.actions;
+export default taskSlice.reducer;
+```
+
+Luego en `TaskForm` importamos el hook `useDispatcher`  y también la acción `addTask`. Luego al hacer submit del formulario ejecutamos `dispatch(addTask(task))`
+
+```jsx
+import React, { useState } from 'react'
+import { useDispatch } from 'react-redux'
+import { addTask } from '../features/tasks/taskSlice'
+
+function TaskForm() {
+  const [task, setTask] = useState({
+    title: '',
+    description:'',
+    completed: false
+  })
+  const dispatch = useDispatch()
+
+  const handleChange = e => {
+    setTask({...task, [e.target.name]:e.target.value})
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // console.log(task)
+    dispatch(addTask(task))
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input type='text' name='title' placeholder='title' onChange={handleChange}/>
+      <textarea name='description' placeholder='description' onChange={handleChange}/>
+      <button>Save</button>
+    </form>
+  )
+}
+
+export default TaskForm
+
+```
+
+
+
+Recordemos que en  `TaskSlice` tenemos un `console.log(state,action)` por lo que en pantalla veremos:
+
+```jsx
+Proxy {0: {…}} 
+{
+type: 'task/addTask', 
+payload: 
+{title: 'Task 3 ', description: 'Task 3 description'}}
+```
+
+Esto significa que el valor que le estamos pasando lo recibimos como `action.payload`
+
+
+
+De la misma manera en las Redux DevTools podremos ver estas acciones:
+
+![image-20230127121331827](3 Redux Toolkit.assets/image-20230127121331827.png)
+
+
+
+## Generación de id único
+
+Por el momento la tarea no tiene id por lo tanto obtendremos un warning indicando que debemos tener un `key` distinto en los elementos y tampoco tiene el campo `completed`.
+
+```
+npm i uuid
+```
+
+En `TaskForm` vamos a importar esta biblioteca y a la hora de crear una nueva tarea le asignamos un id único.
+
+
+
+
+
+Queremos ahora modificar `taskSlice` de manera que el nuevo elemento sea agregado al store.
+
+```jsx
+import { createSlice } from '@reduxjs/toolkit'
+
+const initialState = [
+  {
+    id: 1,
+    title: "Task 1", 
+    description: "Task 1 description",
+    completed: false
+  }, 
+  {
+    id: 2,
+    title: "Task 2", 
+    description: "Task 2 description",
+    completed: false
+  }
+]
+
+export const taskSlice = createSlice({
+  name: 'task',
+  initialState,
+  reducers: {
+    addTask: (state, action) => {
+      state.push(action.payload)
+    }
+  },
+})
+
+export const { addTask } = taskSlice.actions;
+export default taskSlice.reducer;
+```
+
+
+
+## :rotating_light: Importante
+
+Redux Toolkit nos permite escribir lógica "mutante" en los reducers como vemos con `state.push(action.payload)`. En realidad no está mutando el estado realmente porque usa la biblioteca Immer que detecta esos cambios y produce un nuevo estado inmutable basado en esos cambios.
+
+
+
+# Borrado de tarea
+
+En `TaskList` debemos agregar un botón asociado a cada tarea de modo que al presionarlo elimine la tarea del store.
+
+
+
+Luego debemos modificar `taskSlice`
+
+```jsx
+import { createSlice } from '@reduxjs/toolkit'
+
+const initialState = [
+  {
+    id: 1,
+    title: "Task 1", 
+    description: "Task 1 description",
+    completed: false
+  }, 
+  {
+    id: 2,
+    title: "Task 2", 
+    description: "Task 2 description",
+    completed: false
+  }
+]
+
+export const taskSlice = createSlice({
+  name: 'task',
+  initialState,
+  reducers: {
+    addTask: (state, action) => {
+      state.push(action.payload)
+    },
+    deleteTask: (state, action) => {
+      const taskFound = state.find(task => task.id === action.payload);
+      if (taskFound) {
+        state.splice(state.indexOf(taskFound),1)
+      }
+    }
+  },
+})
+
+export const { addTask, deleteTask } = taskSlice.actions;
+export default taskSlice.reducer;
+```
+
+:rotating_light: Notar nuevamente que utilizamos lógica "mutante" con `state.splice(state.indexOf(taskFound),1)` pero en realidad no estamos mutando el estado.
+
+
+
+# Edición de tareas
+
+Queremos que sea posible editar una tarea en una página aparte y para eso haremos uso de React Router DOM.
+
+```
+npm install react-router-dom@6
+```
+
+
+
+Lo primero que hacemos es modificar `App` de manera tal que si el usuario está navegando por / le muestro `TaskList` y si está en /create le muestro `TaskForm`.
+
