@@ -6,11 +6,11 @@
 
 ## Introducción
 
-React Router es una biblioteca para crear SPA con las cuales a diferencia de las aplicaciones tradicionales multipágina no haremos una solicitud al servidor para cada página.
+React Router es una biblioteca para crear SPA con las cuales a diferencia de las aplicaciones tradicionales multi-página no haremos una solicitud al servidor para cada página.
 
 Cuando hacemos sitios utilizando React normalmente estaremos creando SPAs (single page applications). Como consecuencia de esto, cuando navegamos a la aplicación, el servidor nos devolverá el HTML y JavaScript necesario para mostrar los distintos componentes de la página. Luego cuando intentamos navegar hacia otra sección, esta petición no llegará al servidor sino que será manejada mediante el navegador y es aquí donde podemos utilizar React Router. 
 
-Tendremos un único div con todo  el código y esto traerá como consecuencia una navegación instantánea.
+Tendremos un único `<div>` con todo  el código y esto traerá como consecuencia una navegación instantánea.
 
 Como React no tiene una solución de ruteo incorporada por defecto utilizaremos esta librería que es la más popular para tal fin.
 
@@ -20,13 +20,9 @@ Cuando hacemos click para dirigirnos a una página diferente del sitio, React Ro
 
 
 
-
-
-
-
 ## Configuración
 
-Utilizaremos Create React App para crear la SPA.
+Utilizaremos **Create React App** para crear la SPA, por lo que primero que ejecutamos es:
 
 ```bash
 npx create-react-app react-router-v6
@@ -34,13 +30,15 @@ npx create-react-app react-router-v6
 
 
 
+Luego instalamos rrd propiamente dicho:
+
 ```bash
 npm install react-router-dom@6
 ```
 
 
 
-### Pasando contenido directo a `element`
+### Pasando **contenido** directo a `element`
 
 En `App.js` vemos una primera implementación del ruteo.
 
@@ -53,7 +51,7 @@ function App() {
       <Routes>
         <Route path='/' element={<h1>Home Page</h1>} />
         <Route path='about' element={<h1>About Page</h1>} />
-          <Route path='products' element={<h1>Products Page</h1>} />
+        <Route path='products' element={<h1>Products Page</h1>} />
       </Routes>
     </BrowserRouter>
   );
@@ -67,11 +65,11 @@ export default App;
 Para cada página debemos utilizar el componente `Route` con dos props `path` con la URL deseada y `element` con lo que queremos renderizar.
 
 * En`path` podemos poner tanto `ruta` como `/ruta`.
-* Es posible colocar ``<BrowserRouter>` en `index.js` en lugar de hacerlo en `App.js`
+* Es posible colocar `<BrowserRouter>` en `index.js` en lugar de hacerlo en `App.js`
 
 
 
-### Pasando componentes a `element`
+### Pasando **componentes** a `element`
 
 En `element` hemos puesto directamente el contenido pero lo más normal y fácil de mantener es poner directamente un componente.
 
@@ -94,7 +92,6 @@ function App() {
 }
 
 export default App;
-
 ```
 
 
@@ -103,7 +100,7 @@ export default App;
 
 Utilizaremos el componente `Link` para navegar las distintas secciones de la SPA.
 
-En el componete `Home` queremos poder navegar hacia /about.
+En el componente `Home` queremos poder navegar hacia `/about`.
 
 ```jsx
 import { Link } from "react-router-dom";
@@ -126,7 +123,7 @@ export default Home;
 
 
 
-Al presionar dicho elemento veremos que no tendremos un *full page refresh* sino que la navegación será instantánea
+:tada: Al presionar dicho elemento veremos que no tendremos un *full page refresh* sino que la navegación será instantánea.
 
 
 
@@ -162,7 +159,7 @@ export default App;
 
 
 
-> En v6 el match mas específico aplica a diferencia de lo que sucedía en versiones anteriores donde era importante el orden. En este caso podremos poner la ruta de manejo de errores primero y sin embargo nos seguirán funcionando el resto de las rutas.
+En la versión 6 de React Router **el match mas específico aplica** a diferencia de lo que sucedía en versiones anteriores donde era importante el orden. En este caso podremos poner la ruta de manejo de errores primero y sin embargo nos seguirán funcionando el resto de las rutas.
 
 
 
@@ -198,9 +195,11 @@ export default App;
 
 
 
-## Nested Routes
+# Nested Routes
 
 En ocasiones vamos a querer tener un shared layout y para eso debemos configurar nested routes.
+
+Por ejemplo si queremos que al ingresar a **/about** nos muestre el componente `Home` y `About` tendríamos que empezar creando nested routes como vemos a continuación en `App`:
 
 ```jsx
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
@@ -228,17 +227,7 @@ export default App;
 
 
 
-Sin embargo si ahora navegamos a /about veremos el contenido de `Home` dado que debemos modificar algo mas.
-
-
-
-## Shared Layout
-
-Para poder visualizar el contenido de las rutas hijas debemos colocar en el componente de la ruta padre el componente `Outlet`
-
-En nuestro caso queremos que al entrar a /about nos muestre el contenido del componente `Home` y de `About` ya que es una ruta anidada y por ende queremos que compartan el layout.
-
-
+A continuación para poder visualizar el contenido de las rutas hijas debemos colocar en el componente de la ruta padre el componente `Outlet`, por lo tanto en nuestro caso en `Home`:
 
 ```jsx
 import { Link, Outlet } from "react-router-dom";
@@ -256,13 +245,13 @@ const Home = () => {
 export default Home;
 ```
 
-
+Ahora si ingresamos a /about veremos ambos contenidos.
 
 ## Navbar Reutilizable
 
-Podemos utilizar entonces las rutas anidadas para generar compartir un layout y esto podemos utilizarlo para generar un Navbar.
+Un caso de utilidad podría ser mostrar un `Navbar` que incluiremos en `Home` de modo que se vea al entrar a todas las rutas (conservando el anidamiento de `App` visto anteriormente)
 
-Vamos a crear un componente `Navbar` y lo hacemos `/components/Navbar.js`
+Vamos a crear un componente `Navbar` y lo hacemos `/components/Navbar.js`.
 
 ```jsx
 import { Link } from "react-router-dom";
