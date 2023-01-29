@@ -155,13 +155,13 @@ import { createSlice } from '@reduxjs/toolkit'
 
 const initialState = [
   {
-    id: 1,
+    id: "1",
     title: "Task 1", 
     description: "Task 1 description",
     completed: false
   }, 
   {
-    id: 2,
+    id: "2",
     title: "Task 2", 
     description: "Task 2 description",
     completed: false
@@ -179,7 +179,10 @@ export const tasksSlice = createSlice({
 export default tasksSlice.reducer
 ```
 
+El id que utilizamos es un string por dos motivos:
 
+1. Utilizaremos la [biblioteca uuid](https://www.npmjs.com/package/uuid) para generar ids únicos que serán de tipo string.
+2. Utilizaremos parámetros en las urls a la hora de editar tareas que también son strings.
 
 ## Nuevos componetes
 
@@ -269,13 +272,13 @@ import { createSlice } from '@reduxjs/toolkit'
 
 const initialState = [
   {
-    id: 1,
+    id: "1",
     title: "Task 1", 
     description: "Task 1 description",
     completed: false
   }, 
   {
-    id: 2,
+    id: "2",
     title: "Task 2", 
     description: "Task 2 description",
     completed: false
@@ -377,13 +380,13 @@ import { createSlice } from '@reduxjs/toolkit'
 
 const initialState = [
   {
-    id: 1,
+    id: "1",
     title: "Task 1", 
     description: "Task 1 description",
     completed: false
   }, 
   {
-    id: 2,
+    id: "2",
     title: "Task 2", 
     description: "Task 2 description",
     completed: false
@@ -425,13 +428,13 @@ import { createSlice } from '@reduxjs/toolkit'
 
 const initialState = [
   {
-    id: 1,
+    id: "1",
     title: "Task 1", 
     description: "Task 1 description",
     completed: false
   }, 
   {
-    id: 2,
+    id: "2",
     title: "Task 2", 
     description: "Task 2 description",
     completed: false
@@ -464,6 +467,8 @@ export default taskSlice.reducer;
 
 # Edición de tareas
 
+### Router 
+
 Queremos que sea posible editar una tarea en una página aparte y para eso haremos uso de React Router DOM.
 
 ```
@@ -472,5 +477,318 @@ npm install react-router-dom@6
 
 
 
-Lo primero que hacemos es modificar `App` de manera tal que si el usuario está navegando por / le muestro `TaskList` y si está en /create le muestro `TaskForm`.
+Lo primero que hacemos es modificar `App` de manera tal que si el usuario está navegando en `/` le muestro `TaskList` y si está en `/create` le muestro `TaskForm`.
 
+```jsx
+import {useSelector} from 'react-redux'
+import TaskForm from './components/TaskForm'
+import TasksList from './components/TasksList'
+import {BrowserRouter, Routes, Route} from 'react-router-dom'
+import Error from './components/Error'
+
+function App() {
+  return (
+    <div>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<TasksList/>} />
+          <Route path="/create-task" element={<TaskForm />} />
+          <Route path="*" element={<Error/>}/>
+        </Routes>
+      </BrowserRouter>
+    </div>
+  )
+}
+
+export default App
+```
+
+También creamos una página de Error que será mostrada cuando la url ingresada no corresponda con ninguna de las establecidas.
+
+
+
+### Navegación
+
+Además queremos que la guardar una nueva tarea nos redireccione a /. Esto lo hacemos con el hook `useNavigate` de :sparkles: React Router :sparkles:.
+
+Por lo tanto en `Task-Form` lo usamos como `const navigate = useNavigate()` y luego al guardar una tarea llamamos a `navigate('/')`
+
+```jsx
+import React, {useState} from 'react'
+import {useDispatch} from 'react-redux'
+import {addTask} from '../features/tasks/taskSlice'
+import {v4 as uuidv4} from 'uuid'
+import {useNavigate} from 'react-router-dom'
+
+function TaskForm() {
+  const [task, setTask] = useState({
+    title: '',
+    description: '',
+    completed: false,
+  })
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+
+  const handleChange = e => {
+    setTask({...task, [e.target.name]: e.target.value})
+  }
+
+  const handleSubmit = e => {
+    e.preventDefault()
+    // console.log(task)
+    dispatch(addTask({ ...task, id: uuidv4() }))
+    navigate('/')
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input type='text' name='title' placeholder='title' onChange={handleChange} />
+      <textarea name='description' placeholder='description' onChange={handleChange} />
+      <button>Save</button>
+    </form>
+  )
+}
+
+export default TaskForm
+```
+
+### Navbar
+
+Creamos un componente `Navbar` con la finalidad de que nos permita navegar de una sección a la otra.
+
+```jsx
+import {useSelector} from 'react-redux'
+import TaskForm from './components/TaskForm'
+import TasksList from './components/TasksList'
+import {BrowserRouter, Routes, Route} from 'react-router-dom'
+import Navbar from './components/Navbar'
+import Error from './components/Error'
+
+function App() {
+  return (
+    <div>
+      <BrowserRouter>
+        <Navbar/>
+        <Routes>
+          <Route path="/" element={<TasksList/>} />
+          <Route path="/create-task" element={<TaskForm />} />
+          <Route path="*" element={<Error/>}/>
+        </Routes>
+      </BrowserRouter>
+    </div>
+  )
+}
+
+export default App
+```
+
+
+
+### Navegación a página de edición
+
+En `TaskList` debemos agregar un modo de editar cada una de las tareas y lo haremos haciendo uso de `Link` de modo que tendremos:
+
+```jsx
+<Link to={`/edit-task/${task.id}`}>Editar</Link>
+```
+
+
+
+`TaskList` completo nos quedará:
+
+```jsx
+import React from 'react'
+import {useDispatch, useSelector} from 'react-redux'
+import { Link } from 'react-router-dom'
+import { deleteTask } from '../features/tasks/taskSlice'
+
+function TasksList() {
+  const tasks = useSelector(state => state.tasks)
+  const dispatch = useDispatch()
+
+  const handleDelete = (id) => {
+    dispatch(deleteTask(id))
+  }
+
+  return (
+    <>
+      {tasks.map(task => (
+        <div key={task.id}>
+          <p>{task.title}</p>
+          <p>{task.description}</p>
+          <button onClick={() => handleDelete(task.id)}>Delete</button>
+          <Link to={`/edit-task/${task.id}`}>Editar</Link>
+        </div>
+      ))}
+    </>
+  )
+}
+
+export default TasksList
+```
+
+
+
+### Ruteo de tarea a editar
+
+Debemos ahora modificar `App` de modo que al ingresar a una url como `/edit-task/1` sepa que se trata de un **id** y renderice el componente `TaskForm` (luego veremos cómo completar los )
+
+
+
+:high_brightness: 
+
+```jsx
+<Route path="/edit-task/:id" element={<TaskForm />}/>
+```
+
+
+
+```jsx
+import {useSelector} from 'react-redux'
+import TaskForm from './components/TaskForm'
+import TasksList from './components/TasksList'
+import {BrowserRouter, Routes, Route} from 'react-router-dom'
+import Navbar from './components/Navbar'
+import Error from './components/Error'
+
+function App() {
+  return (
+    <div>
+      <BrowserRouter>
+        <Navbar/>
+        <Routes>
+          <Route path="/" element={<TasksList/>} />
+          <Route path="/create-task" element={<TaskForm />} />
+          <Route path="/edit-task/:id" element={<TaskForm />}/>
+          <Route path="*" element={<Error/>}/>
+        </Routes>
+      </BrowserRouter>
+    </div>
+  )
+}
+
+export default App
+```
+
+
+
+### Cargar datos de tarea
+
+`TaskForm` lo usamos entonces para crear notas nuevas y para editar existentes. Hacemos uso del hook `useParams` para obtener el `id` de la tarea que estamos editando:
+
+```
+const {id} = useParams()
+```
+
+Como queremos obtener la tarea cuyo `id` recibimos como parámetro utilizamos un `useEffect` que apenas carga el componente obtiene esa tarea del store y carga el formulario con esa info.
+
+Además guardar si estamos en creación o edición tendremos que despachar acciones distintas cosa que también hacemos de acuerdo a la presencia o no de id.
+
+`TaskForm` nos queda (despachando la acción `editTask` que todavía no hemos creado).
+
+```jsx
+import React, {useEffect, useState} from 'react'
+import {useDispatch, useSelector} from 'react-redux'
+import {addTask, editTask} from '../features/tasks/taskSlice'
+import {v4 as uuidv4} from 'uuid'
+import {useNavigate, useParams} from 'react-router-dom'
+
+function TaskForm() {
+  const [task, setTask] = useState({
+    title: '',
+    description: '',
+    completed: false,
+  })
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const params = useParams()
+  const tasks = useSelector(state => state.tasks)
+
+  useEffect(() => {
+    if (params.id) {
+      const editingTask = tasks.find(task => task.id === params.id)
+      if (editingTask) {
+        setTask(editingTask)
+      }
+    }
+  }, [])
+
+  const handleChange = e => {
+    setTask({...task, [e.target.name]: e.target.value})
+  }
+
+  const handleSubmit = e => {
+    e.preventDefault()
+
+    if (params.id) {
+      dispatch(editTask(task))
+    } else {
+      dispatch(addTask({...task, id: uuidv4()}))
+    }
+    navigate('/')
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input type='text' name='title' placeholder='title' onChange={handleChange} value={task.title} />
+      <textarea name='description' placeholder='description' onChange={handleChange} value={task.description} />
+      <button>Save</button>
+    </form>
+  )
+}
+
+export default TaskForm
+
+```
+
+En `TaskSlice` debemos agregar `editTask`:
+
+```
+import { createSlice } from '@reduxjs/toolkit'
+
+const initialState = [
+  {
+    id: '1',
+    title: "Task 1", 
+    description: "Task 1 description",
+    completed: false
+  }, 
+  {
+    id: '2',
+    title: "Task 2", 
+    description: "Task 2 description",
+    completed: false
+  }
+]
+
+export const taskSlice = createSlice({
+  name: 'task',
+  initialState,
+  reducers: {
+    addTask: (state, action) => {
+      state.push(action.payload)
+    },
+    editTask: (state, action) => {
+      const { id, title, description } = action.payload;
+      const taskFound = state.find(task => task.id === id);
+      if (taskFound) {
+        taskFound.title = title;
+        taskFound.description = description;
+      }
+
+    },
+    deleteTask: (state, action) => {
+      const taskFound = state.find(task => task.id === action.payload);
+      if (taskFound) {
+        state.splice(state.indexOf(taskFound),1)
+      }
+    },
+    
+  },
+})
+
+export const { addTask, editTask, deleteTask } = taskSlice.actions;
+export default taskSlice.reducer;
+```
+
+Notar que a la hora de actualizar simplemente podemos utilizar nuevamente lógica mutante y modificar `taskFound.title = title;` y quedará actualizado el store.
