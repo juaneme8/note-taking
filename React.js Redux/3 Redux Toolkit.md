@@ -1,6 +1,6 @@
 # Redux Toolkit
 
-* Basado en el [video](https://youtu.be/w2rAP7d6ndg) de Fazt Code.
+* :pencil: Basado en el [video](https://youtu.be/w2rAP7d6ndg) de Fazt Code (COMPLETO)
 
 
 
@@ -792,3 +792,7 @@ export default taskSlice.reducer;
 ```
 
 Notar que a la hora de actualizar simplemente podemos utilizar nuevamente lógica mutante y modificar `taskFound.title = title;` y quedará actualizado el store.
+
+
+
+:warning: En el video se ven nociones iniciales de TailwindCSS pero las mismas no aportan nuevos conceptos por lo que no se ven reflejadas en estas notas.
