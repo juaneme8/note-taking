@@ -167,9 +167,9 @@ return (
 
 ## de Vite.js a TypeScript
 
-Segun la documentación de Vite soporta TypeScript out of the box, por lo que no debemos realizar nada en particular:
+Según la [documentación](https://vitejs.dev/guide/features.html) de Vite soporta TypeScript out of the box, por lo que no debemos realizar nada en particular:
 
-```
+```bash
 npm install typescript @types/react
 ```
 
