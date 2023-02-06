@@ -1005,7 +1005,95 @@ En caso de querer suspender el rebase podríamos ejecutar `git rebase --abort` p
 
 ## Aplastar Commits con rebase
 
-rebase también nos permite aplastar commits en uno sólo de modo de limpiar un poco el historial.
+`git rebase` también nos permite aplastar commits en uno sólo de modo de limpiar un poco el historial.
+
+
+
+# Interactive rebase
+
+:link: Basado en el [video de freecodecamp de Tobias Günther ](https://youtu.be/qsTthZi23VE)
+
+Interactive rebase nos permite el manipular el historial de commits, es decir que nos permite realizar cambios en los commits luego de que estos sucedieron. Esto podrá ser útil para:
+
+* Cambiar el mensaje de commits
+* Eliminar commits
+* Reordenar commits
+* Combinar múltiples commits en uno
+* Editar o dividir commits existentes en múltiples.
+
+
+
+:warning: Tenemos que tener presente que **interactive rebase reescribe el commit history** (los commits manipulados tendrán un nuevo hash id) por lo que no debemos usarlo en commits que ya hayamos pusheado a un repositorio remoto. Debemos utilizarlo para limpiar u optimizar nuestro propio historial de commits en nuestra feature branch local antes de mergear a una rama compartida.
+
+## Change old commit message
+
+Podemos utilizar interactive rebase para modificar el mensaje de un commit determinado (si fuera el último utilizaríamos amend).
+
+```
+git log --oneline
+```
+
+![image-20230206101617942](1 Introducción.assets/image-20230206101617942.png)
+
+Lo primero que debemos hacer es establecer el rango de commits que queremos modificar. Supongamos que queremos modificar el commit con el hash **6bcf266**, en ese caso nos ubicamos como mínimo sobre el padre de aquel que queremos manipular, a este lo llamamos **base commit**.
+
+```
+git rebase -i HEAD~3
+```
+
+> Tener en cuenta la posición en la que se encuentra `HEAD` y que queremos ubicarnos tres commits por debajo.
+>
+> Otra forma podría ser referirnos directamente al hash 2b504be.
+
+En ese momento nos aparecerá una ventana donde indicaremos qué tipo de manipulación queremos realizar cambiando la palabra `pick` por el comando deseado.
+
+![image-20230206102558500](1 Introducción.assets/image-20230206102558500.png)
+
+Como en nuestro caso queremos cambiar el commit message en el **6bcf266** escribimos `reword`, guardamos y cerramos el archivo.
+
+![image-20230206102658626](1 Introducción.assets/image-20230206102658626.png)
+
+En ese momento nos aparecerá una nueva ventana donde podremos editar el mensaje y luego guardar.
+
+![image-20230206102926967](1 Introducción.assets/image-20230206102926967.png)
+
+## Combine commits
+
+Supongamos que tenemos un log como el siguiente:
+
+![image-20230206103104789](1 Introducción.assets/image-20230206103104789.png)
+
+Queremos combinar los dos commits seleccionados eb972b4 y 2b504be.
+
+Nuevamente nos ubicamos como mínimo en el commit padre de aquellos que queremos modificar (el 0023cdd):
+
+```
+git rebase -i HEAD~4
+```
+
+En los commits que queremos unir agregamos la palabra:
+
+Como podemos ver en los comandos:
+
+```
+# s, squash <commit> = use commit, but meld into previous commit
+```
+
+Por lo tanto de los dos commits al más nuevo le agregamos la palabra squash.
+
+![image-20230206103627546](1 Introducción.assets/image-20230206103627546.png)
+
+Al guardar nos permitirá completar el commit message deseado:
+
+![image-20230206104002366](1 Introducción.assets/image-20230206104002366.png)
+
+Al guardar y cerrar nos aparecerá **Successfully rebased and updated refs/heads/master**
+
+Tener presente que estamos creando un nuevo commit.
+
+
+
+
 
 # `git stash`
 
@@ -1034,23 +1122,93 @@ Con `git clean --dry-run` podemos ver una previsualización de los archivos que 
 
 # `git cherry-pick`
 
-El comando `git cherry-pick` se utiliza cuando hemos estado trabajando en una rama y queremos en `main` (o en otra rama) sólo uno de esos avances. 
+> :link: Se sumaron aportes del [video de freecodecamp de Tobias Günther ](https://youtu.be/qsTthZi23VE)
 
-Debemos tener presente que el uso de `cherry-pick` es considerado una mala práctica pues estamos reconstruyendo la historia. Es aconsejable utilizar en cambio `merge`.
+Normalmente cuando queremos integrar commits usamos comandos como merge o rebase e integramos **todos** los commits de una rama en el current HEAD branch. En ocasiones sólo queremos  uno de esos avances y es allí donde resulta útil el comando `git cherry-pick`. 
 
-Suponemos que estuvimos trabajando en la rama `features` y en ella realizamos tres commits `c1`, `c2` y `c3` y queremos traernos a `main` sólo los cambios introducidos en `c1`. Desde la rama `main` debo ejecutar `git cherry-pick id-c1`. Si a continuación ejecutamos `git log --oneline` veremos ese commit como si hubiera sido realizado en la rama `main`. 
+:warning: Debemos tener presente que el uso de `cherry-pick` es considerado una mala práctica pues estamos reconstruyendo la historia. Es aconsejable utilizar en cambio `merge` o `rebase` a menos que tengamos una muy buena razón para hacerlo. 
 
-> Si luego decido realizar merge de `features` en `main` puede que nos aparezcan conflictos. De hecho veremos el mensaje de un commit dos veces (tendrá distinto id).
+Una situación en la que podríamos utilizar cherry-pick podría ser si realizamos un commit en un rama distinta a la que debíamos hacerlo (por ejemplo si queríamos hacerlo en un feature branch `feature/newsletter` y en cambio lo hicimos directamente `main` o en otro long running branch cosa que muchos equipos no lo desean).
+
+![image-20230206115036335](1 Introducción.assets/image-20230206115036335.png)
+
+
+
+Desde la rama `feature/newsletter` debo ejecutar `git cherry-pick <id-c3>`. Si a continuación ejecutamos `git log --oneline` veremos ese commit como si hubiera sido realizado en la rama `feature-X`. 
+
+Finalmente para limpiar `main`
+
+```
+git reset --hard HEAD~1
+```
+
+
 
 # `git reflog`
 
-El comando `git reflog` tiene su nombre basado en *reference logs* y nos permite conocer cuando cambio el apuntador de los branches. Por ejemplo `HEAD@{2}` significa "donde solía estar `HEAD` hace dos movimientos".
+:link: Se sumaron aportes del [video de freecodecamp de Tobias Günther ](https://youtu.be/qsTthZi23VE)
 
-Por ejemplo ante una situación en la que hemos cometido un error y no sabemos bien qué fue lo que sucedió ya que `git log` no nos ayuda, podemos ejecutar `git reflog` y buscar un commit previo a la aparición de este problema. Luego podremos poner por ejemplo `git reset --soft HEAD@{4}` (mantiene lo que sea que tengamos en staging, en staging) y `git reset --hard HEAD@{4}`.  
+El comando `git reflog` tiene su nombre basado en *reference logs* y nos permite conocer cuando cambio el apuntador de los branches. 
 
-El `git reset --hard` debemos usarlo solo en situaciones donde algo se rompió.
+```
+git reflog
+```
 
-Debemos tener presente que al pushear se verá como si no hubiera pasado nada.
+Por ejemplo `HEAD@{2}` significa "donde solía estar `HEAD` hace dos movimientos".
+
+Podemos pensarlo como un diario donde git loguea todo movimiento del puntero `HEAD`. Cada vez que realicemos un movimiento importante como un commit, checkout, merge, rebase, cherry-pick, reset será documentado en la salida de este comando.
+
+
+
+## Recovering deleted commits
+
+El comando `git reflog` nos será útil cuando queramos recuperar commits eliminados, supongamos que tenemos un historial de commits como el siguiente:
+
+![image-20230206124159586](1 Introducción.assets/image-20230206124159586.png)
+
+Luego vemos que c4 y c3 no nos interesan y resetamos:
+
+```
+git reset --hard <id-c2>
+```
+
+Instantes después nos damos cuenta que esto fue un gran error y usaremos el comando `git reflog`.
+
+![image-20230206133850899](1 Introducción.assets/image-20230206133850899.png)
+
+Una posible solución podría ser ejecutar `git reset --hard e5b19e4` mientras que optamos por crear una nueva rama partiendo de ese commit:
+
+```
+git branch happy-ending e5b19e4
+```
+
+>  Otra opción sería utilizar en lugar de commit id por ejemplo `HEAD@{4}` 
+
+## Recovering deleted branches
+
+El comando `git reflog` nos será útil también cuando queramos recuperar ramas eliminadas
+
+![image-20230206134633268](1 Introducción.assets/image-20230206134633268.png)
+
+Supongamos que tenemos un branch que contiene un commit que no tenemos en otra rama, luego nos movemos a `main` y eliminamos esa rama:
+
+```
+git branch -D feature/login
+```
+
+En ese momento si ejecutamos `git reflog` veremos:
+
+![image-20230206135815700](1 Introducción.assets/image-20230206135815700.png)
+
+En ese caso vemos que el último log fue cuando nos movimos a `main` (en la imagen aparece como `master`) por lo que queremos movernos al siguiente punto:
+
+```bash
+git branch feature/login b1c249b
+```
+
+
+
+
 
 # `git grep`
 
