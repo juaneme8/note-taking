@@ -796,3 +796,9 @@ Notar que a la hora de actualizar simplemente podemos utilizar nuevamente lógic
 
 
 :warning: En el video se ven nociones iniciales de TailwindCSS pero las mismas no aportan nuevos conceptos por lo que no se ven reflejadas en estas notas.
+
+
+
+# Migración a TypeScript
+
+Según la [documentación de Vite](https://vitejs.dev/guide/) TypeScript ya viene disponible por defecto.
