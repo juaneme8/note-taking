@@ -1466,5 +1466,20 @@ https://dev.to/rhymu8354/git-renaming-the-master-branch-137b
 
 
 
+# Submodules
 
+En ocasiones vamos a querer agregar bibliotecas u otro third party code en nuestro proyecto. Si bien esto podemos hacerlo manualmente descargando los archivos, copiándolos en nuestro proyecto y haciendo un commit al repositorio git. Esta no es la implementación más limpia ya que es susceptible de algunos problemas. Estamos mezclando código propio con ajeno y como la librería es un proyecto en sí mismo y debería estar separado del nuestro. Además ante cambios en features, bugfixes, etc tendremos repetir el proceso para actualizar el código. Git nos ofrece una solución a este problema con submodules.
 
+Un submódulo es un repositorio standard de git anidado dentro de un repositorio padre.
+
+Es aconsejable crear una carpeta `lib` o `vendor` para una separación más limpia:
+
+```
+mkdir lib
+cd lib
+git submodule add https://github.com/djyde/ToProgress
+```
+
+Como consecuencia de esto veremos que nos ha creado una carpeta `ToProgress` con el código de dicho repositorio y además tenemos una carpeta `.git` dentro.
+
+Tener presente que se trata de un *fully featured git repository* teniendo en cuenta que el **contenido de ese repositorio no se almacena en el repositorio padre**. Como podemos ver en el archivo `.gitmodules` que se ha creado,el repositorio padre solo almacena la `url` del repositorio `https://github.com/djyde/ToProgress`, y el path local dentro del proyecto `/lib/ToProgress`.
