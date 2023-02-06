@@ -2,21 +2,19 @@
 
 :link: Basado en el [video de freeCodeCamp](https://youtu.be/59IXY5IDrBA).
 
-:link: Basado en la [playlist](https://www.youtube.com/watch?v=OMQ2QARHPo0&list=PL4cUxeGkcC9iVKmtNuCeIswnQ97in2GGf&ab_channel=TheNetNinja) de The Net Ninja.
+:link: Basado en la [playlist](https://www.youtube.com/watch?v=OMQ2QARHPo0&list=PL4cUxeGkcC9iVKmtNuCeIswnQ97in2GGf&ab_channel=TheNetNinja) de The Net Ninja. (VIDEO 1 COMPLETO)
 
 ## Introducción
 
-React Router es una biblioteca para crear SPA con las cuales a diferencia de las aplicaciones tradicionales multi-página no haremos una solicitud al servidor para cada página.
+Cuando hacemos sitios utilizando React normalmente estaremos creando SPAs (single page applications). En este tipo de aplicaciones cuando navegamos a la aplicación, el servidor nos devolverá el HTML y código JavaScript de React necesario para mostrar los distintos componentes de la página. Luego cuando intentamos navegar hacia otra sección, esta petición será interceptada y no llegará al servidor. Esto será manejado por el frontend y React Router mostrará el componente acorde a la página deseada.
 
-Cuando hacemos sitios utilizando React normalmente estaremos creando SPAs (single page applications). Como consecuencia de esto, cuando navegamos a la aplicación, el servidor nos devolverá el HTML y JavaScript necesario para mostrar los distintos componentes de la página. Luego cuando intentamos navegar hacia otra sección, esta petición no llegará al servidor sino que será manejada mediante el navegador y es aquí donde podemos utilizar React Router. 
+Como tendremos todo el código en un único `<div>` la navegación será instantánea.
 
-Tendremos un único `<div>` con todo  el código y esto traerá como consecuencia una navegación instantánea.
-
-Como React no tiene una solución de ruteo incorporada por defecto utilizaremos esta librería que es la más popular para tal fin.
+La utilización de una biblioteca como React Router es necesaria ya que React no tiene un mecanismo de ruteo incorporado por defecto.
 
 ![image-20230105075625371](Introducción.assets/image-20230105075625371.png)
 
-Cuando hacemos click para dirigirnos a una página diferente del sitio, React Router intercepta esta petición impidiendo que llegue al servidor y cambia el contenido dependiendo de qué fue lo que solicitamos.
+
 
 
 
@@ -30,7 +28,7 @@ npx create-react-app react-router-v6
 
 
 
-Luego instalamos rrd propiamente dicho:
+Luego instalamos React Router propiamente dicho:
 
 ```bash
 npm install react-router-dom@6
@@ -65,7 +63,9 @@ export default App;
 Para cada página debemos utilizar el componente `Route` con dos props `path` con la URL deseada y `element` con lo que queremos renderizar.
 
 * En`path` podemos poner tanto `ruta` como `/ruta`.
-* Es posible colocar `<BrowserRouter>` en `index.js` en lugar de hacerlo en `App.js`
+* Es posible colocar `<BrowserRouter>` en `index.js` en lugar de hacerlo en `App.js`.
+* Si cambiamos en al barra de dirección de **/** a **/about** por ejemplo y le damos ENTER si bien estaríamos visualizando uno u otro componente, en ese caso sí estaríamos haciendo un nuevo request al server, cosa que evitaremos con los componentes de RR `Link` o `NavLink`. 
+* :vertical_traffic_light: Para darle un mayor nivel semántico podríamos colocar abarcando a `<Routes>` un `<main>`.
 
 
 
@@ -98,6 +98,8 @@ export default App;
 
 ## Navegación
 
+### `Link`
+
 Utilizaremos el componente `Link` para navegar las distintas secciones de la SPA.
 
 En el componente `Home` queremos poder navegar hacia `/about`.
@@ -123,7 +125,13 @@ export default Home;
 
 
 
-:tada: Al presionar dicho elemento veremos que no tendremos un *full page refresh* sino que la navegación será instantánea.
+:tada: Como ya dijimos al presionar dicho elemento veremos que no tendremos un *full page refresh* sino que la navegación será instantánea.
+
+
+
+### `NavLink`
+
+`NavLink` es un tipo especial de `Link` que sabe si está "activo" o no. Esto es útil a la hroa de crear menus de navegación como un breadcrumb o tabs donde nos resultaría útil mostrar cuál opción está actualmente seleccionada.
 
 
 
@@ -165,7 +173,11 @@ En la versión 6 de React Router **el match mas específico aplica** a diferenci
 
 ## Layout
 
-En ocasiones vamos a querer tener el mismo layout para todos los componentes. En ese caso **por fuera de `Routes`** debemos colocar aquellos elementos que queremos reutilizar.
+En ocasiones vamos a querer tener el mismo layout para todos los componentes. 
+
+Un caso típico de uso será para implementar un navbar con todos los enlaces a las distinas secciones.
+
+En ese caso **por fuera de `Routes`** debemos colocar aquellos elementos que queremos reutilizar.
 
 ```jsx
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
@@ -193,7 +205,9 @@ export default App;
 
 ```
 
+* :vertical_traffic_light: Nuevamente para darle un mayor nivel semántico podríamos envolver el `<nav>` con un `<head>`.
 
+  
 
 # Nested Routes
 
