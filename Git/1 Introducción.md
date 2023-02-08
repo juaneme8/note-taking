@@ -1468,6 +1468,8 @@ https://dev.to/rhymu8354/git-renaming-the-master-branch-137b
 
 # Submodules
 
+ :link: Basado en el [video de freecodecamp de Tobias Günther ](https://youtu.be/qsTthZi23VE)
+
 En ocasiones vamos a querer agregar bibliotecas u otro third party code en nuestro proyecto. Si bien esto podemos hacerlo manualmente descargando los archivos, copiándolos en nuestro proyecto y haciendo un commit al repositorio git. Esta no es la implementación más limpia ya que es susceptible de algunos problemas. Estamos mezclando código propio con ajeno y como la librería es un proyecto en sí mismo y debería estar separado del nuestro. Además ante cambios en features, bugfixes, etc tendremos repetir el proceso para actualizar el código. Git nos ofrece una solución a este problema con submodules.
 
 Un submódulo es un repositorio standard de git anidado dentro de un repositorio padre.
@@ -1482,4 +1484,112 @@ git submodule add https://github.com/djyde/ToProgress
 
 Como consecuencia de esto veremos que nos ha creado una carpeta `ToProgress` con el código de dicho repositorio y además tenemos una carpeta `.git` dentro.
 
-Tener presente que se trata de un *fully featured git repository* teniendo en cuenta que el **contenido de ese repositorio no se almacena en el repositorio padre**. Como podemos ver en el archivo `.gitmodules` que se ha creado,el repositorio padre solo almacena la `url` del repositorio `https://github.com/djyde/ToProgress`, y el path local dentro del proyecto `/lib/ToProgress`.
+Tener presente que se trata de un repositorio git con todas sus características, teniendo en cuenta que el **contenido de ese repositorio no se almacena en el repositorio padre**. 
+
+
+
+* :paperclip: `.gitmodules` este archivo se creará en la raíz y veremos que del repositorio padre solo almacena la ``url = https://github.com/djyde/ToProgress` y el `path = /lib/ToProgress`.
+* :paperclip: `.git/config` también agrega información similar.
+*  :file_folder:`.git/modules/lib/ToProgress` git tendrá una copia cada repositorio de submodulos.
+
+
+
+Luego de agregar ese submódulo nos aparecerán los siguientes cambios que tendremos que commitear:
+
+![image-20230207165523491](C:\Users\JuaNeMe\AppData\Roaming\Typora\typora-user-images\image-20230207165523491.png)
+
+
+
+## Clonar proyecto con submódulos
+
+Analizaremos ahora qué sucede cuando clonamos un proyecto que cuenta con submodules:
+
+```
+git clone https://github.com/apache/airflow.git
+```
+
+Veremos que por haber utilizado el clonado default que hemos hecho, las carpetas de submodulos (de acciones en este caso) están vacías. Por ejemplo la carpeta`.github/actions/checks-action`.
+
+Hasta ahora sabemos que el repositorio padre no contiene los archivos de los submodules sino sólo la configuración
+
+```
+git submodule update --init --recursive
+```
+
+Ahora lograremos que se relllenen las carpetas con el clonado de los repositorios de los submodulos.
+
+Podríamos lograr lo mismo que hicimos con estos dos comandos con uno solo haciendo:
+
+```
+git clone --recurse-submodules https://github.com/apache/airflow.git
+```
+
+En un repositorio normal hacemos checkout a un branch y automáticamente el último commit de esa rama es la checkout revision. Si realizamos nuevos commits la revisión siempre será el commit mas nuevo. Al trabajar con submodules en lugar de hacer checkout a una rama como sucede con repositorios normales, estaremos haciendo checkout a un commit en particular. Queremos asegurar que tenemos la revisión deseada del código (la mayoría de los casos será código de una biblioteca).
+
+
+
+# Search & Find
+
+:link: Basado en el [video de freecodecamp de Tobias Günther ](https://youtu.be/qsTthZi23VE)
+
+Es posible filtrar en el historial de commits.
+
+
+
+* Por fecha
+
+  Si queremos mostrar los commits a partir de una fecha:
+
+  ```
+  git log --after="2023-1-2"
+  ```
+
+  ```
+  git log --since=2023-01-15
+  ```
+
+  Notar que podemos usar comillas o no usarlas y colocar el mes como 01 o como 1.
+
+  ```
+  git log --before=2023-2-1
+  ```
+
+  ```
+  git log --until=2023-2-1
+  ```
+
+  
+
+* Por mensaje
+
+  ```
+  git log --grep="mensaje"
+  ```
+
+  Tener presente que acepta regular expressions.
+
+* Por autor
+
+  ```
+  git log --author="Juan"
+  ```
+
+  
+
+* Por archivo
+
+  Cuando queremos buscar los commits donde modificamos un archivo en particular
+
+  ```
+  git log -- README.md
+  ```
+
+  El doble -- es para asegurarnos que git no se confunda el nombre de archivo con el nombre de rama.
+
+* Por rama
+
+  ```
+  git log feature/login..main
+  ```
+
+  Cuando queremos ver todos los commits que están en main pero no en feature/login.
