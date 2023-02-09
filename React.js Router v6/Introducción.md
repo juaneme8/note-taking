@@ -2,7 +2,7 @@
 
 :link: Basado en el [video de freeCodeCamp](https://youtu.be/59IXY5IDrBA).
 
-:link: Basado en la [playlist](https://www.youtube.com/watch?v=OMQ2QARHPo0&list=PL4cUxeGkcC9iVKmtNuCeIswnQ97in2GGf&ab_channel=TheNetNinja) de The Net Ninja. (VIDEO 1 COMPLETO)
+:link: Basado en la [playlist](https://www.youtube.com/watch?v=OMQ2QARHPo0&list=PL4cUxeGkcC9iVKmtNuCeIswnQ97in2GGf&ab_channel=TheNetNinja) de The Net Ninja. (VIDEO 2 COMPLETO)
 
 ## Introducción
 
@@ -18,7 +18,7 @@ La utilización de una biblioteca como React Router es necesaria ya que React no
 
 
 
-## Configuración
+## Getting started
 
 Utilizaremos **Create React App** para crear la SPA, por lo que primero que ejecutamos es:
 
@@ -36,9 +36,11 @@ npm install react-router-dom@6
 
 
 
-### Pasando **contenido** directo a `element`
+# Implementación previa a v6.4
 
-En `App.js` vemos una primera implementación del ruteo.
+## Pasando **contenido** directo a `element`
+
+A continuación modificamos `App.js` para tener una primera implementación del ruteo.
 
 ```jsx
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
@@ -58,7 +60,7 @@ function App() {
 export default App;
 ```
 
-
+Cuando nos referimos a la ruta principal en lugar de colocar  `<Route path='/' element={...}` podemos usar `<Route index element={...}>`
 
 Para cada página debemos utilizar el componente `Route` con dos props `path` con la URL deseada y `element` con lo que queremos renderizar.
 
@@ -69,7 +71,7 @@ Para cada página debemos utilizar el componente `Route` con dos props `path` co
 
 
 
-### Pasando **componentes** a `element`
+## Pasando **componentes** a `element`
 
 En `element` hemos puesto directamente el contenido pero lo más normal y fácil de mantener es poner directamente un componente.
 
@@ -98,7 +100,7 @@ export default App;
 
 ## Navegación
 
-### `Link`
+## `Link`
 
 Utilizaremos el componente `Link` para navegar las distintas secciones de la SPA.
 
@@ -129,9 +131,13 @@ export default Home;
 
 
 
-### `NavLink`
+## `NavLink`
 
-`NavLink` es un tipo especial de `Link` que sabe si está "activo" o no. Esto es útil a la hroa de crear menus de navegación como un breadcrumb o tabs donde nos resultaría útil mostrar cuál opción está actualmente seleccionada.
+`NavLink` es un tipo especial de `Link` que sabe si está "activo" o no. Esto es útil a la hora de crear menus de navegación como un breadcrumb o tabs donde nos resultaría útil mostrar cuál opción está actualmente seleccionada.
+
+Si analizamos en las DevTools veremos que tenemos un elemento `<a>` al cual cuando está activo se le agrega `class="active"`.
+
+En `index.css` establecemos los estilos que nos permitan diferenciar cuando un elemento de la navegación esté activo.
 
 
 
@@ -209,7 +215,7 @@ export default App;
 
   
 
-# Nested Routes
+## Nested Routes
 
 En ocasiones vamos a querer tener un shared layout y para eso debemos configurar nested routes.
 
@@ -314,3 +320,18 @@ const Home = () => {
 export default Home;
 ```
 
+
+
+# Implementación desde v6.4
+
+A partir de la versión 6.4 en lugar de utilizar el componente `<BrowserRouter>` utilizaremos otra metodología como veremos a continuación.
+
+En `App.js`:
+
+```jsx
+
+```
+
+
+
+Creamos una carpeta `layouts` y en ella el componente `RootLayout` que debe tener un `<Outlet/>` que garantiza que se muestre el contenido de las rutas anidadas.
