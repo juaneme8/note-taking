@@ -75,7 +75,7 @@ div{
 	display:grid;
 }
 ```
-De esta manera logramos tener un *grid container* y automáticamente todos los elementos anidados pasan a ser *grid items*  
+De esta manera logramos tener un *grid container* y automáticamente todos los elementos anidados pasan a ser *grid items*.
 Como el `<div>` es un elemento de bloque que tiene por default todo el ancho de la página (o el contenedor dentro del cual esté), el grid también lo tendrá. 
 
 ## grid-template-columns
