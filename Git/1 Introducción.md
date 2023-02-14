@@ -428,7 +428,65 @@ Si ahora hacemos un cambio veremos nuevamente: **Changes not staged for commit:*
 
 # `git show`
 
-El comando `git show` nos permite obtener los cambios introducidos por el último commit y quién los ha efectuado.
+El comando `git show` nos permite obtener información sobre los cambios introducidos por un determinado commit (autor, fecha, archivos modificados), tag, blob, etc.
+
+
+
+* Si queremos obtener información del último commit:
+
+  ```
+  git show
+  git show HEAD
+  ```
+
+
+
+* Si queremos obtener información de un commit en particular:
+
+  ```
+  git show <commit-id>
+  ```
+
+  
+
+* Si queremos obtener información de un merge commit debemos utilizar:
+
+  ```
+  git show -m <commit-id>
+  ```
+
+* Si queremos obtener información de un tag en particular:
+
+  ```
+  git show v2.5.1
+  ```
+
+  > Con `git tag -l` podríamos listar los tags.
+
+
+
+
+
+# `git show-branch`
+
+El comando `git show-branch` nos muestra las ramas y sus cambios:
+
+* Si queremos mostrar las ramas locales y sus cambios:
+
+  ```
+  git show-branch
+  ```
+
+* Si queremos mostrar las ramas locales y remotas y sus cambios:
+
+  ```
+  git show-branch --all
+  git show-branch -a
+  ```
+
+  
+
+
 
 # `git help`
 
@@ -463,7 +521,76 @@ Por ejemplo `git log --oneline --graph --decorate --all`
 -   `--stat`: veo la cantidad de cambios `+` y `-` que se hicieron en cada archivo con cada commit.
 -   `--patch` similar al anterior pero para mostrar además qué información fue agregada o quitada en cada archivo modificado en cada commit.
 -   `--author="Juan"` me aparecerán todos los commits realizados por un usuario que coincida con la cadena ingresada. No hace falta poner el nombre exacto.
--   
+
+
+
+# Search & Find
+
+:link: Basado en el [video de freecodecamp de Tobias Günther ](https://youtu.be/qsTthZi23VE)
+
+Es posible filtrar en el historial de commits.
+
+
+
+* Por fecha
+
+  Si queremos mostrar los commits a partir de una fecha:
+
+  ```
+  git log --after="2023-1-2"
+  ```
+
+  ```
+  git log --since=2023-01-15
+  ```
+
+  Notar que podemos usar comillas o no usarlas y colocar el mes como 01 o como 1.
+
+  ```
+  git log --before=2023-2-1
+  ```
+
+  ```
+  git log --until=2023-2-1
+  ```
+
+  
+
+* Por mensaje
+
+  ```
+  git log --grep="mensaje"
+  ```
+
+  Tener presente que acepta regular expressions.
+
+* Por autor
+
+  ```
+  git log --author="Juan"
+  ```
+
+  
+
+* Por archivo
+
+  Cuando queremos buscar los commits donde modificamos un archivo en particular
+
+  ```
+  git log -- README.md
+  ```
+
+  El doble -- es para asegurarnos que git no se confunda el nombre de archivo con el nombre de rama.
+
+* Por rama
+
+  ```
+  git log feature/login..main
+  ```
+
+  Cuando queremos ver todos los commits que están en main pero no en feature/login.
+
+
 
 # `git diff`
 
@@ -686,8 +813,7 @@ Con `git fetch --all` obtenemos todas las las ramas remotas.
 Con `git checkout features` cambiamos al branch `features`.
 Con `git checkout -b features2` creamos el branch `features2` y saltamos a él a la vez.
 
-Con `git show-branch` mostramos las ramas locales y sus cambios.
-Con `git show-branch --all` mostramos las ramas locales y remotas y sus cambios.
+
 
 Con `gitk` abrimos un entorno gráfico en el cual podemos ver la historia (debemos estar en Git Bash para poder hacerlo).
 
@@ -900,6 +1026,8 @@ Luego podremos utilizarlo con `git hist` y si queremos obtener la misma informac
 En los proyectos de código abierto es habitual encontrarnos con etiquetas que hacen referencia a la versión del código. Por lo general son útiles cuando estamos en GitHub, ya que así como tenemos el apartado de **ramas** tenemos uno de **tags** donde veremos las distintas etiquetas creadas y al hacer click navegaremos a esos cambios.
 
 Es posible etiquetar puntos específicos en los cambios de código que representan ciertos releases, esta funcionalidad se usa típicamente para marcar versiones de lanzamiento (v1.0, por ejemplo). 
+
+## `git tag`
 
 El modo de crear una etiqueta consiste en primer lugar en copiar el hash del commit al cual queremos referenciar (podremos copiar sólo la versión reducida de dicho hash) `git tag -a v0.1 -m "Versión preliminar" 1b56158`. De este modo estaremos agregando una referencia en `refs/tags/`.
 
@@ -1536,68 +1664,49 @@ En un repositorio normal hacemos checkout a un branch y automáticamente el últ
 
 
 
-# Search & Find
+# Husky y Lint-Staged
 
-:link: Basado en el [video de freecodecamp de Tobias Günther ](https://youtu.be/qsTthZi23VE)
+:link: Basado en el [video de Carlos Azaustre](https://youtu.be/YWBrzwSDpo8)
 
-Es posible filtrar en el historial de commits.
+**Husky** se basa en los Git Hooks que son scripts que se ejecutan antes o después de determinados comandos de git. Por ejemplo el hook pre commit se ejecuta antes de realizar el commit, por lo que podríamos tener un linter y una batería de tests y solo si todo es exitoso se realizará el commit.
+
+Como el linteo de todos los archivos en un proyecto de magnitud nos llevaría bastante tiempo, con **lint-staged** nos aseguramos lintear solo los archivos que hacemos modificado y que han pasado por el staging en el commit que estamos realizando.
+
+Nos vamos a basar en una aplicación de Node.js y como Husky funciona como git hooks debemos crear un repositorio.
+
+```
+npm init -y
+git init
+echo node_modules>>.gitignore
+```
+
+:warning: Notar que estamos haciendo *append* debido a que usamos `>>` con `>` simplemente estaríamos haciendo *overwrite*.
+
+```
+npm i -D husky lint-staged
+```
 
 
 
-* Por fecha
+## Crear `.lintstagedrc`
 
-  Si queremos mostrar los commits a partir de una fecha:
+```
+{
+  "**/*.{js,jsx}": ["eslint"]
+}
+```
 
-  ```
-  git log --after="2023-1-2"
-  ```
 
-  ```
-  git log --since=2023-01-15
-  ```
 
-  Notar que podemos usar comillas o no usarlas y colocar el mes como 01 o como 1.
+## Creamos script en `package.json`
 
-  ```
-  git log --before=2023-2-1
-  ```
+```
+npm set.script prepare "husky install"
+```
 
-  ```
-  git log --until=2023-2-1
-  ```
+Este comando es lo mismo que modificar manualmente el `package.json` y agregar:
 
-  
+```
 
-* Por mensaje
+```
 
-  ```
-  git log --grep="mensaje"
-  ```
-
-  Tener presente que acepta regular expressions.
-
-* Por autor
-
-  ```
-  git log --author="Juan"
-  ```
-
-  
-
-* Por archivo
-
-  Cuando queremos buscar los commits donde modificamos un archivo en particular
-
-  ```
-  git log -- README.md
-  ```
-
-  El doble -- es para asegurarnos que git no se confunda el nombre de archivo con el nombre de rama.
-
-* Por rama
-
-  ```
-  git log feature/login..main
-  ```
-
-  Cuando queremos ver todos los commits que están en main pero no en feature/login.
