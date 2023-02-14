@@ -1117,11 +1117,11 @@ Sin embargo, en ocasiones puede que queramos que los commits de `feature` se int
 
 Inicialmente supongamos que tenemos una situación como la siguiente:
 
-![image-20230213204856347](C:\Users\JuaNeMe\Documents\Code\note-taking\Git\1 Introducción.assets\image-20230213204856347.png)
+![image-20230213204856347](./1 Introducción.assets\image-20230213204856347.png)
 
 Que representa a `main` y a la `rama1` donde ambos tienen nuevos commits posteriores a la creación de la rama. Queremos pasar a tener un gráfico como el siguiente:
 
-![image-20230213204943684](C:\Users\JuaNeMe\Documents\Code\note-taking\Git\1 Introducción.assets\image-20230213204943684.png)
+![image-20230213204943684](.\1 Introducción.assets\image-20230213204943684.png)
 
 Un ejemplo de uso interesante es si creamos la rama `rama1` y modificamos `file1` y aunque en `main` modifiquemos `file2` ya no nos permitirá realizar un `merge` con fast foward. Entonces tendremos ese commit del merge recursivo que queremos evitar. En ese caso desde la rama con el feature hacemos `git rebase main` y los cambios en `file1` aparecerán como que se hicieron a lo último. Una vez hecho esto podremos volver a `main` y hacer `git merge rama1` con la ventaja que será resuelto con **fast forward merge**.
 
