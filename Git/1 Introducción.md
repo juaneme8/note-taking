@@ -849,7 +849,7 @@ Lo cual nos da la pauta que ese commit fue producto de un merge entre los commit
 
 ## Evitar Merge Branch Commit al Pullear
 
-Supongamos que estamos trabajando con otras personas de un equipo en unamisma rama. Realizamos cambios, creamos el commit y en el momento de intentar pushear, si otras personas ya pushearon cambios a la rama remota obtendremos un error.  Veremos **failed to push some refs to git@gitlab.com....**. Normalmente nosotros haríamos `git pull` para traernos esos cambios pero esto ocasionaría un "merge commit". Como esto sucederá frecuentemente y estos commits lo único que indican es que hicimos un pull de los cambios para poder hacer un push, se considera una buena práctica evitarlos.
+Supongamos que estamos trabajando con otras personas de un equipo en una misma rama. Realizamos cambios, creamos el commit y en el momento de intentar pushear, si otras personas ya pushearon cambios a la rama remota obtendremos un error.  Veremos **failed to push some refs to git@gitlab.com....**. Normalmente nosotros haríamos `git pull` para traernos esos cambios pero esto ocasionaría un "merge commit". Como esto sucederá frecuentemente y estos commits lo único que indican es que hicimos un pull de los cambios para poder hacer un push, se considera una buena práctica evitarlos.
 
 ```
 git pull --rebase
@@ -863,14 +863,14 @@ En caso de que hubiera conflictos luego de solucionarnos si ingresamos `git stat
 
 
 
-## Merge para actualizar rama cuando cambia master
+## Merge para actualizar rama cuando cambia `main`
 
-En ocasiones estamos trabajando en una rama solucionando un bug o desarrollando una nueva funcionalidad y mientras tanto la rama `master` evoluciona con nuevos commits. Queremos traernos esos commits a la rama en la cual estamos trabajando.
+En ocasiones estamos trabajando en una rama solucionando un bug o desarrollando una nueva funcionalidad y mientras tanto la rama `main` evoluciona con nuevos commits. Queremos traernos esos commits a la rama en la cual estamos trabajando.
 
-Por ejemplo desde la rama `bugfix/uuser-auth-error` ejecutamos:
+Por ejemplo desde la rama `bugfix/user-auth-error` ejecutamos:
 
 ```
-git merge master
+git merge main
 ```
 
 
@@ -985,15 +985,23 @@ Este comando es muy peligroso y debemos usarlo solo en caso de emergencia. Recue
 
 Cuando desarrollamos una nueva característica hasta ahora hemos visto la técnica de crear un branch `feature` realizar los commits que hagan falta en esa rama (y también habrán sucedido otros commits en `main` por otros miembros del equipo) y luego realizar el `merge` que **creará un nuevo commit con estrategia recursiva**.
 
-Sin embargo, en ocasiones puede que queramos que los commits de `feature` se integren a la historia de la rama `main` como si hubieran ocurrido en ella (y la rama nunca hubiera existido) o bien simplemente queremos mantener el historial limpio sin esos commits que ocasionaría un merge recursivo.
+Sin embargo, en ocasiones puede que queramos que los commits de `feature` se integren a la historia de la rama `main` como si hubieran ocurrido en ella (y la rama nunca hubiera existido) y mantener el historial limpio sin esos commits que ocasionaría un merge recursivo. Este un merge commit que es un commit especial que puede tener 2 padres.
 
-Un ejemplo de uso interesante es si creamos la rama `rama1` y modificamos `file1` y aunque en `main` modifiquemos `file2` ya no nos permitirá realizar un `merge` con fast foward. Entonces tendremos ese commit del merge recursivo que queremos evitar. En ese caso desde la rama hacemos `git rebase main` y los cambios en `file1` aparecerá como que se hicieron a lo último. Una vez hecho esto podremos volver a `main` y hacer `git merge rama1` con la ventaja que será resuelto con **fast forward merge**.
+Inicialmente supongamos que tenemos una situación como la siguiente:
+
+![image-20230213204856347](C:\Users\JuaNeMe\Documents\Code\note-taking\Git\1 Introducción.assets\image-20230213204856347.png)
+
+Que representa a `main` y a la `rama1` donde ambos tienen nuevos commits posteriores a la creación de la rama. Queremos pasar a tener un gráfico como el siguiente:
+
+![image-20230213204943684](C:\Users\JuaNeMe\Documents\Code\note-taking\Git\1 Introducción.assets\image-20230213204943684.png)
+
+Un ejemplo de uso interesante es si creamos la rama `rama1` y modificamos `file1` y aunque en `main` modifiquemos `file2` ya no nos permitirá realizar un `merge` con fast foward. Entonces tendremos ese commit del merge recursivo que queremos evitar. En ese caso desde la rama con el feature hacemos `git rebase main` y los cambios en `file1` aparecerán como que se hicieron a lo último. Una vez hecho esto podremos volver a `main` y hacer `git merge rama1` con la ventaja que será resuelto con **fast forward merge**.
 
 Debemos tener presente que **rebase** que es un comando destructivo que va a alterar el historial, ya que es como si estuviéramos alterando la historia, pero como lo hicimos en una rama que recién creamos no hay ningún problema. La regla de oro respecto al uso de **rebase** es nunca hacerlo en ramas públicas. **rebase** no funciona muy bien en proyectos open-source y pull requests.
 
-> El uso de **rebase** tiene la ventaja por sobre el uso de **merge**, que si hacemos `git log` o con la herramienta gráfica `gitk` veremos todos los commits en línea por lo que sera fácil de seguir el historial aún si tenemos varias personas en el equipo de trabajo.
+> El uso de **rebase** tiene la ventaja por sobre el uso de **merge**, que si hacemos `git log` o con la herramienta gráfica `gitk` veremos todos los commits en línea por lo que sera fácil de seguir el historial aún si tenemos varias personas en el equipo de trabajo. En caso de que aparezca un bug, podremos identificar en qué commit sucedió y a partir de allí podremos saber fácilmente qué se introduzco desde el commit problemático.
 >
-> El uso de **merge** en cambio tiene la ventaja de que tendremos trazabilidad pues sabremos de donde provienen los commits (de un merge de tal rama con `main`)
+> El uso de **merge** en cambio tiene la ventaja de que tendremos trazabilidad pues sabremos de donde provienen los commits (de un merge de tal rama con `main`).
 
 
 
