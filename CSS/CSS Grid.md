@@ -1,5 +1,7 @@
 # CSS Grid
 > [The Net Ninja - CSS Grid](https://www.youtube.com/playlist?list=PL4cUxeGkcC9itC4TxYMzFCfveyutyPOCY) - [Repositorio](https://github.com/iamshaunjp/css-grid-playlist)
+>
+> :link: CSS Grid - Wes Bos
 
 Grid nos permite desarrollar layouts con menor esfuerzo y logrando un código más limpio que si los implementáramos con **floats** o **flexbox**.
 
