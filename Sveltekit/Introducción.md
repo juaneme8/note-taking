@@ -302,15 +302,49 @@ En aplicaciones complejas es común tener más de un segmento dinámico en las r
 
 Por ejemplo podríamos desear tener:
 
-* /products/1
-* /products/1/review/1
+* /products/1 en este caso veríamos detalles sobre el producto 1
+* /products/1/review/1 en este caso veríamos la review 1 sobre el producto 1
 
 ```
 - routes
   - products
     - [productId]
       - +page.svelte
-      - [reviewId]
-        - +page.svelte
+      - reviews
+        - [reviewId]
+          - +page.svelte
+```
+
+
+
+Luego en este archivo: 
+
+```
+<script>
+	import { page } from $app/stores
+	const { productId, reviewId } = $page.params;
+</script>
+
+<h1>Review {reviewId} of product {productId}</h1>
+```
+
+  
+
+## Catch All Routes
+
+Queremos crear un único archivo que sea capaz de catchear todos segmentos de la URL. 
+
+Esto sería útil suponiendo que tenemos una página de documentación con cierta cantidad de features y a su vez cada feature con una serie de conceptos que deben ser explicados.
+
+* /docs/feature1/concept1, ..., /docs/feature1/concept5
+* ...
+* /docs/feature5/concept1, ....
+
+Como SvelteKit tiene un routing basado en el file-system y suponiendo que sean 20 temas y 20 conceptos estaríamos hablando de 400 archivos, pero por supuesto podemos utilizar dynamic routes como vimos anteriormente, por lo que podríamos crear:
+
+```
+- routes
+  - [featureId]
+    - [conceptId]	
 ```
 
