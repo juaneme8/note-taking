@@ -1,6 +1,6 @@
 # SvelteKit
 
-:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 2**
+:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 6**
 
 ## ¿Qué es Svelte?
 
@@ -59,7 +59,11 @@ git init && git add -A && git commit -m "Initial commit"  npm npm run dev -- --o
 
 # Folder Structure
 
-## `package.json`
+
+
+## Archivos
+
+### :scroll:`package.json`
 
 Si analizamos las `devDependencies` nso encontramos con lo siguiente:
 
@@ -107,45 +111,37 @@ Si analizamos los scripts nos encontramos con:
 
 * Con `npm run format` formatea todos los archivos.
 
-
-
-## `package-lock.json`
+### :scroll:`package-lock.json`
 
 `package-lock.json` Asegura consistencia de las dependencias instaladas.
 
-## `.npmrc`
+### :scroll:`.npmrc`
 
 El archivo `.npmrc` es un archivo de configuración usado por npm y mediante la opción `engine-strict=true` nos aseguramos la compatibilidad de las dependencias con los `engines` especificados en el `package.json.` Por ejemplo si un paquete especifica `"engines": {"node": ">=12.0.0 <14.0.0"}` en el `package.json` con `engine-strict=true` nos aseguramos que las dependencias del paquete también cumplan este requerimiento. Se considera una buena práctica ya que puede evitar potenciales issues en el futuro.
 
-
-
-## `svelte.config.js`
+### :scroll:`svelte.config.js`
 
 `svelte.config.js` es el archivo de configuración de Svelte.
 
 Exporta un objeto `config` que será usado por otras herramientas que integremos con Svelte. Inicialmente tenemos solo una configuración para `adapter` que son pequeños plugins que toman la aplicación buildeada como entrada y generan una salida para deployment.
 
-
-
-## `vite.config.js`
+### :scroll:`vite.config.js`
 
 `vite.config.js` es el archivo de configuración de vite
 
-
-
-## `.eslintrc.cjs`
+### :scroll:`.eslintrc.cjs`
 
 `.eslintrc.cjs` es el archivo de configuración de ESLint
 
-## `.estlintignore`
+### :scroll:`.estlintignore`
 
 `.estlintignore` es el archivo de configuración donde indicamos los archivos en los que queremos ignorar el linteo.
 
-## `.prettierr`
+### :scroll:`.prettierc`
 
 `.prettierr` es el archivo de configuración de Prettier
 
-## `.prettierignore`
+### :scroll:`.prettierignore`
 
 `.prettierignore` es el archivo de configuración donde indicamos los archivos en los que queremos ignorar el formateo.
 
@@ -153,10 +149,168 @@ Exporta un objeto `config` que será usado por otras herramientas que integremos
 
 ## Carpetas
 
-`.svelte-kit`
+### :file_folder: `.svelte-kit`
 
-Esta carpeta es generada automáticamente cuando ejecutamos dev o build scripts.
+Esta carpeta es generada automáticamente cuando ejecutamos dev o build scripts. Esta 
 
 
 
-https://youtu.be/iqm7Sv9VykI?t=310|
+### :file_folder: `static`
+
+Los archivos de esta carpeta como su nombre lo indican son servidos estáticamente como `favicon.png` o `robots.txt`
+
+
+
+### :file_folder: `src`
+
+La carpeta `src` contiene `app.html` y una carpeta `routes` que será responsable del ruteo de la aplicación. Inicialmente de `routes` tenemos  `+page.svelte` que será servido cuando visitemos localhost:5173.
+
+En `app.svelte` se conoce como el page template y nos encontramos con tres placeholders:
+
+* `%sveltekit.assets%` representando a los archivos estáticos
+* `%sveltekit.head%` representando a los elementos de tipo link y scripts requeridos por la página.
+* `%sveltekit.body%` representando al markup para la página a renderizar, que será el contenido de `+page.svelte`
+
+
+
+## Routing
+
+Svelte se caracteriza por tener un mecanismo de ruteo basado en el file-system. Esto significa que los paths en la URL serán definidos mediante archivos y carpetas.
+
+Esto no significa que cada archivo en nuestra aplicación responda a una ruta sino que es aca donde toman importancia las **convenciones** que mencionamos que hay que seguir en SvelteKit para lograr esta aplicación de alta performance y lista para producción.
+
+
+
+### Routing conventions
+
+Para que un archivo esté disponible como ruta debemos seguir las siguientes convenciones.
+
+* Deben estar en una carpeta `routes` dentro de `src`.
+* Los path segments de la URL una son determinados por carpetas.
+* Los archivos que corresponden a una ruta deben llamarse `+page.svelte`.
+
+
+
+Es por eso que para el contenido que queremos mostrar al navegar a localhost:5173 debemos crear una carpeta `routes` y dentro un archivo `+page.svelte`
+
+Para mostrar una página **/about** debemos crear una carpeta `about` y dentro de ella un archivo `+page.svelte`
+
+
+
+### 404 Default Page
+
+Si ingresamos una URL que no puede ser mapeada con ningún archivo (non-matching route) dentro de `routes`, como por ejemplo /dashboard veremos un 404 Not Found entregado automáticamente por SvelteKit.
+
+
+
+### Nested Routes
+
+Queremos tener la capacidad de trabajar con rutas anidadas, de modo que el usuario pueda ingresar a:
+
+* **/blog**
+
+* **/blog/first**
+
+* **/blog/second**
+
+En ese caso debemos crear el directorio `blog` y dentro un `+page.svelte`, luego un directorio `first` y dentro un `+page.svelte` y por último un directorio `second` y dentro un `+page.svelte`.
+
+```
+- routes
+  - blog
+    - +page.svelte
+    - first
+      - +page.svelte
+    - second
+      - +page.svelte
+```
+
+
+
+### Dynamic Routes
+
+Queremos contar con rutas dinámicas de modo que el usuario pueda ingresar a:
+
+* **/products** donde verá una lista de los productos
+* **/products/1** donde encontrará detalles sobre un producto en particular
+
+
+
+En `routes` creamos una carpeta `products` y en ella `+page.svelte` para la página donde veremos el listado.
+
+```
+<h1>Products List</h1>
+<h2>Product 1</h2>
+<h2>Product 2</h2>
+<h2>Product 3</h2>
+```
+
+
+
+Con lo visto hasta ahora podríamos pensar en una solución creando una carpeta para cada producto y dentro un archivo `+page.svelte`.
+
+```
+- routes
+  - products
+    - 1
+      - +page.svelte
+    - 2
+      - +page.svelte
+    - 3
+      - +page.svelte
+```
+
+
+
+Sin embargo en caso de tener una cantidad grande de productos esto no sería eficiente por lo tanto creamos un segmento dinámico a través de una carpeta `[productId]` y luego creamos un archivo `+page.svelte`:
+
+```
+- routes
+  - products
+    - [productId]
+      - +page.svelte
+```
+
+
+
+Luego en `+page.svelte` tenemos:
+
+```
+<h1>Details about product</h1>
+```
+
+Este mismo contenido veremos si navegamos a **/products/1**, **/products/99**, etc.
+
+Para extraer el id actual
+
+```vue
+<script>
+	import { page } from '$app/stores'
+	const productId = $page.params.productId;
+</script>
+
+<h1>Details about product {productId}</h1>
+```
+
+En el readable store `page` tenemos acceso a datos de la página actual como ser los parámetros de la URL y con el signo `$` en `$page.params.productId;` indicamos que se trata de un store.
+
+
+
+### Nested Dynamic Routes
+
+En aplicaciones complejas es común tener más de un segmento dinámico en las rutas.
+
+Por ejemplo podríamos desear tener:
+
+* /products/1
+* /products/1/review/1
+
+```
+- routes
+  - products
+    - [productId]
+      - +page.svelte
+      - [reviewId]
+        - +page.svelte
+```
+
