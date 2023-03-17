@@ -1,6 +1,6 @@
 # SvelteKit
 
-:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 6**
+:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 8**
 
 ## ¿Qué es Svelte?
 
@@ -330,21 +330,131 @@ Luego en este archivo:
 
   
 
-## Catch All Routes
+### Catch All Routes
 
-Queremos crear un único archivo que sea capaz de catchear todos segmentos de la URL. 
+Queremos crear un único archivo que sea capaz de catchear todos segmentos de la URL.  Esto puede ser útil cuando necesitamos manejar URLS desconocidas o dinámicas.
 
-Esto sería útil suponiendo que tenemos una página de documentación con cierta cantidad de features y a su vez cada feature con una serie de conceptos que deben ser explicados.
+Por ejemplo supongamos que tenemos una página de documentación con cierta cantidad de features y a su vez cada feature con una serie de conceptos que deben ser explicados e incluso pueden tener otras rutas dentro.
 
-* /docs/feature1/concept1, ..., /docs/feature1/concept5
+* /docs/feature1/concept1/example1
 * ...
-* /docs/feature5/concept1, ....
+* /docs/feature**n**/concept**n**/example**n**
 
-Como SvelteKit tiene un routing basado en el file-system y suponiendo que sean 20 temas y 20 conceptos estaríamos hablando de 400 archivos, pero por supuesto podemos utilizar dynamic routes como vimos anteriormente, por lo que podríamos crear:
+Un ejemplor real de esto podría ser **/docs/routing/catch-all-routes**
+
+Como todas estas páginas tendrán un layout similar nos interesará tener un único archivo capaz de catchear todas los route segments de la URL. Tener en cuenta  los distintos segmentos de las URL nos resultan beneficiosos en términos de organización y SEO.
+
+Debemos crear una carpeta `docs` y dentro de ella una carpeta `[...slug]` y `+page.svelte`.
 
 ```
 - routes
-  - [featureId]
-    - [conceptId]	
+  - docs
+    - [...slug]
+      - +page.svelte
+```
+
+Si bien podemos ponerle el nombre que queramos es una especie de convención usar slug.
+
+
+
+El archivo `+page.svelte` matcheará con cualquier URL que contenga /docs en su path. Esto significa que lo veremos al visitar docs/feature1 y al visitar docs/feature1/concept1, etc.
+
+```vue
+<script>
+  import page from '$app/stores'
+  console.log($page.params.slug);
+</script>
+
+<h1>Docs home page</h1>
+```
+
+Si ingresamos a /docs/feature1/concept1/example1 veremos en pantalla el log:`feature1/concept1/example1` es decir un string que contiene todos los segmentos luego de docs. A partir de este string vamos a generar una array utilizando `.split("/")`.
+
+```vue
+<script>
+  import page from '$app/stores'
+  const slugArr = $page.params.slug;
+</script>
+
+{#if slugArr.length===1}
+<h1>Viewing docs for feature {slugArr[0]}</h1>
+{:else if slugArr.length===1}
+<h1>Viewing docs for feature {slugArr[0]} and concept {slugArr[1]}</h1>
+{/if}
+```
+
+Si visitamos /docs/routing/catch-all-routes veremos Viewing docs for feature routing and concept catch-all.routes.
+
+
+
+#### Filter Parameters
+
+Otro caso en el cual es podría ser útil el concepto de catch all routes es a la hora de pasar parámetros de filtro.
+
+Supongamos que en una página de una inmobiliaria queremos listar todas las casa pero a su vez filtrar de acuerdo a nuestro presupuesto.
+
+Suponiendo que este sea entre $100000 y $1000000 podríamos usar la URL: **/houses/100000/1000000**
+
+```
+- routes
+  - houses
+    - [...slug]
+      - +page.svelte
+```
+
+Luego en `+page.svelte` tendríamos:
+
+```
+<script>
+  import page from '$app/stores'
+  const slugArr = $page.params.slug;
+</script>
+
+<h1>List of houses between {slugArr[0]} and {slugArr[1]}</h1>
+```
+
+
+
+### Optional Parameters
+
+Hasta ahora trabajamos con rutas con parámetros dinámicos, al usarlos el segmento de la url es obligatorio para que matchee con la página.
+
+```
+- routes
+  - products
+    - [productId]
+      - +page.svelte
+```
+
+Lo que significa que para visualizar el contenido de la página tendremos que visitar /products/1. Sin embargo en ocasiones queremos mostrar el contenido de una página aunque no esté el parámetro. 
+
+* / queremos mostrar la versión por defecto de la página en inglés.
+* /es
+* /fr
+
+```
+- routes
+  - [[lang]]
+      - +page.svelte
+```
+
+Notar el uso de corchetes dobles `[[]]`
+
+Luego en `+page.svelte`:
+
+```vue
+<script>
+	import { page } from '$app/stores'
+
+	const greetings = {
+		en: 'Hello',
+		es: 'Hola',
+		fr: 'Bonjour'
+	}
+	const {lang} = $page.params || 'en';
+	const greeting = greetings[lang];
+</script>
+
+<h1>{greeting[lang]}</h1>
 ```
 
