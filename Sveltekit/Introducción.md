@@ -1,6 +1,6 @@
 # SvelteKit
 
-:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 8**
+:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 11**
 
 ## ¿Qué es Svelte?
 
@@ -428,9 +428,13 @@ Hasta ahora trabajamos con rutas con parámetros dinámicos, al usarlos el segme
 
 Lo que significa que para visualizar el contenido de la página tendremos que visitar /products/1. Sin embargo en ocasiones queremos mostrar el contenido de una página aunque no esté el parámetro. 
 
-* / queremos mostrar la versión por defecto de la página en inglés.
-* /es
-* /fr
+
+
+Supongamos que queremos tener las siguientes rutas:
+
+* `/` al entrar a la raíz queremos mostrar la **versión por defecto** de la página en inglés.
+* `/es`
+* `/fr`
 
 ```
 - routes
@@ -438,7 +442,19 @@ Lo que significa que para visualizar el contenido de la página tendremos que vi
       - +page.svelte
 ```
 
-Notar el uso de corchetes dobles `[[]]`
+Notar el uso de corchetes dobles `[[]]` que es lo que determina que no sea un parámetro obligatorio sino opcional.
+
+:rotating_light: En ese momento veremos en pantalla un mensaje:
+
+```
+The "/" and the "/[[lang]]" routes conflict with each other
+```
+
+Esto se debe a que como `lang` es opcional, tenemos dos rutas que matchean por lo queSvelte no sabe a qué archivo debe mapear.
+
+Una forma es eliminar el `+page.svelte` de la raíz pero lo mejor sería crear una carpeta nueva `marketing` y colocar allí dentro al `[[lang]]` y a `+page.svelte`, teniendo en cuenta que tendremos que ingresar como **/marketing**, **/marketing/es**, etc.
+
+
 
 Luego en `+page.svelte`:
 
@@ -451,10 +467,162 @@ Luego en `+page.svelte`:
 		es: 'Hola',
 		fr: 'Bonjour'
 	}
-	const {lang} = $page.params || 'en';
+	const {lang = 'en'} = $page.params;
 	const greeting = greetings[lang];
 </script>
 
 <h1>{greeting[lang]}</h1>
 ```
 
+Notar que con `const {lang = 'en'} = $page.params;` estamos seteando un valor por defecto al hacer destructuring.
+
+
+
+### Route Navigation
+
+Queremos que la navigación entre las distintas rutas no sea posible sólo modificando la barra de direcciones del navegador sino que queremos que sea posible acceder mediante un elemento de UI como un link o de manera automática luego de cierta acción.
+
+
+
+#### Navegación mediante UI
+
+Implementaremos una navegación de una ruta a otra mediante elementos de UI por parte del usuario.
+
+SvelteKit utiliza anchors `<a>` para navegar entre rutas en lugar de utilizar otro componente específico del framework.
+
+
+
+##### **Navegación a rutas estáticas**
+
+Queremos implementar la navegación desde / hacia /blog y /products, por lo tanto en `+page.svelte`
+
+```
+<a href="/blog">Blog</a>
+<a href="/products">Products</a>
+```
+
+Luego por ejemplo en `/products/+page.svelte` podremos garantizar la naveción al inicio.
+
+```
+<a href="/">Home</a>
+
+<h1>Products</h1>
+
+<h2>Product 1</h2>
+<h2>Product 2</h2>
+<h2>Product 3</h2>
+```
+
+
+
+##### **Navegación a rutas dinámicas**
+
+La navegación a rutas dinámicas es similar a lo visto:
+
+```
+<a href="/">Home</a>
+
+<h1>Products</h1>
+
+<h2><a href="/products/1">Product 1</a></h2>
+<h2><a href="/products/2">Product 2</a></h2>
+<h2><a href="/products/2">Product 3</a></h2>
+```
+
+
+
+En lugar de utilizar un valor hardcodeado suponemos que recibimos por prop la ruta dinámica:
+
+```
+<script>
+	export let productId = 100;
+</script>
+<a href="/">Home</a>
+
+<h1>Products</h1>
+
+<h2><a href="/products/1">Product 1</a></h2>
+<h2><a href="/products/2">Product 2</a></h2>
+<h2><a href="/products/2">Product 3</a></h2>
+<h2><a href={`/products/${productId}`}Product {productId}</a></h2>
+```
+
+
+
+#### Navegación programática
+
+En ocasiones vamos a querer que luego de una determinada acción se produzca una navegación programática a otra ruta. 
+
+Para simular esta situación (en la que por ejemplo luego de una acción que demanda cierto tiempo en completarse queremos redireccionar al usuario a otra página) lo haremos con botón de modo que al hacer click en el será redireccionado a /products.
+
+Como queremos colocar el botón en la página de inicio, editamos el `+page.svelte` del directorio raíz.
+
+```vue
+<script>
+  import { goto } from '$app/navigation'
+  
+  const handleClick = () => {
+  	console.log('Placing your order');
+  	goto('/products');
+  }
+</script>
+
+<button on:click={handleClick}>Place order</button>
+```
+
+
+
+##### **Replace History**
+
+Si luego de navegar hacemos click en el botón "back" del navegador iremos a la página anterior que en este caso es la de inicio. Esto se debe a hemos hecho push de la ruta en el stack, pero también es posible reemplazar el historial para eso podemos agregar un objeto como segundo argumento.
+
+```
+goto('/products', {replaceState: true})
+```
+
+Esto traerá como consecuencia que al presionar el botón back no volvamos a esta página sino a la anteriormente visitada.
+
+
+
+##### **Funciones `beforeNavigate` y `afterNavigate`**
+
+El módulo `$app/navigation` exporta las funciones `beforeNavigate` y `afterNavigate` que serán útiles cuando queramos mostrar u ocultar un spinner cuando la navegación está en progreso. Estas funciones aceptan un callback como argumento. Estos callback reciben automáticamente un parámetro `navigation`.
+
+```vue
+<script>
+  import { goto, beforeNavigate, afterNavigate } from '$app/navigation'
+  
+  const handleClick = () => {
+  	console.log('Placing your order');
+  	goto('/products');
+  }
+  
+  beforeNavigate((navigation)=> {
+  	console.log({before: navigation});
+  })
+   ((navigation)=> {
+  	console.log({after: navigation});
+  })
+</script>
+
+<button on:click={handleClick}>Place order</button>
+```
+
+Cuando hacemos click en el botón "Place order" veremos en pantalla `{before: {...}}` al analizar el objecto `navigation`:
+
+* `from` objecto donde veremos info sobre /
+* `to` objeto donde veremos info sobre /products
+* `type: "goto"`
+* `cancel` función que podremos llamar si queremos cancelar una navegación.
+
+
+
+Si ahora hacemos click en el botón "back" se ejecutará el callback de `afterNavigate` por lo que veremos en consola `{after: {...}}` al analizar el objecto `navigation`:
+
+* `from` objecto donde veremos info sobre /products
+
+* `to` objeto donde veremos info sobre /
+
+* `type: "popstate"`
+
+  Notar que no tenemos una función cancel ya que no podemos cancelar una navegación luego de que ha sucedido.
