@@ -1,6 +1,6 @@
 # SvelteKit
 
-:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 11**
+:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 14**
 
 ## ¿Qué es Svelte?
 
@@ -626,3 +626,107 @@ Si ahora hacemos click en el botón "back" se ejecutará el callback de `afterNa
 * `type: "popstate"`
 
   Notar que no tenemos una función cancel ya que no podemos cancelar una navegación luego de que ha sucedido.
+
+
+
+## Route Matchers
+
+Suponiendo que tenemos una ruta `products` con una ruta dinámica `[productId]` como vemos a continuación:
+
+```
+- routes
+  - products
+    - [productId]
+      - +page.svelte
+```
+
+Esto nos permite navegar a `/products/1`, `/products/100` pero también matcheará con `/products/batman` cosa no deseada.
+
+Para solucionar esto SvelteKit cuenta con **matchers** que son funciones que aceptarán o rechazarán el parámetro recibido. En nuestro caso vamos a querer retornar `true`sólo si el parámetro recibido es un dígito.
+
+En `src` vamos a crear una carpeta `params` y dentro un archivo `integer.js`.
+
+```jsx
+export default match(param){
+	return /^\d+$/.test(param)
+}
+```
+
+> La función debe llamarse `match` ya que esto es una convención de SvelteKit a seguir.
+
+Luego para que esto comience a funcionar debemos renombrar la carpeta `[productsId]` que pasará a ser `[productId=integer]` siendo `integer` el nombre de archivo en la carpeta `params`.
+
+Si ahora ingresamos a `/products/batman` veremos un 404.
+
+
+
+## Route Layout
+
+Normalmente a la hora de desarrollar aplicaciones tendremos un layout por defecto que queremos mostrar en todas las páginas como ser un header o un footer.
+
+Hasta ahora al navegar de `/` a `/blog` por ejemplo la actual `+page.svelte` era destruida y una nueva tomaba su lugar.
+
+En caso de querer afectar a todas las páginas de la aplicación, creamos un archivo `+layout.svelte` en `routes`.
+
+```vue
+<header>Header</header>
+<slot />
+<footer>Footer</footer>
+```
+
+Con `<slot />` cualquier` página individual que mostremos se renderizará en el lugar de ese tag
+
+
+
+#### Layouts Anidados
+
+En ocasiones vamos a querer tener layouts que apliquen solo a ciertas partes de nuestra aplicación. Por ejemplo supongamos que en /products/1 además de la info del producto 1 queremos mostrar otros productos sugeridos.
+
+En ese caso dentro de la carpeta `products` y dentro de `[productId=integer]` podríamos crear un archivo `+layout.svelte` y colocar allí el layout que queremos tener acompañado del tag `<slot/>`. 
+
+```
+<slot/>
+<h3>Featured products</h3>
+```
+
+
+
+## Layout Groups
+
+Para explicar este concepto asumiremos que estamos trabajando con rutas relacionadas a la autenticación.
+
+```
+- routes
+  - register
+    - +page.svelte
+  - login
+    - +page.svelte
+```
+
+Supongamos que tenemos la rutas /register y /login que muestran cierto contenido y se nos solicita que ambas rutas tengan un layout en común como ser un mensaje de bienvenida.
+
+La forma más simple sería crear una carpeta `auth` mover las carpetas `register` y `login` dentro suyo y a su vez crear un `+layout.svelte`:
+
+```
+- routes
+  - auth
+    - register
+      - +page.svelte
+    - login
+      - +page.svelte
+    - +layout.svelte
+```
+
+En `+layout.svelte` bastaría con tener:
+
+```
+<h1>Welcome</h1>
+<slot />
+```
+
+
+
+Sin embargo estamos agregando un nuevo segmento `auth` en las url que serán: `/auth/register` y `/auth/login` y puede que esto no sea deseado, es allí donde es útil el concepto de layout group. 
+
+Bastará con cambiarle el nombre a la carpeta `auth` por `auth` de manera que las rutas estarán juntas y contaremos con el layout pero sin afectar la url.
+
