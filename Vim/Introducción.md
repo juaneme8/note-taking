@@ -25,7 +25,7 @@ sudo apt update
 sudo apt install vim
 ```
 
-Luego podemos verificar que tenemos Vim instalado con: `which vim` y nos aparecerá: `/usr/bin/vim`
+Luego podemos verificar que tenemos Vim instalado con: `which vim` y nos aparecerá: `/usr/bin/vim` en caso de que no nos aparezca nada (por ejemplo en algun contenedor) podremos probar con `which vi` y veremos `/usr/bin/vi`.
 
 Luego podemos ver la versión instalada ingresando: `vim` o `vi`
 
@@ -63,12 +63,15 @@ La pregunta mas frecuente de la gente que comienza con Vim suele ser cómo salir
 
 * Si queremos salir sin guardar: `:q!`. No confundir el orden ya que cuando empezamos con signo de exclamación `!` es un comando de terminal (ej `:!ls`).
 * Si queremos guardar los cambios `:w`.
+* Si queremos guardar los cambios en un archivo con un nombre determinado: `:w text.txt`.
 
 * Si queremos guardar los cambios y salir `:wq`.
 
 
 
 # Vim Modes
+
+En vim contamos con tres modos: normal mode, insert mode y visual mode.
 
 ## Normal Mode
 
@@ -93,57 +96,140 @@ Si queremos volver a normal mode debemos presionar `ESC`.
 
 
 
+## Visual mode
+
+Este modo es utilizado para seleccionar elementos.
+
+Podemos entrar en este modo presionando la tecla `v` y a partir de ese momento cuando nos desplacemos se seleccionará el texto.
+
+## Mostrar número de líneas
+
+```
+:set number
+```
+
+
+
+## Numeración relativa
+
+En lugar de tener una numeración de líneas absolutas es posible establecerla de manera relativa a la línea en la que nos encontramos.
+
+```
+:set relativenumber
+```
+
+Esto nos permitirá de un vistazo fácil saber cuanto queremos saltar y ejecutarlo rápidamente.
+
+Otra forma de hacerlo es con `:set nu`
+
+Esto podrá ser combinado con eliminación, copiado, etc
+
+> Si queremos deshabilitarlo podremos hacerlo con `:set norelativenumber` `:set nonu`
+
+## Activar mouse
+
+```
+:set mouse=a
+```
+
+
+
+## Esquema de colores
+
+```
+:colorscheme slate
+```
+
+Notar que si dejamos un espacio y presionamos `TAB` podremos ver las distintas opciones de colores.
+
+
+
+## Archivo de configuración
+
+Para conservar los cambios que realizamos en la configuración cuando cerramos el editor debemos crear un archivo de configuración como veremos a continuación:
+
+```
+vim ~/.vimrc
+```
+
+```
+set number
+set relativenumber
+set tabstop=4
+set shiftwidth=4
+set autoindent
+set mouse=4
+colorscheme slate
+```
+
+
+
+## Desplazamiento:
+
+En lugar de las flechitas podemos desplazarnos utilizando las teclas en línea`hjkl` de modo que no tengamos que abandonar la parte principal del teclado. Con las de las puntas nos movemos hacia los costados (h izquierda y l derecha) y con las internas abajo y arriba (j para abajo y k para arriba)
+
+
+
+## Repetición de acciones
+
+Si queremos movernos 5 líneas para abajo podremos presionar: `5` y la tecla hacia abajo (o lo que es lo mismo `5j`)
+
+
+
 ### Buffer
 
 Cuando ingresamos texto en la ventana de Vim no estamos editando un archivo sino que estamos trabajando en lo que se conoce como buffer que no es más que un espacio de memoria. Esto será válido tanto para cuando creamos una archivo nuevo como así también en caso de estar editando un archivo existente que será cargado en memoria en ese buffer.
 
 
 
-#### Editar un archivo
-
-Para abrir un archivo con Vim 
-
-```
-vim file.txt
-```
-
-
-
-#### Modos de Funcionamiento
-
-Vim cuenta con distintos modos de funcionamiento: *normal mode*, *command mode* e *insert mode*.
-
-Cuando ingresamos estamos en el *normal mode*. 
-
-Si presionamos `:` pasaremos al *command mode*.
-
-Si  presionamos la letra `i` pasaremos al *insert mode*.
-
 
 
 # Keybindings
 
+## Undo & redo
+
+* `u` deshacer la última acción. Si presionamos `3u` deshacemos las últimas 3 acciones.
+
+  > Debemos tener presente que CTRL+Z nos llevaría el proceso al background por lo que no es el comportamiento esperado.
+
+* `CONTROL+R` para rehacer la última acción.
+
+
+
+## Comandos en modo visual
+
+Con `v` entramos en visual mode, seleccionamos el contenido deseado.
+
+* Con  `d` eliminamos el contenido seleccionado y pasamos a normal mode.
+
+* Con `dd` eliminamos una línea completa.
+
+* Con `3dd` eliminamos tres líneas.
+
+* Con `D` eliminamos
+
+  
+
+* Con `c` eliminamos el contenido seleccionado y pasamos a insert mode.
+* Con `cc` modificamos la línea (se borra el contenido pero no la línea) e ingresamos a insert mode.
+
+
+
+* Con  `y` (de yanking) copiamos el contenido seleccionado.
+
+* Con `yy` copiamos una línea completa.
+
+  
+
+* Con  `p` pegamos el contenido previamente copiado  en la línea de abajo.
+
+* Con `3p` pegamos el contenido tres veces.
+
+* Con  `P` pegamos el contenido previamente copiado  en la línea de arriba.
+
+
+
 #### Comandos básicos
-
-* `i` para pasar a *insert mode* en la posición actual, `ESC` volveremos al *normal mode*.
-
-* `A` para pasar a *insert mode* al final de la línea.
-
-* `:q` para salir
-
-* `:w` para guardar los cambios
-
-* `:w text.txt` para guardar los cambios en `text.txt`.
-
-* `:wq` para guardar los cambios y salir
-
-* `:q!` para salir sin guardar los cambios
-
-* `:set number` para mostrar los números al lado de cada línea
-
-* `u` deshacer la última acción.
-
-* `CONTROL+R` para rehacer la última acción (asociar con la búsqueda inversa en la terminal)
 
 * `/keyword` para buscar la palabra "keyword" en el archivo. Con`ENTER` nos dirigimos al primer caracter del primer match. 
 
@@ -162,9 +248,7 @@ Si  presionamos la letra `i` pasaremos al *insert mode*.
 
 * `x` para eliminar un caracter.
 
-* `dd` para eliminar una línea.
-
-* `3dd` para eliminar tres líneas.
+* 
 
 * `di` delete inner para eliminar el contenido entre llaves de donde tengo el cursor.
 
