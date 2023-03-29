@@ -168,7 +168,28 @@ colorscheme slate
 
 En lugar de las flechitas podemos desplazarnos utilizando las teclas en línea`hjkl` de modo que no tengamos que abandonar la parte principal del teclado. Con las de las puntas nos movemos hacia los costados (h izquierda y l derecha) y con las internas abajo y arriba (j para abajo y k para arriba)
 
+* Con  `h` nos  movemos hacia la izquierda.
+* Con  `j` nos  movemos hacia abajo.
+* Con  `k` nos  movemos hacia arriba.
+* Con  `l` nos  movemos hacia la derecha.
 
+
+
+* Con `w` nos movemos hacia la siguiente palabra (si tenemos `Hello-I-am-a-simple-sentence` considerará cada guión como separador de palabra)
+* Con `W` nos movemos hacia la siguiente palabra. En este caso es necesario un espacio para que considere que se trata de una nueva palabra.
+
+
+
+* Con `b` nos movemos hacia la anterior palabra (si tenemos `Hello-I-am-a-simple-sentence` considerará cada guión como separador de palabra)
+* Con `B` nos movemos hacia la anterior palabra. En este caso es necesario un espacio para que considere que se trata de una nueva palabra.
+
+
+
+* Con `Ctrl + u` hacemos scroll hacia arriba.
+
+* Con `Ctrl + d` hacemos scroll hacia abajo.
+
+  
 
 ## Repetición de acciones
 
@@ -200,24 +221,33 @@ Cuando ingresamos texto en la ventana de Vim no estamos editando un archivo sino
 
 Con `v` entramos en visual mode, seleccionamos el contenido deseado.
 
-* Con  `d` eliminamos el contenido seleccionado y pasamos a normal mode.
+* Con `d` eliminamos el contenido seleccionado y pasamos a normal mode.
 
 * Con `dd` eliminamos una línea completa.
 
 * Con `3dd` eliminamos tres líneas.
 
-* Con `D` eliminamos
+* Con `D` eliminamos lo que resta de la línea.
+
+* Con `di` (delete inner) eliminamos el contenido entre llaves de donde tengo el cursor.
+
+* Con `dw` eliminamos la palabra siguiente.
+
+* Con `d3w` (o `3dw`) eliminamos las tres palabras siguientes.
 
   
 
-* Con `c` eliminamos el contenido seleccionado y pasamos a insert mode.
+* Con `c` modificamos el contenido seleccionado (lo borramos pero la diferencia está en que con `d` pasamos a modo normal) y pasamos a insert mode.
+
 * Con `cc` modificamos la línea (se borra el contenido pero no la línea) e ingresamos a insert mode.
+
+* Con `C` modificamos **el resto** de la línea.
 
 
 
 * Con  `y` (de yanking) copiamos el contenido seleccionado.
 
-* Con `yy` copiamos una línea completa.
+* Con `yy` o con `Y` copiamos una línea completa.
 
   
 
@@ -229,7 +259,17 @@ Con `v` entramos en visual mode, seleccionamos el contenido deseado.
 
 
 
-#### Comandos básicos
+* Con `r` reemplazamos un caracter. 
+
+
+
+* Con `x` eliminamos un caracter.
+
+  
+
+
+
+## Búsqueda
 
 * `/keyword` para buscar la palabra "keyword" en el archivo. Con`ENTER` nos dirigimos al primer caracter del primer match. 
 
@@ -243,29 +283,3 @@ Con `v` entramos en visual mode, seleccionamos el contenido deseado.
 * `:%s/word1/word2/gc` para reemplazar la palabra "word1" por "word2" de manera global con confirmación antes de cada cambio.
 
 
-
-#### Eliminar
-
-* `x` para eliminar un caracter.
-
-* 
-
-* `di` delete inner para eliminar el contenido entre llaves de donde tengo el cursor.
-
-* `d3w` eliminar las tres palabras siguientes.
-
-  
-
-
-
-#### Copiar
-
-* `yy` copiar línea
-* `p` pegar línea
-
-
-
-#### Movimiento
-
-* `CTRL+u` scroll hacia arriba
-* `CTRL+d` scroll hacia abajo
