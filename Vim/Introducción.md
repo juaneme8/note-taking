@@ -1,6 +1,6 @@
 # Introducción
 
-> :link: [Vim Tutorial for Beginners](https://youtu.be/RZ4p-saaQkc)
+> :link: [Vim Tutorial for Beginners](https://youtu.be/RZ4p-saaQkc) (COMPLETO)
 >
 > :link: [Vim Basics in 8 Minutes](https://youtu.be/ggSyF1SVFr4)
 >
@@ -148,7 +148,7 @@ Esto podrá ser combinado con eliminación, copiado, etc
 :set mouse=a
 ```
 
-
+`a` significa "todos", lo que indica que se permitirá el uso del mouse para todas las modos de Vim.
 
 ## Esquema de colores
 
@@ -431,7 +431,7 @@ Es posible crear luego una macro a y b y a continuación una macro c que ejecute
 
 # Plugins
 
-Si bien al comenzar a utilizar Vim es aconsejable utilizar la versión Vainilla, es posible mediante el agregado de plugins lograr una experiencia similar a la que tendríamos con un IDE.
+Si bien al comenzar a utilizar Vim es aconsejable utilizar la versión Vainilla, es posible mediante el agregado de plugins lograr una experiencia similar a la que tendríamos con un IDE pero con la ventaja que será único pues nuestra configuración nos brindará una personalización extrema.
 
 Se aconseja para esto primero instalar **neovim** que es mejor, más rápido y acepta más plugins que Vim no soporta.
 
@@ -441,6 +441,57 @@ sudo apt install neovim
 
 Luego podremos iniciarlo con `nvim`
 
-Luego podremos instalar los plugins de acuerdo a las instrucciones que tenemos en [este repositorio](https://github.com/junegunn/vim-plug)
+Luego podremos instalar los plugins de acuerdo a las instrucciones que tenemos en [este repositorio](https://github.com/junegunn/vim-plug) pero tener presente que puede que haya pasos previos por lo que en lugar de usarlo directo tomarlo solo como referencia y leer la documentación de cada plugin.
 
-El archivo de configuración de neovim debemos crearlo en `/.config/nvim` y llamarlo `init.vim`
+Neovim necesita un archivo de configuración específico que debemos crearlo en `/.config/nvim` y llamarlo `init.vim`. Normalmente no tendremos ni el directorio `nvim` ni el archivo `init.vim` por lo que tendremos que crearlos.
+
+El autor del [video](https://youtu.be/RZ4p-saaQkc) de FreeCodeCamp NeuralNine ofrece [su archivo de configuración](https://github.com/NeuralNine/config-files/blob/master/init.vim) para futura referencia.
+
+En cuanto a la estructura veremos al comienzo los **comandos**:
+
+```
+:set number
+:set relativenumber
+:set autoindent
+:set tabstop=4
+:se shiftwidth=4
+:set smarttab
+:set softtabstop=4
+:set mouse=a
+```
+
+- `set autoindent`: ajuste automático de la sangría de una línea según la sangría de la línea anterior.
+- `set shiftwidth=4`: establece la cantidad de espacios que se usan para representar una sangría al usar la tecla TAB o al sangrar manualmente en 4.
+- `set tabstop=4`: Establece la cantidad de espacios que se usan para representar una tabulación en el documento en 4.
+- `set smarttab`: establece la cantidad de espacios equivalentes a una tabulación (definida por `tabstop`) cuando se presiona la tecla TAB después de una palabra, pero use una tabulación real si se presiona la tecla TAB después de una tabulación.
+- `set softtabstop=4`: Establece la cantidad de espacios que se usan para representar una tabulación "virtual" cuando se presiona la tecla TAB. Si se establece en 4, se insertarán 4 espacios en lugar de una tabulación real.
+
+
+
+Luego tendremos que indicar los plugins que vamos a querer ejecutar con:
+
+```
+call plug#begin()
+
+Plug 'https://github.com/tpope/vim-surround'
+
+call plug#end()
+```
+
+> Por ejemplo en este caso hemos asumido que queremos instalar [este](https://github.com/tpope/vim-surround) plugin por lo que pondremos la dirección de su repositorio.
+>
+> Cada plugin tiene su configuración particular, será cuestión de analizar la documentación en el repositorio
+
+Algunos ejemplos:
+
+* [nerdtree](https://github.com/preservim/nerdtree) nos permitirá visualizar un árbol de archivos.
+* [vim-commentary](https://github.com/tpope/vim-commentary) nos permitirá seleccionar una porción de código y comentarla presionando `gc`
+
+
+
+A continuación para instalar los plugins ejecutamos:
+
+```
+:PlugInstall
+```
+
