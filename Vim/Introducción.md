@@ -259,9 +259,13 @@ En lugar de las flechitas podemos desplazarnos utilizando las teclas en línea`h
 
 * Con `d%` eliminamos todo el contenido entre llaves incluídas las llaves mismas.
 
-* Con `dt*` eliminamos todo el contenido hasta el próximo asterisco (sin incluirlo).
+* Con `dt{char}` (delete till) eliminamos todo el contenido hasta el próximo `char` sin incluirlo. 
 
-* Con `df*` eliminamos todo el contenido hasta el próximo asterisco incluído.
+  Ej: con `dt*` borraremos hasta el próximo asterisco pero sin incluirlo.
+
+* Con `df{char}` (delete find) eliminamos todo el contenido hasta  `char` incluido.
+
+  Ej: con `df*`  borraremos hasta próximo asterisco incluido.
 
 
 
