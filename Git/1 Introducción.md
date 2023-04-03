@@ -1598,13 +1598,39 @@ Cuando trabajemos con repositorios antiguos y queramos cambiar el nombre de la r
 
 https://dev.to/rhymu8354/git-renaming-the-master-branch-137b
 
+1. Renombrar el branch local
 
+   ```
+   git branch -m master main
+   ```
 
+2. Pushear el branch renombrado y setear el remote tracking branch.
 
+   ```
+   git push -u origin main
+   ```
+
+3. Establecer en GitHub el branch default.
+
+![image-20230331072159693](1 Introducción.assets/image-20230331072159693.png)
+
+4. Eliminar la rama remota
+
+   ```
+   git push origin --delete master
+   ```
+
+5. Setear upstream remote's HEAD
+
+   ```
+   git remote set-head origin -a
+   ```
+
+   
 
 # Submodules
 
- :link: Basado en el [video de freecodecamp de Tobias Günther ](https://youtu.be/qsTthZi23VE)
+ :link: Basado en el [video de FreeCodeCamp de Tobias Günther ](https://youtu.be/qsTthZi23VE)
 
 En ocasiones vamos a querer agregar bibliotecas u otro third party code en nuestro proyecto. Si bien esto podemos hacerlo manualmente descargando los archivos, copiándolos en nuestro proyecto y haciendo un commit al repositorio git. Esta no es la implementación más limpia ya que es susceptible de algunos problemas. Estamos mezclando código propio con ajeno y como la librería es un proyecto en sí mismo y debería estar separado del nuestro. Además ante cambios en features, bugfixes, etc tendremos repetir el proceso para actualizar el código. Git nos ofrece una solución a este problema con submodules.
 

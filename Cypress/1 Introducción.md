@@ -51,7 +51,7 @@ Para ejecutar los tests corremos, es importante tener presente que **antes tenem
 npx cypress open
 ```
 
-También podemos crear un script `"test:integration":"cypress open"` que luego podremos ejecutar con `npm test`
+También podemos crear un script `"test:integration":"cypress open"` que luego podremos ejecutar con `npm test:integration  `
 
 > En la parte superior derecha podemos elegir el navegador, veremos un botón que dice por ejemplo **Chrome 88** y haciendo click ahí veremos el resto de las opciones.
 

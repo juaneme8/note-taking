@@ -1,6 +1,6 @@
 # SvelteKit
 
-:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 14**
+:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 18**
 
 ## ¿Qué es Svelte?
 
@@ -494,16 +494,16 @@ SvelteKit utiliza anchors `<a>` para navegar entre rutas en lugar de utilizar ot
 
 ##### **Navegación a rutas estáticas**
 
-Queremos implementar la navegación desde / hacia /blog y /products, por lo tanto en `+page.svelte`
+Queremos implementar la navegación desde `/` hacia `/blog` y `/products`, por lo tanto en `+page.svelte`
 
-```
+```vue
 <a href="/blog">Blog</a>
 <a href="/products">Products</a>
 ```
 
 Luego por ejemplo en `/products/+page.svelte` podremos garantizar la naveción al inicio.
 
-```
+```vue
 <a href="/">Home</a>
 
 <h1>Products</h1>
@@ -519,7 +519,7 @@ Luego por ejemplo en `/products/+page.svelte` podremos garantizar la naveción a
 
 La navegación a rutas dinámicas es similar a lo visto:
 
-```
+```vue
 <a href="/">Home</a>
 
 <h1>Products</h1>
@@ -533,7 +533,7 @@ La navegación a rutas dinámicas es similar a lo visto:
 
 En lugar de utilizar un valor hardcodeado suponemos que recibimos por prop la ruta dinámica:
 
-```
+```vue
 <script>
 	export let productId = 100;
 </script>
@@ -544,7 +544,8 @@ En lugar de utilizar un valor hardcodeado suponemos que recibimos por prop la ru
 <h2><a href="/products/1">Product 1</a></h2>
 <h2><a href="/products/2">Product 2</a></h2>
 <h2><a href="/products/2">Product 3</a></h2>
-<h2><a href={`/products/${productId}`}Product {productId}</a></h2>
+<h2>
+  <a href={`/products/${productId}`}Product {productId}</a></h2>
 ```
 
 
@@ -703,7 +704,7 @@ Para explicar este concepto asumiremos que estamos trabajando con rutas relacion
     - +page.svelte
 ```
 
-Supongamos que tenemos la rutas /register y /login que muestran cierto contenido y se nos solicita que ambas rutas tengan un layout en común como ser un mensaje de bienvenida.
+Supongamos que tenemos la rutas `/register` y `/login` que muestran cierto contenido y se nos solicita que ambas rutas tengan un layout en común como ser un mensaje de bienvenida.
 
 La forma más simple sería crear una carpeta `auth` mover las carpetas `register` y `login` dentro suyo y a su vez crear un `+layout.svelte`:
 
@@ -724,9 +725,186 @@ En `+layout.svelte` bastaría con tener:
 <slot />
 ```
 
+Sin embargo estamos agregando un nuevo segmento `auth` en las url que serán: `/auth/register` y `/auth/login` y puede que esto no sea deseado, es allí donde es útil el concepto de **layout group**. 
+
+Bastará con cambiarle el nombre a la carpeta `auth` por `(auth)` de manera que las rutas estarán juntas y contaremos con el layout pero sin afectar la url.
 
 
-Sin embargo estamos agregando un nuevo segmento `auth` en las url que serán: `/auth/register` y `/auth/login` y puede que esto no sea deseado, es allí donde es útil el concepto de layout group. 
 
-Bastará con cambiarle el nombre a la carpeta `auth` por `auth` de manera que las rutas estarán juntas y contaremos con el layout pero sin afectar la url.
+## Breaking Out of Layouts
 
+En ocasiones vamos a querer que una ruta tenga un layout distinto.
+
+```
+- routes
+  - +layout.svelte
+  - (auth)
+    - +layout.svelte
+    - password
+      - +layout.svelte
+      - info
+        - +page.svelte
+      - forgot
+        - +page.svelte
+      - reset
+        - +page.svelte
+```
+
+En `+layout.svelte` establecemos un layout que se manifestaría en todas las páginas:
+
+```
+<p>Password layout</p>
+<slot />
+```
+
+El comportamiento default hereda layouts de elementos de jerarquía superior, en nuestro caso por el nivel de anidamiento veremos el layout del directorio root, el de auth y el de password.
+
+Supongamos que por algun motivo queremos queremos modificar los layouts que hereda cada ruta.
+
+* En `/forgot` no queremos mostrar el password layout pero sí el auth layout y root layout. En ese caso modificamos el archivo `+page.svelte` y lo llamamos `+page@(auth).svelte`. Esto se interpreta como carpeta `auth` y hacia arriba.
+
+* En `/reset` solo queremos ver el root layout, por eso lo renombramos a `+page@.svelte`
+
+
+
+Esta misma sintaxis funciona para archivos `+layout.svelte` por lo que podremos hacer que un layout rompa con la jerarquía de layouts que heredaría.
+
+
+
+## Otros archivos
+
+Hasta ahora en la carpeta `routes` trabajamos con archivos llamados `+page.svelte` y `+layout.svelte`. Cuando creamos un archivo con otro nombre no serán tratados como rutas sino que les daremos un tratamiento de componentes.
+
+En el root layout `+layout.svelte` hasta ahora tenemos:
+
+```vue
+<header>Header</header>
+<slot />
+<footer>Footer</footer>
+```
+
+Vamos a extraer el contenido en dos componentes para ello creamos al mismo nivel dos archivos: `header.svelte` y `footer.svelte`.
+
+```vue
+<script>
+	import Header from './header.svelte'
+  import Footer from './footer.svelte'
+</script>
+
+<Header />
+<slot />
+<Footer />
+```
+
+Sin embargo debemos tener que estos componentes no serán mapeados a ninguna ruta.
+
+
+
+### Carpeta `lib`
+
+Cuando tenemos componentes específicos a una ruta, creamos los archivos dentro de su carpeta pero si se trata de componentes o módulos que serán requeridos por múltiples rutas es una buena idea colocarlos en una carpeta `lib` en `src`.
+
+
+
+### Path alias
+
+Supongamos que movimos los archivos `header.svelte` y `footer.svelte` a la carpeta `lib`.
+
+Luego a la hora de importarlos podremos utilizar un path alias:
+
+```vue
+<script>
+	import Header from '$lib/header.svelte'
+  import Footer from '$lib/footer.svelte'
+</script>
+
+<Header />
+<slot />
+<Footer />
+```
+
+Como vemos gracias a esto se nos simplificará el acceso a los archivos evitando tener múltiples `../` pudiendo utilizar path alias.
+
+
+
+## API Routes
+
+Hasta ahora hemos aprendido como rutear páginas, pero en SvelteKit también podremos rutear a endpoints de una API. A diferencia de las rutas de páginas donde respondemos con HTML las API Routes nos dan la posibilidad de tener un control total sobre la respuesta. Vamos a poder realizar operaciones CRUD sobre una DB de manera similar a lo que haríamos en una app con Node.js+Express.js pero sin la necesidad de configurar un servidor aparte.
+
+Estas API Routes también son útiles para hacer peticiones a APIs externas. Un caso ideal sería en caso de tener que consultar una API que requiera una private key, ya que al ser server-side-routes no se envían al navegador.
+
+Creamos en `routes` para tener una mejor organización y separación creamos una carpeta  `api` aunque no es una convención obligatoria. 
+
+En este primer ejemplo queremos obtener la respuesta al acceder a `/api` por ello dentro de ella creamos un archivo que por convención debe llamarse `+server.js`.
+
+```
+export function GET(){
+  return new Response("Hello from the demo API")
+}
+```
+
+El nombre de la función matcheando el HTTP verb es otra convención que debemos seguir.
+
+Utilizamos el objeto `Response` standard de JavaScript.
+
+Si navegamos a `/demo-api` veremos la respuesta en pantalla.
+
+
+
+### GET Request
+
+Utilizaremos la extensión **Thunder Client** como herramienta para efectuar los requests a nuestras rutas de la API. En una aplicación real la UI será la encargada de hacer los requests.
+
+Utilizaremos datos en memoria representando lo que en una aplicación real sería la data de una DB, para ello creamos un archivo `comments`.js en la carpeta `lib`. 
+
+```
+export const comments = [
+  {
+    id: 1, 
+    text: "This is the first comment",
+  },
+  {
+    id: 2, 
+    text: "This is the second comment",
+  },
+  {
+    id: 3, 
+    text: "This is the third comment",
+  },
+];
+```
+
+
+
+En `api` creamos una carpeta `comments` y en ella un archivo `+server.js` 
+
+```js
+import {comments} from '$lib/comments'
+
+export function GET(){
+	return new Response(JSON.stringify(comments), {
+    headers: {
+      'Content-type': 'application/json'
+    }
+  });
+}
+```
+
+
+
+Como esto es un poco engorroso y  el restono de un JSON desde una API Route es algo habitual, SvelteKit nos lo simplifica con una función llamada `json` para generar estas respuestas:
+
+```js
+import { json } from '@sveltejs/kit'
+import {comments} from '$lib/comments'
+
+export function GET(){
+	return json(comments);
+}
+```
+
+
+
+Podremos probar esta respuesta en el navegador ingresando a http://localhost:5173/api/comments directamente o podemos hacerlo utilizando las extensiones Thunder Client, HTTP Client o externamente a través de Postman.
+
+Si en ese momento nos aparece un mensaje de error **Connection was refused by the server** tendremos que cambiar `localhost` por `[::1]`
