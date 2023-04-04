@@ -1,6 +1,6 @@
 # SvelteKit
 
-:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 21**
+:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 22**
 
 ## ¿Qué es Svelte?
 
@@ -1066,3 +1066,7 @@ export async function DELETE(requestEvent){
 Almacenamos `deletedComment` ya que lo necesitamos para retornarlo. Luego buscamos el índice de dicho elemento en el array y por último utilizamos `comments.splice(index, 1);` que mutará el array original.
 
 En Thunder Client seleccionamos el verbo `DELETE` y en la dirección colocamos `http://[::1]:5173/api/comments/1`.
+
+
+
+# Loading Data
