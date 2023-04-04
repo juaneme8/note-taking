@@ -1,6 +1,6 @@
 # SvelteKit
 
-:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 18**
+:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 21**
 
 ## ¿Qué es Svelte?
 
@@ -35,7 +35,13 @@ Creamos carpeta `md-sveltekit` y una vez adentro de ella ejecutamos:
 npm create svelte@latest hello-world
 ```
 
-Accederemos a un CLI interactivo
+Accederemos a un CLI interactivo:
+
+Need to install the following packages:
+  create-svelte@latest
+Ok to proceed? (y)
+
+
 
 ◇ Which Svelte app template? 
 **Skeleton project**: consiste en el scaffolding básico.
@@ -838,6 +844,14 @@ Creamos en `routes` para tener una mejor organización y separación creamos una
 En este primer ejemplo queremos obtener la respuesta al acceder a `/api` por ello dentro de ella creamos un archivo que por convención debe llamarse `+server.js`.
 
 ```
+- routes
+  - api
+    - +server.js
+```
+
+
+
+```
 export function GET(){
   return new Response("Hello from the demo API")
 }
@@ -847,7 +861,7 @@ El nombre de la función matcheando el HTTP verb es otra convención que debemos
 
 Utilizamos el objeto `Response` standard de JavaScript.
 
-Si navegamos a `/demo-api` veremos la respuesta en pantalla.
+Si navegamos a `/api` veremos la respuesta en pantalla.
 
 
 
@@ -876,7 +890,16 @@ export const comments = [
 
 
 
-En `api` creamos una carpeta `comments` y en ella un archivo `+server.js` 
+En `api` creamos una carpeta `comments` y en ella un archivo `+server.js`.
+
+```
+- routes
+  - api
+    - comments
+      - +server.js
+```
+
+
 
 ```js
 import {comments} from '$lib/comments'
@@ -907,4 +930,117 @@ export function GET(){
 
 Podremos probar esta respuesta en el navegador ingresando a http://localhost:5173/api/comments directamente o podemos hacerlo utilizando las extensiones Thunder Client, HTTP Client o externamente a través de Postman.
 
-Si en ese momento nos aparece un mensaje de error **Connection was refused by the server** tendremos que cambiar `localhost` por `[::1]`
+Si en ese momento nos aparece un mensaje de error **Connection was refused by the server** tendremos que cambiar `localhost` por `[::1]` por lo que pasará a ser:
+
+```
+http://[::1]:5173/api/comments
+```
+
+
+
+### POST Request
+
+```
+- routes
+  - api
+    - comments
+      - +server.js
+```
+
+```jsx
+import { json } from '@sveltejs/kit'
+import {comments} from '$lib/comments'
+
+export function GET(){
+	return json(comments);
+}
+
+export async function POST(requestEvent){
+  const {request} = requestEvent;
+  const {text} = await request.json();
+  
+  const newComment = {
+  	id: comments.length+1,
+  	text
+  }
+  return json(newComment, {status: 201});
+}
+```
+
+* En Thunder Client seleccionamos el verbo `POST` y en la dirección colocamos `http://[::1]:5173/api/comments` y luego en Body: `{"text": "New comment"}`. El id será generado automáticamente en el handler.
+
+* Con `await request.json();` extraemos el JSON Body que es enviado como parte de la petición. Notar que utilizamos la variable `text` al hacer destructuring ya que es una de las propiedades de ese objeto `body`.
+
+* Podríamos haber retornado también un objeto de tipo `Response`
+
+  ```
+  new Response(JSON.stringify(newComment),{status: 201})
+  ```
+
+  
+
+> Si enviamos una request en Thunder Client sin haber creado el handler correspondiente obtendremos un 405 con Method Not Allowed.
+
+
+
+## Dynamic API Routes
+
+Hasta ahora para los `GET` y `POST` trabajamos con `/api/comments` tanto para listar todos los elementos como para agregar uno nuevo. En ocasiones vamos a querer referenciar un elemento en particular ya sea para listarlo, editarlo o eliminarlo. 
+
+En nuestro ejemplo lo haremos con `/api/comments/:commentId` siendo este último un **segmento dinámico**.
+
+Debemos partir de la base de que las dynamic API routes son muy similares a las dynamic page routes.
+
+```
+- routes
+  - api
+    - comments
+      - +server.js
+      - [commentId]
+        - +server.js
+```
+Queremos retonar un comentario cuyo id matchee con el route parameter.
+```jsx
+import { json } from '@sveltejs/kit'
+import {comments} from '$lib/comments'
+
+export function GET(requestEvent){
+	const {params} = requestEvent;
+  const {commentId} = params;
+  const comment = comments.find(
+    comment => comment.id===parseInt(commentId)
+  )
+  
+  return json(comment)
+}
+```
+
+* Usamos `parseInt()` con el parámetro ya que en el array lo almacenamos como número pero el parámetro lo recibimos como string.
+
+### PATCH Request
+
+En ocasiones vamos a querer realizar modificaciones parciales en un elemento en particular y operamos de la misma manera vista en el caso anterior.
+
+En Thunder Client seleccionamos el verbo `PATCH` y en la dirección colocamos `http://[::1]:5173/api/comments/1` y luego en Body: `{"text": "Updated comment"}`
+
+```jsx
+import { json } from '@sveltejs/kit'
+import {comments} from '$lib/comments'
+
+export async function PATCH(requestEvent){
+  const {params, request} = requestEvent;
+  const {commentId} = params;
+  const {text} = await request.json();
+  
+  const comment = comments.find(
+    comment => comment.id===parseInt(commentId)
+  )
+	comment.text = text;
+  return json(comment)
+}
+```
+
+En este caso luego de un patch exitoso retornamos un 200.
+
+### DELETE Request
+
