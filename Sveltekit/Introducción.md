@@ -1070,3 +1070,5 @@ En Thunder Client seleccionamos el verbo `DELETE` y en la dirección colocamos `
 
 
 # Loading Data
+
+En aplicaciones reales en lugar de utilizar contenido estático hardcodeado como hasta ahora vamos a querer realizar la carga de datos de APIs externas.
