@@ -1044,3 +1044,25 @@ En este caso luego de un patch exitoso retornamos un 200.
 
 ### DELETE Request
 
+```jsx
+import {json} from '@sveltejs/kit'
+import {comments} from '$lib/comments'
+
+export async function DELETE(requestEvent){
+	const {params} = requestEvent;
+	const {commentId} = params;
+	
+	const deletedComment = comments.find(
+    comment => comment.id===parseInt(commentId)
+  );
+  const index = comments.findIndex(
+  	comment => comment.id===parseInt(commentId)
+  );
+ 	comments.splice(index, 1);
+	return json(deletedComment)
+}
+```
+
+Almacenamos `deletedComment` ya que lo necesitamos para retornarlo. Luego buscamos el índice de dicho elemento en el array y por último utilizamos `comments.splice(index, 1);` que mutará el array original.
+
+En Thunder Client seleccionamos el verbo `DELETE` y en la dirección colocamos `http://[::1]:5173/api/comments/1`.
