@@ -655,7 +655,7 @@ En `src` vamos a crear una carpeta `params` y dentro un archivo `integer.js`.
 
 ```jsx
 export default match(param){
-	return /^\d+$/.test(param)
+	return /^\d+$/.test(param);
 }
 ```
 
@@ -1071,4 +1071,4 @@ En Thunder Client seleccionamos el verbo `DELETE` y en la dirección colocamos `
 
 # Loading Data
 
-En aplicaciones reales en lugar de utilizar contenido estático hardcodeado como hasta ahora vamos a querer realizar la carga de datos de APIs externas.
+En aplicaciones productivas en lugar de utilizar contenido estático hardcodeado como hasta ahora vamos a querer realizar la carga de datos de fuentes externas (DB o API externa).
