@@ -1,6 +1,6 @@
 # SvelteKit
 
-:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 22**
+:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 23**
 
 ## ¿Qué es Svelte?
 
@@ -1071,4 +1071,79 @@ En Thunder Client seleccionamos el verbo `DELETE` y en la dirección colocamos `
 
 # Loading Data
 
-En aplicaciones productivas en lugar de utilizar contenido estático hardcodeado como hasta ahora vamos a querer realizar la carga de datos de fuentes externas (DB o API externa).
+En aplicaciones productivas en lugar de utilizar contenido estático hardcodeado como hasta ahora vamos a querer realizar la carga de datos provenientes de fuentes externas (DB o API externa).
+
+SvelteKit aporta varias condiciones que simplifican este proceso.
+
+> En esta sección asumimos que estamos en un nuevo proyecto, es por eso que diremos por ejemplo que creamos una carpeta `products` que anteriormente ya utilizamos.
+
+Suponemos en la página de inicio tenemos un enlace que nos lleva a `/products` donde vemos un listado de productos que son cargados de una fuente externa.
+
+```
+- routes
+  - +page.svelte
+  - products
+    - +page.svelte
+```
+
+
+
+En `/routes/+page.svelte`:
+
+```
+<h1>Welcome to the home page</h1>
+<a href="/products">Products</a>
+```
+
+En `/routes/products/+page.svelte` inicialmente tenemos:
+
+```
+<h1>List of products</h1>
+```
+
+
+
+### Generación de API Externa
+
+Para generar la API externa utilizaremos el paquete JSON Server que nos permite crear REST APIs con *zero-config*.
+
+```
+npm install json-server
+```
+
+En la raíz creamos un archivo `db.json` con un objeto que tiene una propiedad `products` que es un array de objetos.
+
+```json
+{
+	"products": [
+		{
+			"id": 1,
+			"title": "Product 1",
+			"price": 700,
+			"description": "Description 1"
+		},
+		{
+			"id": 2,
+			"title": "Product 2",
+			"price": 1050,
+			"description": "Description 2"
+		},
+		{
+			"id": 3,
+			"title": "Product 3",
+			"price": 2600,
+			"description": "Description 3"
+		}
+	],
+}
+```
+
+Luego en `package.json` creamos un nuevo script:
+
+```json
+"serve-json": "json-server --watch db.json --port 4000"
+```
+
+De esta manera creamos un endpoint de la API sirviendo en localhost:4000 la lista de productos. 
+
+Luego ejecutamos `npm run serve-json` luego en el navegador bastará con visitar `localhost:4000/products` y veremos la lista de elementos. Si visitamos `localhost:4000/products/1` veremos la info de ese elemento en particular.
