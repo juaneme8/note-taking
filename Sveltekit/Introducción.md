@@ -1412,11 +1412,11 @@ Agregamos a `db.json` la propiedad `postcodes` que servirá un array de tres ele
 	}
 ```
 
-Visitando `http://localhost:4000/products` accederemos a esta información.
+Visitando `http://localhost:4000/postcodes` accederemos a esta información.
 
-Como muchos de estos datos son innecesarios utilizaremos un endpoint de nuestra API `/postcodes` para realizar el fetching a la API externa y devolver la data con el formato deseado.
+El propósito es autocompletar un select que será utilizado en la UI. Como muchos de estos datos son innecesarios utilizaremos un endpoint de nuestra API `/postcodes` para realizar el fetching a la API externa y devolver la data con el formato deseado.
 
-Para ello creamos una carpeta `api` y dentro un archivo `+server.js`.
+Para ello creamos una carpeta `api` y dentro una carpeta `postcodes` y allí un archivo `+server.js`.
 
 ```
 - routes
@@ -1426,3 +1426,32 @@ Para ello creamos una carpeta `api` y dentro un archivo `+server.js`.
 ```
 
 En `+server.js` creamos un GET request que realice el fetch a la API externa y devuelva los datos formateados.
+
+```jsx
+export async function GET() {
+	const response = await fetch('http://localhost:4000/postcodes');
+	const postcodes = await response.json();
+	const appPostCodes = postcodes.map((postcode) => {
+		return {
+			buildingName: postcode.building_name,
+			line1: postcode.line_1,
+			line2: postcode.line_2,
+			line3: postcode.line_3,
+			town: postcode.post_town,
+			country: postcode.country,
+			postcode: postcode.postcode
+		};
+	});
+	return new Response(JSON.stringify(appPostCodes), {
+		headers: {
+			'Content-Type': 'application/json'
+		}
+	});
+}
+```
+
+
+
+Si visitamos ahora `http://localhost:5173/api/postcodes` accederemos a la información formateada.
+
+2min25
