@@ -1,6 +1,6 @@
 # SvelteKit
 
-:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 23**
+:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 24**
 
 ## ¿Qué es Svelte?
 
@@ -1147,3 +1147,282 @@ Luego en `package.json` creamos un nuevo script:
 De esta manera creamos un endpoint de la API sirviendo en localhost:4000 la lista de productos. 
 
 Luego ejecutamos `npm run serve-json` luego en el navegador bastará con visitar `localhost:4000/products` y veremos la lista de elementos. Si visitamos `localhost:4000/products/1` veremos la info de ese elemento en particular.
+
+
+
+### Fetching de datos
+
+A continuación queremos agregar el fetching de datos de la API creada recientemente.
+
+Debemos crear un archivo `+page.js` (el nombre es una convención de SvelteKit) en la misma jerarquía del `+page.svelte`, como vemos a continuación. 
+
+```
+- routes
+  - +page.svelte
+  - products
+    - +page.svelte
+    - +page.js
+```
+
+Este archivo debe exportar una función llamada `load`y  esta debe retornar un objeto. Siguiendo esta convención el objeto retornado formará parte de las props del `+page.svelte` ubicado al mismo nivel.
+
+
+
+#### Retorno simple de `data`
+
+
+
+En `+page.js` tenemos:
+
+```jsx
+export async function load() {
+	const title = "List of available products"
+  return {
+  	title
+  }
+}
+```
+
+Luego en `+page.svelte` accedemos a este objeto y lo llamamos `data`.
+
+```vue
+<script>
+	export let data;
+</script>
+
+<h1>{data.title}</h1>
+```
+
+
+
+#### Fetching real
+
+```jsx
+export async function load() {
+	const title = "List of available products";
+  const response = await fetch('http://localhost:4000/products');
+  const products = response.json()
+  return {
+    title,
+  	products
+  }
+}
+```
+
+
+
+```vue
+<script>
+	export let data;
+	const products = data.products;
+</script>
+
+<h1>{data.title}</h1>
+{#each products as product}
+<div>
+	<h2>{product.title}</h2>
+	<p>{product.description></p>
+	<hr /> 
+</div>
+{/each}
+```
+
+En la consola veremos un warning como el siguiente: **`Loading /login using window.fetch. For best results, use the fetch that is passed to your load function:` [`https://kit.svelte.dev/docs/load#making-fetch-requests`](https://kit.svelte.dev/docs/load#making-fetch-requests)**
+
+
+
+#### `loadEvent` y función `fetch`
+
+Nos indica que no debemos usar la función `fetch` nativa sino que debemos usar la que le pasa a `load` a través de `loadEvent` recibido como argumento.
+
+```jsx
+export async function load({loadEvent}) {
+	const {fetch} = loadEvent;
+	const title = "List of available products";
+  const response = await fetch('http://localhost:4000/products');
+  const products = response.json()
+  return {
+    title,
+  	products
+  }
+}
+```
+
+
+
+#### Diferencias funciones `fetch`
+
+A continuación vamos a analizar las diferencias existentes entre la función `fetch` nativa y esta que estamos utilizando y así entender qué fue lo que motivó el warning.
+
+Agregamos a `db.json` la propiedad `postcodes` que servirá un array de tres elementos.
+
+```
+{
+	"products": [
+		{
+			"id": 1,
+			"title": "Product 1",
+			"price": 700,
+			"description": "Description 1"
+		},
+		{
+			"id": 2,
+			"title": "Product 2",
+			"price": 1050,
+			"description": "Description 2"
+		},
+		{
+			"id": 3,
+			"title": "Product 3",
+			"price": 2600,
+			"description": "Description 3"
+		}
+	],
+  "postcodes": [
+      {
+        "postcode": "E3 4NA",
+        "postcode_inward": "4NA",
+        "postcode_outward": "E3",
+        "post_town": "London",
+        "dependant_locality": "",
+        "double_dependant_locality": "",
+        "thoroughfare": "Wellington Way",
+        "dependant_thoroughfare": "",
+        "building_number": "",
+        "building_name": "Wellington Buildings",
+        "sub_building_name": "Flat 1",
+        "po_box": "",
+        "department_name": "",
+        "organisation_name": "",
+        "udprn": 7871403,
+        "postcode_type": "S",
+        "su_organisation_indicator": "",
+        "delivery_point_suffix": "1A",
+        "line_1": "Flat 1",
+        "line_2": "Wellington Buildings",
+        "line_3": "Wellington Way",
+        "premise": "Flat 1, Wellington Buildings",
+        "longitude": -0.0252715,
+        "latitude": 51.5266544,
+        "eastings": 537084,
+        "northings": 182708,
+        "country": "England",
+        "traditional_county": "Greater London",
+        "administrative_county": "",
+        "postal_county": "London",
+        "county": "London",
+        "district": "Tower Hamlets",
+        "ward": "Bromley North",
+        "uprn": "6074452",
+        "id": "paf_7871403",
+        "country_iso": "GBR",
+        "country_iso_2": "GB",
+        "county_code": "",
+        "language": "en",
+        "umprn": "",
+        "dataset": "paf"
+      },
+      {
+        "postcode": "E3 4NA",
+        "postcode_inward": "4NA",
+        "postcode_outward": "E3",
+        "post_town": "London",
+        "dependant_locality": "",
+        "double_dependant_locality": "",
+        "thoroughfare": "Wellington Way",
+        "dependant_thoroughfare": "",
+        "building_number": "",
+        "building_name": "Wellington Buildings",
+        "sub_building_name": "Flat 2",
+        "po_box": "",
+        "department_name": "",
+        "organisation_name": "",
+        "udprn": 7871414,
+        "postcode_type": "S",
+        "su_organisation_indicator": "",
+        "delivery_point_suffix": "1Q",
+        "line_1": "Flat 2",
+        "line_2": "Wellington Buildings",
+        "line_3": "Wellington Way",
+        "premise": "Flat 2, Wellington Buildings",
+        "longitude": -0.0252715,
+        "latitude": 51.5266544,
+        "eastings": 537084,
+        "northings": 182708,
+        "country": "England",
+        "traditional_county": "Greater London",
+        "administrative_county": "",
+        "postal_county": "London",
+        "county": "London",
+        "district": "Tower Hamlets",
+        "ward": "Bromley North",
+        "uprn": "6074463",
+        "id": "paf_7871414",
+        "country_iso": "GBR",
+        "country_iso_2": "GB",
+        "county_code": "",
+        "language": "en",
+        "umprn": "",
+        "dataset": "paf"
+      },
+      {
+        "postcode": "E3 4NA",
+        "postcode_inward": "4NA",
+        "postcode_outward": "E3",
+        "post_town": "London",
+        "dependant_locality": "",
+        "double_dependant_locality": "",
+        "thoroughfare": "Wellington Way",
+        "dependant_thoroughfare": "",
+        "building_number": "",
+        "building_name": "Wellington Buildings",
+        "sub_building_name": "Flat 3",
+        "po_box": "",
+        "department_name": "",
+        "organisation_name": "",
+        "udprn": 7871425,
+        "postcode_type": "S",
+        "su_organisation_indicator": "",
+        "delivery_point_suffix": "2D",
+        "line_1": "Flat 3",
+        "line_2": "Wellington Buildings",
+        "line_3": "Wellington Way",
+        "premise": "Flat 3, Wellington Buildings",
+        "longitude": -0.0252715,
+        "latitude": 51.5266544,
+        "eastings": 537084,
+        "northings": 182708,
+        "country": "England",
+        "traditional_county": "Greater London",
+        "administrative_county": "",
+        "postal_county": "London",
+        "county": "London",
+        "district": "Tower Hamlets",
+        "ward": "Bromley North",
+        "uprn": "6074474",
+        "id": "paf_7871425",
+        "country_iso": "GBR",
+        "country_iso_2": "GB",
+        "county_code": "",
+        "language": "en",
+        "umprn": "",
+        "dataset": "paf"
+      }
+    ]
+	}
+```
+
+Visitando `http://localhost:4000/products` accederemos a esta información.
+
+Como muchos de estos datos son innecesarios utilizaremos un endpoint de nuestra API `/postcodes` para realizar el fetching a la API externa y devolver la data con el formato deseado.
+
+Para ello creamos una carpeta `api` y dentro un archivo `+server.js`.
+
+```
+- routes
+  - api
+  	- postcodes
+    	- +server.js
+```
+
+En `+server.js` creamos un GET request que realice el fetch a la API externa y devuelva los datos formateados.
