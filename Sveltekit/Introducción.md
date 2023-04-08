@@ -1,6 +1,6 @@
 # SvelteKit
 
-:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 24**
+:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 25**
 
 ## ¿Qué es Svelte?
 
@@ -1248,7 +1248,7 @@ export async function load({loadEvent}) {
 }
 ```
 
-
+En este caso no hay ninguna ventaja de usar esta función `fetch` de SK frente a la nativa, pero veremos a continuación casos en los que sí obtenemos mejoras.
 
 #### Diferencias funciones `fetch`
 
@@ -1256,7 +1256,7 @@ A continuación vamos a analizar las diferencias existentes entre la función `f
 
 Agregamos a `db.json` la propiedad `postcodes` que servirá un array de tres elementos.
 
-```
+```json
 {
 	"products": [
 		{
@@ -1278,138 +1278,42 @@ Agregamos a `db.json` la propiedad `postcodes` que servirá un array de tres ele
 			"description": "Description 3"
 		}
 	],
-  "postcodes": [
-      {
-        "postcode": "E3 4NA",
-        "postcode_inward": "4NA",
-        "postcode_outward": "E3",
-        "post_town": "London",
-        "dependant_locality": "",
-        "double_dependant_locality": "",
-        "thoroughfare": "Wellington Way",
-        "dependant_thoroughfare": "",
-        "building_number": "",
-        "building_name": "Wellington Buildings",
-        "sub_building_name": "Flat 1",
-        "po_box": "",
-        "department_name": "",
-        "organisation_name": "",
-        "udprn": 7871403,
-        "postcode_type": "S",
-        "su_organisation_indicator": "",
-        "delivery_point_suffix": "1A",
-        "line_1": "Flat 1",
-        "line_2": "Wellington Buildings",
-        "line_3": "Wellington Way",
-        "premise": "Flat 1, Wellington Buildings",
-        "longitude": -0.0252715,
-        "latitude": 51.5266544,
-        "eastings": 537084,
-        "northings": 182708,
-        "country": "England",
-        "traditional_county": "Greater London",
-        "administrative_county": "",
-        "postal_county": "London",
-        "county": "London",
-        "district": "Tower Hamlets",
-        "ward": "Bromley North",
-        "uprn": "6074452",
-        "id": "paf_7871403",
-        "country_iso": "GBR",
-        "country_iso_2": "GB",
-        "county_code": "",
-        "language": "en",
-        "umprn": "",
-        "dataset": "paf"
-      },
-      {
-        "postcode": "E3 4NA",
-        "postcode_inward": "4NA",
-        "postcode_outward": "E3",
-        "post_town": "London",
-        "dependant_locality": "",
-        "double_dependant_locality": "",
-        "thoroughfare": "Wellington Way",
-        "dependant_thoroughfare": "",
-        "building_number": "",
-        "building_name": "Wellington Buildings",
-        "sub_building_name": "Flat 2",
-        "po_box": "",
-        "department_name": "",
-        "organisation_name": "",
-        "udprn": 7871414,
-        "postcode_type": "S",
-        "su_organisation_indicator": "",
-        "delivery_point_suffix": "1Q",
-        "line_1": "Flat 2",
-        "line_2": "Wellington Buildings",
-        "line_3": "Wellington Way",
-        "premise": "Flat 2, Wellington Buildings",
-        "longitude": -0.0252715,
-        "latitude": 51.5266544,
-        "eastings": 537084,
-        "northings": 182708,
-        "country": "England",
-        "traditional_county": "Greater London",
-        "administrative_county": "",
-        "postal_county": "London",
-        "county": "London",
-        "district": "Tower Hamlets",
-        "ward": "Bromley North",
-        "uprn": "6074463",
-        "id": "paf_7871414",
-        "country_iso": "GBR",
-        "country_iso_2": "GB",
-        "county_code": "",
-        "language": "en",
-        "umprn": "",
-        "dataset": "paf"
-      },
-      {
-        "postcode": "E3 4NA",
-        "postcode_inward": "4NA",
-        "postcode_outward": "E3",
-        "post_town": "London",
-        "dependant_locality": "",
-        "double_dependant_locality": "",
-        "thoroughfare": "Wellington Way",
-        "dependant_thoroughfare": "",
-        "building_number": "",
-        "building_name": "Wellington Buildings",
-        "sub_building_name": "Flat 3",
-        "po_box": "",
-        "department_name": "",
-        "organisation_name": "",
-        "udprn": 7871425,
-        "postcode_type": "S",
-        "su_organisation_indicator": "",
-        "delivery_point_suffix": "2D",
-        "line_1": "Flat 3",
-        "line_2": "Wellington Buildings",
-        "line_3": "Wellington Way",
-        "premise": "Flat 3, Wellington Buildings",
-        "longitude": -0.0252715,
-        "latitude": 51.5266544,
-        "eastings": 537084,
-        "northings": 182708,
-        "country": "England",
-        "traditional_county": "Greater London",
-        "administrative_county": "",
-        "postal_county": "London",
-        "county": "London",
-        "district": "Tower Hamlets",
-        "ward": "Bromley North",
-        "uprn": "6074474",
-        "id": "paf_7871425",
-        "country_iso": "GBR",
-        "country_iso_2": "GB",
-        "county_code": "",
-        "language": "en",
-        "umprn": "",
-        "dataset": "paf"
-      }
-    ]
-	}
+	"postcodes": [
+		{
+    	"postcode": "E3 4NA",
+    	"post_town": "London",
+      "building_name": "Wellington Buildings",
+      "line_1": "Flat 1",
+      "line_2": "Wellington Buildings",
+      "line_3": "Wellington Way",
+      "udprn": 7871403,
+      "traditional_county": "Greater London",
+      "country": "England"
+    },
+    {
+      "postcode": "E3 4NA",
+      "post_town": "London",
+      "building_name": "Wellington Buildings",
+      "line_1": "Flat 2",
+      "line_2": "Wellington Buildings",
+      "line_3": "Wellington Way",
+      "udprn": 7871414,
+      "traditional_county": "Greater London",
+      "country": "England"
+    },
+    {
+      "postcode": "E3 4NA",
+      "post_town": "London",
+      "building_name": "Wellington Buildings",
+      "line_1": "Flat 3",
+      "line_2": "Wellington Buildings",
+      "line_3": "Wellington Way",
+      "udprn": 7871425,
+      "traditional_county": "Greater London",
+      "country": "England"
+    }
+  ]
+}
 ```
 
 Visitando `http://localhost:4000/postcodes` accederemos a esta información.
@@ -1454,4 +1358,67 @@ export async function GET() {
 
 Si visitamos ahora `http://localhost:5173/api/postcodes` accederemos a la información formateada.
 
-2min25
+
+
+Luego creamos la función `load` que retorna la data de la API utilizando el endpoint creado recientemente:
+
+```
+- routes
+  - address
+  	- +page.js
+```
+
+Entonces en `+page.js` para cada postcode retornamos un string de address.
+
+```jsx
+export const load = async () => {
+	const response = await fetch('http://localhost:5173/api/postcodes');
+	const postcodes = await response.json();
+	const addressList = postcodes.map((postcode) => {
+		return `${postcode.buildingName}, ${postcode.line1} ,${postcode.line2}, ${postcode.line3}, ${postcode.town}, ${postcode.country}, ${postcode.postcode}`;
+	});
+	return { addressList };
+};
+```
+
+En `+page.svelte` recibimos esta data como props y la presentamos en pantalla:
+
+```vue
+<script>
+	let address = '';
+	export let data;
+	const { addressList } = data;
+</script>
+
+<h1>Select your address</h1>
+
+<select bind:value={address}>
+	<option value="">Pick an address</option>
+	{#each addressList as addressItem}
+		<option value={addressItem}>{addressItem}</option>
+	{/each}
+</select>
+```
+
+
+
+Nuevamente obtenemos el warning que nos indica: For best results, use the `fetch` that is passed to your `load` function.
+
+Para satisfacer esto modificamos `+page.js`:
+
+```jsx
+export const load = async (loadEvent) => {
+	const { fetch } = loadEvent;
+	const response = await fetch('/api/postcodes');
+	const postcodes = await response.json();
+	const addressList = postcodes.map((postcode) => {
+		return `${postcode.buildingName}, ${postcode.line1} ,${postcode.line2}, ${postcode.line3}, ${postcode.town}, ${postcode.country}, ${postcode.postcode}`;
+	});
+	return { addressList };
+};
+```
+
+Este `fetch` de SvelteKit mejora el fetching de datos de dos formas:
+
+* Utilizando el `fetch` nativo estamos realizando una llamada HTTP de nuestro server a nuestro server lo cual es redundante. Esto afectará la performance. El `fetch` de SK directamente llama al handler del GET sin la necesidad de un request adicional.
+* Con el `fetch` nativo debemos utilizar la URL completa mientras que con el de SK podemos utilizar **requests relativos**.
