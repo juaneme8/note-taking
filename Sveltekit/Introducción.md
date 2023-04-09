@@ -1,6 +1,6 @@
 # SvelteKit
 
-:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 25**
+:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 26**
 
 ## ¿Qué es Svelte?
 
@@ -1316,7 +1316,7 @@ Agregamos a `db.json` la propiedad `postcodes` que servirá un array de tres ele
 }
 ```
 
-Visitando `http://localhost:4000/postcodes` accederemos a esta información.
+Luego de modificar el JSON al visitar`http://localhost:4000/postcodes` accederemos a esta información.
 
 El propósito es autocompletar un select que será utilizado en la UI. Como muchos de estos datos son innecesarios utilizaremos un endpoint de nuestra API `/postcodes` para realizar el fetching a la API externa y devolver la data con el formato deseado.
 
@@ -1366,6 +1366,7 @@ Luego creamos la función `load` que retorna la data de la API utilizando el end
 - routes
   - address
   	- +page.js
+  	- +page.svelte
 ```
 
 Entonces en `+page.js` para cada postcode retornamos un string de address.
@@ -1422,3 +1423,47 @@ Este `fetch` de SvelteKit mejora el fetching de datos de dos formas:
 
 * Utilizando el `fetch` nativo estamos realizando una llamada HTTP de nuestro server a nuestro server lo cual es redundante. Esto afectará la performance. El `fetch` de SK directamente llama al handler del GET sin la necesidad de un request adicional.
 * Con el `fetch` nativo debemos utilizar la URL completa mientras que con el de SK podemos utilizar **requests relativos**.
+
+
+
+## Universal Load Function
+
+La función `load` que creamos en `+page.js` y estuvimos estudiando recibe el nombre de universal load function ya que se ejecuta tanto en el sevidor como en el cliente.
+
+Para demostrar esto primero editamos el `src/app.html` que inicialmente es así:
+
+```html
+<body data-sveltekit-preload-data="hover">
+		<div style="display: contents">%sveltekit.body%</div>
+</body>
+```
+
+Sacamos el `data-sveltekit-preload-data="hover"` ya que puede traer confusión aunque luego veremos en detalle el propósito de este atributo.
+
+```html
+<body>
+		<div style="display: contents">%sveltekit.body%</div>
+</body>
+```
+
+
+
+Si agregamos un `console.log()` en `/src/routes/products/+page.js`
+
+```jsx
+export async function load({loadEvent}) {
+	console.log('Load function called in page.js')
+	const {fetch} = loadEvent;
+	const title = "List of available products";
+  const response = await fetch('http://localhost:4000/products');
+  const products = response.json()
+  return {
+    title,
+  	products
+  }
+}
+```
+
+Al refrescar la página `/products` veremos el log tanto en las devtools como en la terminal, lo que demuestra que la función se ejecuta en el servidor y en el navegador.
+
+Tener presente que al realizar *client side navigation* no ejecutamos código en el servidor, es decir que si desde `/` hacemos click en un botón para navegar hacia `/products` no veremos el log en la terminal pero sí en las devtools.
