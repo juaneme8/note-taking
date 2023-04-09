@@ -1467,3 +1467,45 @@ export async function load({loadEvent}) {
 Al refrescar la página `/products` veremos el log tanto en las devtools como en la terminal, lo que demuestra que la función se ejecuta en el servidor y en el navegador.
 
 Tener presente que al realizar *client side navigation* no ejecutamos código en el servidor, es decir que si desde `/` hacemos click en un botón para navegar hacia `/products` no veremos el log en la terminal pero sí en las devtools.
+
+
+
+## Server Load Funciton
+
+Recientemente vimos la función `load` definida en `+page.js` encargada de *loading page data* y que se ejecuta tanto en servidor como en el navegador.
+
+En ocasiones vamos a querer ejecutar una data loading function solo en el servidor. Por ejemplo si tenemos una private key como parte de la request a la API o si queremos conectarnos directamente a la base de datos para obtener los datos, en ambos casos podríamos estar utilizando variables de entorno privadas que nunca deben ser enviadas al navegador. Una universal load function (ULF) comprometería este principio, en estos casos utilizaremos una server load function (SLF).
+
+Una server load function es similar a la universal load function, en el sentido que es una función llamada `load` que retorna un objeto que es inyectado en el componente como data prop. Sin embargo, la diferencia está en que esta será ejecutada sólo en el navegador.
+
+Creamos un archivo `+page.server.js`:
+
+```
+- routes
+  - products
+    - +page.svelte
+    - +page.server.js
+```
+(para evitar confunsiones borramos el `- +page.js` que contiene la ULF)
+
+Debemos realizar algunos cambios respecto a la función `load` vista anteriormente:
+
+* El argumento pasado a una SLF es distinto del pasado a una ULF por lo tanto en vez de `loadEvent` lo llamamos `serverLoadEvent`.
+
+```jsx
+export async function load({serverLoadEvent}) {
+	console.log('Load function called in page.server.js')
+	const {fetch} = loadEvent;
+	const title = "List of available products";
+  const response = await fetch('http://localhost:4000/products');
+  const products = response.json()
+  return {
+    title,
+  	products
+  }
+}
+```
+
+Si navegamos a `/products` no veremos el log en la consola de las dev tools pero sí en la terminal, con lo cual confirmamos que sólo se ejecuta en el servidor (el código ni se caga ni se ejecuta en el servidor).
+
+3min
