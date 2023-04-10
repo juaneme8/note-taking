@@ -1474,7 +1474,7 @@ Tener presente que al realizar *client side navigation* no ejecutamos código en
 
 Recientemente vimos la función `load` definida en `+page.js` encargada de *loading page data* y que se ejecuta tanto en servidor como en el navegador.
 
-En ocasiones vamos a querer ejecutar una data loading function solo en el servidor. Por ejemplo si tenemos una private key como parte de la request a la API o si queremos conectarnos directamente a la base de datos para obtener los datos, en ambos casos podríamos estar utilizando variables de entorno privadas que nunca deben ser enviadas al navegador. Una universal load function (ULF) comprometería este principio, en estos casos utilizaremos una server load function (SLF).
+En ocasiones vamos a querer ejecutar una data loading function solo en el servidor. Es útil cuando trabajamos con información sensible que no queremos que sea accesible desde el navegador. Por ejemplo si tenemos una private key como parte de la request a la API o si queremos conectarnos directamente a la base de datos para obtener los datos, en ambos casos podríamos estar utilizando variables de entorno privadas que nunca deben ser enviadas al navegador. Una universal load function (ULF) comprometería este principio, en estos casos utilizaremos una server load function (SLF).
 
 Una server load function es similar a la universal load function, en el sentido que es una función llamada `load` que retorna un objeto que es inyectado en el componente como data prop. Sin embargo, la diferencia está en que esta será ejecutada sólo en el navegador.
 
@@ -1508,4 +1508,11 @@ export async function load({serverLoadEvent}) {
 
 Si navegamos a `/products` no veremos el log en la consola de las dev tools pero sí en la terminal, con lo cual confirmamos que sólo se ejecuta en el servidor (el código ni se caga ni se ejecuta en el servidor).
 
-3min
+
+
+### Deshabilitar JavaScript
+
+Si desde las Devtools presionamos Ctrl+Shift+P y **Disable JavaScript** si a continuación realizamos una navegación client-side haciendo click en un enlace veremos el contenido de la página cargado correctamente.
+
+Desde la pestaña de Network veremos que se realiza una request a products por lo que la load function se ejecutará en el server, obtendrá la data y la devolverá para mostrar en pantalla (cosa que podremos ver en Preview y Response). 
+
