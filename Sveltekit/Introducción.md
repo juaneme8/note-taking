@@ -1588,7 +1588,6 @@ En `+page.svelte` vamos a hardcodear el componente `Product`
 Notar que ponemos `product` que es equivalente a `product={product}`
 
 
-
 En este momento en pantalla veremos lo mismo que teníamos anteriormente.
 
 En lugar de hardcodear el componente `Product` con una ULF podemos retornar el componente como parte de la prop `data`.
