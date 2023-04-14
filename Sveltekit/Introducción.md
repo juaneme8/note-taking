@@ -1516,3 +1516,108 @@ Si desde las Devtools presionamos Ctrl+Shift+P y **Disable JavaScript** si a con
 
 Desde la pestaña de Network veremos que se realiza una request a products por lo que la load function se ejecutará en el server, obtendrá la data y la devolverá para mostrar en pantalla (cosa que podremos ver en Preview y Response). 
 
+
+
+# Universal vs Server Load Function
+
+Tanto la ULF como la SLF se utilizan para obtener data para una página. Hemos visto que la SLF como su nombre lo indica corre sólo en el servidor y su código nunca alcanza al navegador, lo que la vuelve ideal para manejar información sensible.
+
+Queremos demostrar ahora en qué caso tendría utilidad una ULF.
+
+Hasta ahora en  `+page.svelte`  recibimos la `data` y la renderizamos en el HTML:
+
+```vue
+<script>
+	export let data;
+	const products = data.products;
+</script>
+
+<h1>{data.title}</h1>
+{#each products as product}
+<div>
+	<h2>{product.title}</h2>
+	<p>{product.description></p>
+	<hr /> 
+</div>
+{/each}
+```
+
+Queremos extraer el contenido de adentro del `div` a un componente aparte llamado `product.svelte`
+
+```
+- routes
+  - products
+    - +page.svelte
+    - +page.server.js
+    - product.svelte
+```
+
+
+
+En `product.svelte`:
+
+```vue
+<script>
+	export let product;
+</script>
+
+<h2>{product.title}</h2>
+<p>{product.description></p>
+<hr /> 
+```
+
+
+
+En `+page.svelte` vamos a hardcodear el componente `Product`
+
+```vue
+<script>
+	import Product from './product.svelte'
+	export let data;
+	const products = data.products;
+</script>
+
+<h1>{data.title}</h1>
+{#each products as product}
+<div>
+	<Product {product}/>
+</div>
+{/each}
+```
+
+Notar que ponemos `product` que es equivalente a `product={product}`
+
+
+
+En este momento en pantalla veremos lo mismo que teníamos anteriormente.
+
+En lugar de hardcodear el componente `Product` con una ULF podemos retornar el componente como parte de la prop `data`.
+
+Creamos un archivo `page.js` (`page.server.js` lo borramos momentáneamente)
+
+```
+- routes
+  - products
+    - +page.svelte
+    - +page.js
+    - product.svelte
+```
+
+
+
+```
+import Product './product.svelte';
+
+export async function load({loadEvent}) {
+	console.log('Load function called in page.js')
+	const {fetch} = loadEvent;
+	const title = "List of available products";
+  const response = await fetch('http://localhost:4000/products');
+  const products = response.json()
+  return {
+    title,
+  	products
+  }
+}
+```
+
