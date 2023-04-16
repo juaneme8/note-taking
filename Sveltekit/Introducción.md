@@ -1,6 +1,6 @@
 # SvelteKit
 
-:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 26**
+:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 28**
 
 ## ¿Qué es Svelte?
 
@@ -1520,9 +1520,11 @@ Desde la pestaña de Network veremos que se realiza una request a products por l
 
 # Universal vs Server Load Function
 
-Tanto la ULF como la SLF se utilizan para obtener data para una página. Hemos visto que la SLF como su nombre lo indica corre sólo en el servidor y su código nunca alcanza al navegador, lo que la vuelve ideal para manejar información sensible.
+Tanto la ULF como la SLF se utilizan para obtener data para una página. Hemos visto que la SLF como su nombre lo indica corre sólo en el servidor y su código nunca alcanza al navegador, lo que la vuelve ideal para retornar datos que requieren de información sensible para obtenerlos (db credentials, private API keys).
 
-Queremos demostrar ahora en qué caso tendría utilidad una ULF.
+La utilidad de una ULF radica en que las SLF sólo pueden devolver valores que sean serializables (JSON, map, set, etc) pero no puede retornar clases o constructores de componentes.
+
+A continuación veremos que con una ULF podremos devolver un componente mientras que con una SLF esto no es posible.
 
 Hasta ahora en  `+page.svelte`  recibimos la `data` y la renderizamos en el HTML:
 
@@ -1588,11 +1590,11 @@ En `+page.svelte` vamos a hardcodear el componente `Product`
 Notar que ponemos `product` que es equivalente a `product={product}`
 
 
-En este momento en pantalla veremos lo mismo que teníamos anteriormente.
+En este momento al visitar /products  en pantalla veremos lo mismo que teníamos anteriormente.
 
 En lugar de hardcodear el componente `Product` con una ULF podemos retornar el componente como parte de la prop `data`.
 
-Creamos un archivo `page.js` (`page.server.js` lo borramos momentáneamente)
+Creamos un archivo `page.js` (`page.server.js` lo borramos momentáneamente) con la ULF.
 
 ```
 - routes
@@ -1604,7 +1606,7 @@ Creamos un archivo `page.js` (`page.server.js` lo borramos momentáneamente)
 
 
 
-```
+```jsx
 import Product './product.svelte';
 
 export async function load({loadEvent}) {
@@ -1615,7 +1617,92 @@ export async function load({loadEvent}) {
   const products = response.json()
   return {
     title,
-  	products
+  	products,
+    Component: Product
+  }
+}
+```
+
+Estamos pasando un constructor `Component` como data a la página. 
+
+
+
+Luego en `+page.svelte`
+
+```vue
+<script>
+	export let data;
+	const products = data.products;
+	const Component = data.Component;
+</script>
+
+<h1>{data.title}</h1>
+{#each products as product}
+<div>
+	<Component {product}/>
+</div>
+{/each}
+```
+
+
+
+Intetamos lo mismo con una SLF. Creamos un archivo `+page.server.js`
+
+```jsx
+import Product './product.svelte';
+
+export async function load({serverLoadEvent}) {
+	console.log('Load function called in page.server.js')
+	const {fetch} = loadEvent;
+	const title = "List of available products";
+  const response = await fetch('http://localhost:4000/products');
+  const products = response.json()
+  return {
+    title,
+  	products,
+    Component: Product
+  }
+}
+```
+
+Habiendo utilizado la SLF al visitar /products veremos un error 500 que nos dirá **GET http://localhost:5173/products** en las DevTools y en la terminal veremos el mensaje **Error: Data returned from 'load' when rendering /products is not serializable*: Cannot stringify a function**
+
+
+
+## ULF con SLF
+
+En ocasiones tendremos que retornar data que requiere de información sensible para obtenerla y también queremos retornar info no serializable como constructores de componentes o clases. SvelteKit nos permite utilizar ambas funciones a la vez. Esto significa que podremos obtener la data de una página usando SLF, ULF o ambas.
+
+Los datos retornados por la SLF son provistos a la ULF como parte del argumento `loadEvent`.
+
+Por lo tanto en la SLF `+page.server.js` retornamos `title` y `products`
+
+```jsx
+export async function load({serverLoadEvent}) {
+	console.log('Load function called in page.server.js')
+	const {fetch} = loadEvent;
+	const title = "List of available products";
+  const response = await fetch('http://localhost:4000/products');
+  const products = response.json()
+  return {
+    title,
+  	products,
+  }
+}
+```
+
+Luego en la ULF `server.js` recibimos `data` de la SLF y no es necesaria la lógica de fetching.
+
+```jsx
+import Product './product.svelte';
+
+export async function load({loadEvent}) {
+	console.log('Load function called in page.js')
+	const {data} = loadEvent;
+	
+  return {
+    ...data, 
+    Component: Product
   }
 }
 ```
