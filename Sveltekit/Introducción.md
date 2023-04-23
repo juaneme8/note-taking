@@ -1,6 +1,6 @@
 # SvelteKit
 
-:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 29**
+:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 30**
 
 ## ¿Qué es Svelte?
 
@@ -1753,6 +1753,7 @@ export async function load(serverLoadEvent) {
   const response = await fetch(`http://localhost:4000/products/${productId}`);
   const product = response.json()
   return {
+    title,
   	product,
   }
 }
@@ -1770,7 +1771,7 @@ Luego modificamos `+page.svelte` para consumir estos datos:
 
 <h1>{title}</h1>
 <div>
-	<h2>{product.title} - {product.price}</h2>
+	<h2>{product.title} - ${product.price}</h2>
   <p>{product.description}</p>
 </div>
 
@@ -1821,5 +1822,117 @@ URL {
 ```
 route
 { id: '/products/[productId]' }
+```
+
+
+
+# Handle Erorrs
+
+Veremos a continuación como trabajar errores en la función `load`.
+
+Si visitamos http://localhost:5173/products/4 es decir con un `productId` inexistente en nuestro JSON Server veremos en pantalla toods valores `undefined`. Lo que queremos hacer en cambio es mostrarle un mensaje de error (404 product not found) al usuario.
+
+Lo que haremos será trabajar en `+page.server.js` y allí verificar si el `productId` es mayor que 3.
+
+En primer lugar utilizaremos el objeto `Error` y veremos qué sucede:
+
+```jsx
+export async function load(serverLoadEvent) {
+	const {fetch, params} = serverLoadEvent;
+  const { productId } = params;
+  if (productId > 3) {
+    throw new Error('Product not found')
+  }
+  const title = "Product details";
+  const response = await fetch(`http://localhost:4000/products/${productId}`);
+  const product = response.json()
+  return {
+    title,
+  	product,
+  }
+}
+```
+
+Si ahora visitamos http://localhost:5173/products/4 veremos en pantalla un error 500. Esto se debe a que en las load functions debemos manejar los erorres con una `error` que es una helper function de SvelteKit.
+
+```jsx
+import { error } from '@sveltejs/kit'
+export async function load(serverLoadEvent) {
+	const {fetch, params} = serverLoadEvent;
+  const { productId } = params;
+  if (productId > 3) {
+    throw error(404, 'Product not found')
+  }
+  const title = "Product details";
+  const response = await fetch(`http://localhost:4000/products/${productId}`);
+  const product = response.json()
+  return {
+    title,
+  	product,
+  }
+}
+```
+
+La función `error` acepta dos argumentos el primero es el status code y el segundo el mensaje de error. 
+
+Ahora veremos en pantalla: 404 - Product not found con la página por defecto de error de SvelteKit. Podemos personalizarla creando un archivo `+error.svelte`.
+
+```
+- routes
+  - products
+    - [productId]
+     	- +page.svelte
+    	- +page.server.js
+    	- +error.svelte
+```
+
+
+
+En `+error.svelte`
+
+```vue
+<script>
+	import { page } from '$app/stores'
+</script>
+
+<h1>{$page.status}: {$page.error.message}</h1>
+```
+
+
+
+## Objeto personalizado
+
+Hemos hasta ahora devuelto desde `+page.server.js` como segundo argumento un string  `throw error(404, 'Product not found')` y lo recibimos `+error.svelte` como `$page.error.message`. 
+
+Pero podríamos haber devuelto en lugar de un string un objeto por ejemplo con las siguientes propiedades: `throw error(404, {message: 'Product not found', hint: 'Try a different product'})` que accederíamos con `$page.error.message` y `$page.error.hint`.
+
+
+
+# Redirects
+
+Desde la función `load` es posible redireccionar al usuario gracias a otro helper de SvelteKit llamado `redirect`. 
+
+Por ejemplo podríamos querer redireccionarlos si el `productId` es mayor que 3. 
+
+Tener presente que para el caso mencionado donde un usuario ingresa a una ruta con un `productId` inválido es más apropiado mostrar un error que para la redirección pero por simplicidad tomamos el mismo caso. Un caso de uso más apropiado sería si el usuario intenta ingresar a una ruta protegida sin estar logueado y lo redireccionamos a `/login`.
+
+Al trabajar con `redirect` como primer argumento indicamos el status code (podemos usar 307 que representa temporary redirect) y como segundo la ruta a la cual queremos hacer la redirección (podemos usar `/products`)
+
+```jsx
+import { redirect } from '@sveltejs/kit'
+export async function load(serverLoadEvent) {
+	const {fetch, params} = serverLoadEvent;
+  const { productId } = params;
+  if (productId > 3) {
+    throw redirect(307, '/products')
+  }
+  const title = "Product details";
+  const response = await fetch(`http://localhost:4000/products/${productId}`);
+  const product = response.json()
+  return {
+    title,
+  	product,
+  }
+}
 ```
 
