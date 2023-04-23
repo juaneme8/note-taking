@@ -1,6 +1,6 @@
 # SvelteKit
 
-:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 28**
+:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 29**
 
 ## ¿Qué es Svelte?
 
@@ -244,7 +244,7 @@ Queremos contar con rutas dinámicas de modo que el usuario pueda ingresar a:
 
 En `routes` creamos una carpeta `products` y en ella `+page.svelte` para la página donde veremos el listado.
 
-```
+```html
 <h1>Products List</h1>
 <h2>Product 1</h2>
 <h2>Product 2</h2>
@@ -281,7 +281,7 @@ Sin embargo en caso de tener una cantidad grande de productos esto no sería efi
 
 Luego en `+page.svelte` tenemos:
 
-```
+```html
 <h1>Details about product</h1>
 ```
 
@@ -1236,7 +1236,7 @@ En la consola veremos un warning como el siguiente: **`Loading /login using wind
 Nos indica que no debemos usar la función `fetch` nativa sino que debemos usar la que le pasa a `load` a través de `loadEvent` recibido como argumento.
 
 ```jsx
-export async function load({loadEvent}) {
+export async function load(loadEvent) {
 	const {fetch} = loadEvent;
 	const title = "List of available products";
   const response = await fetch('http://localhost:4000/products');
@@ -1451,7 +1451,7 @@ Sacamos el `data-sveltekit-preload-data="hover"` ya que puede traer confusión a
 Si agregamos un `console.log()` en `/src/routes/products/+page.js`
 
 ```jsx
-export async function load({loadEvent}) {
+export async function load(loadEvent) {
 	console.log('Load function called in page.js')
 	const {fetch} = loadEvent;
 	const title = "List of available products";
@@ -1493,9 +1493,9 @@ Debemos realizar algunos cambios respecto a la función `load` vista anteriormen
 * El argumento pasado a una SLF es distinto del pasado a una ULF por lo tanto en vez de `loadEvent` lo llamamos `serverLoadEvent`.
 
 ```jsx
-export async function load({serverLoadEvent}) {
+export async function load(serverLoadEvent) {
 	console.log('Load function called in page.server.js')
-	const {fetch} = loadEvent;
+	const {fetch} = serverLoadEvent;
 	const title = "List of available products";
   const response = await fetch('http://localhost:4000/products');
   const products = response.json()
@@ -1606,10 +1606,12 @@ Creamos un archivo `page.js` (`page.server.js` lo borramos momentáneamente) con
 
 
 
+`page.js` nos queda así:
+
 ```jsx
 import Product './product.svelte';
 
-export async function load({loadEvent}) {
+export async function load(loadEvent) {
 	console.log('Load function called in page.js')
 	const {fetch} = loadEvent;
 	const title = "List of available products";
@@ -1651,9 +1653,9 @@ Intetamos lo mismo con una SLF. Creamos un archivo `+page.server.js`
 ```jsx
 import Product './product.svelte';
 
-export async function load({serverLoadEvent}) {
+export async function load(serverLoadEvent) {
 	console.log('Load function called in page.server.js')
-	const {fetch} = loadEvent;
+	const {fetch} = serverLoadEvent;
 	const title = "List of available products";
   const response = await fetch('http://localhost:4000/products');
   const products = response.json()
@@ -1678,9 +1680,9 @@ Los datos retornados por la SLF son provistos a la ULF como parte del argumento 
 Por lo tanto en la SLF `+page.server.js` retornamos `title` y `products`
 
 ```jsx
-export async function load({serverLoadEvent}) {
+export async function load(serverLoadEvent) {
 	console.log('Load function called in page.server.js')
-	const {fetch} = loadEvent;
+	const {fetch} = serverLoadEvent;
 	const title = "List of available products";
   const response = await fetch('http://localhost:4000/products');
   const products = response.json()
@@ -1691,12 +1693,12 @@ export async function load({serverLoadEvent}) {
 }
 ```
 
-Luego en la ULF `server.js` recibimos `data` de la SLF y no es necesaria la lógica de fetching.
+Luego en la ULF `+page.js` recibimos `data` de la SLF y no es necesaria la lógica de fetching.
 
 ```jsx
 import Product './product.svelte';
 
-export async function load({loadEvent}) {
+export async function load(loadEvent) {
 	console.log('Load function called in page.js')
 	const {data} = loadEvent;
 	
@@ -1710,3 +1712,114 @@ export async function load({loadEvent}) {
 
 
 ## URL Data
+
+Frecuentemente vamos a querer cargar datos específicos de una entidad de acuerdo a los parámetros recibidos en la URL. 
+
+Vamos a hacer uso de JSON Server para proporcionarnos datos de un producto en particular al ingresar a http://localhost:4000/products/1
+
+```
+- routes
+  - products
+    - [productId]
+    	- +page.svelte
+```
+
+En `+page.svelte` por el momento simplemente tenemos:
+
+```
+<h1>Product details</h1>
+```
+
+Si ahora visitamos http://localhost:5173/products/1 veremos este contenido.
+
+Ahora queremos cargar la data que será consumida por esta página.
+
+Tomamos la elección de hacerlo en una **SLF** por ello creamos un archivo `+page.server.js`
+
+```
+- routes
+  - products
+    - [productId]
+     	- +page.svelte
+    	- +page.server.js
+```
+
+Realizamos la fetch a la API generada con JSON Server.
+```jsx
+export async function load(serverLoadEvent) {
+	const {fetch, params} = serverLoadEvent;
+  const {productId} = params;
+  const title = "Product details";
+  const response = await fetch(`http://localhost:4000/products/${productId}`);
+  const product = response.json()
+  return {
+  	product,
+  }
+}
+```
+
+Luego modificamos `+page.svelte` para consumir estos datos:
+
+```vue
+<script>
+	import Product from './product.svelte'
+  export let data;
+	const title = data.title;
+  const product = data.product;
+</script>
+
+<h1>{title}</h1>
+<div>
+	<h2>{product.title} - {product.price}</h2>
+  <p>{product.description}</p>
+</div>
+
+
+```
+
+Si ahora visitamos http://localhost:5173/products/1 veremos la información correcta.
+
+
+
+#### `params`, `url`, `route`
+
+Tanto en las SLF como en la ULF además de `params` contamos con `url` y `route` que podrán resultarnos útiles en alguna ocasión. Para conocer su comportamiento si visitamos http://localhost:5173/products/1 y los logueamos en pantalla veremos:
+
+
+
+* `params` como ya vimos nos entrega un objeto con los parámetro de la ruta.
+
+```
+{ productId: '1' }
+```
+
+
+
+* `url` como su nombre lo indica contiene todos los key/value relacionados con la url.
+
+```
+URL {
+  href: 'http://localhost:5173/products/1',
+  origin: 'http://localhost:5173',
+  protocol: 'http:',
+  username: '',
+  password: '',
+  host: 'localhost:5173',
+  hostname: 'localhost',
+  port: '5173',
+  pathname: '/products/1',
+  search: '',
+  searchParams: URLSearchParams {},
+  hash: ''
+}
+```
+
+
+
+* `route` nos permite conocer el nombre del directorio de la ruta actual.
+
+```
+route
+{ id: '/products/[productId]' }
+```
+
