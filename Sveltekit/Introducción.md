@@ -1936,3 +1936,142 @@ export async function load(serverLoadEvent) {
 }
 ```
 
+
+
+# Layout Data
+
+Hasta ahora tenemos una página donde mostramos todos los productos y una dónde mostramos los detalles de un producto en particular. En ambos contamos con un `+page.js` o `+page.server.js` con la `load` function con la que proporcionamos los datos necesarios.
+
+```
+- routes
+  - products
+    
+    - [productId]
+     	- +page.svelte
+    	- +page.server.js
+    
+    - +page.svelte
+    - +page.server.js
+```
+
+Queremos incorporar en ambas páginas una sección de *featured products*. En primer lugar modificamos el `db.json` de json server agregando la propiedad `featured-products` de modo que al ingresar a http://localhost:4000/featured-products accedamos a este listado.
+
+```json
+{
+	"products": [
+		{
+			"id": 1,
+			"title": "Product 1",
+			"price": 700,
+			"description": "Description 1"
+		},
+		{
+			"id": 2,
+			"title": "Product 2",
+			"price": 1050,
+			"description": "Description 2"
+		},
+		{
+			"id": 3,
+			"title": "Product 3",
+			"price": 2600,
+			"description": "Description 3"
+		}
+	],
+	"featured-products": [
+		{
+			"id": 1,
+			"title": "Featured Product 1",
+			"price": 700,
+			"description": "Description 1"
+		},
+		{
+			"id": 2,
+			"title": "Featured Product 2",
+			"price": 1050,
+			"description": "Description 2"
+		},
+		{
+			"id": 3,
+			"title": "Featured Product 3",
+			"price": 2600,
+			"description": "Description 3"
+		}
+	],
+}
+```
+
+
+
+Si bien podríamos hacer el fetch en ambas funciones `load` estaríamos violando el principio DRY (do not repeat yourself). Una solución óptima consiste en envolver las dos páginas en un layout y cargar los featured products allí.
+
+Por lo tanto en `products` creamos el archivo `+layout.svelte`
+
+```
+- routes
+  - products
+    
+    - [productId]
+     	- +page.svelte
+    	- +page.server.js
+    
+    - +page.svelte
+    - +page.server.js
+    - +layout.svelte
+```
+
+Si bien sabemos que en `+layout.svelte` mostraremos los productos destacados los datos se los pasaremos a través de `+layout.js` o `+layout.server.js` siguiendo una convención similar a la vista anteriormente.
+
+Creamos un `+layout.js` que será una ULF que correrá tanto en el servidor como en el navegador:
+
+```
+- routes
+  - products
+    
+    - [productId]
+     	- +page.svelte
+    	- +page.server.js
+    
+    - +page.svelte
+    - +page.server.js
+    
+    - +layout.svelte
+    - +layout.js
+```
+
+
+
+Por lo tanto en `+layout.js`
+
+```jsx
+export async function load(loadEvent){
+	const { fetch } = loadEvent;
+	const title = 'Featured products';
+	const response = await fetch('http://localhost:4000/featured-products')
+	const featuredProducts = response.json();
+	
+	return {title, featuredProducts}
+}
+```
+
+
+
+En `+layout.svelte` accederemos al objeto retornado como la prop `data`. 
+
+```vue
+<script>
+	export let data;
+	const title = data.title;
+	const featuredProducts = data.featuredProducts;
+</script>
+
+<slot />
+<h2>{title}</h2>
+{#each featuredProducts as product}
+    <div>
+        <h2>${product.title}</h2>
+        <p>${product.description}</p>
+    </div>
+{/each}
+```
+
