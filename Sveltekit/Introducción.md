@@ -1,6 +1,6 @@
 # SvelteKit
 
-:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 30**
+:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 32**
 
 ## ¿Qué es Svelte?
 
@@ -2056,7 +2056,7 @@ export async function load(loadEvent){
 
 
 
-En `+layout.svelte` accederemos al objeto retornado como la prop `data`. 
+En `+layout.svelte` consumiremos esta data mediante el objeto retornado como la prop `data`. 
 
 ```vue
 <script>
@@ -2075,3 +2075,95 @@ En `+layout.svelte` accederemos al objeto retornado como la prop `data`.
 {/each}
 ```
 
+
+
+# Using parent data
+
+En ocasiones vamos a necesitar datos que son cargados más arriba en el árbol de componentes. Por ejemplo supongamos que en el **root layout** vamos a cargar los detalles del usuario y también queremos acceder a lo mismo dentro del layout de products.
+
+<img src="Introducción.assets/image-20230425082959681.png" alt="image-20230425082959681" style="zoom:50%;" />
+
+```
+- routes
+  - products
+    - +layout.svelte
+    - +layout.js
+    
+  
+  - +layout.svelte
+  - +layout.js
+```
+
+En la raíz de `routes` creamos un archivo `+layout.svelte` y uno `+layout.js` de manera similar a lo visto anteriormente.
+
+En `+layout.js` obtenemos los datos del usuario (en este caso no hacemos el fetch de una API externa sino que los hardcodeamos por simplicidad)
+
+```js
+export async function load(loadEvent){
+	return {
+		username: 'juaneme8'
+	}
+}
+```
+
+En `+layout.svelte` consumimos estos datos:
+
+```vue
+<script>
+	export let data;
+	const { username } = data;
+</script>
+
+<div>Welcome, {username}</div>
+<slot />
+```
+
+
+
+Queremos mostrar el nombre de usuario en el layout vinculado con el layout de los detalles de producto
+
+
+
+En `products/+layout.js` accedemos a parent data a través de la función `parent` 
+
+```js
+export async function load(loadEvent){
+	const { fetch, parent } = loadEvent;
+  const parentData = await parent()
+  const { username } = parentData;
+	const title = 'Featured products';
+	const response = await fetch('http://localhost:4000/featured-products')
+	const featuredProducts = response.json();
+	
+	return {username, title, featuredProducts}
+}
+```
+
+Luego en `products/+layout.svelte``
+
+```vue
+<script>
+	export let data;
+  const username = data.username;
+	const title = data.title;
+	const featuredProducts = data.featuredProducts;
+</script>
+
+
+<slot />
+<h2>{title} for {username}</h2>
+{#each featuredProducts as product}
+    <div>
+        <h2>${product.title}</h2>
+        <p>${product.description}</p>
+    </div>
+{/each}
+```
+
+
+
+Las técnicas vistas son válidas:
+
+* Sin importar el nivel de anidamiento que tenga el componente hijo en el árbol del componentes.
+
+* Tanto para ULF como para SLF.
