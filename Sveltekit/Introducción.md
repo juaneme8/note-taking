@@ -2079,7 +2079,9 @@ En `+layout.svelte` consumiremos esta data mediante el objeto retornado como la 
 
 # Using parent data
 
-En ocasiones vamos a necesitar datos que son cargados más arriba en el árbol de componentes. Por ejemplo supongamos que en el **root layout** vamos a cargar los detalles del usuario y también queremos acceder a lo mismo dentro del layout de products.
+En ocasiones vamos a necesitar datos que son cargados más arriba en el árbol de componentes. 
+
+Como ejemplo consideramos el que en el **root layout** vamos a cargar los detalles del usuario y también queremos acceder a lo mismo dentro del layout de products.
 
 <img src="Introducción.assets/image-20230425082959681.png" alt="image-20230425082959681" style="zoom:50%;" />
 
@@ -2167,3 +2169,99 @@ Las técnicas vistas son válidas:
 * Sin importar el nivel de anidamiento que tenga el componente hijo en el árbol del componentes.
 
 * Tanto para ULF como para SLF.
+
+
+
+
+
+# Using child data
+
+De manera similar a lo visto anteriormente veremos cómo utilizar datos de hijos en componentes padres o ubicados más arriba en el árbol de componentes.
+
+Como ejemplo consideramos un **banner de notificaciones** ubicado en el root layout que esperamos que sea actualizado por la página que esté actualmente siendo renderizada. Por ejemplo en la página de página de todos los productos queremos mostrar una notificación y en la página de detalles de un producto otra notificación. Esto lo haremos trabajando en la función `load` de `+page.js`
+
+En `products/+page.js` incorporamos el campo `notification` al objeto retornado por la función `load`:
+
+```js
+import Product './product.svelte';
+
+export async function load(loadEvent) {
+	console.log('Load function called in page.js')
+  const notification = 'End of season sale!'
+	const {data} = loadEvent;
+	
+  return {
+    ...data, 
+    Component: Product
+    notification,
+  }
+}
+```
+
+
+
+Lo mismo hacemos en `products/[productId]/+page.server.js`
+
+```jsx
+import { redirect } from '@sveltejs/kit'
+export async function load(serverLoadEvent) {
+	const {fetch, params} = serverLoadEvent;
+  const { productId } = params;
+ 
+  if (productId > 3) {
+    throw redirect(307, '/products')
+  }
+  const title = "Product details";.
+  const notification = 'End of season sale! 50% off'
+  const response = await fetch(`http://localhost:4000/products/${productId}`);
+  const product = response.json()
+  return {  
+    title,
+  	product,
+    notification,
+  }
+}
+```
+
+
+
+Es posible acceder a estos datos en el layout padre, por lo tanto en `+layout.svelte`
+
+```vue
+<script>
+	import { page } from '$app/stores'
+	export let data;
+	const { username } = data;
+</script>
+
+{#if $page.data.notification}
+	<p>{$page.data.notification}</p>
+{/if}
+
+<div>Welcome, {username}</div>
+<slot />
+```
+
+
+
+Un caso de uso práctico es para configurar el título de una página en la aplicación.
+
+```vue
+<script>
+	import { page } from '$app/stores'
+	export let data;
+	const { username } = data;
+</script>
+
+<svelte:head>
+	<title>{$page.data.title} || 'Default page name'</title>
+</svelte:head>
+
+{#if $page.data.notification}
+	<p>{$page.data.notification}</p>
+{/if}
+
+<div>Welcome, {username}</div>
+<slot />
+```
+
