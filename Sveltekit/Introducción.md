@@ -1,6 +1,6 @@
 # SvelteKit
 
-:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 32**
+:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 34**
 
 ## ¿Qué es Svelte?
 
@@ -2263,5 +2263,154 @@ Un caso de uso práctico es para configurar el título de una página en la apli
 
 <div>Welcome, {username}</div>
 <slot />
+```
+
+
+
+# Promise Unwrapping
+
+Modificamos ahora el JSON Server en `db.json` de manera que incorporemos tres propiedades nuevas:
+
+```json
+{
+	"most-active-stock": {
+		"symbol": "STOCK A",
+		"price": 351.0
+	},
+	"top-gaining-stock": {
+		"symbol": "STOCK B",
+		"price": 50.0
+	},
+	"top-losing-stock": {
+		"symbol": "STOCK C",
+		"price": 100.0
+	},
+}
+```
+
+
+
+* `most-active-stock`
+* `top-gaining-stock`
+* `top-losing-stock`
+
+Estas nos habilitarán tres nuevos endpoints:
+
+* http://localhost:4000/most-active-stock
+* http://localhost:4000/top-gaining-stock
+* http://localhost:4000/top-gaining-stock
+
+
+
+Supongamos que queremos mostrar estos tres valores en una página:
+
+```
+- routes
+  - stocks
+    - +page.svelte
+    - +page.js
+```
+
+
+
+Luego en `+page.js` obtenemos la data realizando tres llamadas a la API.
+
+```jsx
+export const load = async (loadEvent) => {
+	const {fetch} = loadEvent;
+    const mostActiveStockResponse = await fetch('http://localhost:4000/most-active-stock');
+    const topGainingStockResponse = await fetch('http://localhost:4000/top-gaining-stock');
+    const topLosingStockResponse = await fetch('http://localhost:4000/top-losing-stock');
+    
+    const mostActiveStock = await mostActiveStockResponse.json();
+    const topGainingStock = await topGainingStockResponse.json();
+    const topLosingStock = await topLosingStockResponse.json();
+    
+    return {
+        mostActiveStock,
+        topGainingStock,
+        topLosingStock
+    }
+}
+```
+
+
+
+Luego en `+page.svelte` accedemos a estos datos mediante la prop `data`.
+
+```vue
+<script>
+	export let data;
+	const {mostActiveStock,topGainingStock,topLosingStock} = data;
+</script>
+
+<span>Most Active Stock - {mostActiveStock.symbol}</span>
+<span>Top Gaining Stock - {topGainingStock.symbol}</span>
+<span>Top Losing Stock - {topLosingStock.symbol}</span>
+```
+
+
+
+Es posible realizar una mejora en términos de performance haciendo uso del concepto de **Promise Unwrapping** es una característica de las `load` functions que nos permite evitar el waterfall effect que se causa el tener que hacer `await` de `response.json` una tras otra, ya que tendremos que esperar que cada una de esas promesas se resuelvan antes de resolver la siguiente.
+
+Para optimizarlo lo especificamos como parte del return statement sin el keyword `await` de modo que  SvelteKit se encargará de resolver las promesas en paralelo.
+
+```jsx
+export const load = async (loadEvent) => {
+	const {fetch} = loadEvent;
+    const mostActiveStockResponse = await fetch('http://localhost:4000/most-active-stock');
+    const topGainingStockResponse = await fetch('http://localhost:4000/top-gaining-stock');
+    const topLosingStockResponse = await fetch('http://localhost:4000/top-losing-stock');
+
+    return {
+        mostActiveStock: mostActiveStockResponse.json(),
+        topGainingStock: topGainingStockResponse.json(),
+        topLosingStock: topLosingStockResponse.json()
+    }
+}
+```
+
+
+
+Tener presente que SvelteKit sólo resolverá **top level promises**, esto significa que si tenemos por ejemplo:
+
+```jsx
+return {
+        mostActiveStock: mostActiveStockResponse.json(),
+        topGainingStock: topGainingStockResponse.json(),
+        topLosingStock: topLosingStockResponse.json(),
+        anotherStock: {
+        	nestedStock: response.json()
+        }
+    }
+```
+
+Esto no funcionará.
+
+
+
+# Data invalidation
+
+En Promise Unwrapping trabajamos con `+page.js` y `+page.svelte`, para esta sección migramos ambos archivos a `+layout.js` y `+layout.svelte` respectivamente.
+
+Actualizamos `db.json` agregando la propiedad `stocks`:
+
+```json
+{
+	"stocks": [
+		{
+			"symbol": "STOCK D",
+			"price": 151.0
+		},
+		{
+			"symbol": "STOCK E",
+			"price": 100.0
+		},
+		{
+			"symbol": "STOCK F",
+			"price": 240.0
+		}
+	],
+}
 ```
 
