@@ -1,6 +1,6 @@
 # SvelteKit
 
-:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 36**
+:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 37**
 
 ## ¿Qué es Svelte?
 
@@ -2567,8 +2567,67 @@ Como consecuencia de esto al presionar Refresh invalidaremos todas las load func
 
 Hemos visto que en SvelteKit utilizamos el anchor tag para navegar entre las distintas rutas de nuestra aplicación. Bastará con que el href no sea un sitio externo sino una ruta de nuestra aplicación y navegaremos a esa página. Importaremos el código del componente y luego llamaremos a las `load` functions que necesita para obtener datos.
 
-En las dev tools veremos en Network todas las requests que se efectúan cuando hacemos click en el botón para navegar por ejemplo a `/products`:
+En `/routes/+page.svelte` suponemos que tenemos:
+
+```html
+<h1>Welcome to the home page</h1>
+<a href="/products">Products</a>
+```
+
+
+
+En las DevTools veremos en Network todas las requests que se efectúan cuando hacemos click en el botón para navegar por ejemplo a `/products`:
 
 `__data...` (data de JSON server), `+page.svelte`,`+page.js`,`+layout.svelte`,`+layout.js`, `product.svelte`, `featured-products` 
 
 Veremos que es posible personalizar el fetching de código y de datos.
+
+ 
+
+## Preload Data
+
+Hemos visto que al hacer click en un botón para navegar a otra página, se carga tanto el código como los datos del server y se renderiza la página en el navegador. SvelteKit proporciona atributos que nos permiten hacer un preload de los datos y del código.
+
+Para hacer un **preload de los datos y el código** podemos modificar `+page.svelte` de la siguiente forma:
+
+```html
+<h1>Welcome to the home page</h1>
+<a href="/products" data-sveltekit-preload-data="hover">Products</a>
+```
+
+Al hacer hover (o touch start event en mobile) sobre el link veremos que se disparan todas las requests que anteriormente veíamos cuando hacíamos click en el link. Esto trae como consecuencia que al hacer click la carga de la página sea instantánea.
+
+Si bien esto puede ocasionar mejoras en la performance, en ocasiones puede no ser deseado. Hemos dado por sentado que el usuario va a hacer click en el link pero puede que no lo haga o lo que es peor que los datos cambien y necesiten ser actualizados. 
+
+En ese caso en lugar de hover utilizamos `tap` que se dispara cuando el usuario hace click aún sin soltar el mouse.
+
+```html
+<h1>Welcome to the home page</h1>
+<a href="/products" data-sveltekit-preload-data="tap">Products</a>
+```
+
+
+
+Si tenemos múltiples links que queremos hacer el preload no tenemos que agregar este atributo a todos ellos sino que podíamos ponerlo una única vez en el `body`.
+
+Recordemos que al estudiar la ULF justamente quitamos `data-sveltekit-preload-data="hover"` del `body`. Ahora lo volvemos a agregar:
+
+```html
+<body data-sveltekit-preload-data="hover">
+		<div style="display: contents">%sveltekit.body%</div>
+</body>
+```
+
+Como consecuencia de esto bastará con hacer hover sobre cualquier elemento link para que se efectúe el preloading.
+
+* Podemos agregar este atributo en un `div` que envuelva a varios links.
+* Podemos agregar el atributo al tag `html` pero quitarlo de aquellos links que no queremos que se haga el preload (esto será útil si nos interesa tener preload en un gran porcentaje de nuestros links y no tenerlo en uno pequeño).
+
+```html
+<h1>Welcome to the home page</h1>
+<a href="/products" data-sveltekit-preload-data="off">Products</a>
+```
+
+
+
+## Preload Code
