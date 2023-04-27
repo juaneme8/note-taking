@@ -1,6 +1,6 @@
 # SvelteKit
 
-:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 34**
+:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 36**
 
 ## ¿Qué es Svelte?
 
@@ -2391,7 +2391,9 @@ Esto no funcionará.
 
 # Data invalidation
 
-En Promise Unwrapping trabajamos con `+page.js` y `+page.svelte`, para esta sección migramos ambos archivos a `+layout.js` y `+layout.svelte` respectivamente.
+Frecuentemente vamos a estar mostrando datos en pantalla y necesitaremos invalidarlos luego de que ocurra un evento y realizar un nuevo fetch para botener los datos actualizados.
+
+Trabajaremos también con `+page.js` y `+page.svelte` creados en Promise Unwrapping dentro de `stocks`, pero para esta sección migramos ambos archivos a `+layout.js` y `+layout.svelte` respectivamente.
 
 Actualizamos `db.json` agregando la propiedad `stocks`:
 
@@ -2414,3 +2416,159 @@ Actualizamos `db.json` agregando la propiedad `stocks`:
 }
 ```
 
+
+
+Ahora en `page.js` hacemos el fetch y retornamos los datos:
+
+```js
+export const load = async (loadEvent) => {
+	const { fetch, depends } = loadEvent;
+	const response = await fetch('http://localhost:4000/stocks');
+	const stocks = await response.json();
+	return { stocks };
+};
+```
+
+
+
+En `page.svelte` mostramos los elementos en pantalla:
+
+```vue
+<script>
+	export let data;
+</script>
+
+<h1>Actively trading stocks</h1>
+
+{#each data.stocks as stock}
+	<h2>{stock.symbol} - ${stock.price}</h2>
+{/each}
+```
+
+
+
+Como estos valores fluctúan constantemente. Para simular esto modificamos los valores de `db.json` e inmediatamente veremos reflejados estos cambios en `http://localhost:4000/stocks` debido al watch mode, pero en la UI seguiremos viendo los valores viejos (stale data). 
+
+Si bien podríamos tener una función que se ejecute cada algunos segundos y actualice los datos, el requerimiento que se nos hace es contar con un botón de refrescar que haga el fetch de los valores actualizados.
+
+Podríamos llamar nuevamente al endpoint /stocks pero esto hace que tengamos orígenes distintos de los datos para el render inicial (load function) y para los renders subsiguientes lo cual complica las cosas. La solución mas simple es llamar a la función `load` que realizará el fetch nuevamente de la API, retornará los datos actualizados para que sean inyectados en la página y la ui será renderizada. Para lograr que SvelteKit ejecute nuevamente la `load` function hacemos uso de la función `invalidate`.
+
+```vue
+<script>
+	import { invalidate } from '$app/navigation';
+	export let data;
+  
+	function refresh() {
+		invalidate('http://localhost:4000/stocks');
+	}
+</script>
+
+<h1>Actively trading stocks</h1>
+
+{#each data.stocks as stock}
+	<h2>{stock.symbol} - ${stock.price}</h2>
+{/each}
+
+<button on:click={refresh}>Refresh</button>
+```
+
+SvelteKit buscará todas las `load` functions donde se efectúe un request a esta URL y las volverá a ejecutar.
+
+Invalidar datos mediante la URL se vuelve dificil en aquellos casos en los cuales trabajamos con urls que aceptan parámetros, en esos casos podremos utilizar `depends` disponible en `loadEvent`. Lo que haremos con `depends` será pasarle un string que actuará como label para esa función `load`.
+
+Por lo tanto en `+page.js`
+
+```js
+export const load = async (loadEvent) => {
+	const { fetch, depends } = loadEvent;
+	depends('stocks:actively-trading');
+	const response = await fetch('http://localhost:4000/stocks');
+	const stocks = await response.json();
+	return { stocks };
+};
+```
+
+
+
+Luego en `+page.svelte` simplemente podremos tener:
+
+```vue
+<script>
+	import { invalidate } from '$app/navigation';
+	export let data;
+  
+	function refresh() {
+		invalidate('stocks:actively-trading');
+	}
+</script>
+
+<h1>Actively trading stocks</h1>
+
+{#each data.stocks as stock}
+	<h2>{stock.symbol} - ${stock.price}</h2>
+{/each}
+
+<button on:click={refresh}>Refresh</button>
+```
+
+
+
+Tener presente que solo invalidaremos `load` functions que matcheen con la URL que le pasemos o la etiqueta. Por ejemplo si quisiéramos que al presionar refresh también se actualice la información provista por el fetch de  `+layout.js` (el que originalmente teníamos en `+page.js` ). 
+
+```jsx
+export const load = async (loadEvent) => {
+	const {fetch} = loadEvent;
+    const mostActiveStockResponse = await fetch('http://localhost:4000/most-active-stock');
+    const topGainingStockResponse = await fetch('http://localhost:4000/top-gaining-stock');
+    const topLosingStockResponse = await fetch('http://localhost:4000/top-losing-stock');
+    
+    const mostActiveStock = await mostActiveStockResponse.json();
+    const topGainingStock = await topGainingStockResponse.json();
+    const topLosingStock = await topLosingStockResponse.json();
+    
+    return {
+        mostActiveStock,
+        topGainingStock,
+        topLosingStock
+    }
+}
+```
+
+Si bien podríamos agregar aquí un `depends` e invalidar también eso existe otra forma. 
+
+
+
+Una forma más simple en cambio es utilizar `invalidateAll`, por lo que actualizando `+page.svelte`
+
+```
+<script>
+	import { invalidateAll } from '$app/navigation';
+	export let data;
+  
+	function refresh() {
+		invalidateAll();
+	}
+</script>
+
+<h1>Actively trading stocks</h1>
+
+{#each data.stocks as stock}
+	<h2>{stock.symbol} - ${stock.price}</h2>
+{/each}
+
+<button on:click={refresh}>Refresh</button>
+```
+
+Como consecuencia de esto al presionar Refresh invalidaremos todas las load functions activas.
+
+
+
+# Link Options
+
+Hemos visto que en SvelteKit utilizamos el anchor tag para navegar entre las distintas rutas de nuestra aplicación. Bastará con que el href no sea un sitio externo sino una ruta de nuestra aplicación y navegaremos a esa página. Importaremos el código del componente y luego llamaremos a las `load` functions que necesita para obtener datos.
+
+En las dev tools veremos en Network todas las requests que se efectúan cuando hacemos click en el botón para navegar por ejemplo a `/products`:
+
+`__data...` (data de JSON server), `+page.svelte`,`+page.js`,`+layout.svelte`,`+layout.js`, `product.svelte`, `featured-products` 
+
+Veremos que es posible personalizar el fetching de código y de datos.
