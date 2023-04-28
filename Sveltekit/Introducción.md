@@ -1,6 +1,6 @@
 # SvelteKit
 
-:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 37**
+:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 38**
 
 ## ¿Qué es Svelte?
 
@@ -2578,7 +2578,7 @@ En `/routes/+page.svelte` suponemos que tenemos:
 
 En las DevTools veremos en Network todas las requests que se efectúan cuando hacemos click en el botón para navegar por ejemplo a `/products`:
 
-`__data...` (data de JSON server), `+page.svelte`,`+page.js`,`+layout.svelte`,`+layout.js`, `product.svelte`, `featured-products` 
+`__data.json` (data de JSON server), `+page.svelte`,`+page.js`,`+layout.svelte`,`+layout.js`, `product.svelte`, `featured-products` 
 
 Veremos que es posible personalizar el fetching de código y de datos.
 
@@ -2630,4 +2630,40 @@ Como consecuencia de esto bastará con hacer hover sobre cualquier elemento link
 
 
 
+
+
 ## Preload Code
+
+El preload de data y código es una técnica interesante desde el punto de vista de UX ya que logramos que la próxima ruta cargue instantáneamente para el usuario. Sin embargo, esto no es deseable en todos los escenarios. Si tenemos datos que se actualizan permanentemente hacer el preload ante un hover del link nos generará stale data si el usuario decide navegar luego de unos segundos. Podríamos hacer un preload ante un tap pero en estos casos lo mejor es hacer un preload del código únicamente (y no data) ante un hover.
+
+Eliminamos el atributo del `body` y trabajamos sobre la página de inicio, ya vimos que si tenemos lo siguiente:
+
+```html
+<h1>Welcome to the home page</h1>
+<a href="/products" data-sveltekit-preload-data="hover">Products</a>
+```
+
+Se realiza el preload de los datos (`__data.json`) y del código (`+page...`,`+layout...`) cosa que observamos en las devtools.
+
+Para evitar trabajar con data obsoleta (staleness data) precargamos sólo el código y no los datos. Esto lo hacemos utilizando el atributo `data-sveltekit-preload-code`:
+
+```html
+<h1>Welcome to the home page</h1>
+<a href="/products" data-sveltekit-preload-code="hover">Products</a>
+```
+
+Al hacer click sobre el link los datos serán fetcheados y no serán stale.
+
+
+
+Los valores posibles de `data-sveltekit-preload-code` son: 
+
+* `hover`, `tap` (ambos idénticos a lo visto anteriormente), 
+
+* `eager` con este valor los links serán precargados directamente sin la necesidad de hacer click o hover.
+
+* `viewport` los links serán precargados cuando entren al viewport. Si tenemos un elemento fuera de la pantalla y scrolleamos hacia el, cuando aparezca en el viewport se realizará el preload.
+
+
+
+Debemos tener presente que el preload de código es un prerrequisito del preload de data, por lo que si tenemos ``data-sveltekit-preload-data` con valor `hover` o `tap` implicará que  `data-sveltekit-preload-code` también tiene estos valores. 
