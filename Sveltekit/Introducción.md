@@ -1,6 +1,6 @@
 # SvelteKit
 
-:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 38**
+:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 41**
 
 ## ¿Qué es Svelte?
 
@@ -2540,7 +2540,7 @@ Si bien podríamos agregar aquí un `depends` e invalidar también eso existe ot
 
 Una forma más simple en cambio es utilizar `invalidateAll`, por lo que actualizando `+page.svelte`
 
-```
+```vue
 <script>
 	import { invalidateAll } from '$app/navigation';
 	export let data;
@@ -2565,7 +2565,7 @@ Como consecuencia de esto al presionar Refresh invalidaremos todas las load func
 
 # Link Options
 
-Hemos visto que en SvelteKit utilizamos el anchor tag para navegar entre las distintas rutas de nuestra aplicación. Bastará con que el href no sea un sitio externo sino una ruta de nuestra aplicación y navegaremos a esa página. Importaremos el código del componente y luego llamaremos a las `load` functions que necesita para obtener datos.
+Hemos visto que en SvelteKit utilizamos el anchor tag para navegar entre las distintas rutas de nuestra aplicación. Bastará con que el `href` no sea un sitio externo sino una ruta de nuestra aplicación y navegaremos a esa página. Importaremos el código del componente y luego llamaremos a las `load` functions que necesita para obtener datos.
 
 En `/routes/+page.svelte` suponemos que tenemos:
 
@@ -2620,15 +2620,13 @@ Recordemos que al estudiar la ULF justamente quitamos `data-sveltekit-preload-da
 
 Como consecuencia de esto bastará con hacer hover sobre cualquier elemento link para que se efectúe el preloading.
 
-* Podemos agregar este atributo en un `div` que envuelva a varios links.
+* Podemos agregar este atributo en un elemento que envuelva a varios links (un `div` por ejemplo)
 * Podemos agregar el atributo al tag `html` pero quitarlo de aquellos links que no queremos que se haga el preload (esto será útil si nos interesa tener preload en un gran porcentaje de nuestros links y no tenerlo en uno pequeño).
 
 ```html
 <h1>Welcome to the home page</h1>
 <a href="/products" data-sveltekit-preload-data="off">Products</a>
 ```
-
-
 
 
 
@@ -2667,3 +2665,231 @@ Los valores posibles de `data-sveltekit-preload-code` son:
 
 
 Debemos tener presente que el preload de código es un prerrequisito del preload de data, por lo que si tenemos ``data-sveltekit-preload-data` con valor `hover` o `tap` implicará que  `data-sveltekit-preload-code` también tiene estos valores. 
+
+
+
+## Otros atributos
+
+Además de `data-sveltekit-preload-data` y `data-sveltekit-preload-code` existen otros dos atributos que no son tan usados: `data-sveltekit-reload` y `data-sveltekit-noscroll`
+
+
+
+### `data-sveltekit-reload`
+
+Cuando utilizamos elementos anchor tags (`<a>`) el comportamiento por defecto es el estudiado donde SvelteKit los controlará posibilitándonos la client side navegation.
+
+```
+<a href="/products">Products</a>
+```
+
+Esto significa que cuando hacemos click en el enlace navegaremos sin la necesidad de que la página recargue. Si por algún motivo necesitamos que la página se recargue (full page navigation) podemos hacerlo de esta forma:
+
+```
+<a href="/products" data-sveltekit-reload>Products</a>
+```
+
+
+
+### `data-sveltekit-noscroll`
+
+En ocasiones vamos a querer conservar el estado de scroll actual al navegar a otra ruta. El comportamiento por defecto al navegar a rutas dentro de la aplicación SvelteKit  consiste en posicionarnos en la parte superior de la pantalla scrolleando respecto de la posición anteiror en caso de ser necesario. 
+
+Si queremos deshabilitar esta opción podemos hacerlo modificando `routes/+page.svelte` de esta forma:
+
+```vue
+<a href="/products" data-sveltekit-noscrol>Products</a>
+
+<style>
+  .tall{
+    height: 100vh;
+  }
+</style>
+```
+
+Nos apoyamos en CSS para hacer notorios estos cambios.
+
+
+
+# Preload Programmatically
+
+En la sección anterior vimos cómo personalizar el comportamiento de los links usando atributos, pero como también es posible la navegación programática también podemos hacer preload de data y código.
+
+En `routes/+page.svelte` supongamos que tenemos:
+
+```vue
+<script>
+import { goto } from '$app/navigation'
+</script>
+
+<button on:click={() => {
+goto('/products')
+}}>Go to products</button>
+```
+
+Lo primero que podemos observar es que al hacer hover del botón no realizamos pre-load de data ni de código.
+
+Al hacer click en el botón navegamos a la página de Products y en las devtools podremos ver qué es ahi cuando obtenemos los datos y el código.
+
+```vue  
+<script>
+import { goto, preloadData } from '$app/navigation'
+</script>
+
+<button 
+        on:mouseover={async () =>{await preloadData('/products')}}
+  			on:focus={async () =>{await preloadData('/products')}}
+        on:click={() => {goto('/products')}}>
+  Go to products
+</button>
+```
+
+Al agregar `on:mouseover` también debemos agregar `on:focus` para garantizar la accesibilidad.
+
+Si pasamos el mouse por encima del botón podremos ver el preloading de data y código de manera similar a lo que sucede en un link.
+
+
+
+* Si queremos imitar el comportamiento de tap que lograbamos con `data-sveltekit-preload-data="tap"` podemos utilizar `on:mousedown`:
+
+  ```vue
+  <script>
+  import { goto, preloadData } from '$app/navigation'
+  </script>
+  
+  <button 
+          on:mousedown={async () =>{await preloadData('/products')}}
+    			on:focus={async () =>{await preloadData('/products')}}
+          on:click={() => {goto('/products')}}>
+    Go to products
+  </button>
+  ```
+
+  
+
+
+
+* Si queremos hacer el preload de código en lugar de data podemos importar `preloadCode`
+
+```vue
+<script>
+import { goto, preloadCode } from '$app/navigation'
+</script>
+
+<button 
+        on:mouseover={async () =>{await preloadCode('/products')}}
+  			on:focus={async () =>{await preloadCode('/products')}}
+        on:click={() => {goto('/products')}}>
+  Go to products
+</button>
+```
+
+Al pasar el mouse por encima del botón no veremos en las devtools en network el archivo `__data.json`.
+
+
+
+# Page Options
+
+Por defecto SvelteKit renderiza un componente en el servidor antes de mandarlo al cliente como HTML y luego va a renderizar el componente otra vez en el navegador para hacerlo interactivo en un proceso que se conoce como **hydration**. Por ejemplo un botón podría haber sido cargado pero no sería clickeable, la interactividad se la proporciona la hidratación.
+
+Este comportamiento de primero renderizar en el servidor y luego hacerlo en el navegador para hacerlo interactivo puede controlarse usando algunas opciones de página:
+
+* SSR: server side rendering
+
+* CSR: client side rendering
+
+  
+
+* Prerender: Renderizar antes de enviar al navegador, típicamente en build time.
+
+
+
+## SSR y CSR
+
+Las page options SSR y CSR pueden ser específicadas en `+page.js` o `+page.server.js`
+
+Por ejemplo en `products/+page.js` :
+
+```js
+import Product './product.svelte';
+
+export async function load(loadEvent) {
+	console.log('Load function called in page.js')
+  const notification = 'End of season sale!'
+	const {data} = loadEvent;
+	
+  return {
+    ...data, 
+    Component: Product
+    notification,
+  }
+}
+
+export const ssr = true;
+export const csr = true;
+```
+
+Debemos tener presente que `true` es el valor por defecto para ambos por lo que no notaremos ninguna diferencia. 
+
+Por tratarse de una ULF veremos el `console.log()` tanto en la terminal como en el navegador.
+
+Si observamos en el panel de Network veremos que el HTML es generado en el servidor ya que si previsualizamos la respuesta de `products` lo veremos incluído allí. Esto es bueno para performance y SEO.
+
+
+
+## CSR only
+
+A continuación buscaremos que el código no corra en el servidor y sólamente lo haga en el navegador.
+
+```js
+import Product './product.svelte';
+
+export async function load(loadEvent) {
+	console.log('Load function called in page.js')
+  const notification = 'End of season sale!'
+	const {data} = loadEvent;
+	
+  return {
+    ...data, 
+    Component: Product
+    notification,
+  }
+}
+
+export const ssr = false;
+export const csr = true;
+```
+
+Veremos que el log sólamente en el navegador y si analizamos la pestaña Preview de lo recibido en Network de `products` veremos que está en blanco (no contiene el HTML) y en Response directamente veremos que tenemos un `div`. Se carga JavaScript y luego se ejecuta para montar los elementos HTML en el DOM. Un caso de uso para "CSR only page option" es cuando estamos armando la sección admin de nuestra aplicación, donde no necesariamente necesitamos SEO y probablemente ahorraremos costos de server ya que no tenemos que generar el HTML para cada request.
+
+
+
+## SSR only
+
+Consideramos el caso de SSR
+
+```js
+import Product './product.svelte';
+
+export async function load(loadEvent) {
+	console.log('Load function called in page.js')
+  const notification = 'End of season sale!'
+	const {data} = loadEvent;
+	
+  return {
+    ...data, 
+    Component: Product
+    notification,
+  }
+}
+
+export const ssr = true;
+export const csr = false;
+```
+
+En este momento podremos ver que el log aparece en la terminal pero no en la consola de las devtools. En la response preview veremos todo el contenido presente que lo convierte en una opción viable cuando el SEO sea importante. Sin embargo si la página requiere JavaScript tendremos que tener ambos en `true`. Un caso de uso podría ser una página de noticias donde sólo se muestra contenido con importancia de SEO pero no de interactividad.
+
+
+
+## Both in `false`
+
+Si colocamos `ssr = false` y `csr = false` veremos la página en blanco ya que el código no corre ni en el servidor ni en el navegador.
