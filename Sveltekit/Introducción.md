@@ -871,7 +871,7 @@ Utilizaremos la extensión **Thunder Client** como herramienta para efectuar los
 
 Utilizaremos datos en memoria representando lo que en una aplicación real sería la data de una DB, para ello creamos un archivo `comments`.js en la carpeta `lib`. 
 
-```
+```js
 export const comments = [
   {
     id: 1, 
@@ -2967,3 +2967,101 @@ La hidratación sucederá en el navegador y esto lo confirmamos mediante el log 
 ## Pre-rendering API routes
 
 Crearemos un API endpoint sin una utilidad práctica real sino a los fines de presentar el tema.
+
+Creamos una carpeta `current-time` y en ella `+server.js` como vemos a continuación:
+
+```
+- routes
+  - api
+  	- current-time
+  		- +server.js
+```
+
+
+
+```js
+export async function GET(){
+	console.log('current-time GET handler invoked');
+    return new Respone(new Date().toLocaleTimeString());
+}
+```
+
+
+
+Ejecutamos la aplicación con `npm run dev` y veremos que al navegar a http://localhost:5173/api/current-time  (url de development) veremos la hora actual y si refrescamos vemos nuevamente la hora actualizada.
+
+Incorporamos ahora el pre-render
+
+```js
+export async function GET(){
+	console.log('current-time GET handler invoked');
+    return new Respone(new Date().toLocaleTimeString());
+}
+
+export const prerender = true;
+```
+
+
+
+Hacemos el build de la aplicación `npm run build` (veremos el log de esta API route).
+
+En `.svelte-kit` veremos:
+
+```
+- .svelte-kit
+  - output
+  	- server
+  	- client
+  	- prerendered
+  		- api
+  			- current-time
+```
+
+En el archivo `current-time` veremos la hora de cuando fue invocado el GET durante el build.
+
+Luego cuando servimos `npm run preview` veremos que al ingresar a la http://localhost:4173/api/current-time  (notar que es otra url)  la hora presentada será la misma que vimos en la carpeta `output` aunque refresquemos las veces que sea.
+
+De manera similar si tuviéramos una función fetch que genera un request a una API externa, esta sería guardada en la carpeta `output` y sería reutilizado ante cada request a ese endpoint. Cualquier cambio en la data externa no se vería reflejado en nuestra página.
+
+
+
+Un punto importante del pre-rendering de API routes es que heredan valores por defecto de las páginas que fetchean datos de ellas.
+
+Quitamos el pre-render en `server.js`:
+
+```js
+export async function GET(){
+	console.log('current-time GET handler invoked');
+    return new Respone(new Date().toLocaleTimeString());
+}
+
+```
+
+
+
+Luego en `+page.js` dentro de la ULF del componente inicial:
+
+```js
+export const load = async ({fetch}) => {
+	console.log('home page universal load function called');
+    const response = await fetch('/api/current-time');
+    const currentTime = await response.text();
+    return {currentTime};
+}
+
+export const prerender = true;
+exprot const csr = false;
+```
+
+
+
+En `+page.svelte` obtenemos la prop `data`:
+
+```
+<script>
+	export let data;
+</script>
+
+<h1>Welcome to Sveltekit @ {data.currentTime}</h1>
+```
+
