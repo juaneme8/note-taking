@@ -2900,7 +2900,7 @@ Si colocamos `ssr = false` y `csr = false` veremos la página en blanco ya que e
 
 Renderiza todo el HTML de páginas en *buildtime* en vez de hacerlo en *runtime*. Esto tiene los mismos beneficios que las páginas server-rendered pero como ventaja adicional evita tener que recalcular la página para cada visitante y escala con bajo costo cuando el número de visitantes crece. Como desventaja el buildtime es más costoso y sólo puede ser actualizada mediante el build y deploy de una nueva versión de la aplicación. Un caso de uso podría ser para blogs, ecommerce, documentación o páginas de marketing. En estos casos creamos el HTML una vez, lo cacheamos en un CDN y se lo servimos al cliente de manera casi instantánea mejorando así la performance
 
-### `.svelte-kit`
+### Análisis `.svelte-kit`
 
 ```
 - .svelte-kit
@@ -2959,3 +2959,11 @@ En `index.html` podremos ver el HTML de la página home.
 A continuación servimos la aplicación con `npm run preview`. Al visitar la página veremos el contenido pero esta vez el HTML no fue conputado cuando hicimos el request sino que fue en buildtime. Esto lo podemos confirmar ante la ausencia del log de la load function en la terminal.
 
 La hidratación sucederá en el navegador y esto lo confirmamos mediante el log que aparece en la consola. Si no lo queremos podemos deshabiltar CSR.
+
+
+
+
+
+## Pre-rendering API routes
+
+Crearemos un API endpoint sin una utilidad práctica real sino a los fines de presentar el tema.
