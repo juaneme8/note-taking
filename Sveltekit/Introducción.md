@@ -1,6 +1,6 @@
 # SvelteKit
 
-:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 41**
+:link: Basado en la [playlist](https://www.youtube.com/watch?v=UOMLvxfrTCA&list=PLC3y8-rFHvwjifDNQYYWI6i06D7PjF0Ua&ab_channel=Codevolution) de Codevolution. **COMPLETO VIDEO 43**
 
 ## ¿Qué es Svelte?
 
@@ -2893,3 +2893,69 @@ En este momento podremos ver que el log aparece en la terminal pero no en la con
 ## Both in `false`
 
 Si colocamos `ssr = false` y `csr = false` veremos la página en blanco ya que el código no corre ni en el servidor ni en el navegador.
+
+
+
+## Prerender
+
+Renderiza todo el HTML de páginas en *buildtime* en vez de hacerlo en *runtime*. Esto tiene los mismos beneficios que las páginas server-rendered pero como ventaja adicional evita tener que recalcular la página para cada visitante y escala con bajo costo cuando el número de visitantes crece. Como desventaja el buildtime es más costoso y sólo puede ser actualizada mediante el build y deploy de una nueva versión de la aplicación. Un caso de uso podría ser para blogs, ecommerce, documentación o páginas de marketing. En estos casos creamos el HTML una vez, lo cacheamos en un CDN y se lo servimos al cliente de manera casi instantánea mejorando así la performance
+
+### `.svelte-kit`
+
+```
+- .svelte-kit
+  - generated
+```
+
+Dentro de la carpeta `.svelte-kit` nos encontramos una carpeta `generated` que es creada cada vez que corremos la aplicación y contiene todo el código necesario para correr en desarrollo.
+
+
+
+Cuando ejecutamos `npm run build` veremos una carpeta `output` que dentro tiene carpetas `server` (contiene todo el código que corre en el servidor) y `client` (con todo el código que debe ser entregado al navegador)
+
+```
+- .svelte-kit
+  - output
+  	- server
+  	- client
+```
+
+Como en la página Home no tenemos ningun elemento dinámico que dependa del usuario es un buen candidato para prerender at buildtime en lugar de emplear ssr el HTML ante cada request.
+
+
+
+Para agregar esta *page option* nuevamente debemos hacerlo en `+page.js` o `+page.server.js`
+
+En `routes/+page.js`
+
+```jsx
+export const load = async () => {
+	console.log('home page universal load function called')
+}
+
+export const prerender = true;
+```
+
+
+
+En primer lugar debemos debemos buildear con `npm run build` (veremos el log de la ULF).
+
+Ahora veremos en `.svelte-kit` que en `output` además de `server` y `client` tenemos `prerendered`
+
+```
+- .svelte-kit
+  - output
+  	- server
+  	- client
+  	- prerendered
+  		- pages
+  			- index.html
+```
+
+En `index.html` podremos ver el HTML de la página home.
+
+
+
+A continuación servimos la aplicación con `npm run preview`. Al visitar la página veremos el contenido pero esta vez el HTML no fue conputado cuando hicimos el request sino que fue en buildtime. Esto lo podemos confirmar ante la ausencia del log de la load function en la terminal.
+
+La hidratación sucederá en el navegador y esto lo confirmamos mediante el log que aparece en la consola. Si no lo queremos podemos deshabiltar CSR.
