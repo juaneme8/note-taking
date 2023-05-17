@@ -1,6 +1,12 @@
 # :shield: Recomendaciones de Seguridad
 
 > Basado en [5 Easy Tweaks to increase your Linux Server's Security](https://youtu.be/OVsMaXQkktQ) de LearnLinuxTV.
+>
+> :link: [5 steps to secure Linux by NetworkChuck](https://youtu.be/ZhMw53Ud2tY)
+
+
+
+A continuación presentamos una serie de recomendaciones de seguridad para nuestros servidores Linux, partiendo de la premisa que lograr un sistema a prueba de hackeos es prácticamente imposible pero intentaremos incluir buenas prácticas para hacerlo más difícil.
 
 ## Crear usuario no root
 
@@ -12,7 +18,7 @@ En lo sucesivo asumimos que estamos logueados como `root` y por eso no ponemos `
 adduser juan
 ```
 
-Luego tendremos que ingresar la contraseña y nos pedirá una serie de datos y podemos dejarlos en blanco e ir presionando `ENTER`. Por último nos preguntará si la información es correcta y nos mostrará `Y/n` el hecho de que tenga mayúscula la `Y` da cuenta que se trata de la opción por defecto por lo que podremos presionar nuevamente `ENTER` directamente.
+Luego tendremos que ingresar la contraseña y nos pedirá una serie de datos y podemos dejarlos en blanco e ir presionando `ENTER`. Por último nos preguntará si la información es correcta y nos mostrará `Y/n` el hecho de que tenga mayúscula la `Y` da cuenta que se trata de la **opción por defecto** por lo que podremos presionar nuevamente `ENTER` directamente.
 
 El siguiente paso es agregar este usuario al grupo `sudu` ya que siendo miembro de este grupo podrá utilizar `sudo`.
 
@@ -27,6 +33,10 @@ Podemos verificar que el usuario forma parte de ese grupo
 ```
 groups juan
 ```
+
+
+
+:bulb: Para loguearnos con este usuario por SSH haremos: `ssh juan@<ip-address>` y nos pedirá la contraseña establecida para el usuario.
 
 
 
@@ -48,11 +58,11 @@ Luego nos pedirá el password.
 
 
 
-## Actualizaciones
+## Actualizaciones Manuales
 
-Realizar una actualización completa de los parches de seguridad del servidor antes de colocarlo en producción.
+Es aconsejable realizar una actualización completa de los parches de seguridad del servidor frecuentemente, especialmente antes de colocarlo en producción.
 
-Para refrescar la lista de los paquetes que tenemos disponibles para actualizar.
+Para refrescar la lista de los paquetes del repositorio que tenemos disponibles para actualizar.
 
 ```
 sudo apt update
@@ -70,11 +80,15 @@ Luego reiniciamos el servidor `sudo reboot`
 
 ## Actualizaciones Automáticas
 
+Las actualizaciones automáticas como su nombre lo indica nos permiten saber que se llevarán a cabo automáticamente y no tendremos que recordar hacerlas:
+
 ```
 sudo apt install unattended-upgrades
 ```
 
-Luego yendo a `etc/apt/apt.conf.d` veremos que tenemos una serie de archivos con `ls -l` que mas adelante editaremos.
+Luego nos preguntará si queremos continuar con la instalación y presionamos `ENTER`.
+
+
 
 Para asegurarnos que las actualizaciones automáticas están instaladas:
 
@@ -82,9 +96,11 @@ Para asegurarnos que las actualizaciones automáticas están instaladas:
 sudo dpkg-reconfigure --priority=low unattended-upgrades
 ```
 
-Luego nos preguntará si queremos descargar e instalar actualizaciones estables automáticamente e indicamos que sí.
+Luego nos aparecerá un menu y nos preguntará si queremos descargar e instalar actualizaciones estables automáticamente e indicamos que sí.
 
 
+
+Luego yendo a `etc/apt/apt.conf.d` veremos que tenemos una serie de archivos con `ls -l` que editaremos.
 
 En `20auto-upgrades`agregamos dos líneas, una para que el listado de paquetes se refresque automáticamente y otra para que instale automáticamente estas actualizaciones:
 
@@ -94,7 +110,7 @@ APT::Periodic::Unattended-Package-Lists "1";
 
 ```
 
-En `50unattended-upgrades`veremos que tenemos habilitadas las actualizaciones relacionadas con **security** y **infra security**
+En `50unattended-upgrades`veremos que tenemos habilitadas las actualizaciones relacionadas con **security** e **infra security**
 
 
 
@@ -158,17 +174,51 @@ Unattended-Upgrade::Automatic-Reboot-Time "02:00";
 
 
 
-## Configuraciones en `sshd_config`
-
-### Autenticación por ssh con llave pública
+## Autenticación por ssh con llave pública
 
 Queremos plantear una autenticación con llave pública en lugar de utilizar el password para conectarnos por ssh.
 
-:stop_sign: Ver el apartado de SSH donde se explica esta alternativa a la autenticación con password.
+En primer lugar crearemos una llave pública y una privada. Luego almacenaremos en el servidor la llave pública que podemos pensarla como una candado que sólo puede ser abierta con la llave privada que conservaremos en nuestra pc. 
+
+:stop_sign: Para más información ver el apartado de SSH donde se explica esta alternativa a la autenticación con password.
+
+En el **servidor** creamos el directorio `.ssh` para almacenar las llaves públicas y cambiamos los permisos de modo que sólo el dueño pueda acceder y modificar estos archivos proporcionando una capa extra de seguridad.
+
+```
+mkdir ~/.ssh && chmod 700 ~/.ssh
+```
+
+Con 700 en octal estamos indicando con el 7 los permisos del dueño del archivo garantizando lectura (4), escritura (2) y ejecución (1). Luego con el segundo y el tercer dígito le estamos indicando que el  grupo y otros no tienen permisos.
+
+En nuestra pc creamos las llave públicas y privadas:
+
+```
+ssh-keygen -b 4096
+```
+
+Asumiendo que estamos en **Windows** copiamos la llave pública al servidor:
+
+```
+scp $env:USERPROFILE/.ssh/id_rsa.pub juan@<ip-address>:~/.ssh/authorized_keys
+```
+
+scp = secure copy protocol
+
+En **Linux** ejecutaríamos:
+
+```
+ssh-copy-id juan@<ip-address>
+```
 
 
 
-### Deshabilitar Autenticación por ssh con contraseña
+La próxima vez que nos conectemos por ssh no nos pedirá la contraseña.
+
+
+
+# Configuración `sshd_config`
+
+## Deshabilitar Autenticación por ssh con contraseña
 
 Editamos el archivo de configuración del servicio de ssh.
 
@@ -176,21 +226,53 @@ Editamos el archivo de configuración del servicio de ssh.
 sudo nano /etc/ssh/sshd_config
 ```
 
-Donde dice `PermitRootLogin yes` podemos cambiarlo a `no` para impedir el logueo como `root`.
-
 Donde dice `PasswordAuthentication yes` colocamos `no` de manera que sólo sea posible conectarnos por *public key authentication*
 
-Los cambios tendrán efecto recién cuando reiniciemos el servicio de ssh:
+Los cambios tendrán efecto recién cuando reiniciemos el daemon de ssh:
 
 ```
 sudo systemctl restart sshd
 ```
 
-> Aunque hemos reiniciado el servicio y estamos conectados por ssh no se desconecta.
+> :warning: Aunque hemos reiniciado el servicio y estamos conectados por ssh no se desconecta.
+>
+> :warning: Es importante abrir dos sesiones antes de editar este archivo. En caso de que cometamos algún error y no podamos volver a conectarnos, tendremos la otra sesión para solucionar el problema.
 
 
 
-:warning: Es importante abrir dos sesiones antes de editar este archivo. En caso de que cometamos algún error y no podamos volver a conectarnos, tendremos la otra sesión para solucionar el problema.
+## Impedir logueo como `root`
+
+Donde dice `PermitRootLogin yes` podemos cambiarlo a `no` para impedir el logueo como `root`.
+
+
+
+## Cambiar puerto ssh
+
+Cambiar el puerto predeterminado para SSH (el 22) es una práctica común para mejorar la seguridad de un servidor: Logrando reducir la exposición ya que muchos bots escanean el puerto 22 para intentar ataques de fuerza bruta o explotar vulnerabilidades conocidas. Está claro que esto no representa una medida de seguridad por sí sola pero obliga a un escaneo de puertos más amplio para identificar si el servidor tiene habilitado SSH y en qué puerto se encuentra.
+
+```
+sudo nano /etc/ssh/sshd_config
+```
+
+Descomentar la línea `#Port 22` colocando por ejemplo `Port 717`
+
+
+
+Para acceder al servidor ahora tendremos que hacer:
+
+```
+ssh -p 717 juan@<ip-address>
+```
+
+ 
+
+## Configurar ipv4 only
+
+En lugar de `#AddressFamily any` indicamos que sólo queremos recibir solicitudes ipv4.
+
+```
+AddressFamily inet
+```
 
 
 
@@ -246,28 +328,131 @@ Dentro de las configuraciones veremos:
 
 
 
-# Cambiar nombre de host
+## Conocer puertos en uso
 
-The procedure to change the computer name on Ubuntu Linux:
-
-1. Type the following command to edit /etc/hostname using nano or vi text editor:
-   `sudo nano /etc/hostname`
-   Delete the old name and setup new name.
-
-   
-
-2. Next Edit the /etc/hosts file:
-   `sudo nano /etc/hosts`
-   Replace any occurrence of the existing computer name with your new one.
-
-   
-
-3. Reboot the system to changes take effect:
-   `sudo reboot`
+```
+sudo ss -tupln
+```
 
 
 
-# Aumentar Tamaño Fuente Terminal
+## Firewall UFW
+
+```
+sudo apt install ufw
+```
+
+ufw = uncomplicated firewall
+
+
+
+Conocer el estado
+
+```
+sudo ufw status
+```
+
+
+
+Habilitar puerto 717
+
+```
+sudo ufw allow 717
+```
+
+
+
+Activar firewall
+
+```
+sudo ufw enable
+```
+
+
+
+Luego de activar el firewall lo aconsejable es loguearnos desde otra terminal para asegurarnos de que todo está bien y que nos quedemos afuera de nuestro server.
+
+
+
+Supongamos que tenemos un sitio web que queremos exponer, para esto instalamos el servidor web Apache:
+
+```
+sudo apt install apache2
+```
+
+Luego lo iniciamos
+
+```
+sudo systemctl start apache2
+```
+
+En este momento si ejecutamos `sudo ss -tupln` veremos qeu el puerto 80 está en uso pero eso no significa que sea accesible navegando a `<ip-address>` ya que el firewall lo estará bloqueando por lo que tendremos que ejecutar:
+
+```
+sudo ufw allow 80/tcp
+```
+
+
+
+## Deshabilitar ping 
+
+Como otra medida de ocultamiento, es aconsejable deshabilitar la posibilidad de hacerle ping a la dirección IP del servidor de manera tal de dificultar el conocimiento de que el servidor está activo.
+
+```
+sudo nano /etc/ufw/before.rules
+```
+
+En el apartado donde dice `# ok icmp codes for INPUT` debemos colocar al comienzo:
+
+```
+-A ufw-before-input -p icmp --icmp-type echo-request -j DROP
+```
+
+The rule `-A ufw-before-input -p icmp --icmp-type echo-request -j DROP` is used in UFW (Uncomplicated Firewall) to drop incoming ICMP echo-request packets, which are commonly associated with ping requests. This rule prevents the server from responding to ICMP echo requests, effectively blocking incoming pings.
+
+
+
+```
+sudo ufw reload
+```
+
+
+
+```
+sudo reboot
+```
+
+
+
+# Configuraciones
+
+## Cambiar nombre de host
+
+* Editar el archivo `/etc/hostname`  borrando el nombre antiguo y especificando el nuevo.
+
+```
+sudo nano /etc/hostname
+```
+
+
+
+* Edita el archivo `/etc/hosts` reemplazando cualquier aparición del nombre de la computadora existente por el nuevo.
+
+```
+sudo nano /etc/hosts
+```
+
+
+
+Reinicia el sistema para que los cambios surtan efecto: 
+
+```
+sudo reboot
+```
+
+
+
+## Aumentar Tamaño Fuente Terminal
 
 Para aumentar el tamaño de fuente, debemos editar el archivo `/etc/default/console-setup`
 
@@ -289,54 +474,3 @@ sudo update-initramfs -u
 ```
 
 Luego podemos reiniciar la máquina para ver los cambios `reboot`.
-
-
-
-# Configuración Servidor
-
-> Basado en [este artículo](https://www.redeszone.net/tutoriales/servidores/servidor-openssh-linux-configuracion-maxima-seguridad/)
->
-
-En primer lugar debemos instalar el servidor SSH.
-
-```bash
-sudo apt-get install openssh-server
-```
-Para editar la configuración del servidor SSH:
-
-```
-sudo nano /etc/ssh/sshd_config
-```
-
-
-
-**Para arrancar el servidor:**
-
-```
-sudo /etc/init.d/ssh start
-```
-
-**Para parar el servidor:**
-
-```
-sudo /etc/init.d/ssh stop
-```
-
-**Para reiniciar el servidor:**
-
-```
-sudo /etc/init.d/ssh restart
-```
-**Para conocer el estado del servidor:**
-
-```        bash
-sudo service ssh status
-```
-
-
-
-## Agregar Usuario al Grupo root:
-
-```bash
-usermod -aG sudo username 
-```
