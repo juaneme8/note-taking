@@ -3,10 +3,14 @@
 > Basado en [5 Easy Tweaks to increase your Linux Server's Security](https://youtu.be/OVsMaXQkktQ) de LearnLinuxTV.
 >
 > :link: [5 steps to secure Linux by NetworkChuck](https://youtu.be/ZhMw53Ud2tY)
+>
+> :link: [How to protect Linux by Christian Lempa](https://youtu.be/Bx_HkLVBz9M)
 
 
 
-A continuación presentamos una serie de recomendaciones de seguridad para nuestros servidores Linux, partiendo de la premisa que lograr un sistema a prueba de hackeos es prácticamente imposible pero intentaremos incluir buenas prácticas para hacerlo más difícil.
+A continuación presentamos una serie de recomendaciones de seguridad para nuestros servidores Linux para protegernos de hackers, malware y todas aquellas cosas que podrían infectar nuestros sistemas.
+
+Para este analisis partimos de la premisa que lograr un sistema a prueba de hackeos es prácticamente imposible pero intentaremos incluir buenas prácticas para disminuir la superficie de ataque cubriendo las amenazas mas comunes y más comunes.
 
 ## Crear usuario no root
 
@@ -58,9 +62,13 @@ Luego nos pedirá el password.
 
 
 
-## Actualizaciones Manuales
+# Actualizaciones
 
-Es aconsejable realizar una actualización completa de los parches de seguridad del servidor frecuentemente, especialmente antes de colocarlo en producción.
+Uno de los puntos mas importantes para mantener la seguridad de nuestros sistemas es realizar las actualizaciones del sistema operativo y de las aplicaciones que tenemos instaladas. Cuando se descubre que existe una nueva vulnerabilidad de seguridad suele haber parches disponibles para solucionarla.
+
+
+
+## Actualizaciones Manuales
 
 Para refrescar la lista de los paquetes del repositorio que tenemos disponibles para actualizar.
 
@@ -80,23 +88,30 @@ Luego reiniciamos el servidor `sudo reboot`
 
 ## Actualizaciones Automáticas
 
-Las actualizaciones automáticas como su nombre lo indica nos permiten saber que se llevarán a cabo automáticamente y no tendremos que recordar hacerlas:
+En Linux el software es actualizado por el package manager propio de la distribución, en Ubuntu es posible utilizar unattended-upgrades para llevar a cabo actualizaciones de seguridad de manera automática.
+
+En Ubuntu debería estar instalado pero podemos instalarlo con:
 
 ```
 sudo apt install unattended-upgrades
 ```
 
-Luego nos preguntará si queremos continuar con la instalación y presionamos `ENTER`.
 
 
-
-Para asegurarnos que las actualizaciones automáticas están instaladas:
+Luego lo configuramos para que actualice automáticamente los parches de seguridad del sistema:
 
 ```
 sudo dpkg-reconfigure --priority=low unattended-upgrades
 ```
 
 Luego nos aparecerá un menu y nos preguntará si queremos descargar e instalar actualizaciones estables automáticamente e indicamos que sí.
+
+
+
+Como consecuencia de esto se escribirán dos archivos de configuración en `/etc/apt/apt.conf.d`:
+
+* `20auto-upgrades`
+* `50unattended-upgrades`
 
 
 
@@ -110,7 +125,7 @@ APT::Periodic::Unattended-Package-Lists "1";
 
 ```
 
-En `50unattended-upgrades`veremos que tenemos habilitadas las actualizaciones relacionadas con **security** e **infra security**
+En `50unattended-upgrades`veremos que tenemos habilitadas las actualizaciones relacionadas con **security** e **infra security**. 
 
 
 
@@ -173,6 +188,30 @@ Unattended-Upgrade::Automatic-Reboot-Time "02:00";
 **En todos estos casos debemos analizar la situación propia de nuestro servidor y evaluar si deseamos contar con esa opción o no.**
 
 
+
+Para verificar que la configuración fue aplicada correctamente podemos ejecutar:
+
+```
+sudo unattended-upgrade --dry-run --debug
+```
+
+> Notar que es upgrade en singular.
+
+Veremos si hay paquetes que pueden ser actualizados automáticamente y además nos indicará que el script se ejecutará una vez por día.
+
+
+
+## Actualizaciones contenedores  
+
+Cuando tenemos aplicaciones basadas en contenedores Docker debemos evitar algunos inconvenientes.
+
+En la práctica experimentaremos que no todas las imágenes se actualizan tanto como deberían por lo tanto antes de elegir una imagen debemos analizar quién es su creador y asegurarnos que sean proyectos mantenidos activamente. En ese caso es aconsejable ir a una fuente que las actualice y mantenga como las que podemos obtener en https://www.linuxserver.io/ Cuando existe una nueva imagen Docker que incluye una actualización de seguridad será necesario hacer el re-deploy del contenedor, ya que los contenedores son inmutables.
+
+Es aconsejable la herramienta llamada [Watchtower](https://containrrr.dev/watchtower/) para automáticamente actualizar todos los contedores Docker en un horario donde un pequeño reinicio sea posible.
+
+
+
+# Autenticación
 
 ## Autenticación por ssh con llave pública
 
@@ -329,6 +368,14 @@ Dentro de las configuraciones veremos:
 
 
 ## Conocer puertos en uso
+
+Con el comando `ss` obtendremos info sobre las conexiones de red y los sockets.
+
+- `-t`: muestra únicamente los sockets TCP.
+- `-u`: muestra únicamente los sockets UDP.
+- `-p`: muestra el proceso asociado con cada socket.
+- `-l`: muestra únicamente los sockets en estado de escucha (listening).
+- `-n`: muestra los puertos en formato numérico en lugar de resolver los nombres de servicio.
 
 ```
 sudo ss -tupln
