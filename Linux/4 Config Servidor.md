@@ -12,7 +12,7 @@ A continuación presentamos una serie de recomendaciones de seguridad para nuest
 
 Para este analisis partimos de la premisa que lograr un sistema a prueba de hackeos es prácticamente imposible pero intentaremos incluir buenas prácticas para disminuir la superficie de ataque cubriendo las amenazas mas comunes y más comunes.
 
-## Crear usuario no root
+# Crear usuario no root
 
 Es aconsejable no utilizar `root` en un servidor Linux a menos que sea absolutamente necesario ya que ante un error puede que causemos grandes daños. Cuando instalamos Ubuntu en un servidor no tendremos este problema ya que en el proceso crearemos un usuario, pero cuando trabajamos con una instancia VPS comenzaremos trabajando con `root`. Es por eso que lo primero que debemos hacer es crear un usuario no root al que le daremos privilegios de `sudo` para poder ejecutar comandos como `root` desde un usuario normal.
 
@@ -24,13 +24,45 @@ adduser juan
 
 Luego tendremos que ingresar la contraseña y nos pedirá una serie de datos y podemos dejarlos en blanco e ir presionando `ENTER`. Por último nos preguntará si la información es correcta y nos mostrará `Y/n` el hecho de que tenga mayúscula la `Y` da cuenta que se trata de la **opción por defecto** por lo que podremos presionar nuevamente `ENTER` directamente.
 
-El siguiente paso es agregar este usuario al grupo `sudu` ya que siendo miembro de este grupo podrá utilizar `sudo`.
+
+
+Acabamos de utilizar el comando `adduser` que es interactivo y nos permite realizar configuraciones automáticas por lo que se lo considera de alto nivel si lo comparamos con otra forma de lograr lo mismo que es utilizando `useradd` que es considerado un comando más básico y de bajo nivel.
+
+También podremos usar el comando `useradd`
+
+```
+useradd juan -m -s /bin/bash -c "administrative user"
+```
+
+`-m` crear directorio de inicio para el nuevo usuario será `/home/juan`
+
+`-s` establecemos el intérprete de comandos (shell) para el nuevo usuario.
+
+`-c` establecer comentario al nuevo usuario.
+
+Para asignarle un password si usamos `useradd`  tendremos que ingresar:
+
+```
+passwd juan
+```
+
+
+
+El siguiente paso es agregar este usuario al grupo `sudo` ya que siendo miembro de este grupo podrá utilizar `sudo`.
 
 ```
 usermod -aG sudo juan
 ```
 
-> Con `-aG` indicamos que queremos agregar un usuario a un grupo.
+Con `-aG` indicamos que queremos agregar un usuario a un grupo.
+
+
+
+Si queremos agregarlo a más de un grupo podremos hacer `usermod -aG sudo,adm,docker juan` con `adm` podremos leer algunos logs específicos y con `docker` podremos ejecutar comandos de Docker sin usar Docker.
+
+
+
+
 
 Podemos verificar que el usuario forma parte de ese grupo 
 
@@ -213,6 +245,8 @@ Es aconsejable la herramienta llamada [Watchtower](https://containrrr.dev/watcht
 
 # Autenticación
 
+SSH es un secure protocol para autenticarnos remotamente en un shell de Linux. Se trata de un protocolo muy seguro pero habrá que acompañarlo de buenas prácticas. Por ejemplo en caso de utilizar contraseña debemos asegurarnos que esta sea segura. Otra opción es no utilizar password sino una llave pública y privada, con lo cual no tendremos que recordar ninguna contraseña ni correremos riesgos por utilizar la misma en más de un sitio.
+
 ## Autenticación por ssh con llave pública
 
 Queremos plantear una autenticación con llave pública en lugar de utilizar el password para conectarnos por ssh.
@@ -227,6 +261,8 @@ En el **servidor** creamos el directorio `.ssh` para almacenar las llaves públi
 mkdir ~/.ssh && chmod 700 ~/.ssh
 ```
 
+> Tener en cuenta que `~` representa a `/home/juan`
+
 Con 700 en octal estamos indicando con el 7 los permisos del dueño del archivo garantizando lectura (4), escritura (2) y ejecución (1). Luego con el segundo y el tercer dígito le estamos indicando que el  grupo y otros no tienen permisos.
 
 En nuestra pc creamos las llave públicas y privadas:
@@ -234,6 +270,10 @@ En nuestra pc creamos las llave públicas y privadas:
 ```
 ssh-keygen -b 4096
 ```
+
+Como en ocasiones tendremos muchas llaves, es aconsejable asociarla a un comentario: `ssh-keygen -b 4096 -C juan@example.com`
+
+Se recomienda colocar un passphrase especialmente en aquellos casos donde no tengamos las mejores condiciones de seguridad (como contar con device encryption o user authentication en la máquina cliente). El passpharase que nos protegerá en aquellos casos donde alguien acceda a nuestro file system  y copie la llave privada, con la cual podrá loguearse en nuestro server.
 
 Asumiendo que estamos en **Windows** copiamos la llave pública al servidor:
 
@@ -243,6 +283,16 @@ scp $env:USERPROFILE/.ssh/id_rsa.pub juan@<ip-address>:~/.ssh/authorized_keys
 
 scp = secure copy protocol
 
+
+
+O desde `~/.ssh`
+
+```
+scp id_rsa.pub juan@<ip-address>:~/.ssh/authorized_keys
+```
+
+
+
 En **Linux** ejecutaríamos:
 
 ```
@@ -250,6 +300,8 @@ ssh-copy-id juan@<ip-address>
 ```
 
 
+
+Si la carpeta `.ssh` la hubieramos creado con `root` y también el archivo lo hubieramos copiado con ese usuario, deberiamos cambiar el dueño a `juan` de modo que pueda leeerlo. Para eso debemos ejecutar `chown -R juan:juan .ssh`. Lo hacemos recursivo con `-R` para afectar a todos los archivos internos del directorio.
 
 La próxima vez que nos conectemos por ssh no nos pedirá la contraseña.
 
