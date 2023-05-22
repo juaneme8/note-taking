@@ -5,6 +5,8 @@
 > :link: [5 steps to secure Linux by NetworkChuck](https://youtu.be/ZhMw53Ud2tY)
 >
 > :link: [How to protect Linux by Christian Lempa](https://youtu.be/Bx_HkLVBz9M)
+>
+> :link: [How to protect your Linux server from hackers by LiveOverflow](https://youtu.be/fKuqYQdqRIs)
 
 
 
@@ -319,9 +321,13 @@ sudo nano /etc/ssh/sshd_config
 
 ## Deshabilitar Autenticación por ssh con contraseña
 
-Donde dice `PasswordAuthentication yes` colocamos `no` de manera que sólo sea posible conectarnos por *public key authentication*
 
 
+Donde dice `PasswordAuthentication yes` colocamos `no` de manera que sólo sea posible conectarnos por *public key authentication*.
+
+
+
+### Reiniciar daemon ssh
 
 En todos los casos los cambios tendrán efecto recién cuando reiniciemos el daemon de ssh:
 
@@ -335,9 +341,66 @@ sudo systemctl restart ssh
 
 
 
-## Impedir logueo como `root`
+
+
+### :deciduous_tree: Comparativa SSH Keys vs Contraseñas
+
+:neutral_face: **Analisis crítico by LiveOverflow**
+
+Deshabilitar la autenticación mediante password y utilizar en su lugar llaves SSH suele ser una de las recomendaciones más recurrentes a la hora de hacer un hardening de servidores Linux. 
+
+Sin embargo, debemos destactar que deshabilitar la autenticación mediante contraseña como indica [el video de LiveOverflow](https://youtu.be/fKuqYQdqRIs) no representa una mejora a la seguridad en sí mismo. 
+
+Analizaremos a continuación el documento [The Secure Shell (SSH) Protocol Architecture](https://www.rfc-editor.org/rfc/rfc4251) para entender cómo nuestra máquina local habla con el servidor remoto.
+
+En el apartado [9.4.5](https://www.rfc-editor.org/rfc/rfc4251#section-9.4.5) veremos que una autenticación mediante password no deberá utilizarse en caso de que el servidor esté comprometido pues revelará al atacante la combinación username/password.
+
+> The password mechanism, as specified in the authentication protocol, assumes that the server has not been compromised.  If the server has been compromised, using password authentication will reveal a valid username/password combination to the attacker, which may lead to further compromises.
+
+ No obstante, el uso de llaves SSH también asume algo parecido:
+
+> The use of public key authentication assumes that the client host has not been compromised.  It also assumes that the private key of the server host has not been compromised.
+
+
+
+En `sshd_config` veremos:
+
+```
+# To disable tunneled clear text passwords, change to no here!
+PasswordAuthentication no
+```
+
+Esto podría asustarnos, pero hace referencia a que se se creará un canal encriptado con el server y allí se enviará ese clear text password. Es por esto que el servidor ssh tiene su propia private-key y es por eso que debemos verificar la fingerprint antes de conectarnos a un nuevo servidor. Luego nuestra máquina recordará la clave pública del server en el archivo known-hosts. En caso de que un atacante nos haga un Man-in-the-middle o escribamos mal la ip el ssh client nos avisará que algo no está bien mostrándonos el mensaje REMOTE HOST IDENTIFICATION HAS CHANGED. 
+
+
+
+Sí es una buena recomendación pues evitaremos caer en tener que pegar passwords de un PM o lo que es peor reutilizar el mismo en varios lugares.
+
+### :deciduous_tree: Analogía con HTTPS
+
+Si bien HTTPS (SSL o TLS) es un protocolo distinto a SSH pero tiene un comportamiento similar cuando nos logueamos por ejemplo en Twitter, donde también enviaremos el cleartext password en HTTP request dentro del tunel TLS encriptado. En caso de que un network attacker nos haga man-in-the-middle el navegador nos advertirá y rechazará enviar la contraseña. Esto nos hace pensar que el riesgo asumido al utilizar passwords es similar al que tomamos cuando nos logueamos en estos servicios mediante contraseñas.
+
+
+
+### :deciduous_tree:Conclusión
+
+En caso de querer usar passwords asegurarnos que sean lo suficientemente fuertes (unique, random y largos que no puedan ser obtenidos por fuerza bruta) y no los reutilicemos en múltiples sitios. 
+
+El uso de llaves SSH es mas conveniente porque nos evita tener que recordar estas passwords o copiarlas del password manager pero sin incrementar la seguridad.
+
+
+
+
+
+## Impedir logueo directo como `root`
+
+Es aconsejable crear usuarios con el mínimo de privilegios necesarios para llevar a cabo la tarea.
 
 Donde dice `PermitRootLogin yes` podemos cambiarlo a `no` para impedir el logueo como `root`.
+
+
+
+:neutral_face: **Ver analisis crítico by LiveOverflow sobre este punto**
 
 
 
@@ -359,7 +422,11 @@ Para acceder al servidor ahora tendremos que hacer:
 ssh -p 717 juan@<ip-address>
 ```
 
- 
+
+
+:neutral_face: **Ver analisis crítico by LiveOverflow sobre este punto**
+
+
 
 ## Configurar ipv4 only
 
@@ -370,6 +437,8 @@ AddressFamily inet
 ```
 
 
+
+:neutral_face: **Ver analisis crítico by LiveOverflow sobre este punto**
 
 # Network security
 
@@ -497,7 +566,7 @@ En el apartado donde dice `# ok icmp codes for INPUT` debemos colocar al comienz
 -A ufw-before-input -p icmp --icmp-type echo-request -j DROP
 ```
 
-The rule `-A ufw-before-input -p icmp --icmp-type echo-request -j DROP` is used in UFW (Uncomplicated Firewall) to drop incoming ICMP echo-request packets, which are commonly associated with ping requests. This rule prevents the server from responding to ICMP echo requests, effectively blocking incoming pings.
+The rule `-A ufw-before-input -p iccmp --icmp-type echo-request -j DROP` is used in UFW (Uncomplicated Firewall) to drop incoming ICMP echo-request packets, which are commonly associated with ping requests. This rule prevents the server from responding to ICMP echo requests, effectively blocking incoming pings.
 
 
 
@@ -512,6 +581,8 @@ sudo reboot
 ```
 
 
+
+:neutral_face: **Ver analisis crítico by LiveOverflow sobre este punto**
 
 # Proxy Inverso
 
