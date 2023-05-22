@@ -309,20 +309,24 @@ La próxima vez que nos conectemos por ssh no nos pedirá la contraseña.
 
 # Configuración `sshd_config`
 
-## Deshabilitar Autenticación por ssh con contraseña
-
 Editamos el archivo de configuración del servicio de ssh.
 
 ```
 sudo nano /etc/ssh/sshd_config
 ```
 
+
+
+## Deshabilitar Autenticación por ssh con contraseña
+
 Donde dice `PasswordAuthentication yes` colocamos `no` de manera que sólo sea posible conectarnos por *public key authentication*
 
-Los cambios tendrán efecto recién cuando reiniciemos el daemon de ssh:
+
+
+En todos los casos los cambios tendrán efecto recién cuando reiniciemos el daemon de ssh:
 
 ```
-sudo systemctl restart sshd
+sudo systemctl restart ssh
 ```
 
 > :warning: Aunque hemos reiniciado el servicio y estamos conectados por ssh no se desconecta.
@@ -367,85 +371,51 @@ AddressFamily inet
 
 
 
-## Implementación Fail2Ban
+# Network security
 
-Fail2Ban es un framework escrito en python que protege los sistemas Linux de ataques de fuerza bruta. Entre las múltiples funcionalidades que tiene una de ellas es para proteger los ataques de fuerza bruta en un servidor por SSH. También nos permite monitorear la magnitud de los ataques basado en el número de intentos de autenticación que son realizados.
-
-Para instalarlo
-
-```
-sudo apt install fail2ban
-```
-
-Para verificar que está corriendo
-
-```
-systemctl status fail2ban
-```
-
-Para chequear de qué nos está protegiendo inicialmente
-
-```
-sudo fail2ban-client status
-```
-
-Debemos verificar que aparezca `- Jail list: sshd`  lo cual significa que fail2ban está controlando ese servicio, chequeando los logs y si ve muchos fallos al ingresar por SSH baneará la IP que está intentando entrar al servidor. 
-
-Debemos evitar que banee accidentalmente nuestra dirección IP. podríamos editar de manera directa `/etc/fail2ban/jail.conf` pero no es conveniente ya que en caso de actualizaciones este archivo se pisará. Por ese motivo realizamos una copia (desde el directorio de ese archivo):
-
-```
-sudo cp jail.conf jail.local
-```
-
-En caso de que exista `jail.local` fail2ban utilizará ese, caso contrario utilizará `jail.conf`. 
-
-Por lo tanto ahora editamos `jail.local` sabiendo que no será sobrescrito:
-
-```
-sudo nano jail.local
-```
-
-
-
-En el campo `ignoreip = 127.0.0.1/8::1` lo aconsejable es descomentarlo y colocar la IP pública desde donde vamos a querer conectarnos de modo que nunca seamos baneados nosotros mismos. También podríamos poner la IP de una VPN desde la cual nos conectamos si fuera este el caso.
-
-
-
-Dentro de las configuraciones veremos:
-
-`bantime = 10m` es decir que la IP será baneada por 10 minutos.
-
-`maxretry=5` es la cantidad de intentos que puede fallar.
+En cuanto a las configuraciones de red contemplaremos lo relacionado al tráfico de entrada y salida del servidor, partiendo de la recomendación de solo exponer aquellos servicios que tengamos necesidad absoluta de hacerlo.
 
 
 
 ## Conocer puertos en uso
+
+```
+sudo ss -tupln
+```
 
 Con el comando `ss` obtendremos info sobre las conexiones de red y los sockets.
 
 - `-t`: muestra únicamente los sockets TCP.
 - `-u`: muestra únicamente los sockets UDP.
 - `-p`: muestra el proceso asociado con cada socket.
-- `-l`: muestra únicamente los sockets en estado de escucha (listening).
+-  
 - `-n`: muestra los puertos en formato numérico en lugar de resolver los nombres de servicio.
 
-```
-sudo ss -tupln
-```
+
+
+Lo primero que podríamos hacer es indagar sobre cada uno de estos puertos si podemos configurar la aplicación que los utilice para que no lo haga o si no la necesitamos eliminarla.
 
 
 
 ## Firewall UFW
 
+Otra opción de controlar el tráfico es mediante un firewall permitiendo sólo aquello especificado mediante reglas. Debemos tener presente que para los permitidos el firewall no agrega ninguna medida de protección extra. 
+
+
+
+Utilizaremos UFW (uncomplicated firewall)
+
+
+
+### :fire: Instalación
+
 ```
 sudo apt install ufw
 ```
 
-ufw = uncomplicated firewall
 
 
-
-Conocer el estado
+### :fire: Conocer el estado
 
 ```
 sudo ufw status
@@ -453,15 +423,17 @@ sudo ufw status
 
 
 
-Habilitar puerto 717
+### :fire:  Habilitar puertos
+
+:bulb: Lo primero que debemos hacer es habilitar el puerto de SSH para que al activar el firewall no quedemos sin la posibilidad de ingresar al server.
 
 ```
-sudo ufw allow 717
+sudo ufw allow 22
 ```
 
 
 
-Activar firewall
+### :fire: Activar firewall
 
 ```
 sudo ufw enable
@@ -469,9 +441,13 @@ sudo ufw enable
 
 
 
-Luego de activar el firewall lo aconsejable es loguearnos desde otra terminal para asegurarnos de que todo está bien y que nos quedemos afuera de nuestro server.
+:bulb: Luego de activar el firewall lo aconsejable es loguearnos desde otra terminal para asegurarnos de que todo está bien y que nos quedemos afuera de nuestro server.
+
+En ocasiones tendremos que esperar unos minutos hasta que impacten los cambios, sobre todo si tenemos una conexión tcp abierta y debemos esperar a que se resetee.
 
 
+
+### :fire: Ejemplos
 
 Supongamos que tenemos un sitio web que queremos exponer, para esto instalamos el servidor web Apache:
 
@@ -485,7 +461,7 @@ Luego lo iniciamos
 sudo systemctl start apache2
 ```
 
-En este momento si ejecutamos `sudo ss -tupln` veremos qeu el puerto 80 está en uso pero eso no significa que sea accesible navegando a `<ip-address>` ya que el firewall lo estará bloqueando por lo que tendremos que ejecutar:
+En este momento si ejecutamos `sudo ss -tupln` veremos que el puerto 80 está en uso pero eso no significa que sea accesible navegando a `<ip-address>` ya que el firewall lo estará bloqueando por lo que tendremos que ejecutar:
 
 ```
 sudo ufw allow 80/tcp
@@ -493,7 +469,21 @@ sudo ufw allow 80/tcp
 
 
 
-## Deshabilitar ping 
+### :fire: ufw con Docker
+
+Además Docker no funciona por defecto con ufw, Ambos modifican la configuración `iptables` lo cual puede ocasionar inconvenientes exponiendo contenedores que se suponía que no serían públicos. Por ejemplo al intentar ingresar a las webs administrativas de determinados contenedores como portainer en el 9200 veremos que nos permitirá ingresar a ellas (asumiendo que las vemos con `sudo ss -tupln`) aunque no tengamos una regla establecida para tal fin.
+
+Si visualizamos iptable chains veremos que ufw opera en la default chain y Docker crea una chain separada para sus redes que es ignorada por ufw.
+
+
+
+### :fire: Conclusiones firewall
+
+Es importante probar las configuraciones en nuestro setup tomando consideración en los puertos, aplicaciones y contenedores Docker que estamos corriendo y cómo están conectadas a la red. Luego debemos chequear que las reglas estén aplicándose correctamente.
+
+
+
+### :fire: Deshabilitar ping 
 
 Como otra medida de ocultamiento, es aconsejable deshabilitar la posibilidad de hacerle ping a la dirección IP del servidor de manera tal de dificultar el conocimiento de que el servidor está activo.
 
@@ -520,6 +510,111 @@ sudo ufw reload
 ```
 sudo reboot
 ```
+
+
+
+# Proxy Inverso
+
+Luego de configurar nuestro firewall tendremos muchos servicios para los cuales tendremos que permitir el acceso como por ejemplo web server, mail, etc. Para proteger estos servicios expuestos debemos en primer lugar evitar utilizar protocolos inseguros. Esto significa que si tenemos una aplicación web que corre en puerto 80 (http) no vamos a querer autenticar con password ya que el tráfico no es encriptado y cualquier intermediario podría robar el password. Una manera de exponer aplicaciones inseguras via https y trusted ssl certs es utililizando un **proxy inverso**. 
+
+Un proxy inverso es un servidor web que se coloca en frente de la aplicación y reenvía las solicitudes de clientes.
+
+<img src="https://cylab.be/storage/blog/122/files/eSf2nkfQqEn8Z06zhAoCQYlIV3KU8r3ZsvHqnxRW.png" alt="Using HTTPS over a reverse proxy in Laravel | cylab.be" style="zoom: 33%;" />
+
+Por ejemplo si queremos deployar una aplicación como bitwarden o portainer que no vienen con un servidor https propio podemos utilizar un proxy inverso como nginx para exponerlos seguramente con trusted ssl.
+
+Podemos utilizar **Nginx Proxy Manager** que es un proxy inverso basado en el webserver nginx que tiene una interfaz amigable y también nos permite una capa básica de seguridad adicional bloqueando algunos common exploits. Esta herramienta es considerado un proyecto hobbista y existen otras alternativas que ofrecen una mayor protección, reciben el nombre de web application firewalls y suelen ser de pago.
+
+
+
+# DMZ / VPN / Access gateways
+
+Es aconsejable evitar exponer a internet interfaces administrativas por lo que podemos negar el acceso si proviene de una red que no es de confianza. Lo que haremos será limitar la escucha de ips de los servidores a una interfaz específica protegida por una DMZ (demilitarized zone) o VPN. Una DMZ es una red separada entre medio de internet y nuestra LAN, podemos colocar allí nuestra web app y controlar mejor el tráfico.
+
+
+
+# Intrusion prevention system
+
+Dentro de los IPS (intrusion prevention system) existen algunas alternativas open source, una de las mas conocidas es fail to ban.
+
+
+
+## Implementación Fail2Ban
+
+Fail2Ban es un framework escrito en python que protege los sistemas Linux de ataques de fuerza bruta. Entre las múltiples funcionalidades que tiene una de ellas es para proteger los ataques de fuerza bruta en un servidor por SSH. También nos permite monitorear la magnitud de los ataques basado en el número de intentos de autenticación que son realizados.
+
+### :cactus: Instalación
+
+```
+sudo apt install fail2ban
+```
+
+
+
+### :cactus: Estado
+
+Para verificar que está corriendo
+
+```
+sudo systemctl status fail2ban
+```
+
+
+
+### :cactus: Habilitar e Iniciar
+
+```
+sudo systemctl enable fail2ban --now
+```
+
+
+
+### :cactus: Chequear protecciones
+
+Para chequear de qué nos está protegiendo inicialmente
+
+```
+sudo fail2ban-client status
+```
+
+Debemos verificar que aparezca `- Jail list: sshd`  lo cual significa que fail2ban está controlando ese servicio, chequeando los logs y si ve muchos fallos al ingresar por SSH baneará la IP que está intentando entrar al servidor. 
+
+Podremos obtener detalles acerca de un servicio en particular con:
+
+```
+sudo fail2ban-client status sshd
+```
+
+
+
+### :cactus: Blanquear IP desarrollo
+
+Debemos evitar que banee accidentalmente nuestra dirección IP. podríamos editar de manera directa `/etc/fail2ban/jail.conf` pero no es conveniente ya que en caso de actualizaciones este archivo se pisará. Por ese motivo realizamos una copia (desde el directorio de ese archivo):
+
+```
+cd /etc/fail2ban
+sudo cp jail.conf jail.local
+```
+
+En caso de que exista `jail.local` fail2ban utilizará ese, caso contrario utilizará `jail.conf`. 
+
+Por lo tanto ahora editamos `jail.local` sabiendo que no será sobrescrito:
+
+```
+sudo nano jail.local
+```
+
+
+
+En el campo `ignoreip = 127.0.0.1/8::1` lo aconsejable es descomentarlo y colocar la IP pública desde donde vamos a querer conectarnos de modo que nunca seamos baneados nosotros mismos. También podríamos poner la IP de una VPN desde la cual nos conectamos si fuera este el caso.
+
+
+
+Dentro de las configuraciones veremos:
+
+* `bantime = 10m` es decir que la IP será baneada por 10 minutos.
+
+* `maxretry=5` es la cantidad de intentos que puede fallar.
 
 
 
@@ -573,3 +668,6 @@ sudo update-initramfs -u
 ```
 
 Luego podemos reiniciar la máquina para ver los cambios `reboot`.
+
+
+
