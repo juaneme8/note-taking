@@ -1,20 +1,24 @@
 # GraphQL
 
-> Basado en una parte del [curso](https://www.youtube.com/watch?v=Y0lDGjwRYKw&list=PL4cUxeGkcC9iK6Qhn-QLcXCXPQUov1U7f) The Net Ninja luego descartado porque no usa Apollo y la parte de React si bien es basada en Apollo Client es con componentes basados en clases. 
+La bibliografía sobre este tema es bastante variada pues fue estudiado en varias oportunidades.
+
+> :link: [Curso The Net Ninja](https://www.youtube.com/watch?v=Y0lDGjwRYKw&list=PL4cUxeGkcC9iK6Qhn-QLcXCXPQUov1U7f)  luego descartado porque no usa Apollo y la parte de React si bien es basada en Apollo Client es con componentes basados en clases. 
 >
-> Basado en [videos midudev](https://www.youtube.com/watch?v=QG-qbmW-wes)
+> :link: [Videos midudev](https://www.youtube.com/watch?v=QG-qbmW-wes)
 >
+> :link: Basado en el [video de Apollo Server](https://www.youtube.com/watch?v=fIZxZk_szWw) de Fazt
+>
+> :link: Basado en el [video sobre modularizar en archivos](https://www.youtube.com/watch?v=_YN_fs-fuaI) de Fazt
 
 ## Características
 
-* GraphQL es **lenguaje de consultas**. **Graph** significa grafo y **QL** query language. Es decir un lenguaje de consutlas para obtener datos de una API.
-* Es considerado una capa entre el frontend y el backend. A diferencia de SQL por ejemplo que es entre el backend y la DB.
+* GraphQL es **lenguaje de consultas**. **Graph** significa grafo y **QL** query language. Es decir un lenguaje de consultas para obtener datos de una API.
 * Permite la **comunicación de datos entre servidor y cliente** (navegador). 
+* Por lo tanto es considerado una capa entre el frontend y el backend. A diferencia de SQL por ejemplo que es entre el backend y la DB.
 * **Código abierto**.
 * **Creado por Facebook**.
 * Es **utilizable en múltiples lenguajes de programación**. 
 * Es **flexible y eficiente** comparado con el enfoque RESTful.
-
 * Nos permite pedir sólo los datos que queremos, lo cual genera una **optimización y mejora en el rendimiento** en los datos que viajan.
 * Nos permite obtener datos predecibles ya que se corresponderán con la descripción.
 * Haremos **una única petición** a un *supercharged endpoint* y será el servidor de GraphQL el encargado de recoger los datos de las distintas fuentes. Trabajamos haciendo peticiones de tipo POST a ese único endpoint. 
@@ -32,7 +36,7 @@ En una API REST de libros, si queremos obtener información sobre un libro en pa
 domain.com/books/:id
 ```
 
-Donde obtendríamos parte de la información deseada `title`, `genre`, `reviews` y también el `authorId` con el cual obtendríamos la info del autor.
+Donde obtendríamos parte de la información deseada `title`, `genre`, `reviews` y también el `authorId` con el cual podríamos acceder luego a la info del autor.
 
 ```
 domain.com/authors/:id
@@ -63,11 +67,21 @@ Para obtener estos mismos datos con un enfoque GraphQL haríamos la siguiente qu
 
 
 
-# :trophy: Servidor Express, Apollo y MongoDB
+# :rotating_light: Servidor Express, Apollo y MongoDB
 
 > :vhs: Basado en el [video de Apollo Server](https://www.youtube.com/watch?v=fIZxZk_szWw) de Fazt
 >
 > :vhs: Basado en el [video sobre modularizar en archivos](https://www.youtube.com/watch?v=_YN_fs-fuaI) de Fazt
+
+
+
+:rotating_light: **IMPORTANTE - ACTUALIZACIÓN 6/2023:** El material descripto a continuación utiliza `apollo-server-express` sin embargo, este paquete está asociado con Apollo Server v2 y v3 que están deprectados. La funcionalidad de este paquete ahora es provista por `@apollo/server`
+
+Es por esto que al instalar veremos: **The `apollo-server-express` package is part of Apollo Server v2 and v3, which are now deprecated (end-of-life October 22nd 2023). This package's functionality is now found in the `@apollo/server` package. See https://www.apollographql.com/docs/apollo-server/previous-versions/ for more details.**
+
+
+
+
 
 Si bien podríamos trabajar directamente con Apollo Server, utilizamos Express y Express Apollo Server ya que puede ser el caso que tengamos una REST API existente y queramos trabajar también con una de GraphQL.
 
@@ -85,9 +99,9 @@ npm i dotenv mongoose
 
 
 
-> En cuanto a la **estructura** para evitar tener todo en un mismo archivos y que se vuelva dificil de manejar tendremos los siguientes archivos. 
+> En cuanto a la **estructura** para evitar tener todo en un mismo archivo y que se vuelva difícil de manejar tendremos los siguientes archivos. 
 
-* `app.js`
+* `index.js`
 
 * `db.js`
 * `typeDefs.js`
@@ -95,7 +109,7 @@ npm i dotenv mongoose
 
 
 
-En `app.js`.
+En `index.js`.
 
 * Creamos un servidor de Express.
 * En `/` creamos una ruta de la REST API que muestra un mensaje de bienvenida.
@@ -139,7 +153,7 @@ start();
 > :information_source: [Docs](https://www.apollographql.com/docs/apollo-server/api/apollo-server/):
 > Always call `await server.start()` *before* calling `server.applyMiddleware` and starting your HTTP server. This allows you to react to Apollo Server startup failures by crashing your process instead of starting to serve traffic. 
 >
-> :information_source: Si en lugar de con require queremos trabajar con **ECMAScript Modules** en `package.json` agregamos `"type":"module"` .
+> :information_source: Si en lugar de con `require` queremos trabajar con **ECMAScript Modules** en `package.json` agregamos `"type":"module"` .
 
 ## Integración con MongoDB
 
@@ -200,7 +214,15 @@ module.exports = model('Task', taskSchema);
 
 ## Iniciar Aplicación
 
-Para leventar el servidor ejecutamos `node index.js` o bien si queremos correrlo con nodemon `npx nodemon index.js` (atención en las mutaciones si estamos trabajando con Nodemon)
+Para leventar el servidor ejecutamos `node index.js` o bien si queremos correrlo con nodemon `npx nodemon index.js` (atención en las mutaciones si estamos trabajando con Nodemon) otra opción es utilizando el siguiente script:
+
+```json
+"scripts": {
+    "dev": "nodemon index.js"
+}
+```
+
+En este caso con `nodemon` instalado como `devDependencies` por lo que bastará luego con ejecutar `npm run dev`.
 
 ## Playground
 
@@ -236,6 +258,42 @@ module.exports = { typeDefs };
 ```
 
 El hecho de usar `gql` nos permite obtener un coloreado apropiado pero podríamos haber trabajado directamente con un string sin esa palabra. Para ello debemos **instalar la extensión GraphQL de GraphQL Foundation**.
+
+A continuación editamos `resolvers.js` agregando qué debemos hacer cuando recibamos la query `hello`.
+
+```
+const resolvers = {
+  Query: {
+    hello: () => 'Hello World',
+  }
+}
+
+module.exports = {resolvers}
+```
+
+
+
+Luego en el Sandbox ingresamos:
+
+```
+query {
+  hello
+}
+```
+
+
+
+Como respuesta obtendremos:
+
+```json
+{
+  "data": {
+    "hello": "Hello World"
+  }
+}
+```
+
+
 
 ### :rocket: Listado de tareas
 
@@ -347,7 +405,7 @@ module.exports = {resolvers}
 >
 > En este caso hicimos destructuring de este modo `const { title, description } = args;` pero también podríamos haberlo hecho al recibir `args` es decir ` createTask: async (_, {title, description})`
 
-Luego en el Sandbox indicamos las características del documento a agregar:
+Luego en el Sandbox indicamos las características del documento a agregar y que queremos que nos devuelva el id luego de hacerlo.
 
 ```js
 mutation{
@@ -763,17 +821,7 @@ Luego en `index.js` colocamos al principio `require('dotenv').config();` y por �
 
 
 
-#### Sistema de Control de Versiones
-
-```
-git init
-git add .
-git commit -m "My first commit"
-```
-
-
-
-#### Migración a MongoDB Atlas
+#### Migración a MongoDB Atla
 
 Hasta el momento utilizamos MongoDB instalado localmente pero para utilizar Heroku necesitamos subirlo a un servicio en la nube como MongoDB Atlas.
 
@@ -781,39 +829,7 @@ Obtendremos una URL que usaremos como variable de entorno de Heroku.
 
 
 
-#### Deploy en Heroku
-
-En el dashboard le damos un nombre por ejemplo **graphql-api** a la app y presionamos crear.
-
-A continuación debemos instalar heroku cli. Si queremos fijarnos la versión instalada lo hacemos con:
-
-```
-heroku --version
-```
-
-
-
-```
-heroku login
-heroku git remote -a graphql-api
-git push heroku main
-```
-
-> Notar que en la documentación Heroku sugiere `git push heroku master` asumiendo que es la rama `master` la que queremos deployar.
-
-
-
-En la sección **Config Vars** podremos configurar las variables de entorno (la variable `PORT` es asignada automaticamente por lo que no debemos definirla).
-
-
-
-En caso de que algo no funcione del modo esperado podremos ver los logs:
-
-```
-heroku logs --tail
-```
-
-
+#### Deploy
 
 Tener presente que al visitar la URL `/` veremos el mensaje de bienvenida pero en `/graphql` no veremos la interfaz, sino que tendremos que interactuar mediante Postman o una aplicación cliente por ejemplo usando **Apollo Client**.
 
