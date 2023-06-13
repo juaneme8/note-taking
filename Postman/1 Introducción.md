@@ -163,9 +163,148 @@ Con este último if evitamos un error de JavaScript.
 
 
 
-1h38
+Si queremos verificar que un valor el valor de una propiedad sea mayor a un cierto umbral.
+
+```js
+const response = pm.response.json();
+
+pm.text("Is in stock?", ()=>{
+	pm.expect(response["current-stock"]).to.be.above(0);
+})
+```
+
+> Notar que debido al guión de current-stock no podemos usar dot notation.
+
+
+
+## Collection Runner
+
+Una vez que tenemos todos definidos todos los tests y las variables de entorno que se generen a partir de datos de una respuesta para ser usados en la request siguiente, podemos automatizar el proceso. Utilizaremos el collection runner que es una herramienta de postman que nos permite ejecutar toda la colección con un solo click.
+
+
+
+En la parte de abajo vemos un botón que dice Runner. Debemos hacer click ahi y en el panel run order debemos arrastrar la colección. En este panel podremos deshabilitar requests y reordenarlas.
+
+También podremos tildar Save response lo cual sera interesante si algo falla.
+
+
+
+### Request execution order
+
+Es posible establecer en el código la próxima request que queremos ir de manera programática. Esto puede ser util si por ejemplo tenemos una request de autenticación que no siempre queremos ejecuctar por ejemplo si tenemos la siguiente colección:
+
+1. API Status
+2. Register API Client
+3. List of books
+
+
+
+Estando en la pestaña tests de 1 podremos saltarnos 2 de este modo:
 
 ```
-pm.expect(1).to.be.above(2)
+postman.setNextRequest("List of books")
 ```
 
+> Notar que es postman y no pm, esto puede cambiar.
+>
+> Tener presente que podemos generar un lazo infinito si ponemos un salto hacia atrás en lugar de hacerlo hacia adelante.
+
+
+
+Otra opción es moverlo a la última arrastrándolo y entonces en el anteúltimo paso colocar lo siguiente:
+
+```
+postman.setNextRequest(null)
+```
+
+
+
+## Postman Monitors
+
+Los Monitors de Postman nos permite correr los llamados a los endpoints de manera automática ahorrandonos ese click que hemos visto que tenemos que hacer en el collection runner. Podremos establecer con qué frecuencia queremos correrlos, en qué horarios, etc.
+
+Monitos > Create a monitor
+
+Use a collection: Debemos especificar allí la colección.
+
+Luego se ejecutará automáticamente y obtendremos notificaciones por email si algo no funciona bien.
+
+Esta ejecución se lleva a cabo en la infraestructura de Postman por lo que está completamente desacoplado del navegador o nuestra computadora.
+
+Tener presente que a la hora de crear monitores estaremos compartiendo la colección con Postman, por lo que en las variables de entorno accederá al `INITIAL_VALUE`
+
+Si todo funciona bien nos aparecerá como `HEALTHY`
+
+Tanto con monitores como con collection runner resulta complejo el debug ya que no aportan mucha información, pero ante dudas siempre debemos apuntar a variables de entorno o tokens que no reciben su valor.
+
+# Newman
+
+Newman es una herramienta CLI que a partir de una colección de Postman ejecuta todos los tests y genera un reporte. Es posible ejecutar una colección de Postman con API tests en un servidor profesional que se encarga de building y testing de software (jenkins, gitlab ci).
+
+Para utilizarlo localmente debemos tener instalado Node.js. 
+
+```
+newman --version
+```
+
+Primero debemos exportar la colección y esto podemos hacerlo de distintas formas
+
+* Haciendo click en `...` y luego en Export como JSON. 
+* Haciendo click en `...` luego en Share y Get public link. Tendremos que presionar luego Update Link si queremos traernos los últimos cambios las veces posteriores.
+* Utilizando la API de Postman.
+
+
+
+```
+newman run postman_collection.json
+```
+
+```
+newman run https://getpostman.com/collections/...
+```
+
+
+
+Tener en cuenta que si utilizamos environments debemos exportarlos y especificarlos también.
+
+
+
+## HTML reports con Newman
+
+Newman nos permite generar reportes que contienen la request y respuesta completas.
+
+newman-reporter-htmlextra es una de las opciones mas elegidas
+
+
+
+
+
+```
+npm install -g newman-reporter-htmlextra
+```
+
+```
+newman run collection.json --reporters cli,htmlextra
+```
+
+Notar que queremos seguir generando el reporte por cli
+
+En esa misma carpeta se crerá una carpeta con el reporte llamada newman.
+
+
+
+# CI/CD
+
+En Gitlab CI podremos implementar un Pipeline que tenga los siugientes steps:
+
+
+
+* Build
+
+* Test (code quality, smoke test, unit tests)
+
+* Deploy (deploy)
+
+* Post deploy (api testing) tendremos un `newman run ...`
+
+* Publishing
