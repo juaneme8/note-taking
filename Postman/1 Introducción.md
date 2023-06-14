@@ -308,3 +308,29 @@ En Gitlab CI podremos implementar un Pipeline que tenga los siugientes steps:
 * Post deploy (api testing) tendremos un `newman run ...`
 
 * Publishing
+
+
+
+# Conexión a DB
+
+:link: Basado en [el video](https://youtu.be/aDvM9CxDw1E) de Valentin Despa
+
+En ocasiones puede que tengamos que chequear algo en una base de datos (por ejemplo si tenemos un endpoint para la creación de un recurso pero no uno para chequear que la data fue ingresada correctamente). 
+
+La forma mas simple sería agregar el endpoint faltante en la API de modo que desde Postman podamos consumir el endpoint nuevo.
+
+**Aclaración:** Siempre que probamos una API nos queremos abstraer de las capas inferiores como ser la DB de hecho, acoplar el testeo de la API con la implementación interana incluso es considerado un anti-patrón, pero asumimos que existe alguna razón importante por la cual debemos hacerlo.
+
+
+
+Necesitaremos un Middleware de modo que Postman le hable en HTTP a ese middlware y el middleware se comunique con la db de acuerdo al protocolo de esa base de datos.
+
+
+
+Existen soluciones open source y otras enterprise como DreamFactory, Hasura.
+
+
+
+# Mock servers
+
+Los mock servers nos permiten simular endpoints y sus correspondientes respuestas sin la necesidad de tener un backend.
