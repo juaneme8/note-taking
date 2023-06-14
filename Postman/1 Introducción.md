@@ -177,6 +177,12 @@ pm.text("Is in stock?", ()=>{
 
 
 
+## Testear redirects
+
+Cuando hacemos un redirect por defecto en Postman viene configurada la opción "Automatically follow redirects", esto hará que veamos un 302 y en los Headers dentro de location veremos a dónde nos enviaría ese redirect.
+
+
+
 ## Collection Runner
 
 Una vez que tenemos todos definidos todos los tests y las variables de entorno que se generen a partir de datos de una respuesta para ser usados en la request siguiente, podemos automatizar el proceso. Utilizaremos el collection runner que es una herramienta de postman que nos permite ejecutar toda la colección con un solo click.
