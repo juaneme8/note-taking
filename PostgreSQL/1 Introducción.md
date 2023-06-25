@@ -105,3 +105,112 @@ Contraseña para usuario postgres:
 # Conexión con pgAdmin 4
 
 En el apartado Browser veremos Servers, al desplegarlo clickeamos sobre PostgreSQL 15 y nos pedirá la contraseña.
+
+
+
+## Agregar psql a PATH
+
+De modo que desde la línea de comandos podamos ingresar pql y nos lo reconozca como comando debemos agregar la dirección de su ubicación en la variable de entornoPATH.
+
+Para eso buscamos la ubicación de `psql.exe` que en mi caso es `C:\Program Files\PostgreSQL\15\bin` y luego nos dirigimos a Edit the system environment variables luego a Environment Variables... Luego en el apartado de variables for "username" elegimos Path y luego click en Edit... donde clickeamos New y agregamos la ruta anterior. 
+
+Luego en la terminal ingresamos `psql` pero tener en cuenta que al iniciar nos pedirá la contraseña asociada al usuario de la sesión y cuando instalamos PostgreSQL colocamos la clave para el usuario postgres. Por lo tanto ejecutamos `psql -U postgres` y luego la clave definida al momento de instalar.
+
+
+
+# Comandos
+
+Todos los comandos comienzan con `\`
+
+* `\q` para salir
+
+
+
+## Listar bases de datos
+
+```
+\l
+```
+
+
+
+## Crear base de datos
+
+```
+CREATE DATABASE test;
+```
+
+Si bien es posible utilizar minúsculas también, es aconsejable utilizar mayúsculas para distinguir rápidamente los comandos SQL.
+
+El comando debe tenerminar con un `;` para ejecutarse.
+
+
+
+# Conexión a base de datos
+
+Podemos conectarnos a una base de datos de dos formas:
+
+```
+psql -h localhost -p 5432 -U localhost test
+```
+
+Sólo podremos conectarnos a una base de datos si todos los datos son correctos: usuario, puerto y el nombre coincide con una existente de lo contrario obtendremos un error.
+
+
+
+Otra forma de hacerlo es si ya estamos dentro de `psql` ejecutando:
+
+```
+\c test
+\c another
+```
+
+Si estando en una db queremos cambiar a otra bastará con ejecutar: `\c another`.
+
+
+
+# Eliminar base de datos
+
+```
+DROP DATABASE test;
+```
+
+Tener presente que este es un comando muy importante ya que ocasionará una pérdida de todos los datos, por lo que debemos usarlo con cuidado y siempre contar con un backup.
+
+
+
+# Crear tabla
+
+```
+CREATE TABLE table_name (
+	Column name + data type + constraints if any
+)
+```
+
+
+
+Por ejemplo si queremos crear una tabla `person`:
+
+```SQL
+CREATE TABLE person (
+	id int,
+	first_name VARCHAR(50),
+	last_name VARCHAR(50),
+	gender VARCHAR(6)
+	date_of_birth TIMESTAMP,
+)
+```
+
+
+
+> Con `VARCHAR` se indica que esa columna almacenará caracteres y luego se especifica la cantidad permitida.
+>
+> Como `TIMESTAMP` implica también horas, minutos y segundos es probable que terminemos usando `DATE`.
+
+
+
+## Tipos de datos
+
+En la [documentación](https://www.postgresql.org/docs/current/datatype.html) nos encontramos los distintos tipos de datos:
+
+45min
