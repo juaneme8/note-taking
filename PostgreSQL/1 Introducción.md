@@ -126,7 +126,9 @@ Todos los comandos comienzan con `\`
 
 
 
-## Listar bases de datos
+# Bases de datos
+
+## Listar dbs
 
 ```
 \l
@@ -134,7 +136,7 @@ Todos los comandos comienzan con `\`
 
 
 
-## Crear base de datos
+## Crear db
 
 ```
 CREATE DATABASE test;
@@ -146,7 +148,7 @@ El comando debe tenerminar con un `;` para ejecutarse.
 
 
 
-# Conexión a base de datos
+## Conexión a db
 
 Podemos conectarnos a una base de datos de dos formas:
 
@@ -169,7 +171,7 @@ Si estando en una db queremos cambiar a otra bastará con ejecutar: `\c another`
 
 
 
-# Eliminar base de datos
+## Eliminar db
 
 ```
 DROP DATABASE test;
@@ -179,38 +181,136 @@ Tener presente que este es un comando muy importante ya que ocasionará una pér
 
 
 
-# Crear tabla
+# Tipos de datos
+
+En la [documentación](https://www.postgresql.org/docs/current/datatype.html) nos encontramos los distintos tipos de datos:
+
+* `int8` entero signado de 8 bytes.
+* `int` o `int4` entero signado de 4 bytes.
+* `serial` entero de 8 bytes con autoincremento.
+* `bool`
+* `char(n)` string de longitud fija.
+* `varchar(n)` string de longitud varialbe y con un máximo de caracteres.
+* `money`
+* `json`
+* `date`
+* `text` string de longitud variable sin un largo máximo.
+* `time`
+* `timetzz` incluye time zone.
+* `uuid`
+
+
+
+# Tablas
+
+## Creación de tabla
 
 ```
 CREATE TABLE table_name (
 	Column name + data type + constraints if any
-)
+);
 ```
 
 
+
+## Tabla sin constraints
 
 Por ejemplo si queremos crear una tabla `person`:
 
-```SQL
+```sql
 CREATE TABLE person (
-	id int,
+	id INT,
 	first_name VARCHAR(50),
 	last_name VARCHAR(50),
-	gender VARCHAR(6)
-	date_of_birth TIMESTAMP,
-)
+	gender VARCHAR(6),
+	date_of_birth DATE,
+);
+```
+
+> Notar que podremos ir presionando ENTER para ingresar las distintas líneas del comando ya que sólo se enviará cuando coloquemos un punto y coma.
+
+> Con `VARCHAR` se indica que esa columna almacenará caracteres y luego se especifica la cantidad permitida.
+>
+
+
+
+## Listar todas las tablas
+
+Si queremos obtener un listado de todas las tablas:
+
+```
+\d
+```
+
+> Asociar `\d` con describe.
+
+
+
+## Describir una tabla
+
+Si queremos obtener info sobre una tabla en particular:
+
+```
+\d person
+```
+
+Veremos cada una de las columnas junto con información extra: `type` con el tipo, `collocation`, `nullable` que indica si admite valor null y `default` que indica si tiene un valor por defecto.
+
+## 
+
+## Eliminar tabla
+
+Con el propósito de crear una tabla con contraints (y volver a llamarla igual a la existente) a continuación introducimos el comando necesario para borrar una tabla:
+
+```sql
+DROP TABLE person;
 ```
 
 
 
-> Con `VARCHAR` se indica que esa columna almacenará caracteres y luego se especifica la cantidad permitida.
->
-> Como `TIMESTAMP` implica también horas, minutos y segundos es probable que terminemos usando `DATE`.
+## Tabla con constraints
+
+La tabla creada anteriormente admite introducir elementos que no tengan ninguna de las columnas, lo cual no tiene sentido. Cuando queremos asegurarnos que los datos insertados tengan ciertas características especificamos contraints a la hora de la creación de la tabla.
+
+```sql
+CREATE TABLE person (
+	id BIGSERIAL NOT NULL PRIMARY KEY,
+	first_name VARCHAR(50) NOT NULL,
+	last_name VARCHAR(50) NOT NULL,
+	gender VARCHAR(6) NOT NULL,
+	date_of_birth DATE NOT NULL,
+    email VARCHAR(150),
+);
+```
+
+Con `BIGSERIAL` indicamos que id será un entero único y con valores secuenciales debido al autoincremento.
+
+La constraint `PRIMARY KEY` nos asegura que los valores serán únicos y no null. Además crea automáticamente un índice para búsqueda y obtención de datos mas veloz.
+
+El email es un valor que admite valor `null`.
 
 
 
-## Tipos de datos
+* Con `\d` veremos **dos resultados** uno de ellos de `type` `table` (la tabla `person`) y otro `sequence` vinculada a la secuencia de `BIGSERIAL`.
+* Con `\dt` veremos sólo la tabla.
 
-En la [documentación](https://www.postgresql.org/docs/current/datatype.html) nos encontramos los distintos tipos de datos:
+Luego con `\d person` veremos info sobre la tabla, sus valores admitidos, índices, secuencias, etc.
 
-45min
+
+
+## Insertar records
+
+```sql
+INSERT INTO person (
+	first_name,
+	last_name,
+	gender,
+	date_of_birth)
+VALUES ('Juan', 'Ocho', 'MALE', DATE '1986-12-06');
+```
+
+Notar que no es necesario especificar el id pues contamos con el autoincrement.
+
+Notar que a la hora de definir `date_of_birth` colocamos `DATE 'YYYY-MM-DD'` y no un string.
+
+Consideramos que la persona no tiene un email por ese motivo no se lo pasamos.
