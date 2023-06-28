@@ -313,4 +313,4 @@ Notar que no es necesario especificar el id pues contamos con el autoincrement.
 
 Notar que a la hora de definir `date_of_birth` colocamos `DATE 'YYYY-MM-DD'` y no un string.
 
-Consideramos que la persona no tiene un email por ese motivo no se lo pasamos.
+Consideramos que la persona no tiene un email por ese motivo no se lo pasamos. 
