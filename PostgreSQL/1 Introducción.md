@@ -122,6 +122,8 @@ Luego en la terminal ingresamos `psql` pero tener en cuenta que al iniciar nos p
 
 Todos los comandos comienzan con `\`
 
+* `\?` para obtener ayuda sobre todos los comandos que podemos aplicar.
+
 * `\q` para salir
 
 
@@ -256,7 +258,7 @@ Si queremos obtener info sobre una tabla en particular:
 
 Veremos cada una de las columnas junto con información extra: `type` con el tipo, `collocation`, `nullable` que indica si admite valor null y `default` que indica si tiene un valor por defecto.
 
-## 
+
 
 ## Eliminar tabla
 
@@ -279,7 +281,7 @@ CREATE TABLE person (
 	last_name VARCHAR(50) NOT NULL,
 	gender VARCHAR(6) NOT NULL,
 	date_of_birth DATE NOT NULL,
-    email VARCHAR(150),
+  email VARCHAR(150),
 );
 ```
 
@@ -301,16 +303,61 @@ Luego con `\d person` veremos info sobre la tabla, sus valores admitidos, índic
 ## Insertar records
 
 ```sql
-INSERT INTO person (
-	first_name,
-	last_name,
-	gender,
-	date_of_birth)
-VALUES ('Juan', 'Ocho', 'MALE', DATE '1986-12-06');
+INSERT INTO person (first_name, last_name, gender, date_of_birth)
+VALUES ('Juan', 'Ocho', 'MALE', date '1986-12-06');
 ```
 
-Notar que no es necesario especificar el id pues contamos con el autoincrement.
-
-Notar que a la hora de definir `date_of_birth` colocamos `DATE 'YYYY-MM-DD'` y no un string.
+> Notar que no especificamos el `id` pues es gestionado mediante la secuencia con auto-increment.
+>
+> Notar que a la hora de definir `date_of_birth` colocamos `date 'YYYY-MM-DD'` y no un string.
 
 Consideramos que la persona no tiene un email por ese motivo no se lo pasamos. 
+
+
+
+```
+INSERT INTO person (first_name, last_name, gender, date_of_birth, email)
+VALUES ('Anne', 'Smith', 'FEMALE', date '1987-12-06', 'anne@gmail.com');
+```
+
+
+
+## Listar records
+
+```
+SELECT * FROM person;
+```
+
+
+
+Si queremos una columna en particular:
+
+```
+SELECT first_name FROM person;
+```
+
+
+
+# Generar Mockdata
+
+Utilizaremos [Mockaroo](https://www.mockaroo.com/) para generar 1000 filas.
+
+* Para el `email` establecemos un blank de 30%, por lo que ese porcentaje de personas no tendrán un mail aprovechando que la columna es nullable.
+* Para la fecha elegimos el tipo Datetime en este caso y seleccionamos el formato yyyy-mm-dd.
+* Agregamos también la columna `country_of_birth` .
+* La columna de `id` la agregaremos a mano directamente en el script mas adelante.
+
+
+
+:file_folder: Luego seleccionamos el formato de descarga como SQL, le damos el nombre person y tildamos include CREATE TABLE.
+
+:arrow_down: Por último descargamos el archivo `person.sql` (para lo cual nos hará autenticar) y desde VS Code podremos agregar los `NOT NULL` para todos los campos menos para el `mail` , la cantidad máxima de caracteres deseada para los `VARCHAR` y la columna `id BIGSERIAL NOT NULL PRIMARY KEY`.
+
+:page_facing_up: Si bien podríamos copiar y pegar todos los comandos, lo que haremos será ejecutar el comando directamente desde el archivo.
+
+
+
+```
+ \i /Users/juan.lauria/Desktop/person.sql
+```
+
