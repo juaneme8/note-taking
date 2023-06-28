@@ -322,23 +322,7 @@ VALUES ('Anne', 'Smith', 'FEMALE', date '1987-12-06', 'anne@gmail.com');
 
 
 
-## Listar records
-
-```
-SELECT * FROM person;
-```
-
-
-
-Si queremos una columna en particular:
-
-```
-SELECT first_name FROM person;
-```
-
-
-
-# Generar Mockdata
+## Generar Mockdata
 
 Utilizaremos [Mockaroo](https://www.mockaroo.com/) para generar 1000 filas.
 
@@ -359,5 +343,127 @@ Utilizaremos [Mockaroo](https://www.mockaroo.com/) para generar 1000 filas.
 
 ```
  \i /Users/juan.lauria/Desktop/person.sql
+```
+
+
+
+
+
+## Listar records
+
+```
+SELECT * FROM person;
+```
+
+
+
+Si queremos una columna en particular:
+
+```
+SELECT first_name FROM person;
+```
+
+
+
+## `ORDER BY` keyword
+
+Es posible ordenar los resultados recibidos en una columna utilizando el keyword `ORDER BY`.
+
+```
+SELECT * FROM person
+ORDER BY country_of_birth;
+```
+
+En este caso estaremos ordenando ascendentemente (a-z), sería lo mismo que colocar `ORDER BY country_of_birth ASC` que es valor por defecto. Si queremos un ordenamiento descendiente (z-a) tendremos que ingresar: `ORDER BY country_of_birth DESC;`
+
+
+
+## `DISTINCT` keyword
+
+Si queremos obtener los países de todos los elementos de la tabla podríamos ejecutar:
+
+```
+SELECT country_of_birth from person ORDER BY country_of_birth;
+```
+
+Esto nos devolvería un listado donde se repetiría cada país tantas veces como aparezca en la tabla.
+
+Si queremos en cambio obtener en cambio un resultado por cada pais, podemos utilizar el keyword `DISTINCT`:
+
+```
+SELECT DISTINCT country_of_birth from person ORDER BY country_of_birth; ;
+```
+
+
+
+## `WHERE` clause
+
+Utilizando `WHERE` podremos filtrar los resultados basados en condiciones:
+
+```
+SELECT * FROM person WHERE gender='Female';
+```
+
+
+
+# 
+
+## Logical operators `AND` `OR`
+
+Los operadores lógicos son `AND`, `OR` y `NOT` y podremos usarlos a la hora de filtrar los datos:
+
+```
+SELECT * FROM person WHERE gender='Female' AND (country_of_birth='Poland' OR country_of_birth='Argentina');
+```
+
+
+
+## Comparison operators
+
+A continuación presentamos los operadores de comparación:
+
+* `=`, `<>` (not equal)
+* `<`, `>`, `<=`, `>=`
+
+
+
+> Cuando queremos chequear una condición podremos ejecutar `SELECT 1 = 1;` en este caos obtendremos `t` (lo cual hace referencia a `true`)
+
+
+
+## `LIMIT` keyword
+
+`LIMIT` nos permitirá seleccionar las primeras n filas.
+
+```
+SELECT * FROM person LIMIT 10; 
+```
+
+
+
+## `OFFSET` keyword
+
+En ocasiones querremos recibir las filas a partir de un cierto número, por ejemplo si queremos después de la fila 5 podremos colocar:
+
+```
+SELECT * FROM person OFFSET 5; 
+```
+
+Combinando `LIMIT` y `OFFSET`, para recibir 10 resultados después de la fila 5:
+
+```
+SELECT * FROM person OFFSET 5 LIMIT 10; 
+```
+
+
+
+## `FETCH` keyword
+
+Hemos usado `LIMIT` pero no es una keyword del standard de SQL, como es utilizada en mútiples dbs por lo que terminó siendo aceptada. El modo de hacerlo en Postgres es con `FETCH`.
+
+```
+SELECT * FROM person OFFSET 5 FETCH FIRST 5 ROW ONLY; 
+
+SELECT * FROM person OFFSET 5 FETCH FIRST ROW ONLY; 
 ```
 
