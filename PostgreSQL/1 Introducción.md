@@ -467,3 +467,80 @@ SELECT * FROM person OFFSET 5 FETCH FIRST 5 ROW ONLY;
 SELECT * FROM person OFFSET 5 FETCH FIRST ROW ONLY; 
 ```
 
+
+
+## `IN` operator
+
+El operador `IN` lo utilizamos en el `WHERE` clause para chequear contra una lista de valores. Esto podríamos hacelro utilizando `OR` como vemos a continuación, pero para cada valor habría que escribir bastante:
+
+```
+SELECT * FROM person 
+WHERE country_of_birth='China'
+OR country_of_birth='France'
+OR country_of_birth='Brazil';
+```
+
+
+
+Con el operador `IN` esto mismo puede escribirse de manera reducida 
+
+```
+SELECT * FROM person WHERE country_of_birth IN ('China', 'France', 'Brazil');
+```
+
+
+
+## `BETWEEN` operator
+
+El operador `BETWEEN` nos permite elegir filas entre un rango de valores.
+
+```
+SELECT * FROM person 
+WHERE date_of_birth 
+BETWEEN DATE '2000-01-01' AND '2015-01-01'; 
+```
+
+
+
+## `LIKE` operator
+
+El operador `LIKE` nos permite matchear valores de texto contra un patrón usando comodines.
+
+Por ejemplo si queremos encontrar todos los emails que terminan en ".com":
+
+```
+SELECT * FROM person
+WHERE email LIKE '%.com'
+```
+
+
+
+En estos casos el `%` representa uno o mas caracteres, pero si sabemos que son una cantidad determinada podemos usar `_` guión bajo donde cada uno que representa un caracter.
+
+
+
+## `ILIKE` operator
+
+El operador `ILIKE` es similar a `LIKE` pero ignora la capitalización.
+
+
+
+## `GROUP BY`
+
+`GROUP BY` nos permite agrupar datos basándonos en una columna. 
+
+Si queremos obtener un listado de todos los países que tenemos:
+
+```
+SELECT DISTINCT country_of_birth FROM person;
+```
+
+
+
+Si queremos saber también cuánta gente tenemos de cada país:
+
+```
+SELECT country_of_birth, COUNT(*) FROM person
+GROUP BY country_of_birth;
+```
+
