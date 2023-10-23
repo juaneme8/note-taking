@@ -2045,6 +2045,71 @@ Cuando realizamos tareas de mantenimiento en un servidor y tenemos que reiniciar
 
 
 
+## Comando `awk`
+
+El comando `awk` es una herramienta poderosa para el procesamiento de texto, su nombre proviene de los apellidos de sus creadores.
+
+
+
+* Si queremos mostrar determinadas columnas:
+
+  ```
+  awk '{print $2, $4}' file.csv
+  ```
+
+  
+
+* Si queremos mostrar un título inicial y luego imprimir el contenido de un archivo:
+
+  ```
+  awk 'BEGIN {print "Nombre\tApellido\tEdad\n"} {print}' file.csv
+  ```
+
+  Siendo `BEGIN` un bloque que se ejecuta al inicio del programa
+
+
+
+* Si queremos conocer el número de líneas de un archivo:
+
+  ```
+  awk 'END {print NR}' file.csv
+  ```
+
+  Siendo `END` un bloque que se ejecuta al final del programa y `NR` el *number of records*.
+
+
+
+* Si queremos mostrar el promedio de los valores de una determinada columna:
+
+  ```
+  awk '{sum+=$3} END {print "Promedio:" sum/NR}' file.csv
+  ```
+
+
+
+* Si queremos mostrar las filas que tengan una columna con valor mayor a un umbral.
+
+  ```
+  awk '$4>70' file.csv
+  ```
+
+  > Nota: Utilizar este comando en Linux directamente ya que si bien con Cmder en Windows, awk funciona para algunas cosas no funciona en esta línea (por el > con el que termina cerando un archivo) y tira error.
+
+
+
+* Si queremos cambiar una palabra que aparece en el archivo:
+
+  ```
+  awk '{gsub(/Ariel/, "Burrito"); print}' file.csv
+  ```
+
+
+
+
+
+* 
+* `NF` number of fields.
+
 # Servicios
 
 Un servicio de Linux es un programa que se ejecuta de fondo (como por ejemplo en web servers, database servers, Docker, etc) 
