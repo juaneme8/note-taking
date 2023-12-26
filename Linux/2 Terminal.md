@@ -277,7 +277,31 @@ Cuando usamos el comando `clear` o `CONTROL+L` si scrolleamos para arriba veremo
 
 ### Comando `sed`
 
-En ocasiones puede que tengamos que editar un archivo de configuración (por ejemplo dentro de un contenedor) y no tengamos ningún editor disponible  (`vi`, `vim`, `nano`).
+El comando `sed` (que significa **s**tring **ed**itor) nos permitirá hacer sustituciones de texto es decir buscar y reemplazar el texto deseado en múltiples archivos.
+
+```
+sed -i 's/Tony/Antonio/g' file.doc
+```
+
+Notar la importancia del flag `-i` para lograr el reemplazo in situ sino nos devolverá el archivo con el cambio pero no alterará el archivo original.
+
+
+
+> Se trata de un comando de cuatro partes: `'s/texttobechanged/textwanted/g'` primera parte del comando `s` significa **substitution** y la última `g` **global** de modo que afecte las múltiples ocurrencias en caso de haberlas.
+
+
+
+Si queremos modificar múltiples archivos debemos apoyarnos en el uso del comando `find`, por ejemplo para cambiar todas las ocurrencias en los archivos de tipo txt podemos hacer:
+
+```
+find . --name "*.txt" --exec sed -i "s/Tony/Antonio/g" {} \;
+```
+
+Con `{} \;` indicamos que queremos ejecutar el comando para cada archivo individualmente. `{}` se reemplazará por el nombre de archivo entregado por `find` y `\;` indica el fin del comando `exec`
+
+#### Caso de uso con Docker
+
+Un caso de uso interesante podría ser que tengamos que editar un archivo de configuración (por ejemplo dentro de un contenedor) y no tengamos ningún editor disponible  (`vi`, `vim`, `nano`).
 
 Una solución podría ser instalar uno de estos paquetes, pero puede que no tengamos privilegios o aún teniéndolos si son cambios pequeños puede que nos convenga editar el archivo al vuelo.
 
@@ -1005,7 +1029,7 @@ En lugar de `-n` podremos usar  `--line-number`.
 
 ##### Contar líneas
 
-Con la opción `-c` podremos contar la cantidad de líneas en que encontramos la cadena indicada.
+Con la opción `-c` podremos contar la **cantidad de líneas** (no de ocurrencias) en que encontramos la cadena indicada.
 
 ```
 grep -c hello file.txt
@@ -1053,6 +1077,20 @@ En lugar de `-r` podemos usar `--recursive`
 
 
 
+Otra opción sería `grep -r hello .` si queremos buscar en todos los directorios a partir de nuestra posición.
+
+
+
+##### Búsqueda recursiva incluyendo sólo ciertos archivos
+
+Si queremos buscar recursivamente dentro de un directorio pero sólo estamos interesados en determinado tipo de archivos:
+
+```
+grep -r --include="*.txt" hello . 
+```
+
+
+
 ##### Filtrar Archivos
 
 Utilizando la opción `-l` (junto con `-r`) es posible filtrar todos los archivos de un directorio que contienen una determinada cadena.
@@ -1089,7 +1127,7 @@ Por ejemplo si queremos buscar los scripts que tenemos en un determinado proyect
 cat package.json | grep scripts
 ```
 
-Aunque podríamos haber hecho directamente `grep scripts package.json`
+:sunglasses: Aunque podríamos haber hecho directamente `grep scripts package.json`
 
 
 
