@@ -993,7 +993,7 @@ grep hello file.txt
 
 ##### Invert Match
 
-En lugar de obtener todas las líneas que tienen una determinada cadena, podemos obtener las que no la tienen.
+Es posible obtener todas las **líneas que no tienen una cadena**.
 
 ```
 grep -v hello file.txt
@@ -1202,6 +1202,16 @@ find . -mtime + 5
 ```
 
 
+
+#### Ejecutar un comando contra cada item de los resultados
+
+En ocasiones vamos a querer ejecutar un comando con cada uno de los resultados obtenidos en la búsqueda, por ejemplo si sabemos que buscando a partir del directorio actual hay un archivo llamado Documents y queremos eliminarlo podemos hacer uso de la opción exec.
+
+```
+find . -type f -name Documents -exec rm {} + 
+```
+
+El `{}` representa un placeholder donde irá cada uno de los items encontrados. El `+` es el cierre de cada iteración. Otra forma de terminar es con un `;` pero en ese caso debemos acompañarlo de una barra `\;` para escapar ese caracter (la barra es para escapar el ;)
 
 ## Encadenar Comandos
 
