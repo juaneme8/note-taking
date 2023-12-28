@@ -1135,6 +1135,8 @@ cat package.json | grep scripts
 
 ### Comando `find`
 
+Basado en el [video de Learn Linux TV](https://youtu.be/skTiK_6DdqU)
+
 Con el comando `find`  nos permite buscar archivos y directorios. 
 
 Si lo utilizamos sin argumentos podremos mostrar todos los archivos y directorios en el directorio actual.
@@ -1205,13 +1207,51 @@ find . -mtime + 5
 
 #### Ejecutar un comando contra cada item de los resultados
 
-En ocasiones vamos a querer ejecutar un comando con cada uno de los resultados obtenidos en la búsqueda, por ejemplo si sabemos que buscando a partir del directorio actual hay un archivo llamado Documents y queremos eliminarlo podemos hacer uso de la opción exec.
+En ocasiones vamos a querer ejecutar un comando con cada uno de los resultados obtenidos en la búsqueda.
+
+
+
+##### Ejemplo 1
+
+Si sabemos que buscando a partir del directorio actual hay un archivo llamado `Documents` y queremos eliminarlo podemos hacer uso de la opción exec.
 
 ```
 find . -type f -name Documents -exec rm {} + 
 ```
 
 El `{}` representa un placeholder donde irá cada uno de los items encontrados. El `+` es el cierre de cada iteración. Otra forma de terminar es con un `;` pero en ese caso debemos acompañarlo de una barra `\;` para escapar ese caracter (la barra es para escapar el ;)
+
+
+
+##### Ejemplo 2
+
+Para cambiar todas las ocurrencias en los archivos de tipo txt podemos hacer:
+
+```
+find . -name "*.txt" -exec sed -i "s/Tony/Antonio/g" {} \;
+```
+
+
+
+##### Ejemplo 3
+
+Para cambiar los permisos de todos los archivos  (y no directorios) a partir de un determinado directorio:
+
+```
+find Pictures -type f | exec chmod 600 {} +
+```
+
+
+
+##### Ejemplo 4
+
+Para limpieza de logs en aquellos casos donde sea imprescindible hacerlo porque por ejemplo nos llenaron el disco, por ejemplo si sabemos que los terminados en `.log` son los conflictivos, podremos limpiarlos truncando su size a 0.
+
+```
+sudo find /var/logs -type f -name *.log -exec truncate -s 0 {} +
+```
+
+En servidores productivos es aconsejable antes de ejecutar realizar la búsqueda para saber en qué archivos impactaremos.
 
 ## Encadenar Comandos
 
@@ -1825,7 +1865,9 @@ El comando `chmod`nos permite cambiar los permisos de un archivo desde el usuari
 
 Podemos cambiar los permisos relativos al usuario `u`, al grupo `g` o a todos los demás `o`. 
 
-Cuando creamos un archivo los permisos que tiene inicialmente son son `-rw-r--r--`. Si queremos agregarle al usuario permisos de ejecución:
+Cuando creamos un archivo los permisos que tiene inicialmente son son `-rw-r--r--`. El primer guión indica que se trata de un archivo, luego `rw-` que el usuario tiene permisos de lectura y escritura, `r--` que el grupo solo tiene permisos de lectura y `r--` que los demás también tienen sólo permiso de lectura.
+
+Si queremos agregarle al usuario permisos de ejecución:
 
 ```
 chmod u+x deploy.sh
@@ -1874,6 +1916,16 @@ chmod u+x *.sh
 ```
 
 
+
+* Para aplicar permisos de manera recursiva a partir de un directorio:
+
+```
+chmod 600 file1.sh
+```
+
+Con 600 eliminamos los permisos de lectura para cualquiera que no sea el usuario (100 000 000). 
+
+> Tener presente que los directorios deben tener permisos de ejecución para poder ingresar a ellos y también que no tiene sentido tener permisos de ejecución en cosas que no son programas (como por ejemplo en una imagen).
 
 ## Creación de Alias
 
