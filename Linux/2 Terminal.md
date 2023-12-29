@@ -2147,17 +2147,66 @@ Cuando realizamos tareas de mantenimiento en un servidor y tenemos que reiniciar
 
 ## Comando `awk`
 
-El comando `awk` es una herramienta poderosa para el procesamiento de texto, su nombre proviene de los apellidos de sus creadores.
+:link: Basado en el [video de Learn Linux TV](https://youtu.be/oPEnvuj9QrI).
+
+El comando `awk` (mas que comando es un scripting language) es una herramienta poderosa para el procesamiento de texto, su nombre proviene de los apellidos de sus creadores. Su utilización consiste en aceptar data por standard input (usualmente text file), cambiarla de algún modo y entregarla mediante standard output (usualmente la pantalla).
+
+El modo de uso es `awk '{command}' filename`
+
+Por defecto el comando awk ve los espacios como delimitadores de campos, supongamos que tenemos un archivo `tmnt.txt` con los nombres de las [Teenage Mutant Ninja Turtles](https://en.wikipedia.org/wiki/Teenage_Mutant_Ninja_Turtles).
+
+```
+leonardo blue leader
+raphael red hothead
+michelangelo orange party-animal
+donatello purple geek
+```
 
 
 
-* Si queremos mostrar determinadas columnas:
+#### Impresión de campos
 
-  ```
-  awk '{print $2, $4}' file.csv
-  ```
+Si queremos obtener un campo en particular (por ejemplo el color de las tortugas y el rol).
 
-  
+```
+awk '{print $2, $3}' tmnt.txt
+```
+
+> :bulb: Si ponemos `'{print}'` o `'{print $0}'` imprimiremos el archivo entero.
+
+
+
+#### Impresión último campo
+
+Si queremos mostrar la última columna podemos utilizar `$NF` (number of fields)
+
+```
+awk '{print $NF}' tmnt.txt
+```
+
+
+
+#### Establecer delimitador
+
+```
+awk -F ':' '${}'
+```
+
+
+
+#### Entrada de otro comando
+
+En lugar de un archivo es posible utilizar como entrada de awk otro comando
+
+```
+ls -l | awk '{print $1}'
+```
+
+```
+echo "Hello World" | awk '{print $1}'
+```
+
+
 
 * Si queremos mostrar un título inicial y luego imprimir el contenido de un archivo:
 
