@@ -806,9 +806,21 @@ Si queremos especificar la cantidad de líneas que queremos mostrar: `head -n 12
 
 
 
+Otro uso normal de este comando es recibiendo mediante un pipe la información que deseamos mostrar:
+
+```
+lsof | head
+```
+
+
+
 ### Comando `wc`
 
-El comando `wc` significa word count y nos permite por ejemplo contar la cantidad de líneas devueltas por un comando cuya salida se la pasamos como entrada mediante un pipe.
+El comando `wc` significa word count y nos permite por ejemplo contar la cantidad de palabras.
+
+
+
+Si lo usamos con `-l` podremos contar la cantidad de líneas devueltas por un comando cuya salida se la pasamos como entrada mediante un pipe.
 
 ```
 head /var/log/syslog | wc -l
@@ -2256,8 +2268,33 @@ echo "Hello World" | awk '{print $1}'
 
 
 
-* 
-* `NF` number of fields.
+## Comando `lsof`
+
+El comando `lsof` (list open file) como su nombre lo indica nos permite listar los archivos abiertos indicándonos además por quién fueron abiertos. 
+
+> Casos típicos de uso de este comando podrían ser cuando queremos eliminar un archivo y se nos anuncia que está en uso o cuando estamos ante sospechas de que un archivo pueda afectar a la seguridad y queremos saber un poco más acerca de su legitimidad. En se caso podríamos utilizar `lsof` para saber quién es el responsable de eso.
+
+
+
+```
+lsof
+```
+
+
+
+Nos aparecerá información acerca del comando asociado con el archivo abierto, PID (process id), TID (thread id)
+
+
+
+> Con respecto al PID debemos tener presente que cuando un proceso arranca le solicita al init system (encargado de schedulear los comandos iniciados por el usuario o el sistema la en la CPU, hoy por hoy el mas común es System D) un identificador de proceso. 
+
+
+
+```
+lsof | head
+```
+
+
 
 # Servicios
 
