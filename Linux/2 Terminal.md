@@ -2270,6 +2270,8 @@ echo "Hello World" | awk '{print $1}'
 
 ## Comando `lsof`
 
+:link: Basado en el [video de Learn Linux TV](https://youtu.be/n9nZ1ellaV0)
+
 El comando `lsof` (list open file) como su nombre lo indica nos permite listar los archivos abiertos indicándonos además por quién fueron abiertos. 
 
 > Casos típicos de uso de este comando podrían ser cuando queremos eliminar un archivo y se nos anuncia que está en uso o cuando estamos ante sospechas de que un archivo pueda afectar a la seguridad y queremos saber un poco más acerca de su legitimidad. En se caso podríamos utilizar `lsof` para saber quién es el responsable de eso.
@@ -2290,8 +2292,66 @@ Nos aparecerá información acerca del comando asociado con el archivo abierto, 
 
 
 
+Para ver solo los primeros 10 archivos abiertos:
+
 ```
 lsof | head
+```
+
+
+
+Para ver un aproximado del total de archivos abiertos (no es exacto porque contará por ejemplo la primera línea con las columnas como uno):
+
+```
+lsof | wc -l
+```
+
+
+
+#### Filtrar por usuario
+
+```
+lsof -u jay
+```
+
+```
+lsof | grep jay
+```
+
+
+
+#### Filtrar por proceso
+
+```
+sudo lsof -c apache2
+```
+
+
+
+#### Filtrar por PID 
+
+```
+sudo lsof -p 12278
+```
+
+
+
+#### Filtrar por directorio
+
+Es posible investigar los archivos abiertos en un directorio en particular, por ejemplo en un servidor productivo de un sitio de podcasts si sabemos que almacenamos los mp3 en `/mnt/wp-content` podremos conocer qué archivos están siendo servidos en este momento:
+
+```
+sudo lsof /mnt/wp-content
+```
+
+
+
+#### Filtrar por IP v4 o v6
+
+De la misma manera podríamos obtener la IP de aquellas personas que están consumiendo esos recursos de nuestro sitio, filtrando por ejemplo por ipv4.
+
+```
+sudo lsof -i 4 /mnt/wp-content 
 ```
 
 
