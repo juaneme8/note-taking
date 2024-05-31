@@ -1612,7 +1612,9 @@ https://dev.to/rhymu8354/git-renaming-the-master-branch-137b
 
 3. Establecer en GitHub el branch default.
 
-![image-20230331072159693](1 Introducción.assets/image-20230331072159693.png)
+   Ir a Settings y luego a Default branch
+
+![image-20240425082733602](1 Introducción.assets/image-20240425082733602.png)
 
 4. Eliminar la rama remota
 
